@@ -9,7 +9,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from unittest.mock import patch
 
-from google.protobuf import message_factory
+from google.protobuf import json_format, message_factory
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -101,6 +101,23 @@ class ActorCultivationActivityTests(unittest.TestCase):
         self.assertEqual(self.claim(53001)[0], 409)
         self.assertNotIn(53001, [t["id"] for t in self.module.task_snapshot(self.profile)["tasks"]])
         self.assertEqual(self.claim(54001)[0], 409)
+
+    def test_task_json_preserves_reward_progress_and_all_original_descriptor_defaults(self):
+        self.own()
+        self.own(actor_id=1514)
+        tasks = {row["id"]: row for row in self.module.task_snapshot(self.profile)["tasks"]}
+        cls = message_factory.GetMessageClass(self.game._pool.FindMessageTypeByName("TaskInfo"))
+        for tid, task in tasks.items():
+            with self.subTest(task=tid):
+                self.assertEqual(task["actorCultivationRewardProgress"], TASKS[tid]["actorCultivationRewardProgress"])
+                definition = json_format.ParseDict(task["res"], cls())
+                self.assertEqual(task["res"], json_format.MessageToDict(
+                    definition, always_print_fields_with_no_presence=True))
+                for key in ("activePoint", "extraActivePoint", "preTaskId"):
+                    self.assertEqual(task["res"][key], 0)
+        self.assertEqual((tasks[53001]["actorCultivationRewardProgress"],
+                          tasks[53020]["actorCultivationRewardProgress"]), (1, 2))
+        self.assertEqual((tasks[53001]["res"]["gotoId"], tasks[53023]["res"]["gotoId"]), (0, 209))
 
     def test_wrong_team_or_dungeon_does_not_complete_task(self):
         self.own()

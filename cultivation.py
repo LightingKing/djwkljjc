@@ -175,10 +175,23 @@ class LocalCultivation:
             if (not task_available(task) or not info or not entry or entry["rewardGot"] or info["progress"] >= CONFIG[info["activityId"]]["maxProgress"]
                     or daily and info["progressDaily"] >= CONFIG[info["activityId"]]["dailyTaskMaxProgress"]):
                 continue
-            definition = dict(task, actorCultivationActivityId=info["activityId"], dailyRefresh=daily)
+            # TaskUtil keeps a supplied res instead of loading the client table.
+            # Include TaskInfo's protobuf defaults: Lua treats nil ~= 0 as true.
+            definition = {
+                "id": 0, "priority": 0, "goalType": 0, "maxProgress": 0,
+                "taskParam": [], "reward": [], "activePoint": 0, "preTaskId": 0,
+                "gotoId": 0, "category": 0, "addFollowTask": False, "recordBeforeGot": False,
+                "refreshAfterGot": False, "deleteAfterReward": False, "syncByServer": False,
+                "life": 0, "series": 0, "checkWhenRefresh": False, "outstanding": False,
+                "isActivity": False, "extraActivePointType": 0, "extraActivePoint": 0,
+                "actorCultivationActivityId": 0, "actorCultivationRewardProgress": 0,
+                "dailyRefresh": False,
+                **task, "actorCultivationActivityId": info["activityId"], "dailyRefresh": daily,
+            }
             rows.append({"id": tid, "progress": entry["progress"], "isDone": entry["progress"] >= task["maxProgress"],
                          "rewardGot": False, "endTime": 0, "dailyRefresh": daily, "actorCultivationVipOnly": False,
-                         "actorCultivationActivityId": info["activityId"], "res": definition})
+                         "actorCultivationActivityId": info["activityId"],
+                         "actorCultivationRewardProgress": task["actorCultivationRewardProgress"], "res": definition})
         shown = {row["id"] for row in rows}
         return {"tasks": rows, "delTasks": sorted(set(TASKS) - shown), "clearAll": False}
 

@@ -115,7 +115,11 @@ class CultivationIntegrationTests(unittest.TestCase):
         self.grant(53003, 2)
         self.ok("PATCH", "/fci/FavourGift/2", {"usedItemList": [{"type": 11, "id": 53003, "count": 2}]})
         self.ok("PATCH", "/fci/Signboard/", self.wire("ApiSignboard", signboard=202))
-        self.assertEqual(self.task(53020)["progress"], 1)
+        json_task = self.task(53020)
+        self.assertEqual(json_task["progress"], 1)
+        self.assertEqual(json_task["actorCultivationRewardProgress"], 2)
+        for key in ("activePoint", "extraActivePoint", "gotoId", "preTaskId"):
+            self.assertEqual(json_task["res"][key], 0)
         self.assertEqual(self.task(54020)["progress"], 0)
         frames = [data for name, data in self.connection.messages if name == "ScTasksChange"]
         self.assertTrue(frames)
@@ -125,12 +129,16 @@ class CultivationIntegrationTests(unittest.TestCase):
         task = next(row for row in message.tasks if row.id == 53020)
         self.assertTrue(task.isDone)
         self.assertEqual(task.actorCultivationActivityId, 53001)
+        self.assertEqual(task.actorCultivationRewardProgress, json_task["actorCultivationRewardProgress"])
+        self.assertEqual(next(row for row in message.tasks if row.id == 53001).actorCultivationRewardProgress, 1)
         task_fields = next(_parse_fields(data) for wire, data in _parse_fields(frames[-1])[2]
                            if _one(_parse_fields(data), 1, 0) == 53020)
         cls = message_factory.GetMessageClass(self.game._pool.FindMessageTypeByName("TaskInfo"))
         definition = cls.FromString(_one(task_fields, 5, 2))
         self.assertEqual((definition.id, definition.category, definition.goal_type), (53020, 104, 76))
         self.assertEqual(list(definition.task_param), [2])
+        self.assertEqual((definition.active_point, definition.extra_active_point, definition.goto_id,
+                          definition.pre_task_id), (0, 0, 0, 0))
         self.assertTrue(any(row.id < 53000 for row in message.tasks))
         activity_cls = message_factory.GetMessageClass(self.game._pool.FindMessageTypeByName("ActorCultivationInfoMessage"))
         activity_pushes = [activity_cls.FromString(data) for name, data in self.connection.messages
