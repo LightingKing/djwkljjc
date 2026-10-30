@@ -22,6 +22,7 @@ from server.core.notifications import wire_game_notifications
 from server.core.push_service import PushService
 import test_systems
 from test_task_push import _sc_tasks_change_class
+from cultivation_flow_helpers import prepare_novel_collection
 
 
 class Connection:
@@ -73,7 +74,7 @@ class CultivationIntegrationTests(unittest.TestCase):
     def call(self, method, path, payload=None):
         raw = payload if isinstance(payload, bytes) else json.dumps(payload).encode() if payload is not None else None
         return self.game.handle_http(method, path, raw,
-                                     "application/wireformat" if isinstance(payload, bytes) else "application/json", self.auth)
+                                     "application/wireformat" if isinstance(payload, bytes) and payload != b"null" else "application/json", self.auth)
 
     def ok(self, method, path, payload=None):
         status, result = self.call(method, path, payload)
@@ -145,9 +146,44 @@ class CultivationIntegrationTests(unittest.TestCase):
                            if name == "ActorCultivationInfoMessage"]
         self.assertTrue(activity_pushes)
         self.assertTrue(any(info.activity_id == 53001 for info in activity_pushes[-1].info))
-        claimed = self.ok("POST", "/fci/task/53020/reward-actor-cultivation/", b"")
+        claimed = self.ok("POST", "/fci/task/53020/reward-actor-cultivation/", b"null")
         self.assertEqual(claimed["progress"], 2)
-        self.assertEqual(self.call("POST", "/fci/task/53020/reward-actor-cultivation/", b"")[0], 409)
+        self.assertEqual(self.call("POST", "/fci/task/53020/reward-actor-cultivation/", b"null")[0], 409)
+
+    def test_native_empty_table_vip_and_read_marker_accept_json_null(self):
+        profile = self.profile()
+        self.game.economy._change_resources(profile, [{"type": 27, "count": 1280}])
+        before = {r["type"]: r["count"] for r in self.profile()["resources"] if r["type"] in (5, 27)}
+        result = self.ok("POST", "/fci/actor-cultivation/53001/upgrade-vip/?source=welfare", b"null")
+        self.assertTrue(result["info"]["vip"])
+        after = {r["type"]: r["count"] for r in self.profile()["resources"] if r["type"] in (5, 27)}
+        self.assertEqual(after, {kind: count - 1280 for kind, count in before.items()})
+        self.assertEqual(self.call("POST", "/fci/actor-cultivation/53001/upgrade-vip/", b"null")[0], 409)
+        self.assertFalse(self.ok("PATCH", "/fci/actor-cultivation/53001/new/", b"null")["new"])
+        self.assertEqual(self.call("POST", "/fci/actor-cultivation/progress-reward/", b"null")[0], 400)
+        for body in (b"[]", b"true", b'"empty"'):
+            self.assertEqual(self.call("POST", "/fci/actor-cultivation/53002/upgrade-vip/", body)[0], 400)
+
+    def test_real_novel_collection_completes_only_matching_task_and_survives_reload(self):
+        for novel_id, task_id, activity_id in ((8, 53024, 53001), (11, 54024, 53002)):
+            with self.subTest(novel=novel_id):
+                self.assertEqual(self.task(task_id)["progress"], 0)
+                detail = prepare_novel_collection(self, novel_id)
+                self.assertEqual(detail["novels"][0]["curRewardNum"], 0)
+                self.ok("PUT", f"/fci/CollectionsNovel/{novel_id}", {"newCover": novel_id})
+                self.assertEqual(self.task(task_id)["progress"], 0)
+                self.assertEqual(self.call("POST", f"/fci/task/{task_id}/reward-actor-cultivation/", b"null")[0], 409)
+                collected = self.ok("POST", f"/fci/CollectionsNovel/{novel_id}", b"null")
+                self.assertEqual(collected["novels"][0]["curRewardNum"], 1)
+                self.assertTrue(self.task(task_id)["isDone"])
+                self.assertEqual(self.ok("POST", f"/fci/task/{task_id}/reward-actor-cultivation/", b"null")["progress"], 1)
+                self.assertEqual(self.info(activity_id)["progress"], 1)
+        self.assertFalse(self.game.profile_features._state(self.profile()).get("collections", {}).get("novels"))
+        self.game = LocalGame(self.root / "game", self.accounts, clock=lambda: self.now[0])
+        self.assertEqual(self.info(53001)["progress"], 1)
+        self.assertEqual(self.info(53002)["progress"], 1)
+        ids = {row["id"] for row in self.ok("GET", "/fci/task/")["tasks"]}
+        self.assertTrue({53024, 54024}.isdisjoint(ids))
 
     def test_talent_reset_only_paid_success_advances_matching_actor_task(self):
         self.assertEqual(self.task(53022)["progress"], 0)
@@ -162,7 +198,7 @@ class CultivationIntegrationTests(unittest.TestCase):
         self.assertEqual(self.item(20002), 0)
         self.assertEqual(self.task(53022)["progress"], 1)
         self.assertEqual(self.task(54022)["progress"], 0)
-        self.assertEqual(self.ok("POST", "/fci/task/53022/reward-actor-cultivation/", {})["progress"], 2)
+        self.assertEqual(self.ok("POST", "/fci/task/53022/reward-actor-cultivation/", b"null")["progress"], 2)
         self.assertEqual(self.call("POST", "/fci/talent/reset/", {"actorUid": self.actor, "talentPos": 1})[0], 409)
         self.assertEqual(self.info()["progress"], 2)
 
@@ -203,7 +239,7 @@ class CultivationIntegrationTests(unittest.TestCase):
         self.assertEqual(self.item(20002), 1)
         self.assertEqual(self.task(53027)["progress"], 1)
         self.assertEqual(self.task(54027)["progress"], 0)
-        self.assertEqual(self.ok("POST", "/fci/task/53027/reward-actor-cultivation/", {})["progress"], 1)
+        self.assertEqual(self.ok("POST", "/fci/task/53027/reward-actor-cultivation/", b"null")["progress"], 1)
         self.ok("POST", "/fci/guild/1/donate/send/", native)
         self.assertEqual(self.item(20002), 0)
         self.assertEqual(self.info()["progress"], 1)  # permanent task remains claimed
@@ -214,6 +250,26 @@ class CultivationIntegrationTests(unittest.TestCase):
             self.assertNotIn(tid, ids)
             self.assertEqual(self.call("POST", f"/fci/task/{tid}/reward-actor-cultivation/", {})[0], 404)
         self.assertTrue({53001, 53002, 53007, 53008, 53055} <= ids)
+
+    def test_native_guild_wishes_cover_both_cultivation_roles(self):
+        self.ok("PUT", "/fci/guild/1/pending-members/", {"playerId": self.profile()["player_id"]})
+        wishes = self.ok("GET", "/fci/guild/1/donate/")["donates"]
+        for item_id, task_id, other_task in ((20002, 53027, 54027), (20014, 54027, None)):
+            with self.subTest(fragment=item_id):
+                player_id = next((key for key, wish in wishes.items() if wish["donateRes"]["id"] == item_id), None)
+                self.assertIsNotNone(player_id, wishes)
+                self.assertEqual(self.task(task_id)["progress"], 0)
+                self.grant(item_id, 1)
+                native = self.wire("ApiGuildDonateSend", player_id_request=player_id,
+                                   res={"type": 11, "id": item_id, "count": 1})
+                self.ok("POST", "/fci/guild/1/donate/send/", native)
+                self.assertEqual(self.item(item_id), 0)
+                self.assertTrue(self.task(task_id)["isDone"])
+                if other_task is not None:
+                    self.assertEqual(self.task(other_task)["progress"], 0)
+                claimed = self.ok("POST", f"/fci/task/{task_id}/reward-actor-cultivation/", b"null")
+                self.assertEqual(claimed["progress"], 1)
+                self.assertEqual(self.call("POST", "/fci/guild/1/donate/send/", native)[0], 409)
 
 
 if __name__ == "__main__":

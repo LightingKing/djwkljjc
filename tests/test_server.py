@@ -355,7 +355,7 @@ class FixtureServerTests(unittest.TestCase):
         self.assertEqual(status, 501)
         self.assertEqual(json.loads(body)["error"], "route_not_implemented")
 
-    def test_unexpected_http_handler_exception_returns_500_and_safe_audit(self) -> None:
+    def test_unexpected_http_handler_exception_returns_notify_and_safe_audit(self) -> None:
         class ExplodingGame:
             def handle_http(self, *_args):
                 raise NameError("secret body and bearer token must not be recorded")
@@ -372,10 +372,10 @@ class FixtureServerTests(unittest.TestCase):
                 "Content-Type": "application/wireformat",
             },
         )
-        self.assertEqual(status, 500)
+        self.assertEqual(status, 507)
         self.assertEqual(
             json.loads(body),
-            {"error": "internal_server_error", "message": "request_handler_failed"},
+            {"notify": {"code": "Error_DbError"}},
         )
 
         deadline = time.time() + 1
@@ -413,7 +413,10 @@ class FixtureServerTests(unittest.TestCase):
         self.assertEqual(body[1], len(body)-2)
         self.assertTrue(json.loads(body[2:])['accountToken'].startswith('local_session_'))
         status, _ = self.request('POST', '/AccountSession', b'not-lz4', {'Content-Encoding':'lz4'})
-        self.assertEqual(status, 400)
+        self.assertEqual(status, 509)
+        status, body = self.request('POST', '/ClickGame/', b'not-lz4', {'Content-Encoding':'lz4'})
+        self.assertEqual(status, 509)
+        self.assertEqual(json.loads(body), {"notify": {"code": "Window_SaveFail"}})
 
     def test_role_notepad_query_survives_real_http_dispatch(self) -> None:
         from game import LocalGame
@@ -441,11 +444,11 @@ class FixtureServerTests(unittest.TestCase):
                 self.assertIsInstance(records, list)
                 self.assertEqual([record["roleId"] for record in records], expected)
         status, body = self.request("GET", "/fci/RoleNotePad/?uids=7,3,1", headers=headers)
-        self.assertEqual(status, 404)
-        self.assertEqual(json.loads(body), {"error": "role_notepad_not_found", "roleId": 3})
+        self.assertEqual(status, 509)
+        self.assertEqual(json.loads(body), {"notify": {"code": "Window_SaveFail"}})
         status, body = self.request("GET", "/fci/RoleNotePad/?uids=", headers=headers)
-        self.assertEqual(status, 400)
-        self.assertEqual(json.loads(body), {"error": "invalid_role_notepad_uids"})
+        self.assertEqual(status, 509)
+        self.assertEqual(json.loads(body), {"notify": {"code": "Window_SaveFail"}})
         status, body = self.request("HEAD", "/fci/RoleNotePad/?uids=7", headers=headers)
         self.assertEqual((status, body), (200, b""))
 

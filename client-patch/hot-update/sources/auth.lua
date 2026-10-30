@@ -6,6 +6,8 @@ local authWithBearer = false
 local accountSessionUpdatedCallback
 
 function SetupWindow()
+  REF.InputName.UIInput.characterLimit = 64
+  REF.InputPassword.UIInput.characterLimit = 64
   WU.BindButtonEvent(REF.ButtonCancel, OnCancelClick)
   WU.BindButtonEvent(REF.ButtonConfirm, OnConfirmClick)
   local delegate = CS.EventDelegate
@@ -162,7 +164,8 @@ function OnAccountAuthResponseFailed(result)
   if REF.InputPassword then
     REF.InputPassword.UIInput.value = ""
   end
-  return false
+  WU.ShowHintText(WU.GetString("WindowLogin_LoginFailed"))
+  return true
 end
 
 function GetEntryType(entry)

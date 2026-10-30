@@ -19,6 +19,8 @@ import actors
 from accounts import LocalAccounts
 from cultivation import LocalCultivation, REWARDS, TASKS, task_available
 from game import LocalGame
+from grants import grant_rewards
+from cultivation_flow_helpers import prepare_novel_collection
 import test_systems
 
 
@@ -28,7 +30,7 @@ class ActorCultivationActivityTests(unittest.TestCase):
         self.root = Path(self.temp.name)
         self.now = [1793318400]
         self.accounts = LocalAccounts(self.root / "accounts", clock=lambda: self.now[0])
-        self.game = LocalGame(self.root / "game", self.accounts, clock=lambda: self.now[0])
+        self.game = LocalGame(self.root / "game", self.accounts, clock=lambda: self.now[0], initial_level=30)
         self.account, self.auth = test_systems.LocalSystemsTests._guest(self.accounts)
         self.profile = self.game._profile(self.account)
         self.module = getattr(self.game, "cultivation", None) or LocalCultivation(self.game)
@@ -44,13 +46,14 @@ class ActorCultivationActivityTests(unittest.TestCase):
         return record["uid"]
 
     def call(self, method, path, payload=None):
-        return self.module.handle_http(method, path, json.dumps(payload).encode() if payload is not None else None, self.profile)
+        body = payload if isinstance(payload, bytes) else json.dumps(payload).encode() if payload is not None else None
+        return self.module.handle_http(method, path, body, self.profile)
 
     def info(self):
         return self.module.snapshot(self.profile)[0]
 
     def claim(self, tid):
-        return self.call("POST", f"/fci/task/{tid}/reward-actor-cultivation/")
+        return self.call("POST", f"/fci/task/{tid}/reward-actor-cultivation/", b"null")
 
     def reward(self, progress, vip=False):
         return self.call("POST", "/fci/actor-cultivation/progress-reward/",
@@ -68,7 +71,7 @@ class ActorCultivationActivityTests(unittest.TestCase):
             self.module._save(self.profile, state)
 
     def upgrade(self):
-        return self.call("POST", "/fci/actor-cultivation/53001/upgrade-vip/")
+        return self.call("POST", "/fci/actor-cultivation/53001/upgrade-vip/", b"null")
 
     def test_eligibility_and_wire_task_definition(self):
         self.assertEqual(self.module.snapshot(self.profile), [])
@@ -264,13 +267,26 @@ class ActorCultivationActivityTests(unittest.TestCase):
         uid = self.own(level=52, locked=True)
         state = self.game.systems._state(self.profile)
         state["actorInstances"][str(uid)]["talents"] = [{"talentId": 1502131, "talentValue": 1}]
-        state.setdefault("actorLikes", {})["1502"] = {"liked": True, "count": 1}
         self.game.systems._save(self.profile, state)
+        status, liked = self.game.handle_http("POST", "/fci/ActorLike/1502", b"null", "application/json", self.auth)
+        self.assertEqual(status, 200, liked)
         self.game.profile_features.add_role_favour(self.profile, 2, 100000)
-        feature_state = self.game.profile_features._state(self.profile)
-        feature_state.setdefault("collections", {})["novels"] = [{"novelId": 8}]
-        self.game.profile_features._save(self.profile, feature_state)
-        self.module.record(self.profile, 82, param=20002)
+        prepare_novel_collection(self, 8)
+        status, collected = self.game.handle_http("POST", "/fci/CollectionsNovel/8", b"null", "application/json", self.auth)
+        self.assertEqual(status, 200, collected)
+        self.assertEqual(collected["novels"][0]["curRewardNum"], 1)
+        status, joined = self.game.handle_http("PUT", "/fci/guild/1/pending-members/",
+            json.dumps({"playerId": self.profile["player_id"]}), "application/json", self.auth)
+        self.assertEqual(status, 200, joined)
+        status, wishes = self.game.handle_http("GET", "/fci/guild/1/donate/", None, None, self.auth)
+        self.assertEqual(status, 200, wishes)
+        target = next(key for key, wish in wishes["donates"].items() if wish["donateRes"]["id"] == 20002)
+        grant_rewards(self.game, self.profile, [{"type": 11, "id": 20002, "count": 1}])
+        cls = message_factory.GetMessageClass(self.game._pool.FindMessageTypeByName("ApiGuildDonateSend"))
+        donation = cls(player_id_request=target, res={"type": 11, "id": 20002, "count": 1})
+        status, sent = self.game.handle_http("POST", "/fci/guild/1/donate/send/",
+            donation.SerializeToString(), "application/wireformat", self.auth)
+        self.assertEqual(status, 200, sent)
         for _ in range(90):
             self.module.on_battle_win(self.profile, 8, actor_ids=[1502], dungeon_type=2)
         permanent = [tid for tid, task in TASKS.items() if tid < 54000 and task_available(task)

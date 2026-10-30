@@ -18,6 +18,7 @@ from accounts import LocalAccounts
 from game import LocalGame
 from grants import grant_rewards
 from guild import LocalGuild
+from profile_features import actor_role, role_head_photo
 import test_systems
 
 
@@ -87,6 +88,29 @@ class GuildClientTests(unittest.TestCase):
         self.assertEqual(self.call("GET", "/fci/guild/1/skill/")[1], detail["skills"])
         self.assert_message("DbGuildData.VoteInfo", self.call("GET", "/fci/guild/1/vote/")[1])
 
+    def test_native_null_recommend_and_touch_keep_route_field_validation(self):
+        def native(method, path, raw):
+            return self.game.handle_http(method, path, raw, "application/json", self.auth)
+        expected = native("POST", "/fci/guild-recommend/", b"{}")
+        self.assertEqual(expected[0], 200)
+        self.assertEqual(native("POST", "/fci/guild-recommend/", b"null"), expected)
+        self.assertEqual(native("POST", "/fci/guild-recommend/", b""), expected)
+        self.join()
+        self.assertEqual(native("POST", "/fci/guild/1/donate/touch/", b"null"),
+                         (409, {"error": "no_received_donation"}))
+        self.call("POST", "/fci/guild/1/donate/request/", {"res": {"type": 11, "id": 20001}})
+        status, touched = native("POST", "/fci/guild/1/donate/touch/", b"null")
+        self.assertEqual(status, 200)
+        self.assertGreater(touched["loveScore"], 0)
+        self.assert_message("DbGuildData.DonateSingleInfo", touched)
+        self.assertEqual(native("POST", "/fci/guild/1/donate/touch/", b"{}"), (200, touched))
+        self.assertEqual(native("POST", "/fci/guild/1/donate/request/", b"null"),
+                         (400, {"error": "invalid_shard"}))
+        for raw in (b"[]", b"false", b"1", b'"text"'):
+            with self.subTest(raw=raw):
+                self.assertEqual(native("POST", "/fci/guild-recommend/", raw),
+                                 (400, {"error": "invalid_request"}))
+
     def test_four_native_skill_slots_are_inactive_and_activation_never_charges(self):
         status, detail = self.call("POST", "/fci/guild/", {"name": "技能测试", "icon": "1"})
         self.assertEqual(status, 200)
@@ -105,6 +129,33 @@ class GuildClientTests(unittest.TestCase):
         self.assertEqual((status, result["error"]), (403, "guild_skill_activation_unavailable"))
         self.assertEqual(self.game._profile(self.account)["resources"], before)
         self.assertEqual(self.call("GET", f"/fci/guild/{gid}/")[1], dict(detail, resChange=[]))
+
+    def test_saved_guild_repairs_photos_and_adds_wish_without_discarding_donations(self):
+        self.join()
+        with closing(self.game._connect()) as conn, conn:
+            state = self.guild._load(conn, self.now[0])
+            guild = state["guilds"]["1"]
+            for member in guild["members"].values():
+                member["headPhoto"] = 1001
+            old = guild["donateInfo"]["donates"]["local-bot-003"]
+            old["donateRes"]["id"] = 20003
+            old["donatesCount"][self.profile["player_id"]] = 1
+            self.guild._save(conn, state, self.now[0])
+        appearance = self.game.profile_features._state(self.profile)
+        appearance.update(headPhoto=0, socialPicture="local://avatar")
+        self.game.profile_features._save(self.profile, appearance)
+        restored = LocalGuild(LocalGame(self.root / "game", self.accounts, clock=lambda: self.now[0]))
+        detail = self.call("GET", "/fci/guild/1/", module=restored)[1]
+        bots = {bot["playerId"]: bot for bot in self.game.social.bots.all()}
+        for member in detail["members"]:
+            if member["playerId"] in bots:
+                self.assertEqual(member["headPhoto"], role_head_photo(actor_role(bots[member["playerId"]]["actors"][0])))
+            else:
+                self.assertEqual((member["headPhoto"], member["socialPicture"]), (0, "local://avatar"))
+        requests = detail["donateInfo"]["donates"]
+        self.assertEqual(requests["local-bot-003"]["donatesCount"], {self.profile["player_id"]: 1})
+        self.assertTrue({20002, 20014} <= {r["donateRes"]["id"] for r in requests.values()})
+        self.assertEqual(self.call("GET", "/fci/guild/1/", module=restored)[1], detail)
 
     def test_quit_retry_and_second_quit_function_cooldown(self):
         self.join()

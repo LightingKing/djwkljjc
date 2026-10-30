@@ -22,6 +22,7 @@ from urllib.parse import urlsplit
 from google.protobuf import json_format, message_factory
 
 from economy import _client_rows
+from profile_features import actor_role, role_head_photo
 from server.core.reset import policy_for
 
 
@@ -29,6 +30,10 @@ RULES = _client_rows("GuildMisc")[0]
 ROLES = {(int(r["decomposeRes"]["type"]), int(r["decomposeRes"]["id"])): r
          for r in _client_rows("Role") if r.get("decomposeRes")}
 ACTOR_ROLES = {int(r["id"]): int(r["role"]) for r in _client_rows("ActorConfig") if r.get("role")}
+CULTIVATION_ROLES = {ACTOR_ROLES[int(r["actorId"])] for r in _client_rows("ActorCultivation")}
+BOT_WISHES = tuple(dict.fromkeys([min(ROLES)] + sorted(
+    key for key, role in ROLES.items() if int(role["id"]) in CULTIVATION_ROLES)))
+HEAD_PHOTOS = frozenset(int(row["id"]) for row in _client_rows("PlayerHeadPhoto"))
 # The original GuildSkill prefab has four slots. ProfitDetail supplies their
 # actual display parameters; the GuildSkill fee table was not
 # recovered. Leave its proto defaults at zero and reject activation below.
@@ -114,13 +119,21 @@ class LocalGuild:
         self._new_week(guild, now)
         return guild
 
-    @staticmethod
-    def _member(profile, president=False):
+    def _member(self, profile, president=False):
+        if "account_id" in profile:
+            appearance = self.game.profile_features._state(profile)
+            photo = self.game.profile_features._head_photo_value(appearance)
+            if photo not in HEAD_PHOTOS and photo != 0:
+                photo = role_head_photo(actor_role(photo))
+            social_picture = str(appearance.get("socialPicture", ""))
+        else:
+            photo = self.game.profile_features.bot_head_photo(profile)
+            social_picture = ""
         return {"playerId": str(profile.get("player_id", profile.get("playerId", ""))),
                 "name": str(profile.get("name", "")), "level": _int(profile.get("level"), 1),
                 "type": 2 if president else 0, "lastLogoutTime": 0, "guildScoreRecord": 0,
-                "guildScore": 0, "headPhoto": _int(profile.get("avatar", profile.get("actor_id"))),
-                "socialPicture": "", "gamecenterLoginTime": 0}
+                "guildScore": 0, "headPhoto": photo if photo == 0 or photo in HEAD_PHOTOS else 1,
+                "socialPicture": social_picture, "gamecenterLoginTime": 0}
 
     def _new_week(self, guild, now):
         start = self._policy().period_start(now, "week")
@@ -132,9 +145,40 @@ class LocalGuild:
             guild["botInventory"][pid] = {str(key[1]): 10 for key in ROLES}
             guild["donateInfo"]["donatePlayerInfo"][pid] = {
                 "donateCountWeekly": 0, "playerName": guild["members"][pid]["name"]}
-            if i < 3:
-                resource = sorted(ROLES)[i]
+            if i < len(BOT_WISHES):
+                resource = BOT_WISHES[i]
                 guild["donateInfo"]["donates"][pid] = self._donation(pid, resource, start)
+
+    def _repair_guilds(self, conn, state, now):
+        """Upgrade saved appearances and missing wishes without losing aid history."""
+        bots = {bot["playerId"]: bot for bot in self.game.social.bots.all()}
+        for guild in state["guilds"].values():
+            for pid, member in guild["members"].items():
+                if pid in bots:
+                    member["headPhoto"] = self.game.profile_features.bot_head_photo(bots[pid])
+                else:
+                    row = conn.execute("SELECT f.state_json FROM local_profile_features f "
+                                       "JOIN game_profiles p ON p.account_id=f.account_id WHERE p.player_id=?", (pid,)).fetchone()
+                    if row:
+                        appearance = json.loads(row["state_json"])
+                        photo = self.game.profile_features._head_photo_value(appearance)
+                        if photo not in HEAD_PHOTOS and photo != 0:
+                            photo = role_head_photo(actor_role(photo))
+                        member.update(headPhoto=photo, socialPicture=str(appearance.get("socialPicture", "")))
+                    elif _int(member.get("headPhoto")) not in HEAD_PHOTOS and member.get("headPhoto") != 0:
+                        member["headPhoto"] = role_head_photo(actor_role(member.get("headPhoto")))
+            requests = guild["donateInfo"]["donates"]
+            present = {(r["donateRes"]["type"], r["donateRes"]["id"]) for pid, r in requests.items() if pid in guild["botIds"]}
+            for resource in BOT_WISHES:
+                if resource in present:
+                    continue
+                # Preserve every request that has received a real donation.
+                candidates = [pid for pid in guild["botIds"] if pid not in requests or (
+                    not sum(requests[pid]["donatesCount"].values()) and
+                    (requests[pid]["donateRes"]["type"], requests[pid]["donateRes"]["id"]) not in BOT_WISHES)]
+                if candidates:
+                    requests[candidates[0]] = self._donation(candidates[0], resource, self._policy().period_start(now, "week"))
+                    present.add(resource)
 
     @staticmethod
     def _donation(pid, resource, now):
@@ -266,6 +310,7 @@ class LocalGuild:
                     state = self._load(conn, now)
                     player = state["players"].setdefault(str(profile["player_id"]),
                         {"accountId": int(profile["account_id"]), "data": self._player_default()})
+                    self._repair_guilds(conn, state, now)
                     self._refresh(conn, state, now, notices)
                     result = callback(conn, state, player["data"], now, notices)
                     self._save(conn, state, now)
@@ -288,6 +333,8 @@ class LocalGuild:
             return {}
         try:
             value = json.loads(raw.decode("utf-8"))
+            if value is None:  # Native Post(nil) may serialize as JSON null.
+                return {}
             if not isinstance(value, dict):
                 raise GuildError("invalid_request", 400)
             return value

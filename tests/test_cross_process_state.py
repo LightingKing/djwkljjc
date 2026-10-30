@@ -9,6 +9,10 @@ import unittest
 from accounts import LocalAccounts
 from game import LocalGame
 
+# Friday during the native Thursday–Saturday cycle; never depend on the day
+# the test happens to run (Sunday and the midnight–06:00 gaps are closed).
+RACE_NOW = 1793332800
+
 
 def _send_chat_worker(root: str, authorization: str, index: int, result_queue) -> None:
     """Send one chat message from a fresh worker process.
@@ -37,7 +41,7 @@ def _start_race_worker(root: str, authorization: str, index: int, result_queue) 
     try:
         root_path = Path(root)
         accounts = LocalAccounts(root_path / "accounts")
-        game = LocalGame(root_path / "game", accounts)
+        game = LocalGame(root_path / "game", accounts, clock=lambda: RACE_NOW)
         status, room = game.handle_http("GET", "/fci/RacePVPInfo", authorization=authorization)
         if status != 200:
             result_queue.put((index, status, room))
@@ -119,14 +123,14 @@ class CrossProcessStateTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             accounts = LocalAccounts(root / "accounts")
-            game = LocalGame(root / "game", accounts, initial_level=26)
+            game = LocalGame(root / "game", accounts, initial_level=26, clock=lambda: RACE_NOW)
             authorization = self.guest(accounts)
             status, room = game.handle_http("GET", "/fci/RacePVPInfo", authorization=authorization)
             self.assertEqual(status, 200)
 
             context = multiprocessing.get_context("spawn")
             result_queue = context.Queue()
-            worker_count = 2
+            worker_count = 5
             workers = [
                 context.Process(
                     target=_start_race_worker,

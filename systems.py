@@ -16,7 +16,7 @@ import time
 from contextlib import closing
 from pathlib import Path
 from typing import Any, Mapping, Optional
-from urllib.parse import urlsplit
+from urllib.parse import parse_qs, urlsplit
 
 from google.protobuf import message_factory
 
@@ -1864,7 +1864,8 @@ class LocalSystems:
         return None
 
     def _item_resource(self, method: str, route: str, body: Body, profile: Mapping[str, Any], state: dict[str, Any]) -> Optional[Response]:
-        lower = route.lower(); payload = self._request_values(body)
+        query = parse_qs(urlsplit(route).query, keep_blank_values=True)
+        lower = _route(route).lower(); payload = self._request_values(body)
         item_route = lower in {"/fci/item", "/fci/item/", "/fci/item/use", "/fci/item/sell"} or any(token in lower for token in ("playeritem", "itemuse", "item-use", "itemsell", "item/sell", "/item/"))
         resource_route = any(token in lower for token in ("baseresource", "base-resource", "resourcecompose", "resource-compose", "/resource/compose", "resource/newflag", "resource-new-flag", "resourcefull"))
         if not (item_route or resource_route): return None
@@ -1878,6 +1879,24 @@ class LocalSystems:
                 return 405, {"error": "method_not_allowed", "message": "POST required"}
             return client_route(body, profile, state)
         items = state.setdefault("items", {})
+
+        if method in {"GET", "HEAD"} and (lower.rstrip("/") == "/fci/item" or lower.startswith("/fci/item/")):
+            def item_view(item_id):
+                value = items.get(str(item_id), {})
+                # A consumed stack still has a binding: return zero so ItemChange
+                # can clear it instead of leaving the stale client count intact.
+                return {"id": item_id, "count": _int(value.get("count")),
+                        "gotTime": _int(value.get("gotTime")), "isNew": bool(value.get("isNew", False))}
+            tail = lower.rstrip("/").rsplit("/", 1)[-1]
+            if tail != "item":
+                if not tail.isdecimal() or int(tail) <= 0:
+                    return 400, {"error": "invalid_item_uid"}
+                return 200, item_view(int(tail))
+            if "uids" in query:
+                values = [value.strip() for group in query["uids"] for value in group.split(",")]
+                if any(not value.isdecimal() or int(value) <= 0 for value in values):
+                    return 400, {"error": "invalid_item_uids"}
+                return 200, [item_view(int(value)) for value in values]
 
         # The real client uses a typed single-item endpoint for the item
         # detail popup.  Keep the historical list endpoint as JSON below, but
@@ -3979,7 +3998,7 @@ class LocalSystems:
         # PATCH payloads for compatibility).
         for handler in (self._actor_group, self._flags_and_profit, self._cultivation, self._player_profile, self._actor_maintenance, self._equipment_maintenance, self._item_resource, self._medal_seal_cultivation,
                         self._gacha, self._actor, self._equip, self._mail, self._relation, self._guild):
-            result = handler(method, route, body, profile, state)
+            result = handler(method, path if handler == self._item_resource else route, body, profile, state)
             if result is not None:
                 return result
         result = self._task(method, route, body, profile, state)

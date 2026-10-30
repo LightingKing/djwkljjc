@@ -136,7 +136,7 @@ def build_zip(entries: dict[str, bytes]) -> tuple[bytes, int]:
 
 
 def build_candidate(config_path: Path, bundle_root: Path, output_dir: Path,
-                    base_url: str, zip_name: str = "ljjc-hot-update-v5.zip") -> dict:
+                    base_url: str, zip_name: str = "ljjc-hot-update-v6.zip") -> dict:
     config_path, bundle_root, output_dir = config_path.resolve(), bundle_root.resolve(), output_dir.resolve()
     if relative_path(zip_name) != zip_name or "/" in zip_name or not zip_name.endswith(".zip"):
         raise ValueError("ZIP name must be a .zip filename")
@@ -202,7 +202,7 @@ def main() -> None:
     parser.add_argument("--bundle-root", type=Path, required=True, help="original decoded assets/Patch directory")
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--base-url", default="http://127.0.0.1:19080")
-    parser.add_argument("--zip-name", default="ljjc-hot-update-v5.zip")
+    parser.add_argument("--zip-name", default="ljjc-hot-update-v6.zip")
     args = parser.parse_args()
     report = build_candidate(args.config, args.bundle_root, args.output_dir, args.base_url, args.zip_name)
     print(json.dumps({key: report[key] for key in ("status", "published", "zip", "zipLength", "zipCrc32", "zipSha256")}, indent=2))

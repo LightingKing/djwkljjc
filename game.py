@@ -22,6 +22,7 @@ from server.core.reset import ResetPolicy
 from server.core.atomic import AtomicMutations
 
 import json
+import logging
 import re
 import shutil
 import sqlite3
@@ -1602,7 +1603,12 @@ class LocalGame:
             if result is not None and result[0] == 200 and method.upper() != 'GET' and authorization:
                 account, error = self._authorized(authorization)
                 if account is not None and error is None:
-                    self.cultivation.sync(self._profile(account))
+                    try:
+                        self.cultivation.sync(self._profile(account))
+                    except Exception:
+                        # The primary operation is already committed. A derived
+                        # task refresh must not turn success into a retryable 500.
+                        logging.getLogger(__name__).exception("post-request cultivation refresh failed")
             if before is not None:
                 self._push_base_info_if_changed(before)
             return result

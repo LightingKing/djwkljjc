@@ -107,6 +107,34 @@ function GetProductsByID(proID)
   return m_mapProducts[proID]
 end
 
+function GetMallGiftText(mallInfo, field)
+  local key = "MALL_GIFT_" .. field .. tostring(mallInfo.id)
+  local text = WU.GetString(key)
+  if text ~= nil and text ~= "" and text ~= key then
+    return text
+  end
+  -- Original Mall 926/927 repeat 918/919's product and Item 123003 reward,
+  -- but the APK does not provide the newer rows' title/description strings.
+  local legacyId = ({[926] = 918, [927] = 919})[mallInfo.id]
+  local legacy = legacyId and PB.get("Mall", legacyId)
+  if legacy and legacy.productId == mallInfo.productId then
+    local legacyKey = "MALL_GIFT_" .. field .. tostring(legacyId)
+    local legacyText = WU.GetString(legacyKey)
+    if legacyText ~= nil and legacyText ~= "" and legacyText ~= legacyKey then
+      return legacyText
+    end
+    local reward = mallInfo.reward and mallInfo.reward[1]
+    if reward and reward.type == PB.enum.ResourceType.ResItem then
+      if field == "NAME" then
+        return WU.GetItemName(reward.id, reward.type)
+      elseif field == "DESC" then
+        return WU.GetItemDesc(reward.id)
+      end
+    end
+  end
+  return text
+end
+
 function GetProducts()
   return m_payProducts
 end

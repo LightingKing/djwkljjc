@@ -694,7 +694,11 @@ class LocalProfileFeatures:
         medals = []
         for value in values:
             if isinstance(value, Mapping) and _int(value.get("id")) > 0:
+                expires = _int(value.get("expireTime", value.get("expire_time")))
+                if expires and expires <= self._now():
+                    continue
                 medals.append({"id": _int(value.get("id")), "gotTime": _int(value.get("gotTime", value.get("got_time"))),
+                               "expireTime": expires,
                                "isNew": bool(value.get("isNew", value.get("is_new", False)))})
         medals.sort(key=lambda item: item["id"])
         if not tail:

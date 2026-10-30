@@ -295,10 +295,13 @@ def send_mail(
     mailbox = getattr(game, "mailbox", None)
     notifier = getattr(mailbox, "notifier", None)
     if notifier is not None:
-        try:
-            notifier(profile, {"mails": [mail_view(record)], "clearAll": False, "delMails": trimmed})
-        except Exception:  # pragma: no cover - a live push is best effort
-            _log.debug("mail notifier failed", exc_info=True)
+        payload = {"mails": [mail_view(record)], "clearAll": False, "delMails": trimmed}
+        def notify():
+            try:
+                notifier(profile, payload)
+            except Exception:  # pragma: no cover - a live push is best effort
+                _log.debug("mail notifier failed", exc_info=True)
+        game.after_commit(notify)
     return dict(record)
 
 
@@ -361,6 +364,9 @@ class LocalMailbox:
         # grant_rewards loads and saves the same state row itself (bag items,
         # actor instances), so mark the mails on a fresh copy afterwards.
         changes = grant_rewards(self.game, profile, rewards) if rewards else []
+        race = getattr(getattr(self.game, "realtime_pvp", None), "race", None)
+        if race is not None:
+            race.record_mail_claims(profile, [_int(item["id"]) for item in pending])
         state = self._load(profile)
         for item in state["mails"]:
             if _int(item["id"]) in target_ids:

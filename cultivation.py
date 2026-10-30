@@ -117,7 +117,8 @@ class LocalCultivation:
     def _sync(self, profile, state):
         system = self.game.systems._state(profile)
         features = getattr(self.game, "profile_features", None)
-        feature_state = features._state(profile) if features is not None else {}
+        achievements = getattr(self.game, "achievements", None)
+        collected_novels = achievements._state(profile).get("novels", {}) if achievements is not None else {}
         notepads = {row["roleId"]: row for row in features.role_notepads(profile)} if features is not None else {}
         owned = self._owned(profile, system)
         now = self._now()
@@ -152,8 +153,9 @@ class LocalCultivation:
                 elif goal == 81:
                     value = int(bool(system.get("actorLikes", {}).get(str(params[0]), {}).get("liked")))
                 elif goal == 68:
-                    novels = feature_state.get("collections", {}).get("novels", [])
-                    value = int(any(_int(row.get("novelId")) == params[0] for row in novels if isinstance(row, dict)))
+                    # CollectionsNovel POST stores the claimed cover here. A
+                    # visible novel or a selected default cover is not collected.
+                    value = int(_int(collected_novels.get(str(params[0]), {}).get("curRewardNum")) > 0)
                 elif goal == 78 and len(params) > 1:
                     value = int(any(t.get("talentId") == params[1] for r in records for t in r.get("talents", [])))
                 entry["progress"] = min(task["maxProgress"], max(entry["progress"], value))
@@ -347,12 +349,18 @@ class LocalCultivation:
     def handle_http(self, method, path, body, profile):
         route = urlsplit(path).path.rstrip("/").lower()
         task_match = re.fullmatch(r"/fci/task/(\d+)/reward-actor-cultivation", route)
+        vip_match = re.fullmatch(r"/fci/actor-cultivation/(\d+)/upgrade-vip", route)
+        new_match = re.fullmatch(r"/fci/actor-cultivation/(\d+)/new", route)
         if not route.startswith("/fci/actor-cultivation") and not task_match:
             return None
         if route == "/fci/actor-cultivation" and method == "GET":
             return 200, self.snapshot(profile)
         try:
             payload = json.loads(body) if body else {}
+            # Restifizer serializes the client's empty Lua table as JSON null.
+            # Only these operations have no request fields to validate.
+            if payload is None and (task_match or vip_match or new_match):
+                payload = {}
             if not isinstance(payload, dict):
                 raise ValueError()
         except (ValueError, TypeError, UnicodeDecodeError):
@@ -372,8 +380,6 @@ class LocalCultivation:
             with self._atomic(profile):
                 state = self._state(profile)
                 owned = self._sync(profile, state)
-                vip_match = re.fullmatch(r"/fci/actor-cultivation/(\d+)/upgrade-vip", route)
-                new_match = re.fullmatch(r"/fci/actor-cultivation/(\d+)/new", route)
                 if task_match and method == "POST":
                     result = self._task_reward(state, owned, int(task_match[1]))
                 elif vip_match and method == "POST":

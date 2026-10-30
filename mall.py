@@ -140,6 +140,9 @@ class MallCatalog:
             _int(row.get("id")): [_int(a) for a in row.get("actorIds") or []]
             for row in _rows("ActorSkin", table_dir)
         }
+        # Original APK xlsx__misc.lua:48-51 explicitly includes daily gold.
+        misc = next(iter(_rows("Misc", table_dir)), {})
+        self.month_card_daily_rewards = [_resource(row) for row in misc.get("monthCardRewardDaily", [])]
 
     def page(self, gift_page: int) -> list[dict[str, Any]]:
         """``PB.all("Mall"):where(isMonth == false and giftPage == page)``."""
@@ -154,11 +157,16 @@ class MallCatalog:
                 if _int(row.get("platform")) == platform and row.get("showInShop")]
         return sorted(rows, key=lambda row: float(row.get("price") or 0))
 
-    def mall_row_for_product(self, product_id: str) -> Optional[dict[str, Any]]:
-        for _, row in sorted(self.mall.items()):
-            if str(row.get("productId") or "") == product_id:
-                return row
-        return None
+    def mall_row_for_product(self, product_id: str, *,
+                             open_activity_ids: Optional[set[int]] = None) -> Optional[dict[str, Any]]:
+        rows = [row for _, row in sorted(self.mall.items())
+                if str(row.get("productId") or "") == product_id]
+        if open_activity_ids is not None:
+            # Re-runs share a product id, but only the current Mall activity is
+            # visible. Keep a closed fallback so callers still reject it.
+            rows.sort(key=lambda row: (bool(_int(row.get("activityId")))
+                                       and _int(row["activityId"]) not in open_activity_ids, -_int(row["id"])))
+        return rows[0] if rows else None
 
     def activity_gift_rows(self, *, dedupe: bool = True, include_direct: bool = False) -> list[dict[str, Any]]:
         """Event gift rows whose activities the local server keeps open.
@@ -512,9 +520,7 @@ class LocalMall:
         mail_id = _int(state.get("mail_last_id")) + 1
         now = self._now()
         record = {"id": mail_id, "title": "月卡每日奖励", "content": "今日月卡奖励已送达。",
-                  "senderName": "月卡福利", "attachments": [
-                      {"type": 5, "id": 0, "param": 0, "count": 50},
-                      {"type": 7, "id": 0, "param": 0, "count": 20000}],
+                  "senderName": "月卡福利", "attachments": copy.deepcopy(self.catalog.month_card_daily_rewards),
                   "read": False, "attachmentsGot": False, "createTime": now,
                   "startTime": now, "expireTime": now + 30 * _DAY, "important": True,
                   "monthCardDay": day}
@@ -600,7 +606,7 @@ class LocalMall:
         product = self.catalog.products.get(product_id) or {}
         interval = _int(product.get("maxCountClearInterval"))
         if not interval:
-            row = self.catalog.mall_row_for_product(product_id)
+            row = self.catalog.mall_row_for_product(product_id, open_activity_ids=self.open_activity_ids)
             interval = _int(row.get("maxCountClearInterval")) if row else 0
         return interval
 
@@ -608,7 +614,7 @@ class LocalMall:
         product = self.catalog.products.get(product_id) or {}
         limit = _int(product.get("maxBuyCount"))
         if not limit:
-            row = self.catalog.mall_row_for_product(product_id)
+            row = self.catalog.mall_row_for_product(product_id, open_activity_ids=self.open_activity_ids)
             limit = _int(row.get("maxBuyCount")) if row else 0
         return limit
 
@@ -663,7 +669,7 @@ class LocalMall:
         product = self.catalog.products.get(product_id)
         if product is None:
             return None
-        row = self.catalog.mall_row_for_product(product_id)
+        row = self.catalog.mall_row_for_product(product_id, open_activity_ids=self.open_activity_ids)
         if row is not None and _int(row.get('activityId')) and _int(row['activityId']) not in self.open_activity_ids:
             raise MallError(409, 'mall_activity_closed')
         if row is not None and _int(profile.get("level"), 1) < _int(row.get("limitLv")):
@@ -733,7 +739,7 @@ class LocalMall:
         limit = self._product_limit(product_id)
         if limit and self._effective(state["purchase"].get(product_id), self._product_interval(product_id), self._now()) >= limit:
             raise MallError(409, "purchase_limit_reached")
-        row = self.catalog.mall_row_for_product(product_id)
+        row = self.catalog.mall_row_for_product(product_id, open_activity_ids=self.open_activity_ids)
         if row is not None and _int(row.get('activityId')) and _int(row['activityId']) not in self.open_activity_ids:
             raise MallError(409, 'mall_activity_closed')
         if row is not None and _int(profile.get("level"), 1) < _int(row.get("limitLv")):
