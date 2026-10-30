@@ -1,0 +1,1100 @@
+{
+  "failed": 0,
+  "ok": true,
+  "passed": 84,
+  "results": [
+    {
+      "expected_status": 501,
+      "interface": "ReqDir",
+      "method": "POST",
+      "passed": true,
+      "path": "/Dir/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ReqDir",
+        "path": "/Dir/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ReqWorldConfig",
+      "method": "POST",
+      "passed": true,
+      "path": "/WorldConfig/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ReqWorldConfig",
+        "path": "/WorldConfig/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ReqDirStat",
+      "method": "POST",
+      "passed": true,
+      "path": "/DirStat/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ReqDirStat",
+        "path": "/DirStat/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ReqCommitVersion",
+      "method": "POST",
+      "passed": true,
+      "path": "/CommitVersion/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ReqCommitVersion",
+        "path": "/CommitVersion/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ReqFormalVersion",
+      "method": "POST",
+      "passed": true,
+      "path": "/FormalVersion/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ReqFormalVersion",
+        "path": "/FormalVersion/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ReqAllConfig",
+      "method": "POST",
+      "passed": true,
+      "path": "/AllConfig/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ReqAllConfig",
+        "path": "/AllConfig/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiIpLimit",
+      "method": "POST",
+      "passed": true,
+      "path": "/iplimit/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiIpLimit",
+        "path": "/iplimit/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ReqDirAccount",
+      "method": "POST",
+      "passed": true,
+      "path": "/DirAccount/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ReqDirAccount",
+        "path": "/DirAccount/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiTest",
+      "method": "POST",
+      "passed": true,
+      "path": "/test/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiTest",
+        "path": "/test/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiAccountSwitch",
+      "method": "POST",
+      "passed": true,
+      "path": "/accountswitch/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiAccountSwitch",
+        "path": "/accountswitch/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiManageAuthInfo",
+      "method": "POST",
+      "passed": true,
+      "path": "/ManageAuthInfo/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiManageAuthInfo",
+        "path": "/ManageAuthInfo/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiManageSession",
+      "method": "POST",
+      "passed": true,
+      "path": "/ManageSession/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiManageSession",
+        "path": "/ManageSession/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiAppById",
+      "method": "POST",
+      "passed": true,
+      "path": "/App/sample-app_id/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiAppById",
+        "path": "/App/<string:app_id>/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiApp",
+      "method": "POST",
+      "passed": true,
+      "path": "/App/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiApp",
+        "path": "/App/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiAccountSession",
+      "method": "POST",
+      "passed": true,
+      "path": "/AccountSession/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiAccountSession",
+        "path": "/AccountSession/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiVerifyCode",
+      "method": "POST",
+      "passed": true,
+      "path": "/VerifyCode/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiVerifyCode",
+        "path": "/VerifyCode/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiPasswordVerifyCode",
+      "method": "POST",
+      "passed": true,
+      "path": "/PasswordVerifyCode/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiPasswordVerifyCode",
+        "path": "/PasswordVerifyCode/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiCurrentEntryModifyVerifyCode",
+      "method": "POST",
+      "passed": true,
+      "path": "/CurrentEntryModifyVerifyCode/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiCurrentEntryModifyVerifyCode",
+        "path": "/CurrentEntryModifyVerifyCode/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiNewEntryModifyVerifyCode",
+      "method": "POST",
+      "passed": true,
+      "path": "/NewEntryModifyVerifyCode/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiNewEntryModifyVerifyCode",
+        "path": "/NewEntryModifyVerifyCode/,/exist-entry-verify-code/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiNewEntry",
+      "method": "POST",
+      "passed": true,
+      "path": "/NewEntry/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiNewEntry",
+        "path": "/NewEntry/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiExistEntry",
+      "method": "POST",
+      "passed": true,
+      "path": "/exist-entry/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiExistEntry",
+        "path": "/exist-entry/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiEntryReg",
+      "method": "POST",
+      "passed": true,
+      "path": "/EntryReg/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiEntryReg",
+        "path": "/EntryReg/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiCaptcha",
+      "method": "POST",
+      "passed": true,
+      "path": "/Captcha/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiCaptcha",
+        "path": "/Captcha/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiExtraInfo",
+      "method": "POST",
+      "passed": true,
+      "path": "/ExtraInfo/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiExtraInfo",
+        "path": "/ExtraInfo/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiExtraInfoByAuth",
+      "method": "POST",
+      "passed": true,
+      "path": "/ExtraInfoByAuth/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiExtraInfoByAuth",
+        "path": "/ExtraInfoByAuth/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiPassword",
+      "method": "POST",
+      "passed": true,
+      "path": "/Password/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiPassword",
+        "path": "/Password/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiGmPassword",
+      "method": "POST",
+      "passed": true,
+      "path": "/gm-password/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiGmPassword",
+        "path": "/gm-password/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiPasswordReset",
+      "method": "POST",
+      "passed": true,
+      "path": "/Password/reset/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiPasswordReset",
+        "path": "/Password/reset/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiAccount",
+      "method": "POST",
+      "passed": true,
+      "path": "/Account/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiAccount",
+        "path": "/Account/,/Account/<string:account_id_or_open_id>/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiAccountEntry",
+      "method": "POST",
+      "passed": true,
+      "path": "/AccountEntry/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiAccountEntry",
+        "path": "/AccountEntry/,/AccountEntry/<string:entry>/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiGmAccountEntry",
+      "method": "POST",
+      "passed": true,
+      "path": "/gm-account-entry/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiGmAccountEntry",
+        "path": "/gm-account-entry/,/gm-add-entry/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiAccountEntryExist",
+      "method": "POST",
+      "passed": true,
+      "path": "/AccountEntry/sample-entry/exist/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiAccountEntryExist",
+        "path": "/AccountEntry/<string:entry>/exist/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiAccountGuestBind",
+      "method": "POST",
+      "passed": true,
+      "path": "/AccountEntry/bind/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiAccountEntry",
+        "path": "/AccountEntry/,/AccountEntry/<string:entry>/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiAccountBbrrOldBind",
+      "method": "POST",
+      "passed": true,
+      "path": "/AccountEntry/bind-bbrr-old/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiAccountEntry",
+        "path": "/AccountEntry/,/AccountEntry/<string:entry>/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiAuthInfo",
+      "method": "POST",
+      "passed": true,
+      "path": "/Auth/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiAuthInfo",
+        "path": "/Auth/,/Auth/<string:verify_token>/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiAuthByLdap",
+      "method": "POST",
+      "passed": true,
+      "path": "/Auth-ldap/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiAuthByLdap",
+        "path": "/Auth-ldap/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiBbrrImport",
+      "method": "POST",
+      "passed": true,
+      "path": "/bbrr-import/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiBbrrImport",
+        "path": "/bbrr-import/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiRealNameVerified",
+      "method": "POST",
+      "passed": true,
+      "path": "/real-name-verified/sample-open_id/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiRealNameVerified",
+        "path": "/real-name-verified/<string:open_id>/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiCheckMailEntryExist",
+      "method": "POST",
+      "passed": true,
+      "path": "/entry-exist/email/sample-open_id/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiCheckMailEntryExist",
+        "path": "/entry-exist/email/<string:open_id>/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiCheckPhoneEntryExist",
+      "method": "POST",
+      "passed": true,
+      "path": "/entry-exist/phone/sample-open_id/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiCheckPhoneEntryExist",
+        "path": "/entry-exist/phone/<string:open_id>/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiCheckOpenIdExist",
+      "method": "POST",
+      "passed": true,
+      "path": "/openid-exist/sample-open_id/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiCheckOpenIdExist",
+        "path": "/openid-exist/<string:open_id>/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiClickGame",
+      "method": "POST",
+      "passed": true,
+      "path": "/ClickGame/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiClickGame",
+        "path": "/ClickGame/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiWhiteOpenId",
+      "method": "POST",
+      "passed": true,
+      "path": "/WhiteOpenId/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiWhiteOpenId",
+        "path": "/WhiteOpenId/,/WhiteOpenId/<string:openid>/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiUploadWhiteOpenId",
+      "method": "POST",
+      "passed": true,
+      "path": "/UploadWhiteOpenId/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiUploadWhiteOpenId",
+        "path": "/UploadWhiteOpenId/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiDelWhiteOpenId",
+      "method": "POST",
+      "passed": true,
+      "path": "/DelWhiteOpenId/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiDelWhiteOpenId",
+        "path": "/DelWhiteOpenId/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiDelAllWhiteOpenId",
+      "method": "POST",
+      "passed": true,
+      "path": "/DelAllWhiteOpenId/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiDelAllWhiteOpenId",
+        "path": "/DelAllWhiteOpenId/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiShutDown",
+      "method": "POST",
+      "passed": true,
+      "path": "/shutDown/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiShutDown",
+        "path": "/shutDown/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiKickAll",
+      "method": "POST",
+      "passed": true,
+      "path": "/kickall/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiKickAll",
+        "path": "/kickall/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiTempEntranceSwitch",
+      "method": "POST",
+      "passed": true,
+      "path": "/temp-entrance-switch/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiTempEntranceSwitch",
+        "path": "/temp-entrance-switch/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiDirtyCheck",
+      "method": "POST",
+      "passed": true,
+      "path": "/dirtycheck/sample-content/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiDirtyCheck",
+        "path": "/dirtycheck/<string:content>/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiChangeServerTime",
+      "method": "POST",
+      "passed": true,
+      "path": "/changetime/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiChangeServerTime",
+        "path": "/changetime/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiPlayerSyncMidasInfo",
+      "method": "POST",
+      "passed": true,
+      "path": "/syncmidas/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiPlayerSyncMidasInfo",
+        "path": "/syncmidas/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiPlayerASMIadInfo",
+      "method": "POST",
+      "passed": true,
+      "path": "/asmiadinfo/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiPlayerASMIadInfo",
+        "path": "/asmiadinfo/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiPlayerLogin",
+      "method": "POST",
+      "passed": true,
+      "path": "/login/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiPlayerLogin",
+        "path": "/login/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiPlayerLogout",
+      "method": "POST",
+      "passed": true,
+      "path": "/logout/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiPlayerLogout",
+        "path": "/logout/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiPlayerBaseInfo",
+      "method": "POST",
+      "passed": true,
+      "path": "/baseinfo/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiPlayerBaseInfo",
+        "path": "/baseinfo/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiPlayerName",
+      "method": "POST",
+      "passed": true,
+      "path": "/name/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiPlayerName",
+        "path": "/name/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiPlayerSocialPicture",
+      "method": "POST",
+      "passed": true,
+      "path": "/socialpicture/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiPlayerSocialPicture",
+        "path": "/socialpicture/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiPlayerLevel",
+      "method": "POST",
+      "passed": true,
+      "path": "/baseresource/level/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiPlayerLevel",
+        "path": "/baseresource/level/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiGmRemovePlayer",
+      "method": "POST",
+      "passed": true,
+      "path": "/remove-player/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiGmRemovePlayer",
+        "path": "/remove-player/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiPlayerIdByName",
+      "method": "POST",
+      "passed": true,
+      "path": "/playeridbyname/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiPlayerIdByName",
+        "path": "/playeridbyname/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiOpenIdByPlayerId",
+      "method": "POST",
+      "passed": true,
+      "path": "/openidbyplayerid/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiOpenIdByPlayerId",
+        "path": "/openidbyplayerid/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiBanPlayer",
+      "method": "POST",
+      "passed": true,
+      "path": "/banplayer/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiBanPlayer",
+        "path": "/banplayer/,/banplayer/<string:playerId>/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiPlayerFuncBan",
+      "method": "POST",
+      "passed": true,
+      "path": "/funcban/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiPlayerFuncBan",
+        "path": "/funcban/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiKickPlayer",
+      "method": "POST",
+      "passed": true,
+      "path": "/kickplayer/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiKickPlayer",
+        "path": "/kickplayer/,/kickplayer/<string:playerId>/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiGameCenter",
+      "method": "POST",
+      "passed": true,
+      "path": "/gamecenter/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiGameCenter",
+        "path": "/gamecenter/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiXinyueVipInfo",
+      "method": "POST",
+      "passed": true,
+      "path": "/xinyue-vipinfo/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiXinyueVipInfo",
+        "path": "/xinyue-vipinfo/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiServerUpdateInfo",
+      "method": "POST",
+      "passed": true,
+      "path": "/server-update-info/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiServerUpdateInfo",
+        "path": "/server-update-info/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiCloseWebSocket",
+      "method": "POST",
+      "passed": true,
+      "path": "/close_ws/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiCloseWebSocket",
+        "path": "/close_ws/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiPresentTargetActor",
+      "method": "POST",
+      "passed": true,
+      "path": "/present-target-actor/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiPresentTargetActor",
+        "path": "/present-target-actor/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiHomeBackGround",
+      "method": "POST",
+      "passed": true,
+      "path": "/home-back-ground/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiHomeBackGround",
+        "path": "/home-back-ground/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiGmCachePlayerClean",
+      "method": "POST",
+      "passed": true,
+      "path": "/gm-cache-player-clean/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiGmCachePlayerClean",
+        "path": "/gm-cache-player-clean/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiChipExchange",
+      "method": "POST",
+      "passed": true,
+      "path": "/chipexchange/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiChipExchange",
+        "path": "/chipexchange/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiGuildDungeonPlayerRecord",
+      "method": "POST",
+      "passed": true,
+      "path": "/guild-dungeon-record/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiGuildDungeonPlayerRecord",
+        "path": "/guild-dungeon-record/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiHealth",
+      "method": "POST",
+      "passed": true,
+      "path": "/health/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiHealth",
+        "path": "/health/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiInfo",
+      "method": "POST",
+      "passed": true,
+      "path": "/info/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiInfo",
+        "path": "/info/,/Info/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiInfoRes",
+      "method": "POST",
+      "passed": true,
+      "path": "/info/res/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiInfoRes",
+        "path": "/info/res/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiStatus",
+      "method": "POST",
+      "passed": true,
+      "path": "/status/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiStatus",
+        "path": "/status/,/Status/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiMyIp",
+      "method": "POST",
+      "passed": true,
+      "path": "/myip/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiMyIp",
+        "path": "/myip/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiDbAccess",
+      "method": "POST",
+      "passed": true,
+      "path": "/db-access/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiDbAccess",
+        "path": "/db-access/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiViewTest",
+      "method": "POST",
+      "passed": true,
+      "path": "/test/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiTest",
+        "path": "/test/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiIsOpen",
+      "method": "POST",
+      "passed": true,
+      "path": "/isopen/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiIsOpen",
+        "path": "/isopen/,/IsOpen/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiModelDetailInfo",
+      "method": "POST",
+      "passed": true,
+      "path": "/models/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiModelDetailInfo",
+        "path": "/models/,/models/<string:name>/,/models/<string:name>/<string:key>/"
+      },
+      "status": 501
+    },
+    {
+      "expected_status": 501,
+      "interface": "ApiCheckPlayerData",
+      "method": "POST",
+      "passed": true,
+      "path": "/checkdata/sample-name/sample-key/",
+      "payload": {
+        "error": "route_not_implemented",
+        "interface": "ApiCheckPlayerData",
+        "path": "/checkdata/<string:name>/<string:key>/"
+      },
+      "status": 501
+    }
+  ],
+  "total": 84
+}

@@ -1,0 +1,1100 @@
+{
+  "schemaVersion": 1,
+  "table": "Misc",
+  "observedCount": 1,
+  "rowCount": 1,
+  "completeness": "complete_observed",
+  "sourceFiles": [
+    "config-samples-live.jsonl"
+  ],
+  "sourceRecords": [
+    {
+      "name": "config-samples-live.jsonl",
+      "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\config-samples-live.jsonl",
+      "sha256": "85e1ca251f8355208917cf14a1aee0c5f1c419e8f0ee017a5723a19996daeb54"
+    }
+  ],
+  "rowsSha256": "4be28caeda07265fe6505eb0974fdc3a625858acdbc2ccfbe284a09e3a153531",
+  "schema": {
+    "types": [
+      "object"
+    ],
+    "fields": {
+      "CreditsListScrollVelocity": {
+        "types": [
+          "number"
+        ]
+      },
+      "actorAttrsVersion": {
+        "types": [
+          "integer"
+        ]
+      },
+      "actorDecomposeTalentCoef": {
+        "types": [
+          "number"
+        ]
+      },
+      "auraCooldown": {
+        "types": [
+          "integer"
+        ]
+      },
+      "auraRelationPointAddFriends": {
+        "types": [
+          "integer"
+        ]
+      },
+      "auraRelationPointAddStranger": {
+        "types": [
+          "integer"
+        ]
+      },
+      "burstPvpActorLevel": {
+        "types": [
+          "integer"
+        ]
+      },
+      "burstPvpActorQuality": {
+        "types": [
+          "integer"
+        ]
+      },
+      "burstPvpActorStar": {
+        "types": [
+          "integer"
+        ]
+      },
+      "burstPvpMatchMaxWaitTime": {
+        "types": [
+          "integer"
+        ]
+      },
+      "channels": {
+        "types": [
+          "array"
+        ],
+        "items": {
+          "types": [
+            "object"
+          ],
+          "fields": {
+            "id": {
+              "types": [
+                "string"
+              ]
+            },
+            "name": {
+              "types": [
+                "string"
+              ]
+            },
+            "privilegeIgnore": {
+              "types": [
+                "boolean"
+              ]
+            }
+          }
+        }
+      },
+      "chatBanColdTime": {
+        "types": [
+          "integer"
+        ]
+      },
+      "chipExchangeMaxModifyCount": {
+        "types": [
+          "integer"
+        ]
+      },
+      "chipExchangeSet": {
+        "types": [
+          "array"
+        ],
+        "items": {
+          "types": [
+            "integer"
+          ]
+        }
+      },
+      "citySceneUpdateTime1": {
+        "types": [
+          "integer"
+        ]
+      },
+      "citySceneUpdateTime2": {
+        "types": [
+          "integer"
+        ]
+      },
+      "clawCraneCost": {
+        "types": [
+          "object"
+        ],
+        "fields": {
+          "count": {
+            "types": [
+              "integer"
+            ]
+          },
+          "id": {
+            "types": [
+              "integer"
+            ]
+          },
+          "type": {
+            "types": [
+              "integer"
+            ]
+          }
+        }
+      },
+      "clawCraneSupplyTime": {
+        "types": [
+          "string"
+        ]
+      },
+      "clawCraneTotalProbability": {
+        "types": [
+          "integer"
+        ]
+      },
+      "clickLikeLimit": {
+        "types": [
+          "integer"
+        ]
+      },
+      "cultivationPVPHideRanks": {
+        "types": [
+          "integer"
+        ]
+      },
+      "dailyRefreshTime": {
+        "types": [
+          "string"
+        ]
+      },
+      "dailyRefreshZeroTime": {
+        "types": [
+          "string"
+        ]
+      },
+      "dailySubscribeCheckTime": {
+        "types": [
+          "string"
+        ]
+      },
+      "danMuIntervalSeconds": {
+        "types": [
+          "integer"
+        ]
+      },
+      "dayPassiveTriggeredEventLimit": {
+        "types": [
+          "integer"
+        ]
+      },
+      "dayTriggeredEventActiveCloseTime": {
+        "types": [
+          "string"
+        ]
+      },
+      "dayTriggeredEventActiveOpenTime": {
+        "types": [
+          "string"
+        ]
+      },
+      "dayTriggeredEventFinishLimit": {
+        "types": [
+          "integer"
+        ]
+      },
+      "dayTriggeredEventPassiveCloseTime": {
+        "types": [
+          "string"
+        ]
+      },
+      "dayTriggeredEventPassiveOpenTime": {
+        "types": [
+          "string"
+        ]
+      },
+      "defaultLanguage": {
+        "types": [
+          "integer"
+        ]
+      },
+      "deployFavourCycle": {
+        "types": [
+          "integer"
+        ]
+      },
+      "dungeonActorOverflowExp": {
+        "types": [
+          "integer"
+        ]
+      },
+      "dungeonBalanceFavour": {
+        "types": [
+          "integer"
+        ]
+      },
+      "equipExpToResource": {
+        "types": [
+          "object"
+        ],
+        "fields": {
+          "count": {
+            "types": [
+              "integer"
+            ]
+          },
+          "type": {
+            "types": [
+              "integer"
+            ]
+          }
+        }
+      },
+      "fightInteractionInterval": {
+        "types": [
+          "integer"
+        ]
+      },
+      "forceLimitedPoolCount": {
+        "types": [
+          "integer"
+        ]
+      },
+      "friendApplyLevelMax": {
+        "types": [
+          "integer"
+        ]
+      },
+      "friendApplyLevelMin": {
+        "types": [
+          "integer"
+        ]
+      },
+      "gachaForceOrangeProbabilitiy": {
+        "types": [
+          "integer"
+        ]
+      },
+      "gachaFreeTime": {
+        "types": [
+          "string"
+        ]
+      },
+      "gachaMaxCountOnce": {
+        "types": [
+          "integer"
+        ]
+      },
+      "gachaOrangeSameTypeCount": {
+        "types": [
+          "integer"
+        ]
+      },
+      "gachaPointGenRation": {
+        "types": [
+          "integer"
+        ]
+      },
+      "gachaPurpleSameTypeCount": {
+        "types": [
+          "integer"
+        ]
+      },
+      "gachaRecordActorMax": {
+        "types": [
+          "integer"
+        ]
+      },
+      "gachaRecordActorTalentScore": {
+        "types": [
+          "integer"
+        ]
+      },
+      "gameCenterDSRewardCount": {
+        "types": [
+          "integer"
+        ]
+      },
+      "gameCenterDSRewardType": {
+        "types": [
+          "integer"
+        ]
+      },
+      "gameDataReportOnlineTimePeriod": {
+        "types": [
+          "integer"
+        ]
+      },
+      "gameDataReportPurchaseTimePeriod": {
+        "types": [
+          "integer"
+        ]
+      },
+      "guildDungeonCloseTime": {
+        "types": [
+          "string"
+        ]
+      },
+      "guildDungeonOpenTime": {
+        "types": [
+          "string"
+        ]
+      },
+      "limitGachaPurpleProbability": {
+        "types": [
+          "integer"
+        ]
+      },
+      "mailAttachmentLevelLimit": {
+        "types": [
+          "integer"
+        ]
+      },
+      "mailWarningCount": {
+        "types": [
+          "integer"
+        ]
+      },
+      "maxAccomplishDeployNum": {
+        "types": [
+          "integer"
+        ]
+      },
+      "maxActorCommentCount": {
+        "types": [
+          "integer"
+        ]
+      },
+      "maxActorCommentCountOneDay": {
+        "types": [
+          "integer"
+        ]
+      },
+      "maxActorGroup": {
+        "types": [
+          "integer"
+        ]
+      },
+      "maxActorLevel": {
+        "types": [
+          "integer"
+        ]
+      },
+      "maxActorWarningCount": {
+        "types": [
+          "integer"
+        ]
+      },
+      "maxAnyPurchase": {
+        "types": [
+          "integer"
+        ]
+      },
+      "maxAsyncPVPActorGroup": {
+        "types": [
+          "integer"
+        ]
+      },
+      "maxBlackContactNum": {
+        "types": [
+          "integer"
+        ]
+      },
+      "maxCardGroupNum": {
+        "types": [
+          "integer"
+        ]
+      },
+      "maxChatLen": {
+        "types": [
+          "integer"
+        ]
+      },
+      "maxCongratsRoleNum": {
+        "types": [
+          "integer"
+        ]
+      },
+      "maxDanmuTextLength": {
+        "types": [
+          "integer"
+        ]
+      },
+      "maxDanmuVideoLength": {
+        "types": [
+          "integer"
+        ]
+      },
+      "maxEquipWarningCount": {
+        "types": [
+          "integer"
+        ]
+      },
+      "maxFriendApplyListNum": {
+        "types": [
+          "integer"
+        ]
+      },
+      "maxFriendNum": {
+        "types": [
+          "integer"
+        ]
+      },
+      "maxGlobalMail": {
+        "types": [
+          "integer"
+        ]
+      },
+      "maxGoldActorGroup": {
+        "types": [
+          "integer"
+        ]
+      },
+      "maxNameLen": {
+        "types": [
+          "integer"
+        ]
+      },
+      "maxNotifyDeployNum": {
+        "types": [
+          "integer"
+        ]
+      },
+      "maxOfflineChatNum": {
+        "types": [
+          "integer"
+        ]
+      },
+      "maxPlayerMail": {
+        "types": [
+          "integer"
+        ]
+      },
+      "maxRacePVPActorGroup": {
+        "types": [
+          "integer"
+        ]
+      },
+      "maxRacePvpPlyNum": {
+        "types": [
+          "integer"
+        ]
+      },
+      "maxRecentContact": {
+        "types": [
+          "integer"
+        ]
+      },
+      "maxReportedScore": {
+        "types": [
+          "integer"
+        ]
+      },
+      "maxResetTalentCount": {
+        "types": [
+          "integer"
+        ]
+      },
+      "maxRoleFavourLevel": {
+        "types": [
+          "integer"
+        ]
+      },
+      "maxSkillPoint": {
+        "types": [
+          "integer"
+        ]
+      },
+      "maxStarLevel": {
+        "types": [
+          "integer"
+        ]
+      },
+      "maxTowerActorGroup": {
+        "types": [
+          "integer"
+        ]
+      },
+      "maxTriggeredEventOfflineMessageNum": {
+        "types": [
+          "integer"
+        ]
+      },
+      "maxTriggeredEventOwnCount": {
+        "types": [
+          "integer"
+        ]
+      },
+      "maxUnlockPosterScore": {
+        "types": [
+          "integer"
+        ]
+      },
+      "maxWorldSubChannelCapacity": {
+        "types": [
+          "integer"
+        ]
+      },
+      "maxWorldSubChannelCount": {
+        "types": [
+          "integer"
+        ]
+      },
+      "maxWorldSubChannelWeight": {
+        "types": [
+          "integer"
+        ]
+      },
+      "minAnyPurchase": {
+        "types": [
+          "integer"
+        ]
+      },
+      "minCongratsFavourLv": {
+        "types": [
+          "integer"
+        ]
+      },
+      "modifyNameTutorialLevel": {
+        "types": [
+          "integer"
+        ]
+      },
+      "monthCardIncreaseDays": {
+        "types": [
+          "integer"
+        ]
+      },
+      "monthCardRewardDaily": {
+        "types": [
+          "array"
+        ],
+        "items": {
+          "types": [
+            "object"
+          ],
+          "fields": {
+            "count": {
+              "types": [
+                "integer"
+              ]
+            },
+            "type": {
+              "types": [
+                "integer"
+              ]
+            }
+          }
+        }
+      },
+      "msdkFriendIcon": {
+        "types": [
+          "string"
+        ]
+      },
+      "normalGachaPurpleProbability": {
+        "types": [
+          "integer"
+        ]
+      },
+      "notepadEventVoiceOpenLevel": {
+        "types": [
+          "integer"
+        ]
+      },
+      "notifyCD": {
+        "types": [
+          "object"
+        ],
+        "fields": {
+          "deployFinish": {
+            "types": [
+              "integer"
+            ]
+          },
+          "powerFull": {
+            "types": [
+              "integer"
+            ]
+          }
+        }
+      },
+      "oneStarRewardCount": {
+        "types": [
+          "integer"
+        ]
+      },
+      "payTestRechargeEndTime": {
+        "types": [
+          "string"
+        ]
+      },
+      "payTestRewardStartTime": {
+        "types": [
+          "string"
+        ]
+      },
+      "percentAttrNum": {
+        "types": [
+          "integer"
+        ]
+      },
+      "playerHeadCount": {
+        "types": [
+          "integer"
+        ]
+      },
+      "purblePairsMaxCntPerDay": {
+        "types": [
+          "integer"
+        ]
+      },
+      "purblePairsPerGroupCnt": {
+        "types": [
+          "integer"
+        ]
+      },
+      "purblePairsTotalCnt": {
+        "types": [
+          "integer"
+        ]
+      },
+      "pvpMaxDieNum": {
+        "types": [
+          "integer"
+        ]
+      },
+      "pvpMaxRandTime": {
+        "types": [
+          "integer"
+        ]
+      },
+      "pvpMaxWinNum": {
+        "types": [
+          "integer"
+        ]
+      },
+      "pvpMinRandTime": {
+        "types": [
+          "integer"
+        ]
+      },
+      "pvpOneRandActorNum": {
+        "types": [
+          "integer"
+        ]
+      },
+      "pvpRandTimes": {
+        "types": [
+          "integer"
+        ]
+      },
+      "pvpTickets": {
+        "types": [
+          "integer"
+        ]
+      },
+      "qqSubscribeSceneId": {
+        "types": [
+          "array"
+        ],
+        "items": {
+          "types": [
+            "integer"
+          ]
+        }
+      },
+      "racePVPGroupMaxPlayer": {
+        "types": [
+          "integer"
+        ]
+      },
+      "racePVPRoundNum": {
+        "types": [
+          "integer"
+        ]
+      },
+      "racePVPTicketNum": {
+        "types": [
+          "integer"
+        ]
+      },
+      "racePvpMaxRandTime": {
+        "types": [
+          "integer"
+        ]
+      },
+      "racePvpMinRandTime": {
+        "types": [
+          "integer"
+        ]
+      },
+      "recallSinceLastLogin": {
+        "types": [
+          "integer"
+        ]
+      },
+      "relationPointDailyLimit": {
+        "types": [
+          "integer"
+        ]
+      },
+      "reportedGuildNum": {
+        "types": [
+          "integer"
+        ]
+      },
+      "reportedIpLimit": {
+        "types": [
+          "integer"
+        ]
+      },
+      "reportedRefreshTime": {
+        "types": [
+          "integer"
+        ]
+      },
+      "resetTalentIndexPos": {
+        "types": [
+          "integer"
+        ]
+      },
+      "rolePresentInterval": {
+        "types": [
+          "integer"
+        ]
+      },
+      "rolePresentMaxNum": {
+        "types": [
+          "integer"
+        ]
+      },
+      "signboardFavourCycle": {
+        "types": [
+          "integer"
+        ]
+      },
+      "signboardFavourValue": {
+        "types": [
+          "integer"
+        ]
+      },
+      "spaceBooksCount": {
+        "types": [
+          "integer"
+        ]
+      },
+      "talentCheckVersion": {
+        "types": [
+          "integer"
+        ]
+      },
+      "talentRatio": {
+        "types": [
+          "integer"
+        ]
+      },
+      "taskPresentRewardBoxId": {
+        "types": [
+          "integer"
+        ]
+      },
+      "teamDungeonTicket": {
+        "types": [
+          "object"
+        ],
+        "fields": {
+          "count": {
+            "types": [
+              "integer"
+            ]
+          },
+          "id": {
+            "types": [
+              "integer"
+            ]
+          },
+          "type": {
+            "types": [
+              "integer"
+            ]
+          }
+        }
+      },
+      "towerShowNextAwardCount": {
+        "types": [
+          "integer"
+        ]
+      },
+      "triggeredEventActiveInterval": {
+        "types": [
+          "integer"
+        ]
+      },
+      "triggeredEventLastTime": {
+        "types": [
+          "integer"
+        ]
+      },
+      "triggeredEventPassiveInterval": {
+        "types": [
+          "integer"
+        ]
+      },
+      "triggeredEventTickets": {
+        "types": [
+          "array"
+        ],
+        "items": {
+          "types": [
+            "integer"
+          ]
+        }
+      },
+      "unlockFightSpeedLevel": {
+        "types": [
+          "integer"
+        ]
+      },
+      "unlockNoticeSystemLevel": {
+        "types": [
+          "integer"
+        ]
+      },
+      "vipSuperDSRewardCount": {
+        "types": [
+          "integer"
+        ]
+      },
+      "vipSuperDSRewardType": {
+        "types": [
+          "integer"
+        ]
+      },
+      "wxSubscribeMsgId": {
+        "types": [
+          "array"
+        ],
+        "items": {
+          "types": [
+            "integer"
+          ]
+        }
+      }
+    }
+  },
+  "rows": [
+    {
+      "CreditsListScrollVelocity": 3.0,
+      "actorAttrsVersion": 4,
+      "actorDecomposeTalentCoef": 0.016,
+      "auraCooldown": 14400,
+      "auraRelationPointAddFriends": 25,
+      "auraRelationPointAddStranger": 20,
+      "burstPvpActorLevel": 1,
+      "burstPvpActorQuality": 1,
+      "burstPvpActorStar": 1,
+      "burstPvpMatchMaxWaitTime": 60,
+      "channels": [
+        {
+          "id": "10029304",
+          "name": "bilibili",
+          "privilegeIgnore": true
+        },
+        {
+          "id": "10025553",
+          "name": "taptap",
+          "privilegeIgnore": true
+        },
+        {
+          "id": "3",
+          "name": "yingyongbao",
+          "privilegeIgnore": true
+        }
+      ],
+      "chatBanColdTime": 48,
+      "chipExchangeMaxModifyCount": 2,
+      "chipExchangeSet": [
+        20002,
+        20116,
+        20014,
+        20128,
+        20107,
+        20108,
+        20012,
+        20006
+      ],
+      "citySceneUpdateTime1": 8,
+      "citySceneUpdateTime2": 20,
+      "clawCraneCost": {
+        "count": 1,
+        "id": 61001,
+        "type": 11
+      },
+      "clawCraneSupplyTime": "12:30:00",
+      "clawCraneTotalProbability": 10000000,
+      "clickLikeLimit": 100,
+      "cultivationPVPHideRanks": 10,
+      "dailyRefreshTime": "06:00:00",
+      "dailyRefreshZeroTime": "00:00:00",
+      "dailySubscribeCheckTime": "12:00:00",
+      "danMuIntervalSeconds": 2,
+      "dayPassiveTriggeredEventLimit": 3,
+      "dayTriggeredEventActiveCloseTime": "23:59:59",
+      "dayTriggeredEventActiveOpenTime": "00:00:00",
+      "dayTriggeredEventFinishLimit": 5,
+      "dayTriggeredEventPassiveCloseTime": "23:59:59",
+      "dayTriggeredEventPassiveOpenTime": "00:00:00",
+      "defaultLanguage": 1,
+      "deployFavourCycle": 3600,
+      "dungeonActorOverflowExp": 7000,
+      "dungeonBalanceFavour": 1,
+      "equipExpToResource": {
+        "count": 3,
+        "type": 7
+      },
+      "fightInteractionInterval": 10,
+      "forceLimitedPoolCount": 30,
+      "friendApplyLevelMax": 99,
+      "friendApplyLevelMin": 6,
+      "gachaForceOrangeProbabilitiy": 100,
+      "gachaFreeTime": "06:00:00",
+      "gachaMaxCountOnce": 100,
+      "gachaOrangeSameTypeCount": 2,
+      "gachaPointGenRation": 1000,
+      "gachaPurpleSameTypeCount": 3,
+      "gachaRecordActorMax": 10,
+      "gachaRecordActorTalentScore": 70,
+      "gameCenterDSRewardCount": 200,
+      "gameCenterDSRewardType": 7,
+      "gameDataReportOnlineTimePeriod": 300,
+      "gameDataReportPurchaseTimePeriod": 300,
+      "guildDungeonCloseTime": "00:00:00",
+      "guildDungeonOpenTime": "06:00:00",
+      "limitGachaPurpleProbability": 1000,
+      "mailAttachmentLevelLimit": 10,
+      "mailWarningCount": 80,
+      "maxAccomplishDeployNum": 40,
+      "maxActorCommentCount": 1000,
+      "maxActorCommentCountOneDay": 3,
+      "maxActorGroup": 5,
+      "maxActorLevel": 60,
+      "maxActorWarningCount": 4500,
+      "maxAnyPurchase": 30000,
+      "maxAsyncPVPActorGroup": 1,
+      "maxBlackContactNum": 200,
+      "maxCardGroupNum": 100,
+      "maxChatLen": 128,
+      "maxCongratsRoleNum": 3,
+      "maxDanmuTextLength": 30,
+      "maxDanmuVideoLength": 180,
+      "maxEquipWarningCount": 4000,
+      "maxFriendApplyListNum": 100,
+      "maxFriendNum": 200,
+      "maxGlobalMail": 99,
+      "maxGoldActorGroup": 1,
+      "maxNameLen": 7,
+      "maxNotifyDeployNum": 45,
+      "maxOfflineChatNum": 5,
+      "maxPlayerMail": 99,
+      "maxRacePVPActorGroup": 1,
+      "maxRacePvpPlyNum": 5,
+      "maxRecentContact": 20,
+      "maxReportedScore": 15,
+      "maxResetTalentCount": 10,
+      "maxRoleFavourLevel": 10,
+      "maxSkillPoint": 20,
+      "maxStarLevel": 6,
+      "maxTowerActorGroup": 3,
+      "maxTriggeredEventOfflineMessageNum": 10,
+      "maxTriggeredEventOwnCount": 10,
+      "maxUnlockPosterScore": 4,
+      "maxWorldSubChannelCapacity": 1000,
+      "maxWorldSubChannelCount": 9999,
+      "maxWorldSubChannelWeight": 700,
+      "minAnyPurchase": 10,
+      "minCongratsFavourLv": 2,
+      "modifyNameTutorialLevel": 6,
+      "monthCardIncreaseDays": 30,
+      "monthCardRewardDaily": [
+        {
+          "count": 50,
+          "type": 5
+        },
+        {
+          "count": 20000,
+          "type": 7
+        }
+      ],
+      "msdkFriendIcon": "https://down.qq.com/dianji/fci_notify/OB-icon-tx.jpg",
+      "normalGachaPurpleProbability": 500,
+      "notepadEventVoiceOpenLevel": 4,
+      "notifyCD": {
+        "deployFinish": 30,
+        "powerFull": 60
+      },
+      "oneStarRewardCount": 3,
+      "payTestRechargeEndTime": "2028-08-26 23:59:59",
+      "payTestRewardStartTime": "2028-08-27 06:00:00",
+      "percentAttrNum": 4,
+      "playerHeadCount": 6,
+      "purblePairsMaxCntPerDay": 3,
+      "purblePairsPerGroupCnt": 2,
+      "purblePairsTotalCnt": 18,
+      "pvpMaxDieNum": 3,
+      "pvpMaxRandTime": 10,
+      "pvpMaxWinNum": 5,
+      "pvpMinRandTime": 5,
+      "pvpOneRandActorNum": 3,
+      "pvpRandTimes": 3,
+      "pvpTickets": 1,
+      "qqSubscribeSceneId": [
+        65
+      ],
+      "racePVPGroupMaxPlayer": 20,
+      "racePVPRoundNum": 8,
+      "racePVPTicketNum": 6,
+      "racePvpMaxRandTime": 10,
+      "racePvpMinRandTime": 5,
+      "recallSinceLastLogin": 5,
+      "relationPointDailyLimit": 400,
+      "reportedGuildNum": 2,
+      "reportedIpLimit": 1,
+      "reportedRefreshTime": 24,
+      "resetTalentIndexPos": 4,
+      "rolePresentInterval": 86400,
+      "rolePresentMaxNum": 3,
+      "signboardFavourCycle": 3600,
+      "signboardFavourValue": 1,
+      "spaceBooksCount": 23,
+      "talentCheckVersion": 1,
+      "talentRatio": 30,
+      "taskPresentRewardBoxId": 121002,
+      "teamDungeonTicket": {
+        "count": 1,
+        "id": 80005,
+        "type": 11
+      },
+      "towerShowNextAwardCount": 3,
+      "triggeredEventActiveInterval": 1,
+      "triggeredEventLastTime": 10800,
+      "triggeredEventPassiveInterval": 300,
+      "triggeredEventTickets": [
+        80009
+      ],
+      "unlockFightSpeedLevel": 6,
+      "unlockNoticeSystemLevel": 12,
+      "vipSuperDSRewardCount": 200,
+      "vipSuperDSRewardType": 7,
+      "wxSubscribeMsgId": [
+        297
+      ]
+    }
+  ]
+}

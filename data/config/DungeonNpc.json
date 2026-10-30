@@ -1,0 +1,301 @@
+{
+  "schemaVersion": 1,
+  "table": "DungeonNpc",
+  "observedCount": 32,
+  "rowCount": 4,
+  "completeness": "partial",
+  "sourceFiles": [
+    "story-config.json"
+  ],
+  "sourceRecords": [
+    {
+      "name": "story-config.json",
+      "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\story-config.json",
+      "sha256": "dd1d3b4b6e4815df53852b92bc58dafdf4acbb1dada32bc3bc37d6f569d07638"
+    }
+  ],
+  "rowsSha256": "a4b834943e67bdc328ec75757d4a724473bd378def28b04c2211f856f06f9951",
+  "schema": {
+    "types": [
+      "object"
+    ],
+    "fields": {
+      "actorId": {
+        "types": [
+          "integer"
+        ]
+      },
+      "attrs": {
+        "types": [
+          "array"
+        ],
+        "items": {
+          "types": [
+            "object"
+          ],
+          "fields": {
+            "isRatio": {
+              "types": [
+                "boolean"
+              ]
+            },
+            "type": {
+              "types": [
+                "integer"
+              ]
+            },
+            "value": {
+              "types": [
+                "integer"
+              ]
+            }
+          }
+        }
+      },
+      "level": {
+        "types": [
+          "integer"
+        ]
+      },
+      "npcId": {
+        "types": [
+          "integer"
+        ]
+      },
+      "quality": {
+        "types": [
+          "integer"
+        ]
+      },
+      "skillsLevel": {
+        "types": [
+          "array"
+        ],
+        "items": {
+          "types": [
+            "integer"
+          ]
+        }
+      },
+      "star": {
+        "types": [
+          "integer"
+        ]
+      },
+      "talents": {
+        "types": [
+          "array"
+        ],
+        "items": {
+          "types": [
+            "object"
+          ],
+          "fields": {
+            "talentId": {
+              "types": [
+                "integer"
+              ]
+            },
+            "talentValue": {
+              "types": [
+                "integer"
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "rows": [
+    {
+      "actorId": 1001,
+      "attrs": [
+        {
+          "type": 1,
+          "value": 5624
+        },
+        {
+          "type": 3,
+          "value": 1113
+        },
+        {
+          "type": 5,
+          "value": 212
+        },
+        {
+          "type": 6,
+          "value": 204
+        },
+        {
+          "isRatio": true,
+          "type": 13,
+          "value": 100
+        },
+        {
+          "isRatio": true,
+          "type": 14,
+          "value": 1000
+        },
+        {
+          "type": 25,
+          "value": 550
+        }
+      ],
+      "level": 3,
+      "npcId": 1,
+      "quality": 3,
+      "skillsLevel": [
+        20,
+        20,
+        20
+      ],
+      "star": 6,
+      "talents": [
+        {
+          "talentId": 1001131,
+          "talentValue": 15
+        }
+      ]
+    },
+    {
+      "actorId": 1002,
+      "attrs": [
+        {
+          "type": 1,
+          "value": 6862
+        },
+        {
+          "type": 3,
+          "value": 964
+        },
+        {
+          "type": 5,
+          "value": 327
+        },
+        {
+          "type": 6,
+          "value": 319
+        },
+        {
+          "isRatio": true,
+          "type": 13,
+          "value": 100
+        },
+        {
+          "isRatio": true,
+          "type": 14,
+          "value": 1000
+        },
+        {
+          "type": 25,
+          "value": 800
+        }
+      ],
+      "level": 3,
+      "npcId": 3,
+      "quality": 3,
+      "skillsLevel": [
+        20,
+        20,
+        20
+      ],
+      "star": 6,
+      "talents": [
+        {
+          "talentId": 1002131,
+          "talentValue": 15
+        }
+      ]
+    },
+    {
+      "actorId": 2008,
+      "attrs": [
+        {
+          "type": 1,
+          "value": 6550
+        },
+        {
+          "type": 3,
+          "value": 939
+        },
+        {
+          "type": 5,
+          "value": 301
+        },
+        {
+          "type": 6,
+          "value": 305
+        },
+        {
+          "isRatio": true,
+          "type": 13,
+          "value": 100
+        },
+        {
+          "isRatio": true,
+          "type": 14,
+          "value": 1000
+        },
+        {
+          "type": 25,
+          "value": 757
+        }
+      ],
+      "level": 3,
+      "npcId": 2,
+      "quality": 3,
+      "skillsLevel": [
+        1,
+        1,
+        1
+      ],
+      "star": 6,
+      "talents": []
+    },
+    {
+      "actorId": 2009,
+      "attrs": [
+        {
+          "type": 1,
+          "value": 6862
+        },
+        {
+          "type": 3,
+          "value": 849
+        },
+        {
+          "type": 5,
+          "value": 319
+        },
+        {
+          "type": 6,
+          "value": 319
+        },
+        {
+          "isRatio": true,
+          "type": 13,
+          "value": 100
+        },
+        {
+          "isRatio": true,
+          "type": 14,
+          "value": 1000
+        },
+        {
+          "type": 25,
+          "value": 607
+        }
+      ],
+      "level": 3,
+      "npcId": 4,
+      "quality": 3,
+      "skillsLevel": [
+        20,
+        20,
+        20
+      ],
+      "star": 6,
+      "talents": []
+    }
+  ]
+}

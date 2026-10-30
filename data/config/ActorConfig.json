@@ -1,0 +1,390 @@
+{
+  "schemaVersion": 1,
+  "table": "ActorConfig",
+  "observedCount": 114,
+  "rowCount": 6,
+  "completeness": "partial",
+  "sourceFiles": [
+    "config-samples-live.jsonl"
+  ],
+  "sourceRecords": [
+    {
+      "name": "config-samples-live.jsonl",
+      "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\config-samples-live.jsonl",
+      "sha256": "85e1ca251f8355208917cf14a1aee0c5f1c419e8f0ee017a5723a19996daeb54"
+    }
+  ],
+  "rowsSha256": "de1350e6255a1258480c5e8be3d4efd596e8540845723cdbbe9f32e734e36b0f",
+  "schema": {
+    "types": [
+      "object"
+    ],
+    "fields": {
+      "animRes": {
+        "types": [
+          "string"
+        ]
+      },
+      "animType": {
+        "types": [
+          "integer"
+        ]
+      },
+      "book": {
+        "types": [
+          "integer"
+        ]
+      },
+      "category": {
+        "types": [
+          "integer"
+        ]
+      },
+      "chooseAudio": {
+        "types": [
+          "array"
+        ],
+        "items": {
+          "types": [
+            "string"
+          ]
+        }
+      },
+      "enableGameStartVoice": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "enableStartVoice": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "exclusiveTalentId": {
+        "types": [
+          "array"
+        ],
+        "items": {
+          "types": [
+            "integer"
+          ]
+        }
+      },
+      "height": {
+        "types": [
+          "number"
+        ]
+      },
+      "hitH": {
+        "types": [
+          "number"
+        ]
+      },
+      "hitW": {
+        "types": [
+          "number"
+        ]
+      },
+      "hookObject": {
+        "types": [
+          "array"
+        ]
+      },
+      "id": {
+        "types": [
+          "integer"
+        ]
+      },
+      "kind": {
+        "types": [
+          "integer"
+        ]
+      },
+      "logicRes": {
+        "types": [
+          "string"
+        ]
+      },
+      "openTime": {
+        "types": [
+          "string"
+        ]
+      },
+      "portraitOffsetX": {
+        "types": [
+          "integer"
+        ]
+      },
+      "portraitUVOffsetX": {
+        "types": [
+          "integer"
+        ]
+      },
+      "poseActionCnt": {
+        "types": [
+          "integer"
+        ]
+      },
+      "prefabRes": {
+        "types": [
+          "string"
+        ]
+      },
+      "role": {
+        "types": [
+          "integer"
+        ]
+      },
+      "scale": {
+        "types": [
+          "number"
+        ]
+      },
+      "shadowBaseY": {
+        "types": [
+          "number"
+        ]
+      },
+      "shadowOffset": {
+        "types": [
+          "number"
+        ]
+      },
+      "shareGachaResultOffsetX": {
+        "types": [
+          "integer"
+        ]
+      },
+      "showInLogin": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "skinUIRes": {
+        "types": [
+          "integer"
+        ]
+      },
+      "voiceRes": {
+        "types": [
+          "string"
+        ]
+      },
+      "width": {
+        "types": [
+          "number"
+        ]
+      }
+    }
+  },
+  "rows": [
+    {
+      "animRes": "1001a",
+      "animType": 2,
+      "book": 17,
+      "category": 1,
+      "chooseAudio": [
+        "mikoto/character_select/Mis00_1100",
+        "mikoto/character_select/Mis00_1120",
+        "mikoto/character_select/Mis00_1130"
+      ],
+      "enableStartVoice": true,
+      "exclusiveTalentId": [
+        1001131
+      ],
+      "height": 4.0,
+      "hitH": 3.0,
+      "hitW": 0.7,
+      "hookObject": [],
+      "id": 1001,
+      "kind": 1,
+      "logicRes": "mikoto_1",
+      "openTime": "2018-1-1 00:00:00",
+      "portraitUVOffsetX": 50,
+      "poseActionCnt": 2,
+      "prefabRes": "mikoto",
+      "role": 1,
+      "scale": 1.0,
+      "shadowBaseY": 0.61,
+      "showInLogin": true,
+      "skinUIRes": 1001,
+      "voiceRes": "mikoto",
+      "width": 1.0
+    },
+    {
+      "animRes": "1002a",
+      "animType": 2,
+      "book": 8,
+      "category": 3,
+      "chooseAudio": [
+        "kirito/character_select/Krt00_1100",
+        "kirito/character_select/Krt00_1120",
+        "kirito/character_select/Krt00_1130"
+      ],
+      "enableGameStartVoice": true,
+      "enableStartVoice": true,
+      "exclusiveTalentId": [
+        1002131
+      ],
+      "height": 4.0,
+      "hitH": 3.0,
+      "hitW": 0.7,
+      "hookObject": [],
+      "id": 1002,
+      "kind": 1,
+      "logicRes": "kirito",
+      "openTime": "2018-1-1 00:00:00",
+      "portraitUVOffsetX": 170,
+      "poseActionCnt": 2,
+      "prefabRes": "kirito",
+      "role": 2,
+      "scale": 1.0,
+      "shadowBaseY": 0.6,
+      "shadowOffset": -10.0,
+      "showInLogin": true,
+      "skinUIRes": 1002,
+      "voiceRes": "kirito",
+      "width": 1.0
+    },
+    {
+      "animRes": "1003a",
+      "animType": 2,
+      "book": 16,
+      "category": 1,
+      "chooseAudio": [
+        "miyuki/character_select/Sbm00_1100",
+        "miyuki/character_select/Sbm00_1120",
+        "miyuki/character_select/Sbm00_1130"
+      ],
+      "enableStartVoice": true,
+      "exclusiveTalentId": [
+        1003133
+      ],
+      "height": 4.0,
+      "hitH": 3.0,
+      "hitW": 0.7,
+      "hookObject": [],
+      "id": 1003,
+      "kind": 1,
+      "logicRes": "miyuki",
+      "openTime": "2018-1-1 00:00:00",
+      "portraitOffsetX": 50,
+      "poseActionCnt": 2,
+      "prefabRes": "miyuki",
+      "role": 3,
+      "scale": 1.0,
+      "shadowBaseY": 0.55,
+      "shadowOffset": -20.0,
+      "shareGachaResultOffsetX": 20,
+      "showInLogin": true,
+      "skinUIRes": 1003,
+      "voiceRes": "miyuki",
+      "width": 1.0
+    },
+    {
+      "animRes": "1004a",
+      "animType": 2,
+      "book": 19,
+      "category": 2,
+      "chooseAudio": [
+        "rentaro/character_select/Stm00_1100",
+        "rentaro/character_select/Stm00_1120",
+        "rentaro/character_select/Stm00_1130"
+      ],
+      "enableStartVoice": true,
+      "exclusiveTalentId": [
+        1004131
+      ],
+      "height": 4.0,
+      "hitH": 3.0,
+      "hitW": 0.7,
+      "hookObject": [],
+      "id": 1004,
+      "kind": 1,
+      "logicRes": "rentarou",
+      "openTime": "2018-1-1 00:00:00",
+      "portraitUVOffsetX": 100,
+      "poseActionCnt": 2,
+      "prefabRes": "rentarou",
+      "role": 4,
+      "scale": 1.0,
+      "shadowBaseY": 0.6,
+      "shadowOffset": -40.0,
+      "shareGachaResultOffsetX": 30,
+      "showInLogin": true,
+      "skinUIRes": 1004,
+      "voiceRes": "rentaro",
+      "width": 1.0
+    },
+    {
+      "animRes": "1005a",
+      "animType": 2,
+      "book": 23,
+      "category": 1,
+      "chooseAudio": [
+        "shana/character_select/Sha00_1100",
+        "shana/character_select/Sha00_1120",
+        "shana/character_select/Sha00_1130"
+      ],
+      "enableStartVoice": true,
+      "exclusiveTalentId": [
+        1005131
+      ],
+      "height": 4.0,
+      "hitH": 3.0,
+      "hitW": 0.7,
+      "hookObject": [],
+      "id": 1005,
+      "kind": 1,
+      "logicRes": "shana",
+      "openTime": "2018-1-1 00:00:00",
+      "portraitUVOffsetX": 80,
+      "poseActionCnt": 2,
+      "prefabRes": "shana",
+      "role": 5,
+      "scale": 1.0,
+      "shadowBaseY": 0.6,
+      "shadowOffset": 15.0,
+      "shareGachaResultOffsetX": 20,
+      "showInLogin": true,
+      "skinUIRes": 1005,
+      "voiceRes": "shana",
+      "width": 1.0
+    },
+    {
+      "animRes": "1006a",
+      "animType": 2,
+      "book": 1,
+      "category": 2,
+      "chooseAudio": [
+        "ako/character_select/Ako00_1100",
+        "ako/character_select/Ako00_1120",
+        "ako/character_select/Ako00_1130"
+      ],
+      "enableStartVoice": true,
+      "exclusiveTalentId": [
+        1006131
+      ],
+      "height": 4.0,
+      "hitH": 3.0,
+      "hitW": 0.7,
+      "hookObject": [],
+      "id": 1006,
+      "kind": 1,
+      "logicRes": "ako",
+      "openTime": "2018-1-1 00:00:00",
+      "portraitUVOffsetX": 100,
+      "poseActionCnt": 2,
+      "prefabRes": "ako",
+      "role": 6,
+      "scale": 1.0,
+      "shadowBaseY": 0.6,
+      "shadowOffset": -10.0,
+      "shareGachaResultOffsetX": 20,
+      "showInLogin": true,
+      "skinUIRes": 1006,
+      "voiceRes": "ako",
+      "width": 1.0
+    }
+  ]
+}

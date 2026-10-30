@@ -1,0 +1,164 @@
+{
+  "schemaVersion": 1,
+  "table": "Role",
+  "observedCount": 58,
+  "rowCount": 6,
+  "completeness": "partial",
+  "sourceFiles": [
+    "config-samples-live.jsonl"
+  ],
+  "sourceRecords": [
+    {
+      "name": "config-samples-live.jsonl",
+      "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\config-samples-live.jsonl",
+      "sha256": "85e1ca251f8355208917cf14a1aee0c5f1c419e8f0ee017a5723a19996daeb54"
+    }
+  ],
+  "rowsSha256": "b4e60b5f1eca50cce5c19c5201a93ca70e1cbd7da93bbeb24fdc761b13688ba9",
+  "schema": {
+    "types": [
+      "object"
+    ],
+    "fields": {
+      "animRes": {
+        "types": [
+          "string"
+        ]
+      },
+      "decomposeRes": {
+        "types": [
+          "object"
+        ],
+        "fields": {
+          "id": {
+            "types": [
+              "integer"
+            ]
+          },
+          "type": {
+            "types": [
+              "integer"
+            ]
+          }
+        }
+      },
+      "donateRefund": {
+        "types": [
+          "object"
+        ],
+        "fields": {
+          "count": {
+            "types": [
+              "integer"
+            ]
+          },
+          "type": {
+            "types": [
+              "integer"
+            ]
+          }
+        }
+      },
+      "emoteActorId": {
+        "types": [
+          "integer"
+        ]
+      },
+      "favourActor": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "id": {
+        "types": [
+          "integer"
+        ]
+      }
+    }
+  },
+  "rows": [
+    {
+      "animRes": "1001a",
+      "decomposeRes": {
+        "id": 20001,
+        "type": 11
+      },
+      "donateRefund": {
+        "count": 20000,
+        "type": 7
+      },
+      "emoteActorId": 1001,
+      "favourActor": true,
+      "id": 1
+    },
+    {
+      "animRes": "1002a",
+      "decomposeRes": {
+        "id": 20002,
+        "type": 11
+      },
+      "donateRefund": {
+        "count": 20000,
+        "type": 7
+      },
+      "emoteActorId": 1002,
+      "favourActor": true,
+      "id": 2
+    },
+    {
+      "animRes": "1003a",
+      "decomposeRes": {
+        "id": 20003,
+        "type": 11
+      },
+      "donateRefund": {
+        "count": 20000,
+        "type": 7
+      },
+      "emoteActorId": 1003,
+      "favourActor": true,
+      "id": 3
+    },
+    {
+      "animRes": "1004a",
+      "decomposeRes": {
+        "id": 20004,
+        "type": 11
+      },
+      "donateRefund": {
+        "count": 20000,
+        "type": 7
+      },
+      "favourActor": true,
+      "id": 4
+    },
+    {
+      "animRes": "1005a",
+      "decomposeRes": {
+        "id": 20005,
+        "type": 11
+      },
+      "donateRefund": {
+        "count": 20000,
+        "type": 7
+      },
+      "emoteActorId": 1005,
+      "favourActor": true,
+      "id": 5
+    },
+    {
+      "animRes": "1006a",
+      "decomposeRes": {
+        "id": 20006,
+        "type": 11
+      },
+      "donateRefund": {
+        "count": 20000,
+        "type": 7
+      },
+      "emoteActorId": 1006,
+      "favourActor": true,
+      "id": 6
+    }
+  ]
+}

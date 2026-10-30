@@ -1,0 +1,2666 @@
+{
+  "schemaVersion": 1,
+  "inventorySource": {
+    "path": "I:\\workspace\\mobilegame\\local-server\\ljjc\\data\\apk-inventory.json",
+    "sha256": "91947e1ae144f77fa85dbb5ca416809cb02ce6b23cfad43673b66c0cab2df8e8",
+    "entryCount": 19433
+  },
+  "configSource": {
+    "path": "I:\\workspace\\mobilegame\\local-server\\ljjc\\data\\config",
+    "tableCount": 29,
+    "indexPath": "I:\\workspace\\mobilegame\\local-server\\ljjc\\data\\config\\index.json",
+    "indexSha256": "dacb5b0da82869436e3879a82cf50de4bf2dde1fcc362c56b97a8778cfdc3acc"
+  },
+  "inventoryPaths": {
+    "allConfigCandidates": [
+      "assets/Patch/assetbundle/data/configproto/gameconstconfig",
+      "assets/Patch/assetbundle/data/lua/manager/configdatamanager",
+      "assets/Patch/assetbundle/data/lua/xlsx/achievementinfo",
+      "assets/Patch/assetbundle/data/lua/xlsx/achievementpointtarget",
+      "assets/Patch/assetbundle/data/lua/xlsx/actionbuff",
+      "assets/Patch/assetbundle/data/lua/xlsx/actiondamage",
+      "assets/Patch/assetbundle/data/lua/xlsx/activitybuffgoods",
+      "assets/Patch/assetbundle/data/lua/xlsx/activitybuffshop",
+      "assets/Patch/assetbundle/data/lua/xlsx/activitydungeon",
+      "assets/Patch/assetbundle/data/lua/xlsx/activityextrarewardrule",
+      "assets/Patch/assetbundle/data/lua/xlsx/activitygachalimited",
+      "assets/Patch/assetbundle/data/lua/xlsx/activitygachanormalup",
+      "assets/Patch/assetbundle/data/lua/xlsx/activityinviteactorinfo",
+      "assets/Patch/assetbundle/data/lua/xlsx/activityitemiconinfo",
+      "assets/Patch/assetbundle/data/lua/xlsx/activityshopgoods",
+      "assets/Patch/assetbundle/data/lua/xlsx/activitysigningift",
+      "assets/Patch/assetbundle/data/lua/xlsx/activitysort",
+      "assets/Patch/assetbundle/data/lua/xlsx/actorattrlevelpromotion",
+      "assets/Patch/assetbundle/data/lua/xlsx/actorattrstarpromotion",
+      "assets/Patch/assetbundle/data/lua/xlsx/actorcombo",
+      "assets/Patch/assetbundle/data/lua/xlsx/actorconfig",
+      "assets/Patch/assetbundle/data/lua/xlsx/actorcultivation",
+      "assets/Patch/assetbundle/data/lua/xlsx/actorcultivationemote",
+      "assets/Patch/assetbundle/data/lua/xlsx/actorcultivationprogressreward",
+      "assets/Patch/assetbundle/data/lua/xlsx/actordecompose",
+      "assets/Patch/assetbundle/data/lua/xlsx/actorinfo",
+      "assets/Patch/assetbundle/data/lua/xlsx/actorlevelup",
+      "assets/Patch/assetbundle/data/lua/xlsx/actorlink",
+      "assets/Patch/assetbundle/data/lua/xlsx/actorportrait",
+      "assets/Patch/assetbundle/data/lua/xlsx/actorqualityinfo",
+      "assets/Patch/assetbundle/data/lua/xlsx/actorskill",
+      "assets/Patch/assetbundle/data/lua/xlsx/actorskillmaxlevel",
+      "assets/Patch/assetbundle/data/lua/xlsx/actorskin",
+      "assets/Patch/assetbundle/data/lua/xlsx/actorstarrandom",
+      "assets/Patch/assetbundle/data/lua/xlsx/actortag",
+      "assets/Patch/assetbundle/data/lua/xlsx/actortaginfo",
+      "assets/Patch/assetbundle/data/lua/xlsx/actortalent",
+      "assets/Patch/assetbundle/data/lua/xlsx/actorunlockeffect",
+      "assets/Patch/assetbundle/data/lua/xlsx/additionalincomestate",
+      "assets/Patch/assetbundle/data/lua/xlsx/affixinfo",
+      "assets/Patch/assetbundle/data/lua/xlsx/attrtoscore",
+      "assets/Patch/assetbundle/data/lua/xlsx/attrtypefight",
+      "assets/Patch/assetbundle/data/lua/xlsx/attrtypesortorder",
+      "assets/Patch/assetbundle/data/lua/xlsx/boardactorconfig",
+      "assets/Patch/assetbundle/data/lua/xlsx/boardspeech",
+      "assets/Patch/assetbundle/data/lua/xlsx/boardspeechcondition",
+      "assets/Patch/assetbundle/data/lua/xlsx/boardvoice2text",
+      "assets/Patch/assetbundle/data/lua/xlsx/buffdata",
+      "assets/Patch/assetbundle/data/lua/xlsx/buffindex",
+      "assets/Patch/assetbundle/data/lua/xlsx/bulletconfig",
+      "assets/Patch/assetbundle/data/lua/xlsx/cartoonactorname",
+      "assets/Patch/assetbundle/data/lua/xlsx/cartoonconfig",
+      "assets/Patch/assetbundle/data/lua/xlsx/challengemodedungeon",
+      "assets/Patch/assetbundle/data/lua/xlsx/challengemoderankreward",
+      "assets/Patch/assetbundle/data/lua/xlsx/challengemodescorereward",
+      "assets/Patch/assetbundle/data/lua/xlsx/chapterinfo",
+      "assets/Patch/assetbundle/data/lua/xlsx/chapterreward",
+      "assets/Patch/assetbundle/data/lua/xlsx/chatchannel",
+      "assets/Patch/assetbundle/data/lua/xlsx/chatimage",
+      "assets/Patch/assetbundle/data/lua/xlsx/chipdungeontocultivationdungeon",
+      "assets/Patch/assetbundle/data/lua/xlsx/clawcrane",
+      "assets/Patch/assetbundle/data/lua/xlsx/clawcraneforcecount",
+      "assets/Patch/assetbundle/data/lua/xlsx/clawcranestock",
+      "assets/Patch/assetbundle/data/lua/xlsx/collectionsnovelreward",
+      "assets/Patch/assetbundle/data/lua/xlsx/collectionsscenes",
+      "assets/Patch/assetbundle/data/lua/xlsx/compatnotch",
+      "assets/Patch/assetbundle/data/lua/xlsx/continuousloginprize",
+      "assets/Patch/assetbundle/data/lua/xlsx/costumeinfo",
+      "assets/Patch/assetbundle/data/lua/xlsx/cultivationdegree",
+      "assets/Patch/assetbundle/data/lua/xlsx/dailyrefresh",
+      "assets/Patch/assetbundle/data/lua/xlsx/damageindex",
+      "assets/Patch/assetbundle/data/lua/xlsx/damageindexmonster",
+      "assets/Patch/assetbundle/data/lua/xlsx/delayreward",
+      "assets/Patch/assetbundle/data/lua/xlsx/deploycount",
+      "assets/Patch/assetbundle/data/lua/xlsx/deploymission",
+      "assets/Patch/assetbundle/data/lua/xlsx/diffactorinherit",
+      "assets/Patch/assetbundle/data/lua/xlsx/dropdisplaydailysignin",
+      "assets/Patch/assetbundle/data/lua/xlsx/dropdisplaygacha",
+      "assets/Patch/assetbundle/data/lua/xlsx/dropdisplayshop",
+      "assets/Patch/assetbundle/data/lua/xlsx/dungeonaffix",
+      "assets/Patch/assetbundle/data/lua/xlsx/dungeonmodeindex",
+      "assets/Patch/assetbundle/data/lua/xlsx/dungeonmonster",
+      "assets/Patch/assetbundle/data/lua/xlsx/dungeonnpc",
+      "assets/Patch/assetbundle/data/lua/xlsx/dungeonreward",
+      "assets/Patch/assetbundle/data/lua/xlsx/dungeonslotbackground",
+      "assets/Patch/assetbundle/data/lua/xlsx/equipbaseattr",
+      "assets/Patch/assetbundle/data/lua/xlsx/equipenhance",
+      "assets/Patch/assetbundle/data/lua/xlsx/equipinfo",
+      "assets/Patch/assetbundle/data/lua/xlsx/equiprandomattr",
+      "assets/Patch/assetbundle/data/lua/xlsx/equipsuitattr",
+      "assets/Patch/assetbundle/data/lua/xlsx/eventdungeon",
+      "assets/Patch/assetbundle/data/lua/xlsx/eventdungeonstage",
+      "assets/Patch/assetbundle/data/lua/xlsx/eventreward",
+      "assets/Patch/assetbundle/data/lua/xlsx/favourincreaserule",
+      "assets/Patch/assetbundle/data/lua/xlsx/favourlevel",
+      "assets/Patch/assetbundle/data/lua/xlsx/fightbuff",
+      "assets/Patch/assetbundle/data/lua/xlsx/gachaactorchipchance",
+      "assets/Patch/assetbundle/data/lua/xlsx/gachaactorchipweight",
+      "assets/Patch/assetbundle/data/lua/xlsx/gachaactorpool",
+      "assets/Patch/assetbundle/data/lua/xlsx/gachaad",
+      "assets/Patch/assetbundle/data/lua/xlsx/gachafriendshiprate",
+      "assets/Patch/assetbundle/data/lua/xlsx/gachascorebg",
+      "assets/Patch/assetbundle/data/lua/xlsx/gachatype",
+      "assets/Patch/assetbundle/data/lua/xlsx/gamecredits",
+      "assets/Patch/assetbundle/data/lua/xlsx/gamemodeinfo",
+      "assets/Patch/assetbundle/data/lua/xlsx/golddungeonlevel",
+      "assets/Patch/assetbundle/data/lua/xlsx/goto",
+      "assets/Patch/assetbundle/data/lua/xlsx/guilddungeon",
+      "assets/Patch/assetbundle/data/lua/xlsx/guilddungeonassistscorereward",
+      "assets/Patch/assetbundle/data/lua/xlsx/guilddungeonchallengeprogressreward",
+      "assets/Patch/assetbundle/data/lua/xlsx/guilddungeonchallengescorereward",
+      "assets/Patch/assetbundle/data/lua/xlsx/guildlevel",
+      "assets/Patch/assetbundle/data/lua/xlsx/guildmisc",
+      "assets/Patch/assetbundle/data/lua/xlsx/iteminfo",
+      "assets/Patch/assetbundle/data/lua/xlsx/jigsawpuzzlecell",
+      "assets/Patch/assetbundle/data/lua/xlsx/jigsawpuzzleprize",
+      "assets/Patch/assetbundle/data/lua/xlsx/loadingconfig",
+      "assets/Patch/assetbundle/data/lua/xlsx/mall",
+      "assets/Patch/assetbundle/data/lua/xlsx/manualbox",
+      "assets/Patch/assetbundle/data/lua/xlsx/mazebuff",
+      "assets/Patch/assetbundle/data/lua/xlsx/mazeinfo",
+      "assets/Patch/assetbundle/data/lua/xlsx/mazeprecondition",
+      "assets/Patch/assetbundle/data/lua/xlsx/mazeprize",
+      "assets/Patch/assetbundle/data/lua/xlsx/mazetips",
+      "assets/Patch/assetbundle/data/lua/xlsx/medalinfo",
+      "assets/Patch/assetbundle/data/lua/xlsx/misc",
+      "assets/Patch/assetbundle/data/lua/xlsx/monologueconfig",
+      "assets/Patch/assetbundle/data/lua/xlsx/monsterinfo",
+      "assets/Patch/assetbundle/data/lua/xlsx/monsterlevelupbase",
+      "assets/Patch/assetbundle/data/lua/xlsx/monsterlevelupindex",
+      "assets/Patch/assetbundle/data/lua/xlsx/msdkmessage",
+      "assets/Patch/assetbundle/data/lua/xlsx/msdkurl",
+      "assets/Patch/assetbundle/data/lua/xlsx/novel",
+      "assets/Patch/assetbundle/data/lua/xlsx/novelcredits",
+      "assets/Patch/assetbundle/data/lua/xlsx/patchconfig",
+      "assets/Patch/assetbundle/data/lua/xlsx/patchloadingherodisplay",
+      "assets/Patch/assetbundle/data/lua/xlsx/playerheadphoto",
+      "assets/Patch/assetbundle/data/lua/xlsx/playerlevelinitconfig",
+      "assets/Patch/assetbundle/data/lua/xlsx/postcardcell",
+      "assets/Patch/assetbundle/data/lua/xlsx/postcardprize",
+      "assets/Patch/assetbundle/data/lua/xlsx/presetsettings",
+      "assets/Patch/assetbundle/data/lua/xlsx/profitdetail",
+      "assets/Patch/assetbundle/data/lua/xlsx/purblepairsreward",
+      "assets/Patch/assetbundle/data/lua/xlsx/purchaseinfo",
+      "assets/Patch/assetbundle/data/lua/xlsx/racepvpbattlescorereward",
+      "assets/Patch/assetbundle/data/lua/xlsx/racepvprankscore",
+      "assets/Patch/assetbundle/data/lua/xlsx/racepvpseg",
+      "assets/Patch/assetbundle/data/lua/xlsx/racepvpsegreward",
+      "assets/Patch/assetbundle/data/lua/xlsx/refreshprice",
+      "assets/Patch/assetbundle/data/lua/xlsx/resourcecompose",
+      "assets/Patch/assetbundle/data/lua/xlsx/resourcequality",
+      "assets/Patch/assetbundle/data/lua/xlsx/role",
+      "assets/Patch/assetbundle/data/lua/xlsx/roleclassicana",
+      "assets/Patch/assetbundle/data/lua/xlsx/rolefavourgiftlist",
+      "assets/Patch/assetbundle/data/lua/xlsx/rolenotevoiceconfig",
+      "assets/Patch/assetbundle/data/lua/xlsx/rolescoreattr",
+      "assets/Patch/assetbundle/data/lua/xlsx/sceneconfig",
+      "assets/Patch/assetbundle/data/lua/xlsx/semifixeddungeon",
+      "assets/Patch/assetbundle/data/lua/xlsx/shareactor",
+      "assets/Patch/assetbundle/data/lua/xlsx/sharereward",
+      "assets/Patch/assetbundle/data/lua/xlsx/signboard",
+      "assets/Patch/assetbundle/data/lua/xlsx/signingift",
+      "assets/Patch/assetbundle/data/lua/xlsx/singleactorgroup",
+      "assets/Patch/assetbundle/data/lua/xlsx/skillcamera",
+      "assets/Patch/assetbundle/data/lua/xlsx/skillhit",
+      "assets/Patch/assetbundle/data/lua/xlsx/skillhitindex",
+      "assets/Patch/assetbundle/data/lua/xlsx/skilllevelup",
+      "assets/Patch/assetbundle/data/lua/xlsx/sort",
+      "assets/Patch/assetbundle/data/lua/xlsx/specialattrinfo",
+      "assets/Patch/assetbundle/data/lua/xlsx/speciallevelupindex",
+      "assets/Patch/assetbundle/data/lua/xlsx/storydungeon",
+      "assets/Patch/assetbundle/data/lua/xlsx/talentmisc",
+      "assets/Patch/assetbundle/data/lua/xlsx/talentresetcost",
+      "assets/Patch/assetbundle/data/lua/xlsx/taskactivepointreward",
+      "assets/Patch/assetbundle/data/lua/xlsx/taskextraactivepointreward",
+      "assets/Patch/assetbundle/data/lua/xlsx/taskinfo",
+      "assets/Patch/assetbundle/data/lua/xlsx/teamdungeongroup",
+      "assets/Patch/assetbundle/data/lua/xlsx/teampvetalk",
+      "assets/Patch/assetbundle/data/lua/xlsx/tempentranceswitchwindow",
+      "assets/Patch/assetbundle/data/lua/xlsx/towerfloor",
+      "assets/Patch/assetbundle/data/lua/xlsx/towerfloorreward",
+      "assets/Patch/assetbundle/data/lua/xlsx/towergroupunlocklv",
+      "assets/Patch/assetbundle/data/lua/xlsx/triggeredevent",
+      "assets/Patch/assetbundle/data/lua/xlsx/tutorial",
+      "assets/Patch/assetbundle/data/lua/xlsx/tutorialstep",
+      "assets/Patch/assetbundle/data/lua/xlsx/uiwindowconfig",
+      "assets/Patch/assetbundle/data/lua/xlsx/unforcedtutorial",
+      "assets/Patch/assetbundle/data/lua/xlsx/weekactivepointreward",
+      "assets/Patch/assetbundle/data/lua/xlsx/welfareconfig",
+      "assets/Patch/assetbundle/data/xlsx/actorcombo",
+      "assets/Patch/assetbundle/data/xlsx/actorconfig",
+      "assets/Patch/assetbundle/data/xlsx/actorlink",
+      "assets/Patch/assetbundle/data/xlsx/actorskill",
+      "assets/Patch/assetbundle/data/xlsx/attrtypesortorder",
+      "assets/Patch/assetbundle/data/xlsx/buffdata",
+      "assets/Patch/assetbundle/data/xlsx/bulletconfig",
+      "assets/Patch/assetbundle/data/xlsx/cartoonactorname",
+      "assets/Patch/assetbundle/data/xlsx/cartoonconfig",
+      "assets/Patch/assetbundle/data/xlsx/compatnotch",
+      "assets/Patch/assetbundle/data/xlsx/cultivationdegree",
+      "assets/Patch/assetbundle/data/xlsx/dungeonmonster",
+      "assets/Patch/assetbundle/data/xlsx/guildmisc",
+      "assets/Patch/assetbundle/data/xlsx/misc",
+      "assets/Patch/assetbundle/data/xlsx/monsterinfo",
+      "assets/Patch/assetbundle/data/xlsx/refreshprice",
+      "assets/Patch/assetbundle/data/xlsx/sceneconfig",
+      "assets/Patch/assetbundle/data/xlsx/skillcamera",
+      "assets/Patch/assetbundle/data/xlsx/sort",
+      "assets/Patch/assetbundle/data/xlsx/talentmisc",
+      "assets/Patch/assetbundle/data/xlsx/uiwindowconfig",
+      "assets/bin/Data/Managed/etc/mono/config",
+      "assets/bin/Data/Managed/etc/mono/mconfig/config.xml"
+    ],
+    "xlsxAssets": [
+      "assets/Patch/assetbundle/data/lua/xlsx/achievementinfo",
+      "assets/Patch/assetbundle/data/lua/xlsx/achievementpointtarget",
+      "assets/Patch/assetbundle/data/lua/xlsx/actionbuff",
+      "assets/Patch/assetbundle/data/lua/xlsx/actiondamage",
+      "assets/Patch/assetbundle/data/lua/xlsx/activitybuffgoods",
+      "assets/Patch/assetbundle/data/lua/xlsx/activitybuffshop",
+      "assets/Patch/assetbundle/data/lua/xlsx/activitydungeon",
+      "assets/Patch/assetbundle/data/lua/xlsx/activityextrarewardrule",
+      "assets/Patch/assetbundle/data/lua/xlsx/activitygachalimited",
+      "assets/Patch/assetbundle/data/lua/xlsx/activitygachanormalup",
+      "assets/Patch/assetbundle/data/lua/xlsx/activityinviteactorinfo",
+      "assets/Patch/assetbundle/data/lua/xlsx/activityitemiconinfo",
+      "assets/Patch/assetbundle/data/lua/xlsx/activityshopgoods",
+      "assets/Patch/assetbundle/data/lua/xlsx/activitysigningift",
+      "assets/Patch/assetbundle/data/lua/xlsx/activitysort",
+      "assets/Patch/assetbundle/data/lua/xlsx/actorattrlevelpromotion",
+      "assets/Patch/assetbundle/data/lua/xlsx/actorattrstarpromotion",
+      "assets/Patch/assetbundle/data/lua/xlsx/actorcombo",
+      "assets/Patch/assetbundle/data/lua/xlsx/actorconfig",
+      "assets/Patch/assetbundle/data/lua/xlsx/actorcultivation",
+      "assets/Patch/assetbundle/data/lua/xlsx/actorcultivationemote",
+      "assets/Patch/assetbundle/data/lua/xlsx/actorcultivationprogressreward",
+      "assets/Patch/assetbundle/data/lua/xlsx/actordecompose",
+      "assets/Patch/assetbundle/data/lua/xlsx/actorinfo",
+      "assets/Patch/assetbundle/data/lua/xlsx/actorlevelup",
+      "assets/Patch/assetbundle/data/lua/xlsx/actorlink",
+      "assets/Patch/assetbundle/data/lua/xlsx/actorportrait",
+      "assets/Patch/assetbundle/data/lua/xlsx/actorqualityinfo",
+      "assets/Patch/assetbundle/data/lua/xlsx/actorskill",
+      "assets/Patch/assetbundle/data/lua/xlsx/actorskillmaxlevel",
+      "assets/Patch/assetbundle/data/lua/xlsx/actorskin",
+      "assets/Patch/assetbundle/data/lua/xlsx/actorstarrandom",
+      "assets/Patch/assetbundle/data/lua/xlsx/actortag",
+      "assets/Patch/assetbundle/data/lua/xlsx/actortaginfo",
+      "assets/Patch/assetbundle/data/lua/xlsx/actortalent",
+      "assets/Patch/assetbundle/data/lua/xlsx/actorunlockeffect",
+      "assets/Patch/assetbundle/data/lua/xlsx/additionalincomestate",
+      "assets/Patch/assetbundle/data/lua/xlsx/affixinfo",
+      "assets/Patch/assetbundle/data/lua/xlsx/attrtoscore",
+      "assets/Patch/assetbundle/data/lua/xlsx/attrtypefight",
+      "assets/Patch/assetbundle/data/lua/xlsx/attrtypesortorder",
+      "assets/Patch/assetbundle/data/lua/xlsx/boardactorconfig",
+      "assets/Patch/assetbundle/data/lua/xlsx/boardspeech",
+      "assets/Patch/assetbundle/data/lua/xlsx/boardspeechcondition",
+      "assets/Patch/assetbundle/data/lua/xlsx/boardvoice2text",
+      "assets/Patch/assetbundle/data/lua/xlsx/buffdata",
+      "assets/Patch/assetbundle/data/lua/xlsx/buffindex",
+      "assets/Patch/assetbundle/data/lua/xlsx/bulletconfig",
+      "assets/Patch/assetbundle/data/lua/xlsx/cartoonactorname",
+      "assets/Patch/assetbundle/data/lua/xlsx/cartoonconfig",
+      "assets/Patch/assetbundle/data/lua/xlsx/challengemodedungeon",
+      "assets/Patch/assetbundle/data/lua/xlsx/challengemoderankreward",
+      "assets/Patch/assetbundle/data/lua/xlsx/challengemodescorereward",
+      "assets/Patch/assetbundle/data/lua/xlsx/chapterinfo",
+      "assets/Patch/assetbundle/data/lua/xlsx/chapterreward",
+      "assets/Patch/assetbundle/data/lua/xlsx/chatchannel",
+      "assets/Patch/assetbundle/data/lua/xlsx/chatimage",
+      "assets/Patch/assetbundle/data/lua/xlsx/chipdungeontocultivationdungeon",
+      "assets/Patch/assetbundle/data/lua/xlsx/clawcrane",
+      "assets/Patch/assetbundle/data/lua/xlsx/clawcraneforcecount",
+      "assets/Patch/assetbundle/data/lua/xlsx/clawcranestock",
+      "assets/Patch/assetbundle/data/lua/xlsx/collectionsnovelreward",
+      "assets/Patch/assetbundle/data/lua/xlsx/collectionsscenes",
+      "assets/Patch/assetbundle/data/lua/xlsx/compatnotch",
+      "assets/Patch/assetbundle/data/lua/xlsx/continuousloginprize",
+      "assets/Patch/assetbundle/data/lua/xlsx/costumeinfo",
+      "assets/Patch/assetbundle/data/lua/xlsx/cultivationdegree",
+      "assets/Patch/assetbundle/data/lua/xlsx/dailyrefresh",
+      "assets/Patch/assetbundle/data/lua/xlsx/damageindex",
+      "assets/Patch/assetbundle/data/lua/xlsx/damageindexmonster",
+      "assets/Patch/assetbundle/data/lua/xlsx/delayreward",
+      "assets/Patch/assetbundle/data/lua/xlsx/deploycount",
+      "assets/Patch/assetbundle/data/lua/xlsx/deploymission",
+      "assets/Patch/assetbundle/data/lua/xlsx/diffactorinherit",
+      "assets/Patch/assetbundle/data/lua/xlsx/dropdisplaydailysignin",
+      "assets/Patch/assetbundle/data/lua/xlsx/dropdisplaygacha",
+      "assets/Patch/assetbundle/data/lua/xlsx/dropdisplayshop",
+      "assets/Patch/assetbundle/data/lua/xlsx/dungeonaffix",
+      "assets/Patch/assetbundle/data/lua/xlsx/dungeonmodeindex",
+      "assets/Patch/assetbundle/data/lua/xlsx/dungeonmonster",
+      "assets/Patch/assetbundle/data/lua/xlsx/dungeonnpc",
+      "assets/Patch/assetbundle/data/lua/xlsx/dungeonreward",
+      "assets/Patch/assetbundle/data/lua/xlsx/dungeonslotbackground",
+      "assets/Patch/assetbundle/data/lua/xlsx/equipbaseattr",
+      "assets/Patch/assetbundle/data/lua/xlsx/equipenhance",
+      "assets/Patch/assetbundle/data/lua/xlsx/equipinfo",
+      "assets/Patch/assetbundle/data/lua/xlsx/equiprandomattr",
+      "assets/Patch/assetbundle/data/lua/xlsx/equipsuitattr",
+      "assets/Patch/assetbundle/data/lua/xlsx/eventdungeon",
+      "assets/Patch/assetbundle/data/lua/xlsx/eventdungeonstage",
+      "assets/Patch/assetbundle/data/lua/xlsx/eventreward",
+      "assets/Patch/assetbundle/data/lua/xlsx/favourincreaserule",
+      "assets/Patch/assetbundle/data/lua/xlsx/favourlevel",
+      "assets/Patch/assetbundle/data/lua/xlsx/fightbuff",
+      "assets/Patch/assetbundle/data/lua/xlsx/gachaactorchipchance",
+      "assets/Patch/assetbundle/data/lua/xlsx/gachaactorchipweight",
+      "assets/Patch/assetbundle/data/lua/xlsx/gachaactorpool",
+      "assets/Patch/assetbundle/data/lua/xlsx/gachaad",
+      "assets/Patch/assetbundle/data/lua/xlsx/gachafriendshiprate",
+      "assets/Patch/assetbundle/data/lua/xlsx/gachascorebg",
+      "assets/Patch/assetbundle/data/lua/xlsx/gachatype",
+      "assets/Patch/assetbundle/data/lua/xlsx/gamecredits",
+      "assets/Patch/assetbundle/data/lua/xlsx/gamemodeinfo",
+      "assets/Patch/assetbundle/data/lua/xlsx/golddungeonlevel",
+      "assets/Patch/assetbundle/data/lua/xlsx/goto",
+      "assets/Patch/assetbundle/data/lua/xlsx/guilddungeon",
+      "assets/Patch/assetbundle/data/lua/xlsx/guilddungeonassistscorereward",
+      "assets/Patch/assetbundle/data/lua/xlsx/guilddungeonchallengeprogressreward",
+      "assets/Patch/assetbundle/data/lua/xlsx/guilddungeonchallengescorereward",
+      "assets/Patch/assetbundle/data/lua/xlsx/guildlevel",
+      "assets/Patch/assetbundle/data/lua/xlsx/guildmisc",
+      "assets/Patch/assetbundle/data/lua/xlsx/iteminfo",
+      "assets/Patch/assetbundle/data/lua/xlsx/jigsawpuzzlecell",
+      "assets/Patch/assetbundle/data/lua/xlsx/jigsawpuzzleprize",
+      "assets/Patch/assetbundle/data/lua/xlsx/loadingconfig",
+      "assets/Patch/assetbundle/data/lua/xlsx/mall",
+      "assets/Patch/assetbundle/data/lua/xlsx/manualbox",
+      "assets/Patch/assetbundle/data/lua/xlsx/mazebuff",
+      "assets/Patch/assetbundle/data/lua/xlsx/mazeinfo",
+      "assets/Patch/assetbundle/data/lua/xlsx/mazeprecondition",
+      "assets/Patch/assetbundle/data/lua/xlsx/mazeprize",
+      "assets/Patch/assetbundle/data/lua/xlsx/mazetips",
+      "assets/Patch/assetbundle/data/lua/xlsx/medalinfo",
+      "assets/Patch/assetbundle/data/lua/xlsx/misc",
+      "assets/Patch/assetbundle/data/lua/xlsx/monologueconfig",
+      "assets/Patch/assetbundle/data/lua/xlsx/monsterinfo",
+      "assets/Patch/assetbundle/data/lua/xlsx/monsterlevelupbase",
+      "assets/Patch/assetbundle/data/lua/xlsx/monsterlevelupindex",
+      "assets/Patch/assetbundle/data/lua/xlsx/msdkmessage",
+      "assets/Patch/assetbundle/data/lua/xlsx/msdkurl",
+      "assets/Patch/assetbundle/data/lua/xlsx/novel",
+      "assets/Patch/assetbundle/data/lua/xlsx/novelcredits",
+      "assets/Patch/assetbundle/data/lua/xlsx/patchconfig",
+      "assets/Patch/assetbundle/data/lua/xlsx/patchloadingherodisplay",
+      "assets/Patch/assetbundle/data/lua/xlsx/playerheadphoto",
+      "assets/Patch/assetbundle/data/lua/xlsx/playerlevelinitconfig",
+      "assets/Patch/assetbundle/data/lua/xlsx/postcardcell",
+      "assets/Patch/assetbundle/data/lua/xlsx/postcardprize",
+      "assets/Patch/assetbundle/data/lua/xlsx/presetsettings",
+      "assets/Patch/assetbundle/data/lua/xlsx/profitdetail",
+      "assets/Patch/assetbundle/data/lua/xlsx/purblepairsreward",
+      "assets/Patch/assetbundle/data/lua/xlsx/purchaseinfo",
+      "assets/Patch/assetbundle/data/lua/xlsx/racepvpbattlescorereward",
+      "assets/Patch/assetbundle/data/lua/xlsx/racepvprankscore",
+      "assets/Patch/assetbundle/data/lua/xlsx/racepvpseg",
+      "assets/Patch/assetbundle/data/lua/xlsx/racepvpsegreward",
+      "assets/Patch/assetbundle/data/lua/xlsx/refreshprice",
+      "assets/Patch/assetbundle/data/lua/xlsx/resourcecompose",
+      "assets/Patch/assetbundle/data/lua/xlsx/resourcequality",
+      "assets/Patch/assetbundle/data/lua/xlsx/role",
+      "assets/Patch/assetbundle/data/lua/xlsx/roleclassicana",
+      "assets/Patch/assetbundle/data/lua/xlsx/rolefavourgiftlist",
+      "assets/Patch/assetbundle/data/lua/xlsx/rolenotevoiceconfig",
+      "assets/Patch/assetbundle/data/lua/xlsx/rolescoreattr",
+      "assets/Patch/assetbundle/data/lua/xlsx/sceneconfig",
+      "assets/Patch/assetbundle/data/lua/xlsx/semifixeddungeon",
+      "assets/Patch/assetbundle/data/lua/xlsx/shareactor",
+      "assets/Patch/assetbundle/data/lua/xlsx/sharereward",
+      "assets/Patch/assetbundle/data/lua/xlsx/signboard",
+      "assets/Patch/assetbundle/data/lua/xlsx/signingift",
+      "assets/Patch/assetbundle/data/lua/xlsx/singleactorgroup",
+      "assets/Patch/assetbundle/data/lua/xlsx/skillcamera",
+      "assets/Patch/assetbundle/data/lua/xlsx/skillhit",
+      "assets/Patch/assetbundle/data/lua/xlsx/skillhitindex",
+      "assets/Patch/assetbundle/data/lua/xlsx/skilllevelup",
+      "assets/Patch/assetbundle/data/lua/xlsx/sort",
+      "assets/Patch/assetbundle/data/lua/xlsx/specialattrinfo",
+      "assets/Patch/assetbundle/data/lua/xlsx/speciallevelupindex",
+      "assets/Patch/assetbundle/data/lua/xlsx/storydungeon",
+      "assets/Patch/assetbundle/data/lua/xlsx/talentmisc",
+      "assets/Patch/assetbundle/data/lua/xlsx/talentresetcost",
+      "assets/Patch/assetbundle/data/lua/xlsx/taskactivepointreward",
+      "assets/Patch/assetbundle/data/lua/xlsx/taskextraactivepointreward",
+      "assets/Patch/assetbundle/data/lua/xlsx/taskinfo",
+      "assets/Patch/assetbundle/data/lua/xlsx/teamdungeongroup",
+      "assets/Patch/assetbundle/data/lua/xlsx/teampvetalk",
+      "assets/Patch/assetbundle/data/lua/xlsx/tempentranceswitchwindow",
+      "assets/Patch/assetbundle/data/lua/xlsx/towerfloor",
+      "assets/Patch/assetbundle/data/lua/xlsx/towerfloorreward",
+      "assets/Patch/assetbundle/data/lua/xlsx/towergroupunlocklv",
+      "assets/Patch/assetbundle/data/lua/xlsx/triggeredevent",
+      "assets/Patch/assetbundle/data/lua/xlsx/tutorial",
+      "assets/Patch/assetbundle/data/lua/xlsx/tutorialstep",
+      "assets/Patch/assetbundle/data/lua/xlsx/uiwindowconfig",
+      "assets/Patch/assetbundle/data/lua/xlsx/unforcedtutorial",
+      "assets/Patch/assetbundle/data/lua/xlsx/weekactivepointreward",
+      "assets/Patch/assetbundle/data/lua/xlsx/welfareconfig",
+      "assets/Patch/assetbundle/data/xlsx/actorcombo",
+      "assets/Patch/assetbundle/data/xlsx/actorconfig",
+      "assets/Patch/assetbundle/data/xlsx/actorlink",
+      "assets/Patch/assetbundle/data/xlsx/actorskill",
+      "assets/Patch/assetbundle/data/xlsx/attrtypesortorder",
+      "assets/Patch/assetbundle/data/xlsx/buffdata",
+      "assets/Patch/assetbundle/data/xlsx/bulletconfig",
+      "assets/Patch/assetbundle/data/xlsx/cartoonactorname",
+      "assets/Patch/assetbundle/data/xlsx/cartoonconfig",
+      "assets/Patch/assetbundle/data/xlsx/compatnotch",
+      "assets/Patch/assetbundle/data/xlsx/cultivationdegree",
+      "assets/Patch/assetbundle/data/xlsx/dungeonmonster",
+      "assets/Patch/assetbundle/data/xlsx/guildmisc",
+      "assets/Patch/assetbundle/data/xlsx/misc",
+      "assets/Patch/assetbundle/data/xlsx/monsterinfo",
+      "assets/Patch/assetbundle/data/xlsx/refreshprice",
+      "assets/Patch/assetbundle/data/xlsx/sceneconfig",
+      "assets/Patch/assetbundle/data/xlsx/skillcamera",
+      "assets/Patch/assetbundle/data/xlsx/sort",
+      "assets/Patch/assetbundle/data/xlsx/talentmisc",
+      "assets/Patch/assetbundle/data/xlsx/uiwindowconfig"
+    ],
+    "nonXlsxConfigCandidates": [
+      "assets/Patch/assetbundle/data/configproto/gameconstconfig",
+      "assets/Patch/assetbundle/data/lua/manager/configdatamanager",
+      "assets/bin/Data/Managed/etc/mono/config",
+      "assets/bin/Data/Managed/etc/mono/mconfig/config.xml"
+    ]
+  },
+  "summary": {
+    "tables": 197,
+    "inventoryPathCount": 212,
+    "xlsxAssetPathCount": 208,
+    "xlsxDistinctTableNames": 187,
+    "nonXlsxConfigPathCount": 4,
+    "assetAndExtracted": 19,
+    "assetOnly": 168,
+    "extractedWithoutInventoryAsset": 10
+  },
+  "tables": [
+    {
+      "table": "achievementinfo",
+      "normalizedName": "achievementinfo",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/achievementinfo"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "achievementpointtarget",
+      "normalizedName": "achievementpointtarget",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/achievementpointtarget"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "actionbuff",
+      "normalizedName": "actionbuff",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/actionbuff"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "actiondamage",
+      "normalizedName": "actiondamage",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/actiondamage"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "activitybuffgoods",
+      "normalizedName": "activitybuffgoods",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/activitybuffgoods"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "activitybuffshop",
+      "normalizedName": "activitybuffshop",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/activitybuffshop"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "activitydungeon",
+      "normalizedName": "activitydungeon",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/activitydungeon"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "activityextrarewardrule",
+      "normalizedName": "activityextrarewardrule",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/activityextrarewardrule"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "activitygachalimited",
+      "normalizedName": "activitygachalimited",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/activitygachalimited"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "activitygachanormalup",
+      "normalizedName": "activitygachanormalup",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/activitygachanormalup"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "activityinviteactorinfo",
+      "normalizedName": "activityinviteactorinfo",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/activityinviteactorinfo"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "activityitemiconinfo",
+      "normalizedName": "activityitemiconinfo",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/activityitemiconinfo"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "activityshopgoods",
+      "normalizedName": "activityshopgoods",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/activityshopgoods"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "activitysigningift",
+      "normalizedName": "activitysigningift",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/activitysigningift"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "activitysort",
+      "normalizedName": "activitysort",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/activitysort"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "ActorAttr",
+      "normalizedName": "actorattr",
+      "status": "extracted_without_inventory_asset",
+      "assetPaths": [],
+      "extracted": {
+        "name": "ActorAttr",
+        "path": "data\\config\\ActorAttr.json",
+        "fileSha256": "4d4af0b40d6f5ca67858f57bcac1133481deeff5855d777bbdf0feb50b3b37e1",
+        "completeness": "error",
+        "rowCount": 0,
+        "observedCount": 0,
+        "rowsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "decoded": false
+    },
+    {
+      "table": "ActorAttrLevelPromotion",
+      "normalizedName": "actorattrlevelpromotion",
+      "status": "asset_and_extracted",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/actorattrlevelpromotion"
+      ],
+      "extracted": {
+        "name": "ActorAttrLevelPromotion",
+        "path": "data\\config\\ActorAttrLevelPromotion.json",
+        "fileSha256": "c4dd523c57e676c1356034d3b9ab3e46f136ff00d4072f65ea1d7a8bcd6a26ab",
+        "completeness": "partial",
+        "rowCount": 4,
+        "observedCount": 97,
+        "rowsSha256": "a84af934e75640be10e661751643e1cd6a3b281a5b7bfbdab9d5e5c9c502f158"
+      },
+      "decoded": false
+    },
+    {
+      "table": "ActorAttrStarPromotion",
+      "normalizedName": "actorattrstarpromotion",
+      "status": "asset_and_extracted",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/actorattrstarpromotion"
+      ],
+      "extracted": {
+        "name": "ActorAttrStarPromotion",
+        "path": "data\\config\\ActorAttrStarPromotion.json",
+        "fileSha256": "4290e8895227148a7f8b06699c4020b826971f6d98f51aa786db7416187bf6f1",
+        "completeness": "partial",
+        "rowCount": 4,
+        "observedCount": 577,
+        "rowsSha256": "575ad338e6e75d6f6f02b11517a636df22d61e23c08167518f7c44dcba191ae7"
+      },
+      "decoded": false
+    },
+    {
+      "table": "actorcombo",
+      "normalizedName": "actorcombo",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/actorcombo",
+        "assets/Patch/assetbundle/data/xlsx/actorcombo"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "ActorConfig",
+      "normalizedName": "actorconfig",
+      "status": "asset_and_extracted",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/actorconfig",
+        "assets/Patch/assetbundle/data/xlsx/actorconfig"
+      ],
+      "extracted": {
+        "name": "ActorConfig",
+        "path": "data\\config\\ActorConfig.json",
+        "fileSha256": "2447449aeaadb86b018b42434d48fab2a48097fd67c97e6b40e5312e27be2ca6",
+        "completeness": "partial",
+        "rowCount": 6,
+        "observedCount": 114,
+        "rowsSha256": "de1350e6255a1258480c5e8be3d4efd596e8540845723cdbbe9f32e734e36b0f"
+      },
+      "decoded": false
+    },
+    {
+      "table": "actorcultivation",
+      "normalizedName": "actorcultivation",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/actorcultivation"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "actorcultivationemote",
+      "normalizedName": "actorcultivationemote",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/actorcultivationemote"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "actorcultivationprogressreward",
+      "normalizedName": "actorcultivationprogressreward",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/actorcultivationprogressreward"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "actordecompose",
+      "normalizedName": "actordecompose",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/actordecompose"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "ActorFavour",
+      "normalizedName": "actorfavour",
+      "status": "extracted_without_inventory_asset",
+      "assetPaths": [],
+      "extracted": {
+        "name": "ActorFavour",
+        "path": "data\\config\\ActorFavour.json",
+        "fileSha256": "5b3786beee816646d331989f58d75f3757f44cce7371e73b7b3c773ed1f2e779",
+        "completeness": "error",
+        "rowCount": 0,
+        "observedCount": 0,
+        "rowsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "decoded": false
+    },
+    {
+      "table": "ActorInfo",
+      "normalizedName": "actorinfo",
+      "status": "asset_and_extracted",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/actorinfo"
+      ],
+      "extracted": {
+        "name": "ActorInfo",
+        "path": "data\\config\\ActorInfo.json",
+        "fileSha256": "ede5ba3952b2d1907abcbfe28683730f3da33db1c23c4a06b9a0fc29c9694102",
+        "completeness": "partial",
+        "rowCount": 4,
+        "observedCount": 428,
+        "rowsSha256": "5e63ce2119444d778504290b952b14131931256fce7591b4f89e18684ab93be5"
+      },
+      "decoded": false
+    },
+    {
+      "table": "ActorLevel",
+      "normalizedName": "actorlevel",
+      "status": "extracted_without_inventory_asset",
+      "assetPaths": [],
+      "extracted": {
+        "name": "ActorLevel",
+        "path": "data\\config\\ActorLevel.json",
+        "fileSha256": "803cac253fc2d7c923e0fe6f5187212f2b75fc16df96aec80c0943f08d3b451a",
+        "completeness": "error",
+        "rowCount": 0,
+        "observedCount": 0,
+        "rowsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "decoded": false
+    },
+    {
+      "table": "actorlevelup",
+      "normalizedName": "actorlevelup",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/actorlevelup"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "actorlink",
+      "normalizedName": "actorlink",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/actorlink",
+        "assets/Patch/assetbundle/data/xlsx/actorlink"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "actorportrait",
+      "normalizedName": "actorportrait",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/actorportrait"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "ActorQuality",
+      "normalizedName": "actorquality",
+      "status": "extracted_without_inventory_asset",
+      "assetPaths": [],
+      "extracted": {
+        "name": "ActorQuality",
+        "path": "data\\config\\ActorQuality.json",
+        "fileSha256": "d7374cc36ea6cca2d96e9541a0ed5d32fc07f0622450a5ef56252ca60da3e2b3",
+        "completeness": "error",
+        "rowCount": 0,
+        "observedCount": 0,
+        "rowsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "decoded": false
+    },
+    {
+      "table": "ActorQualityInfo",
+      "normalizedName": "actorqualityinfo",
+      "status": "asset_and_extracted",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/actorqualityinfo"
+      ],
+      "extracted": {
+        "name": "ActorQualityInfo",
+        "path": "data\\config\\ActorQualityInfo.json",
+        "fileSha256": "6c68fdc1ea03de75a9ad683c7c1e996f73a6d9502a7d0582c6c48a574fdabfe0",
+        "completeness": "partial",
+        "rowCount": 4,
+        "observedCount": 388,
+        "rowsSha256": "a0717517c7b2da951514cd160de5f0ee6809e2242ab69c7e3f5f24bb257b30ad"
+      },
+      "decoded": false
+    },
+    {
+      "table": "ActorSkill",
+      "normalizedName": "actorskill",
+      "status": "asset_and_extracted",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/actorskill",
+        "assets/Patch/assetbundle/data/xlsx/actorskill"
+      ],
+      "extracted": {
+        "name": "ActorSkill",
+        "path": "data\\config\\ActorSkill.json",
+        "fileSha256": "779545c0dbd64da983403927d5379e71a76ad2d97883c4c2454e16a058768a75",
+        "completeness": "partial",
+        "rowCount": 6,
+        "observedCount": 836,
+        "rowsSha256": "536adfb4f18a0130801a5e155359a32d0f30610388328c141edf8d7f98b2e618"
+      },
+      "decoded": false
+    },
+    {
+      "table": "actorskillmaxlevel",
+      "normalizedName": "actorskillmaxlevel",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/actorskillmaxlevel"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "actorskin",
+      "normalizedName": "actorskin",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/actorskin"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "ActorStar",
+      "normalizedName": "actorstar",
+      "status": "extracted_without_inventory_asset",
+      "assetPaths": [],
+      "extracted": {
+        "name": "ActorStar",
+        "path": "data\\config\\ActorStar.json",
+        "fileSha256": "d6e3e3b6ff710718740fdc8dfe0069db1e325fb43771d79c929ad69df99714ec",
+        "completeness": "error",
+        "rowCount": 0,
+        "observedCount": 0,
+        "rowsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "decoded": false
+    },
+    {
+      "table": "actorstarrandom",
+      "normalizedName": "actorstarrandom",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/actorstarrandom"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "actortag",
+      "normalizedName": "actortag",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/actortag"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "actortaginfo",
+      "normalizedName": "actortaginfo",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/actortaginfo"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "actortalent",
+      "normalizedName": "actortalent",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/actortalent"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "actorunlockeffect",
+      "normalizedName": "actorunlockeffect",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/actorunlockeffect"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "additionalincomestate",
+      "normalizedName": "additionalincomestate",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/additionalincomestate"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "affixinfo",
+      "normalizedName": "affixinfo",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/affixinfo"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "attrtoscore",
+      "normalizedName": "attrtoscore",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/attrtoscore"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "attrtypefight",
+      "normalizedName": "attrtypefight",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/attrtypefight"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "attrtypesortorder",
+      "normalizedName": "attrtypesortorder",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/attrtypesortorder",
+        "assets/Patch/assetbundle/data/xlsx/attrtypesortorder"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "boardactorconfig",
+      "normalizedName": "boardactorconfig",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/boardactorconfig"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "boardspeech",
+      "normalizedName": "boardspeech",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/boardspeech"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "boardspeechcondition",
+      "normalizedName": "boardspeechcondition",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/boardspeechcondition"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "boardvoice2text",
+      "normalizedName": "boardvoice2text",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/boardvoice2text"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "buffdata",
+      "normalizedName": "buffdata",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/buffdata",
+        "assets/Patch/assetbundle/data/xlsx/buffdata"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "buffindex",
+      "normalizedName": "buffindex",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/buffindex"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "bulletconfig",
+      "normalizedName": "bulletconfig",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/bulletconfig",
+        "assets/Patch/assetbundle/data/xlsx/bulletconfig"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "cartoonactorname",
+      "normalizedName": "cartoonactorname",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/cartoonactorname",
+        "assets/Patch/assetbundle/data/xlsx/cartoonactorname"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "CartoonConfig",
+      "normalizedName": "cartoonconfig",
+      "status": "asset_and_extracted",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/cartoonconfig",
+        "assets/Patch/assetbundle/data/xlsx/cartoonconfig"
+      ],
+      "extracted": {
+        "name": "CartoonConfig",
+        "path": "data\\config\\CartoonConfig.json",
+        "fileSha256": "7bc0d82a5ce22041f41cf77c44cd7504f842c918162801885566a15bbe432d2c",
+        "completeness": "partial",
+        "rowCount": 6,
+        "observedCount": 82,
+        "rowsSha256": "65aeb4bb5b4654c8a2805f5e3524f2656358265cb411242498589c19d67f9897"
+      },
+      "decoded": false
+    },
+    {
+      "table": "challengemodedungeon",
+      "normalizedName": "challengemodedungeon",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/challengemodedungeon"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "challengemoderankreward",
+      "normalizedName": "challengemoderankreward",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/challengemoderankreward"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "challengemodescorereward",
+      "normalizedName": "challengemodescorereward",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/challengemodescorereward"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "ChapterInfo",
+      "normalizedName": "chapterinfo",
+      "status": "asset_and_extracted",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/chapterinfo"
+      ],
+      "extracted": {
+        "name": "ChapterInfo",
+        "path": "data\\config\\ChapterInfo.json",
+        "fileSha256": "699889868b0673cb7ed02e74d513351845543a1498c3bcd1b08507d4835f6da1",
+        "completeness": "partial",
+        "rowCount": 6,
+        "observedCount": 35,
+        "rowsSha256": "d7432b8f735fa76ca56ac6bd23f539d4a78f7995703c6033e8f05cce2b0b97fb"
+      },
+      "decoded": false
+    },
+    {
+      "table": "chapterreward",
+      "normalizedName": "chapterreward",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/chapterreward"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "chatchannel",
+      "normalizedName": "chatchannel",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/chatchannel"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "chatimage",
+      "normalizedName": "chatimage",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/chatimage"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "chipdungeontocultivationdungeon",
+      "normalizedName": "chipdungeontocultivationdungeon",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/chipdungeontocultivationdungeon"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "clawcrane",
+      "normalizedName": "clawcrane",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/clawcrane"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "clawcraneforcecount",
+      "normalizedName": "clawcraneforcecount",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/clawcraneforcecount"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "clawcranestock",
+      "normalizedName": "clawcranestock",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/clawcranestock"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "collectionsnovelreward",
+      "normalizedName": "collectionsnovelreward",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/collectionsnovelreward"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "CollectionsScenes",
+      "normalizedName": "collectionsscenes",
+      "status": "asset_and_extracted",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/collectionsscenes"
+      ],
+      "extracted": {
+        "name": "CollectionsScenes",
+        "path": "data\\config\\CollectionsScenes.json",
+        "fileSha256": "9668935fe88b181d8f97484f37a54c90c6f689f65fbb7f9965e47f282607f602",
+        "completeness": "complete_observed",
+        "rowCount": 19,
+        "observedCount": 19,
+        "rowsSha256": "d9125c0baab861fbf2575fabcb3e0e80e6b1aa976bb738b7f86f7d0f71a89d03"
+      },
+      "decoded": false
+    },
+    {
+      "table": "compatnotch",
+      "normalizedName": "compatnotch",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/compatnotch",
+        "assets/Patch/assetbundle/data/xlsx/compatnotch"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "continuousloginprize",
+      "normalizedName": "continuousloginprize",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/continuousloginprize"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "costumeinfo",
+      "normalizedName": "costumeinfo",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/costumeinfo"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "cultivationdegree",
+      "normalizedName": "cultivationdegree",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/cultivationdegree",
+        "assets/Patch/assetbundle/data/xlsx/cultivationdegree"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "dailyrefresh",
+      "normalizedName": "dailyrefresh",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/dailyrefresh"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "damageindex",
+      "normalizedName": "damageindex",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/damageindex"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "damageindexmonster",
+      "normalizedName": "damageindexmonster",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/damageindexmonster"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "delayreward",
+      "normalizedName": "delayreward",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/delayreward"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "deploycount",
+      "normalizedName": "deploycount",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/deploycount"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "deploymission",
+      "normalizedName": "deploymission",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/deploymission"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "diffactorinherit",
+      "normalizedName": "diffactorinherit",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/diffactorinherit"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "dropdisplaydailysignin",
+      "normalizedName": "dropdisplaydailysignin",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/dropdisplaydailysignin"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "dropdisplaygacha",
+      "normalizedName": "dropdisplaygacha",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/dropdisplaygacha"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "dropdisplayshop",
+      "normalizedName": "dropdisplayshop",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/dropdisplayshop"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "Dungeon",
+      "normalizedName": "dungeon",
+      "status": "extracted_without_inventory_asset",
+      "assetPaths": [],
+      "extracted": {
+        "name": "Dungeon",
+        "path": "data\\config\\Dungeon.json",
+        "fileSha256": "336f3531fdbb7d26ad4b9a95821ec22dd12c596c674a788fb1986c34c98f65a1",
+        "completeness": "error",
+        "rowCount": 0,
+        "observedCount": 0,
+        "rowsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "decoded": false
+    },
+    {
+      "table": "dungeonaffix",
+      "normalizedName": "dungeonaffix",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/dungeonaffix"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "DungeonConfig",
+      "normalizedName": "dungeonconfig",
+      "status": "extracted_without_inventory_asset",
+      "assetPaths": [],
+      "extracted": {
+        "name": "DungeonConfig",
+        "path": "data\\config\\DungeonConfig.json",
+        "fileSha256": "e355f594051ae9d54cbe2e4228716d53a4ac7f577e66d9c6f5b07468643dac94",
+        "completeness": "error",
+        "rowCount": 0,
+        "observedCount": 0,
+        "rowsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "decoded": false
+    },
+    {
+      "table": "dungeonmodeindex",
+      "normalizedName": "dungeonmodeindex",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/dungeonmodeindex"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "DungeonMonster",
+      "normalizedName": "dungeonmonster",
+      "status": "asset_and_extracted",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/dungeonmonster",
+        "assets/Patch/assetbundle/data/xlsx/dungeonmonster"
+      ],
+      "extracted": {
+        "name": "DungeonMonster",
+        "path": "data\\config\\DungeonMonster.json",
+        "fileSha256": "904612c36796f7bb0cecf7e6b59a8bba5b229061ee9730a6dc458171a37aba23",
+        "completeness": "partial",
+        "rowCount": 4,
+        "observedCount": 916,
+        "rowsSha256": "30c1ab0ef9d2bf9dfe7982de1bd6ac7b13350de692e5da897b3e13302f777f66"
+      },
+      "decoded": false
+    },
+    {
+      "table": "DungeonNpc",
+      "normalizedName": "dungeonnpc",
+      "status": "asset_and_extracted",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/dungeonnpc"
+      ],
+      "extracted": {
+        "name": "DungeonNpc",
+        "path": "data\\config\\DungeonNpc.json",
+        "fileSha256": "cdb20e2f89bff204c7443325bc03024619ff8fdf96672698fedd2312c13a32e7",
+        "completeness": "partial",
+        "rowCount": 4,
+        "observedCount": 32,
+        "rowsSha256": "a4b834943e67bdc328ec75757d4a724473bd378def28b04c2211f856f06f9951"
+      },
+      "decoded": false
+    },
+    {
+      "table": "DungeonReward",
+      "normalizedName": "dungeonreward",
+      "status": "asset_and_extracted",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/dungeonreward"
+      ],
+      "extracted": {
+        "name": "DungeonReward",
+        "path": "data\\config\\DungeonReward.json",
+        "fileSha256": "0af7b02a2087e18103ddbec1d5e1fcba7cd73213b7ed7f0f1387c5e68d7d0df0",
+        "completeness": "partial",
+        "rowCount": 6,
+        "observedCount": 683,
+        "rowsSha256": "fb9fd8854f190c8c93416806e94943ce6e19333b2eed4eefc590d8be25c8e66e"
+      },
+      "decoded": false
+    },
+    {
+      "table": "DungeonScene",
+      "normalizedName": "dungeonscene",
+      "status": "extracted_without_inventory_asset",
+      "assetPaths": [],
+      "extracted": {
+        "name": "DungeonScene",
+        "path": "data\\config\\DungeonScene.json",
+        "fileSha256": "657606b780f9b5f659659dfa19c8e5de8d76cff3e27d93cb46619d4c8c46bc48",
+        "completeness": "error",
+        "rowCount": 0,
+        "observedCount": 0,
+        "rowsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "decoded": false
+    },
+    {
+      "table": "dungeonslotbackground",
+      "normalizedName": "dungeonslotbackground",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/dungeonslotbackground"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "equipbaseattr",
+      "normalizedName": "equipbaseattr",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/equipbaseattr"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "equipenhance",
+      "normalizedName": "equipenhance",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/equipenhance"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "equipinfo",
+      "normalizedName": "equipinfo",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/equipinfo"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "equiprandomattr",
+      "normalizedName": "equiprandomattr",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/equiprandomattr"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "equipsuitattr",
+      "normalizedName": "equipsuitattr",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/equipsuitattr"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "eventdungeon",
+      "normalizedName": "eventdungeon",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/eventdungeon"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "eventdungeonstage",
+      "normalizedName": "eventdungeonstage",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/eventdungeonstage"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "eventreward",
+      "normalizedName": "eventreward",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/eventreward"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "favourincreaserule",
+      "normalizedName": "favourincreaserule",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/favourincreaserule"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "favourlevel",
+      "normalizedName": "favourlevel",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/favourlevel"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "fightbuff",
+      "normalizedName": "fightbuff",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/fightbuff"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "gachaactorchipchance",
+      "normalizedName": "gachaactorchipchance",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/gachaactorchipchance"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "gachaactorchipweight",
+      "normalizedName": "gachaactorchipweight",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/gachaactorchipweight"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "gachaactorpool",
+      "normalizedName": "gachaactorpool",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/gachaactorpool"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "gachaad",
+      "normalizedName": "gachaad",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/gachaad"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "gachafriendshiprate",
+      "normalizedName": "gachafriendshiprate",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/gachafriendshiprate"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "gachascorebg",
+      "normalizedName": "gachascorebg",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/gachascorebg"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "gachatype",
+      "normalizedName": "gachatype",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/gachatype"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "gamecredits",
+      "normalizedName": "gamecredits",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/gamecredits"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "gamemodeinfo",
+      "normalizedName": "gamemodeinfo",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/gamemodeinfo"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "golddungeonlevel",
+      "normalizedName": "golddungeonlevel",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/golddungeonlevel"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "goto",
+      "normalizedName": "goto",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/goto"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "guilddungeon",
+      "normalizedName": "guilddungeon",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/guilddungeon"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "guilddungeonassistscorereward",
+      "normalizedName": "guilddungeonassistscorereward",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/guilddungeonassistscorereward"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "guilddungeonchallengeprogressreward",
+      "normalizedName": "guilddungeonchallengeprogressreward",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/guilddungeonchallengeprogressreward"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "guilddungeonchallengescorereward",
+      "normalizedName": "guilddungeonchallengescorereward",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/guilddungeonchallengescorereward"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "guildlevel",
+      "normalizedName": "guildlevel",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/guildlevel"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "guildmisc",
+      "normalizedName": "guildmisc",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/guildmisc",
+        "assets/Patch/assetbundle/data/xlsx/guildmisc"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "iteminfo",
+      "normalizedName": "iteminfo",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/iteminfo"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "jigsawpuzzlecell",
+      "normalizedName": "jigsawpuzzlecell",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/jigsawpuzzlecell"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "jigsawpuzzleprize",
+      "normalizedName": "jigsawpuzzleprize",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/jigsawpuzzleprize"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "loadingconfig",
+      "normalizedName": "loadingconfig",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/loadingconfig"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "mall",
+      "normalizedName": "mall",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/mall"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "manualbox",
+      "normalizedName": "manualbox",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/manualbox"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "mazebuff",
+      "normalizedName": "mazebuff",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/mazebuff"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "mazeinfo",
+      "normalizedName": "mazeinfo",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/mazeinfo"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "mazeprecondition",
+      "normalizedName": "mazeprecondition",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/mazeprecondition"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "mazeprize",
+      "normalizedName": "mazeprize",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/mazeprize"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "mazetips",
+      "normalizedName": "mazetips",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/mazetips"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "medalinfo",
+      "normalizedName": "medalinfo",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/medalinfo"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "Misc",
+      "normalizedName": "misc",
+      "status": "asset_and_extracted",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/misc",
+        "assets/Patch/assetbundle/data/xlsx/misc"
+      ],
+      "extracted": {
+        "name": "Misc",
+        "path": "data\\config\\Misc.json",
+        "fileSha256": "07ee6ca43fd672452bacab6123a382878b8b4fb81f1279ca364ef0b45597f54d",
+        "completeness": "complete_observed",
+        "rowCount": 1,
+        "observedCount": 1,
+        "rowsSha256": "4be28caeda07265fe6505eb0974fdc3a625858acdbc2ccfbe284a09e3a153531"
+      },
+      "decoded": false
+    },
+    {
+      "table": "monologueconfig",
+      "normalizedName": "monologueconfig",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/monologueconfig"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "monsterinfo",
+      "normalizedName": "monsterinfo",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/monsterinfo",
+        "assets/Patch/assetbundle/data/xlsx/monsterinfo"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "monsterlevelupbase",
+      "normalizedName": "monsterlevelupbase",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/monsterlevelupbase"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "monsterlevelupindex",
+      "normalizedName": "monsterlevelupindex",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/monsterlevelupindex"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "msdkmessage",
+      "normalizedName": "msdkmessage",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/msdkmessage"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "msdkurl",
+      "normalizedName": "msdkurl",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/msdkurl"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "novel",
+      "normalizedName": "novel",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/novel"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "novelcredits",
+      "normalizedName": "novelcredits",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/novelcredits"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "patchconfig",
+      "normalizedName": "patchconfig",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/patchconfig"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "patchloadingherodisplay",
+      "normalizedName": "patchloadingherodisplay",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/patchloadingherodisplay"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "playerheadphoto",
+      "normalizedName": "playerheadphoto",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/playerheadphoto"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "PlayerInitConfig",
+      "normalizedName": "playerinitconfig",
+      "status": "extracted_without_inventory_asset",
+      "assetPaths": [],
+      "extracted": {
+        "name": "PlayerInitConfig",
+        "path": "data\\config\\PlayerInitConfig.json",
+        "fileSha256": "6c876a560d7712354cfd13be3c21e591ea5eeae7cfc5062926b902f5cf59b348",
+        "completeness": "error",
+        "rowCount": 0,
+        "observedCount": 0,
+        "rowsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "decoded": false
+    },
+    {
+      "table": "PlayerLevelInitConfig",
+      "normalizedName": "playerlevelinitconfig",
+      "status": "asset_and_extracted",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/playerlevelinitconfig"
+      ],
+      "extracted": {
+        "name": "PlayerLevelInitConfig",
+        "path": "data\\config\\PlayerLevelInitConfig.json",
+        "fileSha256": "9ea717d40f4e304f1dbc957b8e18c127caf0c98dd3d97a6d0289a7260867736c",
+        "completeness": "partial",
+        "rowCount": 6,
+        "observedCount": 99,
+        "rowsSha256": "89e78a8b9dd4583f5796545c6c86f7f471a6a34a944a8ce19d5c8f109f800af6"
+      },
+      "decoded": false
+    },
+    {
+      "table": "postcardcell",
+      "normalizedName": "postcardcell",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/postcardcell"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "postcardprize",
+      "normalizedName": "postcardprize",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/postcardprize"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "presetsettings",
+      "normalizedName": "presetsettings",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/presetsettings"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "profitdetail",
+      "normalizedName": "profitdetail",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/profitdetail"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "purblepairsreward",
+      "normalizedName": "purblepairsreward",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/purblepairsreward"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "purchaseinfo",
+      "normalizedName": "purchaseinfo",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/purchaseinfo"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "racepvpbattlescorereward",
+      "normalizedName": "racepvpbattlescorereward",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/racepvpbattlescorereward"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "racepvprankscore",
+      "normalizedName": "racepvprankscore",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/racepvprankscore"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "racepvpseg",
+      "normalizedName": "racepvpseg",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/racepvpseg"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "racepvpsegreward",
+      "normalizedName": "racepvpsegreward",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/racepvpsegreward"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "refreshprice",
+      "normalizedName": "refreshprice",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/refreshprice",
+        "assets/Patch/assetbundle/data/xlsx/refreshprice"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "resourcecompose",
+      "normalizedName": "resourcecompose",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/resourcecompose"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "resourcequality",
+      "normalizedName": "resourcequality",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/resourcequality"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "Role",
+      "normalizedName": "role",
+      "status": "asset_and_extracted",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/role"
+      ],
+      "extracted": {
+        "name": "Role",
+        "path": "data\\config\\Role.json",
+        "fileSha256": "1f5fa91358170981dcff6a0bc654fb11ed5bd36b834ac7388f9bdff6789b3e89",
+        "completeness": "partial",
+        "rowCount": 6,
+        "observedCount": 58,
+        "rowsSha256": "b4e60b5f1eca50cce5c19c5201a93ca70e1cbd7da93bbeb24fdc761b13688ba9"
+      },
+      "decoded": false
+    },
+    {
+      "table": "roleclassicana",
+      "normalizedName": "roleclassicana",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/roleclassicana"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "RoleFavour",
+      "normalizedName": "rolefavour",
+      "status": "extracted_without_inventory_asset",
+      "assetPaths": [],
+      "extracted": {
+        "name": "RoleFavour",
+        "path": "data\\config\\RoleFavour.json",
+        "fileSha256": "7d41b3af9fe99a9de60487c9fc6cc16f2e6eca626c825fbd0fbb9218fcb9bf74",
+        "completeness": "error",
+        "rowCount": 0,
+        "observedCount": 0,
+        "rowsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "decoded": false
+    },
+    {
+      "table": "rolefavourgiftlist",
+      "normalizedName": "rolefavourgiftlist",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/rolefavourgiftlist"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "rolenotevoiceconfig",
+      "normalizedName": "rolenotevoiceconfig",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/rolenotevoiceconfig"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "rolescoreattr",
+      "normalizedName": "rolescoreattr",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/rolescoreattr"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "sceneconfig",
+      "normalizedName": "sceneconfig",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/sceneconfig",
+        "assets/Patch/assetbundle/data/xlsx/sceneconfig"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "semifixeddungeon",
+      "normalizedName": "semifixeddungeon",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/semifixeddungeon"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "shareactor",
+      "normalizedName": "shareactor",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/shareactor"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "sharereward",
+      "normalizedName": "sharereward",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/sharereward"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "Signboard",
+      "normalizedName": "signboard",
+      "status": "asset_and_extracted",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/signboard"
+      ],
+      "extracted": {
+        "name": "Signboard",
+        "path": "data\\config\\Signboard.json",
+        "fileSha256": "95e28ef93fba7dbdb9583914e619acafbb4812f8c195a26b16c2e3e457de7060",
+        "completeness": "partial",
+        "rowCount": 6,
+        "observedCount": 96,
+        "rowsSha256": "b9efe295cb0e06283a5f36d6d6163ffb1e89149fa19b2c9ad36fa743c978d75f"
+      },
+      "decoded": false
+    },
+    {
+      "table": "signingift",
+      "normalizedName": "signingift",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/signingift"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "SingleActorGroup",
+      "normalizedName": "singleactorgroup",
+      "status": "asset_and_extracted",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/singleactorgroup"
+      ],
+      "extracted": {
+        "name": "SingleActorGroup",
+        "path": "data\\config\\SingleActorGroup.json",
+        "fileSha256": "5eab71f6ed035238f3cc4ce35da76ca26224f508da0514b71edee05242466df0",
+        "completeness": "partial",
+        "rowCount": 4,
+        "observedCount": 5,
+        "rowsSha256": "8082bf7519473789677c441864a774dce1d531049dae5b1f2c5f4966a113c4ee"
+      },
+      "decoded": false
+    },
+    {
+      "table": "skillcamera",
+      "normalizedName": "skillcamera",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/skillcamera",
+        "assets/Patch/assetbundle/data/xlsx/skillcamera"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "skillhit",
+      "normalizedName": "skillhit",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/skillhit"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "skillhitindex",
+      "normalizedName": "skillhitindex",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/skillhitindex"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "skilllevelup",
+      "normalizedName": "skilllevelup",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/skilllevelup"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "sort",
+      "normalizedName": "sort",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/sort",
+        "assets/Patch/assetbundle/data/xlsx/sort"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "specialattrinfo",
+      "normalizedName": "specialattrinfo",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/specialattrinfo"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "speciallevelupindex",
+      "normalizedName": "speciallevelupindex",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/speciallevelupindex"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "StoryDungeon",
+      "normalizedName": "storydungeon",
+      "status": "asset_and_extracted",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/storydungeon"
+      ],
+      "extracted": {
+        "name": "StoryDungeon",
+        "path": "data\\config\\StoryDungeon.json",
+        "fileSha256": "b481ae0e248b55af41dff1e1c1675e2283cf36b8fdfdfe81ba68a19029453f52",
+        "completeness": "partial",
+        "rowCount": 4,
+        "observedCount": 119,
+        "rowsSha256": "1ae9e945ce9ebc6f568771281ceabbcfa1f688617482064cd29fc9a2dde0d26b"
+      },
+      "decoded": false
+    },
+    {
+      "table": "talentmisc",
+      "normalizedName": "talentmisc",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/talentmisc",
+        "assets/Patch/assetbundle/data/xlsx/talentmisc"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "talentresetcost",
+      "normalizedName": "talentresetcost",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/talentresetcost"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "taskactivepointreward",
+      "normalizedName": "taskactivepointreward",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/taskactivepointreward"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "taskextraactivepointreward",
+      "normalizedName": "taskextraactivepointreward",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/taskextraactivepointreward"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "taskinfo",
+      "normalizedName": "taskinfo",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/taskinfo"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "teamdungeongroup",
+      "normalizedName": "teamdungeongroup",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/teamdungeongroup"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "teampvetalk",
+      "normalizedName": "teampvetalk",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/teampvetalk"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "tempentranceswitchwindow",
+      "normalizedName": "tempentranceswitchwindow",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/tempentranceswitchwindow"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "towerfloor",
+      "normalizedName": "towerfloor",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/towerfloor"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "towerfloorreward",
+      "normalizedName": "towerfloorreward",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/towerfloorreward"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "towergroupunlocklv",
+      "normalizedName": "towergroupunlocklv",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/towergroupunlocklv"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "triggeredevent",
+      "normalizedName": "triggeredevent",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/triggeredevent"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "Tutorial",
+      "normalizedName": "tutorial",
+      "status": "asset_and_extracted",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/tutorial"
+      ],
+      "extracted": {
+        "name": "Tutorial",
+        "path": "data\\config\\Tutorial.json",
+        "fileSha256": "2f17763cc426d378657a4a23f7910a2a62ecdbdd8b95d5fb927e82a1cc96783e",
+        "completeness": "partial",
+        "rowCount": 6,
+        "observedCount": 55,
+        "rowsSha256": "f0df05fae64d668dc0af0e16847654751afbcea0402a0d63e78093a5108fc664"
+      },
+      "decoded": false
+    },
+    {
+      "table": "tutorialstep",
+      "normalizedName": "tutorialstep",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/tutorialstep"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "uiwindowconfig",
+      "normalizedName": "uiwindowconfig",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/uiwindowconfig",
+        "assets/Patch/assetbundle/data/xlsx/uiwindowconfig"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "unforcedtutorial",
+      "normalizedName": "unforcedtutorial",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/unforcedtutorial"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "weekactivepointreward",
+      "normalizedName": "weekactivepointreward",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/weekactivepointreward"
+      ],
+      "extracted": null,
+      "decoded": false
+    },
+    {
+      "table": "welfareconfig",
+      "normalizedName": "welfareconfig",
+      "status": "asset_only",
+      "assetPaths": [
+        "assets/Patch/assetbundle/data/lua/xlsx/welfareconfig"
+      ],
+      "extracted": null,
+      "decoded": false
+    }
+  ],
+  "notes": [
+    "An APK inventory path proves only that a named asset was listed; it does not prove that its AssetBundle or Lua payload was decoded.",
+    "asset_only rows remain blocked until a decoder produces a schema and rows with provenance.",
+    "decoded is intentionally false for every row in this report because this audit never parses protected payloads."
+  ]
+}

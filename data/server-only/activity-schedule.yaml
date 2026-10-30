@@ -1,0 +1,86 @@
+schemaVersion: 1
+provenance:
+  source: local compatibility policy; historical production schedule is unavailable
+  confidence: D
+  note: "The scheduler is a deterministic local loop. Replace entries with dated archives when recovered."
+timezone: UTC
+cycle:
+  periodDays: 28
+  anchor: "2026-10-26T06:00:00Z"
+  phases:
+    - id: sign-in
+      dayStart: 0
+      dayEnd: 7
+      activityType: 46
+    - id: shop
+      dayStart: 0
+      dayEnd: 28
+      activityType: 12
+    - id: sandbox-gacha
+      dayStart: 7
+      dayEnd: 21
+      activityType: 25
+management:
+  adminEndpoint: /__local__/admin/activity-schedule
+  canAdjustAnchor: true
+# Permanent challenge-menu (挑战/活动) modes, served by events.py as always-open
+# GET fci/activity/ records.  Window_Activity lists only category
+# WeeklyActivity(1)/Tournament(3) records whose type is in an ActivitySort row,
+# shows a group while ACU.IsActivitiesOn holds and locks it below the
+# PlayerLevelInitConfig.unlockWindow level of
+# WU.ActivityTypeToUnlockWindowType(type).  When a schedule service is
+# attached its document is authoritative: omit this section to list none.
+permanentActivities:
+  provenance:
+    source: "client 2.0.4: xlsx ActivitySort/ActivityDungeon/PlayerLevelInitConfig; window__activity__activity.lua; common__activityutil.lua; window__activitystagechoose__*.lua"
+    confidence: B
+    note: >-
+      Types, categories, the always-open window and CollectionDungeon ids 2001-2003
+      are client evidence.  The historical weekday rotation and the ids of the
+      single-entry modes are unavailable: weekdays below are a local policy that
+      opens at least one material dungeon every day (ActivityStageChoose indexes
+      the first IsOpenForDoing entry unconditionally, all three on Sunday) and
+      single-entry ids follow the client's type*1000+1 numbering (25001, 46001).
+      Weekdays are client weekdays (Monday=1 .. Sunday=7) evaluated on
+      CS.GameTime.serverNow.
+  defaults:
+    category: 1   # ActivityCategory_WeeklyActivity
+    timeType: 1   # ActivityTimeType_Forever -> menu row "Window_OpenForever"
+  entries:
+    - id: collection-2001
+      type: 2            # CollectionDungeon -> ActivityStageChoose2 (UnlockWindow 7, Lv10; forced tutorial 14/15)
+      activityId: 2001   # ActivityDungeon 2001 (dungeons 52101-52110, multipleActivityId 2101)
+      weekdays: [1, 4, 7]
+    - id: collection-2002
+      type: 2
+      activityId: 2002   # ActivityDungeon 2002 (52201-52210, multipleActivityId 2102)
+      weekdays: [2, 5, 7]
+    - id: collection-2003
+      type: 2
+      activityId: 2003   # ActivityDungeon 2003 (52301-52310, multipleActivityId 2103)
+      weekdays: [3, 6, 7]
+    - id: tower
+      type: 3            # Tower -> window Tower (UnlockWindow 9, Lv16)
+      activityId: 3001
+    - id: gold-dungeon
+      type: 17           # GoldDungeon -> window DungeonGold (UnlockWindow 18, Lv18)
+      activityId: 17001
+    - id: challenge-mode
+      type: 30           # ChallengeMode -> ChapterChallenge (UnlockWindow 16, Lv18)
+      activityId: 30001
+    - id: deploy-mission
+      type: 10           # DeployMission -> window Deploy (UnlockWindow 13, Lv20)
+      activityId: 10001
+    - id: triggered-event
+      type: 31           # TriggeredEvent -> window TriggeredEvent (UnlockWindow 32, Lv32)
+      activityId: 31001
+    # Not listed:
+    # - Maze (34): in no ActivitySort row and no other UI entry, so the 2.0.4
+    #   client can never show it.
+    # - RacePVP (20, Lv26) / DungeonTeam (23, Lv30): WeeklyActivity entries of
+    #   realtime/multiplayer modes; add them once their routes are compatible.
+    # - Tournament_AsyncPvp (5, Lv23) / BurstLinkPvp (18, Lv28): category 3
+    #   (Tournament) entries additionally need a matching
+    #   fci/tournament/summary/ activityInfo[] record and fci/tournament/info.
+    # - EventDungeon (27), EventDungeon_Autumn2018(+Hard) (39/40),
+    #   RacePVPActivity (42): dated events, schedule them as phases instead.

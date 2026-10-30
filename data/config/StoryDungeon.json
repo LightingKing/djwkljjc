@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 1,
+  "table": "StoryDungeon",
+  "observedCount": 119,
+  "rowCount": 4,
+  "completeness": "partial",
+  "sourceFiles": [
+    "story-config.json"
+  ],
+  "sourceRecords": [
+    {
+      "name": "story-config.json",
+      "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\story-config.json",
+      "sha256": "dd1d3b4b6e4815df53852b92bc58dafdf4acbb1dada32bc3bc37d6f569d07638"
+    }
+  ],
+  "rowsSha256": "1ae9e945ce9ebc6f568771281ceabbcfa1f688617482064cd29fc9a2dde0d26b",
+  "schema": {
+    "types": [
+      "object"
+    ],
+    "fields": {
+      "dungeonId": {
+        "types": [
+          "integer"
+        ]
+      },
+      "guide": {
+        "types": [
+          "integer"
+        ]
+      },
+      "level": {
+        "types": [
+          "array"
+        ],
+        "items": {
+          "types": [
+            "integer"
+          ]
+        }
+      },
+      "levelUpIndex": {
+        "types": [
+          "array"
+        ]
+      },
+      "monsterId": {
+        "types": [
+          "array"
+        ],
+        "items": {
+          "types": [
+            "integer"
+          ]
+        }
+      }
+    }
+  },
+  "rows": [
+    {
+      "dungeonId": 1001,
+      "guide": 1,
+      "level": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "levelUpIndex": [],
+      "monsterId": [
+        1002309,
+        0,
+        0,
+        2012098,
+        2014098,
+        2108098
+      ]
+    },
+    {
+      "dungeonId": 1002,
+      "guide": 1,
+      "level": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "levelUpIndex": [],
+      "monsterId": [
+        1002309,
+        0,
+        0,
+        2012098,
+        2014098,
+        2108098
+      ]
+    },
+    {
+      "dungeonId": 1003,
+      "level": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "levelUpIndex": [],
+      "monsterId": [
+        1002309,
+        1011009,
+        3004009,
+        2012098,
+        2014098,
+        4003098
+      ]
+    },
+    {
+      "dungeonId": 1004,
+      "level": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "levelUpIndex": [],
+      "monsterId": [
+        1007309,
+        1005009,
+        1010009,
+        2107098,
+        2106098,
+        2101098
+      ]
+    }
+  ]
+}

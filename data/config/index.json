@@ -1,0 +1,2947 @@
+{
+  "schemaVersion": 1,
+  "sources": [
+    "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\config-samples-live.jsonl",
+    "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\combat-config-live.jsonl",
+    "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\starter-config-live.jsonl",
+    "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\story-config.json"
+  ],
+  "sourceRecords": [
+    {
+      "name": "config-samples-live.jsonl",
+      "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\config-samples-live.jsonl",
+      "sha256": "85e1ca251f8355208917cf14a1aee0c5f1c419e8f0ee017a5723a19996daeb54"
+    },
+    {
+      "name": "combat-config-live.jsonl",
+      "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\combat-config-live.jsonl",
+      "sha256": "dbf87819c02e022903c42ddfe6db813c7496a08dacca5f48e45d2fa060ba2abc"
+    },
+    {
+      "name": "starter-config-live.jsonl",
+      "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\starter-config-live.jsonl",
+      "sha256": "bb3dd78b742365ede9dd45f359be5d9df7786d7307e6082e4e92deb9cb3acfd9"
+    },
+    {
+      "name": "story-config.json",
+      "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\story-config.json",
+      "sha256": "dd1d3b4b6e4815df53852b92bc58dafdf4acbb1dada32bc3bc37d6f569d07638"
+    }
+  ],
+  "tableCount": 29,
+  "tables": {
+    "ActorAttr": {
+      "rowCount": 0,
+      "observedCount": 0,
+      "completeness": "error",
+      "sourceFiles": [
+        "combat-config-live.jsonl"
+      ],
+      "sourceRecords": [
+        {
+          "name": "combat-config-live.jsonl",
+          "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\combat-config-live.jsonl",
+          "sha256": "dbf87819c02e022903c42ddfe6db813c7496a08dacca5f48e45d2fa060ba2abc"
+        }
+      ],
+      "rowsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "schema": {
+        "types": [
+          "unknown"
+        ]
+      },
+      "selectedError": "attempt to get length of a nil value"
+    },
+    "ActorAttrLevelPromotion": {
+      "rowCount": 4,
+      "observedCount": 97,
+      "completeness": "partial",
+      "sourceFiles": [
+        "story-config.json"
+      ],
+      "sourceRecords": [
+        {
+          "name": "story-config.json",
+          "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\story-config.json",
+          "sha256": "dd1d3b4b6e4815df53852b92bc58dafdf4acbb1dada32bc3bc37d6f569d07638"
+        }
+      ],
+      "rowsSha256": "a84af934e75640be10e661751643e1cd6a3b281a5b7bfbdab9d5e5c9c502f158",
+      "schema": {
+        "types": [
+          "object"
+        ],
+        "fields": {
+          "actorId": {
+            "types": [
+              "integer"
+            ]
+          },
+          "attrs": {
+            "types": [
+              "array"
+            ],
+            "items": {
+              "types": [
+                "object"
+              ],
+              "fields": {
+                "type": {
+                  "types": [
+                    "integer"
+                  ]
+                },
+                "value": {
+                  "types": [
+                    "integer"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "ActorAttrStarPromotion": {
+      "rowCount": 4,
+      "observedCount": 577,
+      "completeness": "partial",
+      "sourceFiles": [
+        "story-config.json"
+      ],
+      "sourceRecords": [
+        {
+          "name": "story-config.json",
+          "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\story-config.json",
+          "sha256": "dd1d3b4b6e4815df53852b92bc58dafdf4acbb1dada32bc3bc37d6f569d07638"
+        }
+      ],
+      "rowsSha256": "575ad338e6e75d6f6f02b11517a636df22d61e23c08167518f7c44dcba191ae7",
+      "schema": {
+        "types": [
+          "object"
+        ],
+        "fields": {
+          "actorId": {
+            "types": [
+              "integer"
+            ]
+          },
+          "attrs": {
+            "types": [
+              "array"
+            ],
+            "items": {
+              "types": [
+                "object"
+              ],
+              "fields": {
+                "type": {
+                  "types": [
+                    "integer"
+                  ]
+                },
+                "value": {
+                  "types": [
+                    "integer"
+                  ]
+                }
+              }
+            }
+          },
+          "levelLimit": {
+            "types": [
+              "integer"
+            ]
+          },
+          "star": {
+            "types": [
+              "integer"
+            ]
+          },
+          "starCost": {
+            "types": [
+              "array"
+            ],
+            "items": {
+              "types": [
+                "object"
+              ],
+              "fields": {
+                "count": {
+                  "types": [
+                    "integer"
+                  ]
+                },
+                "id": {
+                  "types": [
+                    "integer"
+                  ]
+                },
+                "type": {
+                  "types": [
+                    "integer"
+                  ]
+                }
+              }
+            }
+          },
+          "starCulDegree": {
+            "types": [
+              "integer"
+            ]
+          },
+          "unlockSkillId": {
+            "types": [
+              "integer"
+            ]
+          }
+        }
+      }
+    },
+    "ActorConfig": {
+      "rowCount": 6,
+      "observedCount": 114,
+      "completeness": "partial",
+      "sourceFiles": [
+        "config-samples-live.jsonl"
+      ],
+      "sourceRecords": [
+        {
+          "name": "config-samples-live.jsonl",
+          "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\config-samples-live.jsonl",
+          "sha256": "85e1ca251f8355208917cf14a1aee0c5f1c419e8f0ee017a5723a19996daeb54"
+        }
+      ],
+      "rowsSha256": "de1350e6255a1258480c5e8be3d4efd596e8540845723cdbbe9f32e734e36b0f",
+      "schema": {
+        "types": [
+          "object"
+        ],
+        "fields": {
+          "animRes": {
+            "types": [
+              "string"
+            ]
+          },
+          "animType": {
+            "types": [
+              "integer"
+            ]
+          },
+          "book": {
+            "types": [
+              "integer"
+            ]
+          },
+          "category": {
+            "types": [
+              "integer"
+            ]
+          },
+          "chooseAudio": {
+            "types": [
+              "array"
+            ],
+            "items": {
+              "types": [
+                "string"
+              ]
+            }
+          },
+          "enableGameStartVoice": {
+            "types": [
+              "boolean"
+            ]
+          },
+          "enableStartVoice": {
+            "types": [
+              "boolean"
+            ]
+          },
+          "exclusiveTalentId": {
+            "types": [
+              "array"
+            ],
+            "items": {
+              "types": [
+                "integer"
+              ]
+            }
+          },
+          "height": {
+            "types": [
+              "number"
+            ]
+          },
+          "hitH": {
+            "types": [
+              "number"
+            ]
+          },
+          "hitW": {
+            "types": [
+              "number"
+            ]
+          },
+          "hookObject": {
+            "types": [
+              "array"
+            ]
+          },
+          "id": {
+            "types": [
+              "integer"
+            ]
+          },
+          "kind": {
+            "types": [
+              "integer"
+            ]
+          },
+          "logicRes": {
+            "types": [
+              "string"
+            ]
+          },
+          "openTime": {
+            "types": [
+              "string"
+            ]
+          },
+          "portraitOffsetX": {
+            "types": [
+              "integer"
+            ]
+          },
+          "portraitUVOffsetX": {
+            "types": [
+              "integer"
+            ]
+          },
+          "poseActionCnt": {
+            "types": [
+              "integer"
+            ]
+          },
+          "prefabRes": {
+            "types": [
+              "string"
+            ]
+          },
+          "role": {
+            "types": [
+              "integer"
+            ]
+          },
+          "scale": {
+            "types": [
+              "number"
+            ]
+          },
+          "shadowBaseY": {
+            "types": [
+              "number"
+            ]
+          },
+          "shadowOffset": {
+            "types": [
+              "number"
+            ]
+          },
+          "shareGachaResultOffsetX": {
+            "types": [
+              "integer"
+            ]
+          },
+          "showInLogin": {
+            "types": [
+              "boolean"
+            ]
+          },
+          "skinUIRes": {
+            "types": [
+              "integer"
+            ]
+          },
+          "voiceRes": {
+            "types": [
+              "string"
+            ]
+          },
+          "width": {
+            "types": [
+              "number"
+            ]
+          }
+        }
+      }
+    },
+    "ActorFavour": {
+      "rowCount": 0,
+      "observedCount": 0,
+      "completeness": "error",
+      "sourceFiles": [
+        "combat-config-live.jsonl"
+      ],
+      "sourceRecords": [
+        {
+          "name": "combat-config-live.jsonl",
+          "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\combat-config-live.jsonl",
+          "sha256": "dbf87819c02e022903c42ddfe6db813c7496a08dacca5f48e45d2fa060ba2abc"
+        }
+      ],
+      "rowsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "schema": {
+        "types": [
+          "unknown"
+        ]
+      },
+      "selectedError": "attempt to get length of a nil value"
+    },
+    "ActorInfo": {
+      "rowCount": 4,
+      "observedCount": 428,
+      "completeness": "partial",
+      "sourceFiles": [
+        "story-config.json"
+      ],
+      "sourceRecords": [
+        {
+          "name": "story-config.json",
+          "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\story-config.json",
+          "sha256": "dd1d3b4b6e4815df53852b92bc58dafdf4acbb1dada32bc3bc37d6f569d07638"
+        }
+      ],
+      "rowsSha256": "5e63ce2119444d778504290b952b14131931256fce7591b4f89e18684ab93be5",
+      "schema": {
+        "types": [
+          "object"
+        ],
+        "fields": {
+          "attrs": {
+            "types": [
+              "array"
+            ],
+            "items": {
+              "types": [
+                "object"
+              ],
+              "fields": {
+                "isRatio": {
+                  "types": [
+                    "boolean"
+                  ]
+                },
+                "type": {
+                  "types": [
+                    "integer"
+                  ]
+                },
+                "value": {
+                  "types": [
+                    "integer"
+                  ]
+                }
+              }
+            }
+          },
+          "id": {
+            "types": [
+              "integer"
+            ]
+          },
+          "quality": {
+            "types": [
+              "integer"
+            ]
+          },
+          "qualityAttrRatio": {
+            "types": [
+              "number"
+            ]
+          }
+        }
+      }
+    },
+    "ActorLevel": {
+      "rowCount": 0,
+      "observedCount": 0,
+      "completeness": "error",
+      "sourceFiles": [
+        "combat-config-live.jsonl"
+      ],
+      "sourceRecords": [
+        {
+          "name": "combat-config-live.jsonl",
+          "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\combat-config-live.jsonl",
+          "sha256": "dbf87819c02e022903c42ddfe6db813c7496a08dacca5f48e45d2fa060ba2abc"
+        }
+      ],
+      "rowsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "schema": {
+        "types": [
+          "unknown"
+        ]
+      },
+      "selectedError": "attempt to get length of a nil value"
+    },
+    "ActorQuality": {
+      "rowCount": 0,
+      "observedCount": 0,
+      "completeness": "error",
+      "sourceFiles": [
+        "combat-config-live.jsonl"
+      ],
+      "sourceRecords": [
+        {
+          "name": "combat-config-live.jsonl",
+          "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\combat-config-live.jsonl",
+          "sha256": "dbf87819c02e022903c42ddfe6db813c7496a08dacca5f48e45d2fa060ba2abc"
+        }
+      ],
+      "rowsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "schema": {
+        "types": [
+          "unknown"
+        ]
+      },
+      "selectedError": "attempt to get length of a nil value"
+    },
+    "ActorQualityInfo": {
+      "rowCount": 4,
+      "observedCount": 388,
+      "completeness": "partial",
+      "sourceFiles": [
+        "story-config.json"
+      ],
+      "sourceRecords": [
+        {
+          "name": "story-config.json",
+          "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\story-config.json",
+          "sha256": "dd1d3b4b6e4815df53852b92bc58dafdf4acbb1dada32bc3bc37d6f569d07638"
+        }
+      ],
+      "rowsSha256": "a0717517c7b2da951514cd160de5f0ee6809e2242ab69c7e3f5f24bb257b30ad",
+      "schema": {
+        "types": [
+          "object"
+        ],
+        "fields": {
+          "actorId": {
+            "types": [
+              "integer"
+            ]
+          },
+          "effectActorIdAttr": {
+            "types": [
+              "object"
+            ],
+            "fields": {
+              "attr": {
+                "types": [
+                  "array"
+                ]
+              },
+              "ids": {
+                "types": [
+                  "array"
+                ]
+              }
+            }
+          },
+          "effectAttrs": {
+            "types": [
+              "array"
+            ],
+            "items": {
+              "types": [
+                "object"
+              ],
+              "fields": {
+                "isRatio": {
+                  "types": [
+                    "boolean"
+                  ]
+                },
+                "type": {
+                  "types": [
+                    "integer"
+                  ]
+                },
+                "value": {
+                  "types": [
+                    "integer"
+                  ]
+                }
+              }
+            }
+          },
+          "effectBookIdAttr": {
+            "types": [
+              "object"
+            ],
+            "fields": {
+              "attr": {
+                "types": [
+                  "array"
+                ]
+              },
+              "ids": {
+                "types": [
+                  "array"
+                ]
+              }
+            }
+          },
+          "effectRoleIdAttr": {
+            "types": [
+              "object"
+            ],
+            "fields": {
+              "attr": {
+                "types": [
+                  "array"
+                ]
+              },
+              "ids": {
+                "types": [
+                  "array"
+                ]
+              }
+            }
+          },
+          "quality": {
+            "types": [
+              "integer"
+            ]
+          },
+          "talentResetUpgradeFloor": {
+            "types": [
+              "integer"
+            ]
+          },
+          "talentResetUpgradeRate": {
+            "types": [
+              "integer"
+            ]
+          }
+        }
+      }
+    },
+    "ActorSkill": {
+      "rowCount": 6,
+      "observedCount": 836,
+      "completeness": "partial",
+      "sourceFiles": [
+        "combat-config-live.jsonl"
+      ],
+      "sourceRecords": [
+        {
+          "name": "combat-config-live.jsonl",
+          "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\combat-config-live.jsonl",
+          "sha256": "dbf87819c02e022903c42ddfe6db813c7496a08dacca5f48e45d2fa060ba2abc"
+        }
+      ],
+      "rowsSha256": "536adfb4f18a0130801a5e155359a32d0f30610388328c141edf8d7f98b2e618",
+      "schema": {
+        "types": [
+          "object"
+        ],
+        "fields": {
+          "actorId": {
+            "types": [
+              "integer"
+            ]
+          },
+          "cmdStr": {
+            "types": [
+              "string"
+            ]
+          },
+          "costIndex": {
+            "types": [
+              "integer"
+            ]
+          },
+          "displayIndex": {
+            "types": [
+              "integer"
+            ]
+          },
+          "followSkill": {
+            "types": [
+              "integer"
+            ]
+          },
+          "name": {
+            "types": [
+              "string"
+            ]
+          },
+          "resIndex": {
+            "types": [
+              "integer"
+            ]
+          },
+          "skillId": {
+            "types": [
+              "integer"
+            ]
+          },
+          "specialIndex": {
+            "types": [
+              "array"
+            ]
+          },
+          "target": {
+            "types": [
+              "integer"
+            ]
+          }
+        }
+      }
+    },
+    "ActorStar": {
+      "rowCount": 0,
+      "observedCount": 0,
+      "completeness": "error",
+      "sourceFiles": [
+        "combat-config-live.jsonl"
+      ],
+      "sourceRecords": [
+        {
+          "name": "combat-config-live.jsonl",
+          "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\combat-config-live.jsonl",
+          "sha256": "dbf87819c02e022903c42ddfe6db813c7496a08dacca5f48e45d2fa060ba2abc"
+        }
+      ],
+      "rowsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "schema": {
+        "types": [
+          "unknown"
+        ]
+      },
+      "selectedError": "attempt to get length of a nil value"
+    },
+    "CartoonConfig": {
+      "rowCount": 6,
+      "observedCount": 82,
+      "completeness": "partial",
+      "sourceFiles": [
+        "combat-config-live.jsonl"
+      ],
+      "sourceRecords": [
+        {
+          "name": "combat-config-live.jsonl",
+          "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\combat-config-live.jsonl",
+          "sha256": "dbf87819c02e022903c42ddfe6db813c7496a08dacca5f48e45d2fa060ba2abc"
+        }
+      ],
+      "rowsSha256": "65aeb4bb5b4654c8a2805f5e3524f2656358265cb411242498589c19d67f9897",
+      "schema": {
+        "types": [
+          "object"
+        ],
+        "fields": {
+          "chapterId": {
+            "types": [
+              "integer"
+            ]
+          },
+          "dungeonId": {
+            "types": [
+              "integer"
+            ]
+          },
+          "id": {
+            "types": [
+              "integer"
+            ]
+          },
+          "movieIcon": {
+            "types": [
+              "string"
+            ]
+          },
+          "res": {
+            "types": [
+              "string"
+            ]
+          },
+          "roleID": {
+            "types": [
+              "array"
+            ]
+          },
+          "storyType": {
+            "types": [
+              "integer"
+            ]
+          },
+          "winPlay": {
+            "types": [
+              "integer"
+            ]
+          }
+        }
+      }
+    },
+    "ChapterInfo": {
+      "rowCount": 35,
+      "observedCount": 35,
+      "completeness": "complete_observed",
+      "sourceFiles": [
+        "xlsx__chapterinfo.lua"
+      ],
+      "sourceRecords": [
+        {
+          "name": "xlsx__chapterinfo.lua",
+          "path": "analysis/lua-decompiled/xlsx__chapterinfo.lua",
+          "sha256": "a6f148474e9b4e7ab26d9becb0c8c13d0e76df14952d799d4703fc3465fc1970"
+        }
+      ],
+      "rowsSha256": "fd25468938e96560bda875fa789aa67c82c2b2c03fda1406387129c8671fd829",
+      "schema": {
+        "types": [
+          "object"
+        ],
+        "fields": {
+          "chapterId": {
+            "types": [
+              "integer"
+            ]
+          },
+          "chapterIndex": {
+            "types": [
+              "integer"
+            ]
+          },
+          "dungeonId": {
+            "types": [
+              "array"
+            ],
+            "items": {
+              "types": [
+                "integer"
+              ]
+            }
+          },
+          "dungeonTypeStar": {
+            "types": [
+              "integer"
+            ]
+          },
+          "keyDungeonId": {
+            "types": [
+              "array"
+            ],
+            "items": {
+              "types": [
+                "integer"
+              ]
+            }
+          },
+          "maxRandomDungeon": {
+            "types": [
+              "integer"
+            ]
+          },
+          "preChapterId": {
+            "types": [
+              "integer"
+            ]
+          },
+          "randomDungeonInfo": {
+            "types": [
+              "array"
+            ]
+          },
+          "storyChapterId": {
+            "types": [
+              "integer"
+            ]
+          },
+          "trainingId": {
+            "types": [
+              "integer"
+            ]
+          },
+          "type": {
+            "types": [
+              "integer"
+            ]
+          }
+        }
+      }
+    },
+    "CollectionsScenes": {
+      "rowCount": 19,
+      "observedCount": 19,
+      "completeness": "complete_observed",
+      "sourceFiles": [
+        "starter-config-live.jsonl"
+      ],
+      "sourceRecords": [
+        {
+          "name": "starter-config-live.jsonl",
+          "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\starter-config-live.jsonl",
+          "sha256": "bb3dd78b742365ede9dd45f359be5d9df7786d7307e6082e4e92deb9cb3acfd9"
+        }
+      ],
+      "rowsSha256": "d9125c0baab861fbf2575fabcb3e0e80e6b1aa976bb738b7f86f7d0f71a89d03",
+      "schema": {
+        "types": [
+          "object"
+        ],
+        "fields": {
+          "bgmName": {
+            "types": [
+              "string"
+            ]
+          },
+          "bgmRes": {
+            "types": [
+              "string"
+            ]
+          },
+          "effectRes": {
+            "types": [
+              "string"
+            ]
+          },
+          "hide": {
+            "types": [
+              "boolean"
+            ]
+          },
+          "id": {
+            "types": [
+              "integer"
+            ]
+          },
+          "isDayType": {
+            "types": [
+              "boolean"
+            ]
+          },
+          "openTime": {
+            "types": [
+              "string"
+            ]
+          },
+          "taskId": {
+            "types": [
+              "integer"
+            ]
+          },
+          "textureRes": {
+            "types": [
+              "string"
+            ]
+          },
+          "unlockType": {
+            "types": [
+              "integer"
+            ]
+          }
+        }
+      }
+    },
+    "Dungeon": {
+      "rowCount": 0,
+      "observedCount": 0,
+      "completeness": "error",
+      "sourceFiles": [
+        "config-samples-live.jsonl"
+      ],
+      "sourceRecords": [
+        {
+          "name": "config-samples-live.jsonl",
+          "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\config-samples-live.jsonl",
+          "sha256": "85e1ca251f8355208917cf14a1aee0c5f1c419e8f0ee017a5723a19996daeb54"
+        }
+      ],
+      "rowsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "schema": {
+        "types": [
+          "unknown"
+        ]
+      },
+      "selectedError": "attempt to get length of a nil value"
+    },
+    "DungeonConfig": {
+      "rowCount": 0,
+      "observedCount": 0,
+      "completeness": "error",
+      "sourceFiles": [
+        "combat-config-live.jsonl"
+      ],
+      "sourceRecords": [
+        {
+          "name": "combat-config-live.jsonl",
+          "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\combat-config-live.jsonl",
+          "sha256": "dbf87819c02e022903c42ddfe6db813c7496a08dacca5f48e45d2fa060ba2abc"
+        }
+      ],
+      "rowsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "schema": {
+        "types": [
+          "unknown"
+        ]
+      },
+      "selectedError": "attempt to get length of a nil value"
+    },
+    "DungeonMonster": {
+      "rowCount": 4,
+      "observedCount": 916,
+      "completeness": "partial",
+      "sourceFiles": [
+        "story-config.json"
+      ],
+      "sourceRecords": [
+        {
+          "name": "story-config.json",
+          "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\story-config.json",
+          "sha256": "dd1d3b4b6e4815df53852b92bc58dafdf4acbb1dada32bc3bc37d6f569d07638"
+        }
+      ],
+      "rowsSha256": "30c1ab0ef9d2bf9dfe7982de1bd6ac7b13350de692e5da897b3e13302f777f66",
+      "schema": {
+        "types": [
+          "object"
+        ],
+        "fields": {
+          "aiFilename": {
+            "types": [
+              "string"
+            ]
+          },
+          "bornAnim": {
+            "types": [
+              "array"
+            ],
+            "items": {
+              "types": [
+                "integer"
+              ]
+            }
+          },
+          "dungeonID": {
+            "types": [
+              "integer"
+            ]
+          },
+          "failedDesc": {
+            "types": [
+              "array"
+            ],
+            "items": {
+              "types": [
+                "integer"
+              ]
+            }
+          },
+          "hintShow": {
+            "types": [
+              "integer"
+            ]
+          },
+          "level": {
+            "types": [
+              "array"
+            ],
+            "items": {
+              "types": [
+                "integer"
+              ]
+            }
+          },
+          "levelUpIndex": {
+            "types": [
+              "array"
+            ]
+          },
+          "monsterId": {
+            "types": [
+              "array"
+            ],
+            "items": {
+              "types": [
+                "integer"
+              ]
+            }
+          },
+          "musicID": {
+            "types": [
+              "string"
+            ]
+          },
+          "recommendID": {
+            "types": [
+              "array"
+            ]
+          },
+          "showDesc": {
+            "types": [
+              "array"
+            ]
+          },
+          "showType": {
+            "types": [
+              "array"
+            ],
+            "items": {
+              "types": [
+                "integer"
+              ]
+            }
+          },
+          "stageID": {
+            "types": [
+              "string"
+            ]
+          },
+          "stageIcon": {
+            "types": [
+              "integer"
+            ]
+          },
+          "team1Affix": {
+            "types": [
+              "array"
+            ]
+          },
+          "team2Affix": {
+            "types": [
+              "array"
+            ]
+          },
+          "winParam": {
+            "types": [
+              "array"
+            ],
+            "items": {
+              "types": [
+                "integer"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "DungeonNpc": {
+      "rowCount": 4,
+      "observedCount": 32,
+      "completeness": "partial",
+      "sourceFiles": [
+        "story-config.json"
+      ],
+      "sourceRecords": [
+        {
+          "name": "story-config.json",
+          "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\story-config.json",
+          "sha256": "dd1d3b4b6e4815df53852b92bc58dafdf4acbb1dada32bc3bc37d6f569d07638"
+        }
+      ],
+      "rowsSha256": "a4b834943e67bdc328ec75757d4a724473bd378def28b04c2211f856f06f9951",
+      "schema": {
+        "types": [
+          "object"
+        ],
+        "fields": {
+          "actorId": {
+            "types": [
+              "integer"
+            ]
+          },
+          "attrs": {
+            "types": [
+              "array"
+            ],
+            "items": {
+              "types": [
+                "object"
+              ],
+              "fields": {
+                "isRatio": {
+                  "types": [
+                    "boolean"
+                  ]
+                },
+                "type": {
+                  "types": [
+                    "integer"
+                  ]
+                },
+                "value": {
+                  "types": [
+                    "integer"
+                  ]
+                }
+              }
+            }
+          },
+          "level": {
+            "types": [
+              "integer"
+            ]
+          },
+          "npcId": {
+            "types": [
+              "integer"
+            ]
+          },
+          "quality": {
+            "types": [
+              "integer"
+            ]
+          },
+          "skillsLevel": {
+            "types": [
+              "array"
+            ],
+            "items": {
+              "types": [
+                "integer"
+              ]
+            }
+          },
+          "star": {
+            "types": [
+              "integer"
+            ]
+          },
+          "talents": {
+            "types": [
+              "array"
+            ],
+            "items": {
+              "types": [
+                "object"
+              ],
+              "fields": {
+                "talentId": {
+                  "types": [
+                    "integer"
+                  ]
+                },
+                "talentValue": {
+                  "types": [
+                    "integer"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "DungeonReward": {
+      "rowCount": 683,
+      "observedCount": 683,
+      "completeness": "complete_observed",
+      "sourceFiles": [
+        "xlsx__dungeonreward.lua"
+      ],
+      "sourceRecords": [
+        {
+          "name": "xlsx__dungeonreward.lua",
+          "path": "analysis/lua-decompiled/xlsx__dungeonreward.lua",
+          "sha256": "eb3592c7cfd249bd0782aa35f7a5103c426e5bcb0a9979941d89ff0d6668a6ca"
+        }
+      ],
+      "rowsSha256": "3cce8eda92606730eabe4096616d359375f45210e79a16e5d0f305ddb05aa8d8",
+      "schema": {
+        "types": [
+          "object"
+        ],
+        "fields": {
+          "addDrop": {
+            "types": [
+              "array"
+            ]
+          },
+          "chipExchangeDropCount": {
+            "types": [
+              "integer"
+            ]
+          },
+          "chipExchangePlayerPos": {
+            "types": [
+              "integer"
+            ]
+          },
+          "cost": {
+            "types": [
+              "array"
+            ],
+            "items": {
+              "types": [
+                "object"
+              ],
+              "fields": {
+                "count": {
+                  "types": [
+                    "integer"
+                  ]
+                },
+                "id": {
+                  "types": [
+                    "integer"
+                  ]
+                },
+                "type": {
+                  "types": [
+                    "integer"
+                  ]
+                }
+              }
+            }
+          },
+          "costWin": {
+            "types": [
+              "array"
+            ],
+            "items": {
+              "types": [
+                "object"
+              ],
+              "fields": {
+                "count": {
+                  "types": [
+                    "integer"
+                  ]
+                },
+                "id": {
+                  "types": [
+                    "integer"
+                  ]
+                },
+                "type": {
+                  "types": [
+                    "integer"
+                  ]
+                }
+              }
+            }
+          },
+          "difficultLevelHigh": {
+            "types": [
+              "integer"
+            ]
+          },
+          "difficultLevelLow": {
+            "types": [
+              "integer"
+            ]
+          },
+          "displayType": {
+            "types": [
+              "integer"
+            ]
+          },
+          "dropDisplay": {
+            "types": [
+              "array"
+            ],
+            "items": {
+              "types": [
+                "object"
+              ],
+              "fields": {
+                "count": {
+                  "types": [
+                    "integer"
+                  ]
+                },
+                "id": {
+                  "types": [
+                    "integer"
+                  ]
+                },
+                "type": {
+                  "types": [
+                    "integer"
+                  ]
+                }
+              }
+            }
+          },
+          "dropDisplayFirst": {
+            "types": [
+              "array"
+            ],
+            "items": {
+              "types": [
+                "object"
+              ],
+              "fields": {
+                "count": {
+                  "types": [
+                    "integer"
+                  ]
+                },
+                "id": {
+                  "types": [
+                    "integer"
+                  ]
+                },
+                "type": {
+                  "types": [
+                    "integer"
+                  ]
+                }
+              }
+            }
+          },
+          "dropDisplayOutside": {
+            "types": [
+              "array"
+            ],
+            "items": {
+              "types": [
+                "object"
+              ],
+              "fields": {
+                "count": {
+                  "types": [
+                    "integer"
+                  ]
+                },
+                "id": {
+                  "types": [
+                    "integer"
+                  ]
+                },
+                "type": {
+                  "types": [
+                    "integer"
+                  ]
+                }
+              }
+            }
+          },
+          "dropId": {
+            "types": [
+              "array"
+            ],
+            "items": {
+              "types": [
+                "string"
+              ]
+            }
+          },
+          "dropIdFirst": {
+            "types": [
+              "array"
+            ],
+            "items": {
+              "types": [
+                "string"
+              ]
+            }
+          },
+          "dropIdMultiple": {
+            "types": [
+              "array"
+            ]
+          },
+          "dungeonGroups": {
+            "types": [
+              "array"
+            ],
+            "items": {
+              "types": [
+                "integer"
+              ]
+            }
+          },
+          "dungeonId": {
+            "types": [
+              "integer"
+            ]
+          },
+          "enterCondition": {
+            "types": [
+              "array",
+              "object"
+            ],
+            "fields": {
+              "finishedChapterId": {
+                "types": [
+                  "integer"
+                ]
+              },
+              "finishedChapterIdIsOptional": {
+                "types": [
+                  "boolean"
+                ]
+              }
+            }
+          },
+          "enterTimes": {
+            "types": [
+              "integer"
+            ]
+          },
+          "expActor": {
+            "types": [
+              "integer"
+            ]
+          },
+          "expAssistant": {
+            "types": [
+              "integer"
+            ]
+          },
+          "expectCulDegree": {
+            "types": [
+              "integer"
+            ]
+          },
+          "notFight": {
+            "types": [
+              "integer"
+            ]
+          },
+          "preDungeonDoneTimes": {
+            "types": [
+              "integer"
+            ]
+          },
+          "preDungeonId": {
+            "types": [
+              "integer"
+            ]
+          },
+          "profitDropInfo": {
+            "types": [
+              "array"
+            ]
+          },
+          "randomDungeonUnlockSeconds": {
+            "types": [
+              "integer"
+            ]
+          },
+          "target": {
+            "types": [
+              "array"
+            ],
+            "items": {
+              "types": [
+                "object"
+              ],
+              "fields": {
+                "id": {
+                  "types": [
+                    "integer"
+                  ]
+                },
+                "param": {
+                  "types": [
+                    "array"
+                  ],
+                  "items": {
+                    "types": [
+                      "integer"
+                    ]
+                  }
+                },
+                "type": {
+                  "types": [
+                    "integer"
+                  ]
+                }
+              }
+            }
+          },
+          "triggeredEventPool": {
+            "types": [
+              "integer"
+            ]
+          },
+          "type": {
+            "types": [
+              "integer"
+            ]
+          },
+          "unlockLevel": {
+            "types": [
+              "integer"
+            ]
+          }
+        }
+      }
+    },
+    "DungeonScene": {
+      "rowCount": 0,
+      "observedCount": 0,
+      "completeness": "error",
+      "sourceFiles": [
+        "combat-config-live.jsonl"
+      ],
+      "sourceRecords": [
+        {
+          "name": "combat-config-live.jsonl",
+          "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\combat-config-live.jsonl",
+          "sha256": "dbf87819c02e022903c42ddfe6db813c7496a08dacca5f48e45d2fa060ba2abc"
+        }
+      ],
+      "rowsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "schema": {
+        "types": [
+          "unknown"
+        ]
+      },
+      "selectedError": "attempt to get length of a nil value"
+    },
+    "Misc": {
+      "rowCount": 1,
+      "observedCount": 1,
+      "completeness": "complete_observed",
+      "sourceFiles": [
+        "config-samples-live.jsonl"
+      ],
+      "sourceRecords": [
+        {
+          "name": "config-samples-live.jsonl",
+          "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\config-samples-live.jsonl",
+          "sha256": "85e1ca251f8355208917cf14a1aee0c5f1c419e8f0ee017a5723a19996daeb54"
+        }
+      ],
+      "rowsSha256": "4be28caeda07265fe6505eb0974fdc3a625858acdbc2ccfbe284a09e3a153531",
+      "schema": {
+        "types": [
+          "object"
+        ],
+        "fields": {
+          "CreditsListScrollVelocity": {
+            "types": [
+              "number"
+            ]
+          },
+          "actorAttrsVersion": {
+            "types": [
+              "integer"
+            ]
+          },
+          "actorDecomposeTalentCoef": {
+            "types": [
+              "number"
+            ]
+          },
+          "auraCooldown": {
+            "types": [
+              "integer"
+            ]
+          },
+          "auraRelationPointAddFriends": {
+            "types": [
+              "integer"
+            ]
+          },
+          "auraRelationPointAddStranger": {
+            "types": [
+              "integer"
+            ]
+          },
+          "burstPvpActorLevel": {
+            "types": [
+              "integer"
+            ]
+          },
+          "burstPvpActorQuality": {
+            "types": [
+              "integer"
+            ]
+          },
+          "burstPvpActorStar": {
+            "types": [
+              "integer"
+            ]
+          },
+          "burstPvpMatchMaxWaitTime": {
+            "types": [
+              "integer"
+            ]
+          },
+          "channels": {
+            "types": [
+              "array"
+            ],
+            "items": {
+              "types": [
+                "object"
+              ],
+              "fields": {
+                "id": {
+                  "types": [
+                    "string"
+                  ]
+                },
+                "name": {
+                  "types": [
+                    "string"
+                  ]
+                },
+                "privilegeIgnore": {
+                  "types": [
+                    "boolean"
+                  ]
+                }
+              }
+            }
+          },
+          "chatBanColdTime": {
+            "types": [
+              "integer"
+            ]
+          },
+          "chipExchangeMaxModifyCount": {
+            "types": [
+              "integer"
+            ]
+          },
+          "chipExchangeSet": {
+            "types": [
+              "array"
+            ],
+            "items": {
+              "types": [
+                "integer"
+              ]
+            }
+          },
+          "citySceneUpdateTime1": {
+            "types": [
+              "integer"
+            ]
+          },
+          "citySceneUpdateTime2": {
+            "types": [
+              "integer"
+            ]
+          },
+          "clawCraneCost": {
+            "types": [
+              "object"
+            ],
+            "fields": {
+              "count": {
+                "types": [
+                  "integer"
+                ]
+              },
+              "id": {
+                "types": [
+                  "integer"
+                ]
+              },
+              "type": {
+                "types": [
+                  "integer"
+                ]
+              }
+            }
+          },
+          "clawCraneSupplyTime": {
+            "types": [
+              "string"
+            ]
+          },
+          "clawCraneTotalProbability": {
+            "types": [
+              "integer"
+            ]
+          },
+          "clickLikeLimit": {
+            "types": [
+              "integer"
+            ]
+          },
+          "cultivationPVPHideRanks": {
+            "types": [
+              "integer"
+            ]
+          },
+          "dailyRefreshTime": {
+            "types": [
+              "string"
+            ]
+          },
+          "dailyRefreshZeroTime": {
+            "types": [
+              "string"
+            ]
+          },
+          "dailySubscribeCheckTime": {
+            "types": [
+              "string"
+            ]
+          },
+          "danMuIntervalSeconds": {
+            "types": [
+              "integer"
+            ]
+          },
+          "dayPassiveTriggeredEventLimit": {
+            "types": [
+              "integer"
+            ]
+          },
+          "dayTriggeredEventActiveCloseTime": {
+            "types": [
+              "string"
+            ]
+          },
+          "dayTriggeredEventActiveOpenTime": {
+            "types": [
+              "string"
+            ]
+          },
+          "dayTriggeredEventFinishLimit": {
+            "types": [
+              "integer"
+            ]
+          },
+          "dayTriggeredEventPassiveCloseTime": {
+            "types": [
+              "string"
+            ]
+          },
+          "dayTriggeredEventPassiveOpenTime": {
+            "types": [
+              "string"
+            ]
+          },
+          "defaultLanguage": {
+            "types": [
+              "integer"
+            ]
+          },
+          "deployFavourCycle": {
+            "types": [
+              "integer"
+            ]
+          },
+          "dungeonActorOverflowExp": {
+            "types": [
+              "integer"
+            ]
+          },
+          "dungeonBalanceFavour": {
+            "types": [
+              "integer"
+            ]
+          },
+          "equipExpToResource": {
+            "types": [
+              "object"
+            ],
+            "fields": {
+              "count": {
+                "types": [
+                  "integer"
+                ]
+              },
+              "type": {
+                "types": [
+                  "integer"
+                ]
+              }
+            }
+          },
+          "fightInteractionInterval": {
+            "types": [
+              "integer"
+            ]
+          },
+          "forceLimitedPoolCount": {
+            "types": [
+              "integer"
+            ]
+          },
+          "friendApplyLevelMax": {
+            "types": [
+              "integer"
+            ]
+          },
+          "friendApplyLevelMin": {
+            "types": [
+              "integer"
+            ]
+          },
+          "gachaForceOrangeProbabilitiy": {
+            "types": [
+              "integer"
+            ]
+          },
+          "gachaFreeTime": {
+            "types": [
+              "string"
+            ]
+          },
+          "gachaMaxCountOnce": {
+            "types": [
+              "integer"
+            ]
+          },
+          "gachaOrangeSameTypeCount": {
+            "types": [
+              "integer"
+            ]
+          },
+          "gachaPointGenRation": {
+            "types": [
+              "integer"
+            ]
+          },
+          "gachaPurpleSameTypeCount": {
+            "types": [
+              "integer"
+            ]
+          },
+          "gachaRecordActorMax": {
+            "types": [
+              "integer"
+            ]
+          },
+          "gachaRecordActorTalentScore": {
+            "types": [
+              "integer"
+            ]
+          },
+          "gameCenterDSRewardCount": {
+            "types": [
+              "integer"
+            ]
+          },
+          "gameCenterDSRewardType": {
+            "types": [
+              "integer"
+            ]
+          },
+          "gameDataReportOnlineTimePeriod": {
+            "types": [
+              "integer"
+            ]
+          },
+          "gameDataReportPurchaseTimePeriod": {
+            "types": [
+              "integer"
+            ]
+          },
+          "guildDungeonCloseTime": {
+            "types": [
+              "string"
+            ]
+          },
+          "guildDungeonOpenTime": {
+            "types": [
+              "string"
+            ]
+          },
+          "limitGachaPurpleProbability": {
+            "types": [
+              "integer"
+            ]
+          },
+          "mailAttachmentLevelLimit": {
+            "types": [
+              "integer"
+            ]
+          },
+          "mailWarningCount": {
+            "types": [
+              "integer"
+            ]
+          },
+          "maxAccomplishDeployNum": {
+            "types": [
+              "integer"
+            ]
+          },
+          "maxActorCommentCount": {
+            "types": [
+              "integer"
+            ]
+          },
+          "maxActorCommentCountOneDay": {
+            "types": [
+              "integer"
+            ]
+          },
+          "maxActorGroup": {
+            "types": [
+              "integer"
+            ]
+          },
+          "maxActorLevel": {
+            "types": [
+              "integer"
+            ]
+          },
+          "maxActorWarningCount": {
+            "types": [
+              "integer"
+            ]
+          },
+          "maxAnyPurchase": {
+            "types": [
+              "integer"
+            ]
+          },
+          "maxAsyncPVPActorGroup": {
+            "types": [
+              "integer"
+            ]
+          },
+          "maxBlackContactNum": {
+            "types": [
+              "integer"
+            ]
+          },
+          "maxCardGroupNum": {
+            "types": [
+              "integer"
+            ]
+          },
+          "maxChatLen": {
+            "types": [
+              "integer"
+            ]
+          },
+          "maxCongratsRoleNum": {
+            "types": [
+              "integer"
+            ]
+          },
+          "maxDanmuTextLength": {
+            "types": [
+              "integer"
+            ]
+          },
+          "maxDanmuVideoLength": {
+            "types": [
+              "integer"
+            ]
+          },
+          "maxEquipWarningCount": {
+            "types": [
+              "integer"
+            ]
+          },
+          "maxFriendApplyListNum": {
+            "types": [
+              "integer"
+            ]
+          },
+          "maxFriendNum": {
+            "types": [
+              "integer"
+            ]
+          },
+          "maxGlobalMail": {
+            "types": [
+              "integer"
+            ]
+          },
+          "maxGoldActorGroup": {
+            "types": [
+              "integer"
+            ]
+          },
+          "maxNameLen": {
+            "types": [
+              "integer"
+            ]
+          },
+          "maxNotifyDeployNum": {
+            "types": [
+              "integer"
+            ]
+          },
+          "maxOfflineChatNum": {
+            "types": [
+              "integer"
+            ]
+          },
+          "maxPlayerMail": {
+            "types": [
+              "integer"
+            ]
+          },
+          "maxRacePVPActorGroup": {
+            "types": [
+              "integer"
+            ]
+          },
+          "maxRacePvpPlyNum": {
+            "types": [
+              "integer"
+            ]
+          },
+          "maxRecentContact": {
+            "types": [
+              "integer"
+            ]
+          },
+          "maxReportedScore": {
+            "types": [
+              "integer"
+            ]
+          },
+          "maxResetTalentCount": {
+            "types": [
+              "integer"
+            ]
+          },
+          "maxRoleFavourLevel": {
+            "types": [
+              "integer"
+            ]
+          },
+          "maxSkillPoint": {
+            "types": [
+              "integer"
+            ]
+          },
+          "maxStarLevel": {
+            "types": [
+              "integer"
+            ]
+          },
+          "maxTowerActorGroup": {
+            "types": [
+              "integer"
+            ]
+          },
+          "maxTriggeredEventOfflineMessageNum": {
+            "types": [
+              "integer"
+            ]
+          },
+          "maxTriggeredEventOwnCount": {
+            "types": [
+              "integer"
+            ]
+          },
+          "maxUnlockPosterScore": {
+            "types": [
+              "integer"
+            ]
+          },
+          "maxWorldSubChannelCapacity": {
+            "types": [
+              "integer"
+            ]
+          },
+          "maxWorldSubChannelCount": {
+            "types": [
+              "integer"
+            ]
+          },
+          "maxWorldSubChannelWeight": {
+            "types": [
+              "integer"
+            ]
+          },
+          "minAnyPurchase": {
+            "types": [
+              "integer"
+            ]
+          },
+          "minCongratsFavourLv": {
+            "types": [
+              "integer"
+            ]
+          },
+          "modifyNameTutorialLevel": {
+            "types": [
+              "integer"
+            ]
+          },
+          "monthCardIncreaseDays": {
+            "types": [
+              "integer"
+            ]
+          },
+          "monthCardRewardDaily": {
+            "types": [
+              "array"
+            ],
+            "items": {
+              "types": [
+                "object"
+              ],
+              "fields": {
+                "count": {
+                  "types": [
+                    "integer"
+                  ]
+                },
+                "type": {
+                  "types": [
+                    "integer"
+                  ]
+                }
+              }
+            }
+          },
+          "msdkFriendIcon": {
+            "types": [
+              "string"
+            ]
+          },
+          "normalGachaPurpleProbability": {
+            "types": [
+              "integer"
+            ]
+          },
+          "notepadEventVoiceOpenLevel": {
+            "types": [
+              "integer"
+            ]
+          },
+          "notifyCD": {
+            "types": [
+              "object"
+            ],
+            "fields": {
+              "deployFinish": {
+                "types": [
+                  "integer"
+                ]
+              },
+              "powerFull": {
+                "types": [
+                  "integer"
+                ]
+              }
+            }
+          },
+          "oneStarRewardCount": {
+            "types": [
+              "integer"
+            ]
+          },
+          "payTestRechargeEndTime": {
+            "types": [
+              "string"
+            ]
+          },
+          "payTestRewardStartTime": {
+            "types": [
+              "string"
+            ]
+          },
+          "percentAttrNum": {
+            "types": [
+              "integer"
+            ]
+          },
+          "playerHeadCount": {
+            "types": [
+              "integer"
+            ]
+          },
+          "purblePairsMaxCntPerDay": {
+            "types": [
+              "integer"
+            ]
+          },
+          "purblePairsPerGroupCnt": {
+            "types": [
+              "integer"
+            ]
+          },
+          "purblePairsTotalCnt": {
+            "types": [
+              "integer"
+            ]
+          },
+          "pvpMaxDieNum": {
+            "types": [
+              "integer"
+            ]
+          },
+          "pvpMaxRandTime": {
+            "types": [
+              "integer"
+            ]
+          },
+          "pvpMaxWinNum": {
+            "types": [
+              "integer"
+            ]
+          },
+          "pvpMinRandTime": {
+            "types": [
+              "integer"
+            ]
+          },
+          "pvpOneRandActorNum": {
+            "types": [
+              "integer"
+            ]
+          },
+          "pvpRandTimes": {
+            "types": [
+              "integer"
+            ]
+          },
+          "pvpTickets": {
+            "types": [
+              "integer"
+            ]
+          },
+          "qqSubscribeSceneId": {
+            "types": [
+              "array"
+            ],
+            "items": {
+              "types": [
+                "integer"
+              ]
+            }
+          },
+          "racePVPGroupMaxPlayer": {
+            "types": [
+              "integer"
+            ]
+          },
+          "racePVPRoundNum": {
+            "types": [
+              "integer"
+            ]
+          },
+          "racePVPTicketNum": {
+            "types": [
+              "integer"
+            ]
+          },
+          "racePvpMaxRandTime": {
+            "types": [
+              "integer"
+            ]
+          },
+          "racePvpMinRandTime": {
+            "types": [
+              "integer"
+            ]
+          },
+          "recallSinceLastLogin": {
+            "types": [
+              "integer"
+            ]
+          },
+          "relationPointDailyLimit": {
+            "types": [
+              "integer"
+            ]
+          },
+          "reportedGuildNum": {
+            "types": [
+              "integer"
+            ]
+          },
+          "reportedIpLimit": {
+            "types": [
+              "integer"
+            ]
+          },
+          "reportedRefreshTime": {
+            "types": [
+              "integer"
+            ]
+          },
+          "resetTalentIndexPos": {
+            "types": [
+              "integer"
+            ]
+          },
+          "rolePresentInterval": {
+            "types": [
+              "integer"
+            ]
+          },
+          "rolePresentMaxNum": {
+            "types": [
+              "integer"
+            ]
+          },
+          "signboardFavourCycle": {
+            "types": [
+              "integer"
+            ]
+          },
+          "signboardFavourValue": {
+            "types": [
+              "integer"
+            ]
+          },
+          "spaceBooksCount": {
+            "types": [
+              "integer"
+            ]
+          },
+          "talentCheckVersion": {
+            "types": [
+              "integer"
+            ]
+          },
+          "talentRatio": {
+            "types": [
+              "integer"
+            ]
+          },
+          "taskPresentRewardBoxId": {
+            "types": [
+              "integer"
+            ]
+          },
+          "teamDungeonTicket": {
+            "types": [
+              "object"
+            ],
+            "fields": {
+              "count": {
+                "types": [
+                  "integer"
+                ]
+              },
+              "id": {
+                "types": [
+                  "integer"
+                ]
+              },
+              "type": {
+                "types": [
+                  "integer"
+                ]
+              }
+            }
+          },
+          "towerShowNextAwardCount": {
+            "types": [
+              "integer"
+            ]
+          },
+          "triggeredEventActiveInterval": {
+            "types": [
+              "integer"
+            ]
+          },
+          "triggeredEventLastTime": {
+            "types": [
+              "integer"
+            ]
+          },
+          "triggeredEventPassiveInterval": {
+            "types": [
+              "integer"
+            ]
+          },
+          "triggeredEventTickets": {
+            "types": [
+              "array"
+            ],
+            "items": {
+              "types": [
+                "integer"
+              ]
+            }
+          },
+          "unlockFightSpeedLevel": {
+            "types": [
+              "integer"
+            ]
+          },
+          "unlockNoticeSystemLevel": {
+            "types": [
+              "integer"
+            ]
+          },
+          "vipSuperDSRewardCount": {
+            "types": [
+              "integer"
+            ]
+          },
+          "vipSuperDSRewardType": {
+            "types": [
+              "integer"
+            ]
+          },
+          "wxSubscribeMsgId": {
+            "types": [
+              "array"
+            ],
+            "items": {
+              "types": [
+                "integer"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "PlayerInitConfig": {
+      "rowCount": 0,
+      "observedCount": 0,
+      "completeness": "error",
+      "sourceFiles": [
+        "starter-config-live.jsonl"
+      ],
+      "sourceRecords": [
+        {
+          "name": "starter-config-live.jsonl",
+          "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\starter-config-live.jsonl",
+          "sha256": "bb3dd78b742365ede9dd45f359be5d9df7786d7307e6082e4e92deb9cb3acfd9"
+        }
+      ],
+      "rowsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "schema": {
+        "types": [
+          "unknown"
+        ]
+      },
+      "selectedError": "attempt to get length of a nil value"
+    },
+    "PlayerLevelInitConfig": {
+      "rowCount": 6,
+      "observedCount": 99,
+      "completeness": "partial",
+      "sourceFiles": [
+        "config-samples-live.jsonl",
+        "starter-config-live.jsonl"
+      ],
+      "sourceRecords": [
+        {
+          "name": "config-samples-live.jsonl",
+          "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\config-samples-live.jsonl",
+          "sha256": "85e1ca251f8355208917cf14a1aee0c5f1c419e8f0ee017a5723a19996daeb54"
+        },
+        {
+          "name": "starter-config-live.jsonl",
+          "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\starter-config-live.jsonl",
+          "sha256": "bb3dd78b742365ede9dd45f359be5d9df7786d7307e6082e4e92deb9cb3acfd9"
+        }
+      ],
+      "rowsSha256": "89e78a8b9dd4583f5796545c6c86f7f471a6a34a944a8ce19d5c8f109f800af6",
+      "schema": {
+        "types": [
+          "object"
+        ],
+        "fields": {
+          "equipLevelLimit": {
+            "types": [
+              "integer"
+            ]
+          },
+          "exp": {
+            "types": [
+              "integer"
+            ]
+          },
+          "incInfo": {
+            "types": [
+              "array"
+            ],
+            "items": {
+              "types": [
+                "object"
+              ],
+              "fields": {
+                "inc": {
+                  "types": [
+                    "integer"
+                  ]
+                },
+                "incSeconds": {
+                  "types": [
+                    "integer"
+                  ]
+                },
+                "limit": {
+                  "types": [
+                    "integer"
+                  ]
+                },
+                "max": {
+                  "types": [
+                    "integer"
+                  ]
+                },
+                "type": {
+                  "types": [
+                    "integer"
+                  ]
+                }
+              }
+            }
+          },
+          "level": {
+            "types": [
+              "integer"
+            ]
+          },
+          "levelReward": {
+            "types": [
+              "array"
+            ],
+            "items": {
+              "types": [
+                "object"
+              ],
+              "fields": {
+                "count": {
+                  "types": [
+                    "integer"
+                  ]
+                },
+                "type": {
+                  "types": [
+                    "integer"
+                  ]
+                }
+              }
+            }
+          },
+          "maxRecvRelationPointOneDay": {
+            "types": [
+              "integer"
+            ]
+          },
+          "nextUnlockWindow": {
+            "types": [
+              "array"
+            ],
+            "items": {
+              "types": [
+                "integer"
+              ]
+            }
+          },
+          "unlockWindow": {
+            "types": [
+              "array"
+            ],
+            "items": {
+              "types": [
+                "integer"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "Role": {
+      "rowCount": 6,
+      "observedCount": 58,
+      "completeness": "partial",
+      "sourceFiles": [
+        "config-samples-live.jsonl"
+      ],
+      "sourceRecords": [
+        {
+          "name": "config-samples-live.jsonl",
+          "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\config-samples-live.jsonl",
+          "sha256": "85e1ca251f8355208917cf14a1aee0c5f1c419e8f0ee017a5723a19996daeb54"
+        }
+      ],
+      "rowsSha256": "b4e60b5f1eca50cce5c19c5201a93ca70e1cbd7da93bbeb24fdc761b13688ba9",
+      "schema": {
+        "types": [
+          "object"
+        ],
+        "fields": {
+          "animRes": {
+            "types": [
+              "string"
+            ]
+          },
+          "decomposeRes": {
+            "types": [
+              "object"
+            ],
+            "fields": {
+              "id": {
+                "types": [
+                  "integer"
+                ]
+              },
+              "type": {
+                "types": [
+                  "integer"
+                ]
+              }
+            }
+          },
+          "donateRefund": {
+            "types": [
+              "object"
+            ],
+            "fields": {
+              "count": {
+                "types": [
+                  "integer"
+                ]
+              },
+              "type": {
+                "types": [
+                  "integer"
+                ]
+              }
+            }
+          },
+          "emoteActorId": {
+            "types": [
+              "integer"
+            ]
+          },
+          "favourActor": {
+            "types": [
+              "boolean"
+            ]
+          },
+          "id": {
+            "types": [
+              "integer"
+            ]
+          }
+        }
+      }
+    },
+    "RoleFavour": {
+      "rowCount": 0,
+      "observedCount": 0,
+      "completeness": "error",
+      "sourceFiles": [
+        "combat-config-live.jsonl"
+      ],
+      "sourceRecords": [
+        {
+          "name": "combat-config-live.jsonl",
+          "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\combat-config-live.jsonl",
+          "sha256": "dbf87819c02e022903c42ddfe6db813c7496a08dacca5f48e45d2fa060ba2abc"
+        }
+      ],
+      "rowsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "schema": {
+        "types": [
+          "unknown"
+        ]
+      },
+      "selectedError": "attempt to get length of a nil value"
+    },
+    "Signboard": {
+      "rowCount": 6,
+      "observedCount": 96,
+      "completeness": "partial",
+      "sourceFiles": [
+        "config-samples-live.jsonl"
+      ],
+      "sourceRecords": [
+        {
+          "name": "config-samples-live.jsonl",
+          "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\config-samples-live.jsonl",
+          "sha256": "85e1ca251f8355208917cf14a1aee0c5f1c419e8f0ee017a5723a19996daeb54"
+        }
+      ],
+      "rowsSha256": "b9efe295cb0e06283a5f36d6d6163ffb1e89149fa19b2c9ad36fa743c978d75f",
+      "schema": {
+        "types": [
+          "object"
+        ],
+        "fields": {
+          "BoardOfAnimRes": {
+            "types": [
+              "integer"
+            ]
+          },
+          "BoardOfEmote": {
+            "types": [
+              "integer"
+            ]
+          },
+          "FavourLevel": {
+            "types": [
+              "integer"
+            ]
+          },
+          "active": {
+            "types": [
+              "boolean"
+            ]
+          },
+          "activeTime": {
+            "types": [
+              "string"
+            ]
+          },
+          "roleId": {
+            "types": [
+              "integer"
+            ]
+          },
+          "roleNotepadRes": {
+            "types": [
+              "string"
+            ]
+          },
+          "signboardId": {
+            "types": [
+              "integer"
+            ]
+          },
+          "type": {
+            "types": [
+              "integer"
+            ]
+          },
+          "unlockParams": {
+            "types": [
+              "array"
+            ]
+          },
+          "unlockType": {
+            "types": [
+              "integer"
+            ]
+          }
+        }
+      }
+    },
+    "SingleActorGroup": {
+      "rowCount": 4,
+      "observedCount": 5,
+      "completeness": "partial",
+      "sourceFiles": [
+        "story-config.json"
+      ],
+      "sourceRecords": [
+        {
+          "name": "story-config.json",
+          "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\story-config.json",
+          "sha256": "dd1d3b4b6e4815df53852b92bc58dafdf4acbb1dada32bc3bc37d6f569d07638"
+        }
+      ],
+      "rowsSha256": "8082bf7519473789677c441864a774dce1d531049dae5b1f2c5f4966a113c4ee",
+      "schema": {
+        "types": [
+          "object"
+        ],
+        "fields": {
+          "groupID": {
+            "types": [
+              "integer"
+            ]
+          },
+          "groupmember": {
+            "types": [
+              "array"
+            ],
+            "items": {
+              "types": [
+                "integer"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "StoryDungeon": {
+      "rowCount": 4,
+      "observedCount": 119,
+      "completeness": "partial",
+      "sourceFiles": [
+        "story-config.json"
+      ],
+      "sourceRecords": [
+        {
+          "name": "story-config.json",
+          "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\story-config.json",
+          "sha256": "dd1d3b4b6e4815df53852b92bc58dafdf4acbb1dada32bc3bc37d6f569d07638"
+        }
+      ],
+      "rowsSha256": "1ae9e945ce9ebc6f568771281ceabbcfa1f688617482064cd29fc9a2dde0d26b",
+      "schema": {
+        "types": [
+          "object"
+        ],
+        "fields": {
+          "dungeonId": {
+            "types": [
+              "integer"
+            ]
+          },
+          "guide": {
+            "types": [
+              "integer"
+            ]
+          },
+          "level": {
+            "types": [
+              "array"
+            ],
+            "items": {
+              "types": [
+                "integer"
+              ]
+            }
+          },
+          "levelUpIndex": {
+            "types": [
+              "array"
+            ]
+          },
+          "monsterId": {
+            "types": [
+              "array"
+            ],
+            "items": {
+              "types": [
+                "integer"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "Tutorial": {
+      "rowCount": 6,
+      "observedCount": 55,
+      "completeness": "partial",
+      "sourceFiles": [
+        "config-samples-live.jsonl"
+      ],
+      "sourceRecords": [
+        {
+          "name": "config-samples-live.jsonl",
+          "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\config-samples-live.jsonl",
+          "sha256": "85e1ca251f8355208917cf14a1aee0c5f1c419e8f0ee017a5723a19996daeb54"
+        }
+      ],
+      "rowsSha256": "f0df05fae64d668dc0af0e16847654751afbcea0402a0d63e78093a5108fc664",
+      "schema": {
+        "types": [
+          "object"
+        ],
+        "fields": {
+          "id": {
+            "types": [
+              "integer"
+            ]
+          },
+          "sequence": {
+            "types": [
+              "integer"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

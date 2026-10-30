@@ -1,0 +1,1151 @@
+{
+  "entries": [
+    {
+      "confidence": "D",
+      "date": null,
+      "file": "activity-schedule.yaml",
+      "localPolicy": true,
+      "path": "cycle.anchor",
+      "source": "local compatibility policy; historical production schedule is unavailable",
+      "status": "documented",
+      "value": "2026-10-26T06:00:00Z"
+    },
+    {
+      "confidence": "D",
+      "date": null,
+      "file": "activity-schedule.yaml",
+      "localPolicy": true,
+      "path": "cycle.periodDays",
+      "source": "local compatibility policy; historical production schedule is unavailable",
+      "status": "documented",
+      "value": 28
+    },
+    {
+      "confidence": "D",
+      "date": null,
+      "file": "activity-schedule.yaml",
+      "localPolicy": true,
+      "path": "cycle.phases[0].activityType",
+      "source": "local compatibility policy; historical production schedule is unavailable",
+      "status": "documented",
+      "value": 46
+    },
+    {
+      "confidence": "D",
+      "date": null,
+      "file": "activity-schedule.yaml",
+      "localPolicy": true,
+      "path": "cycle.phases[0].dayEnd",
+      "source": "local compatibility policy; historical production schedule is unavailable",
+      "status": "documented",
+      "value": 7
+    },
+    {
+      "confidence": "D",
+      "date": null,
+      "file": "activity-schedule.yaml",
+      "localPolicy": true,
+      "path": "cycle.phases[0].dayStart",
+      "source": "local compatibility policy; historical production schedule is unavailable",
+      "status": "documented",
+      "value": 0
+    },
+    {
+      "confidence": "D",
+      "date": null,
+      "file": "activity-schedule.yaml",
+      "localPolicy": true,
+      "path": "cycle.phases[0].id",
+      "source": "local compatibility policy; historical production schedule is unavailable",
+      "status": "documented",
+      "value": "sign-in"
+    },
+    {
+      "confidence": "D",
+      "date": null,
+      "file": "activity-schedule.yaml",
+      "localPolicy": true,
+      "path": "cycle.phases[1].activityType",
+      "source": "local compatibility policy; historical production schedule is unavailable",
+      "status": "documented",
+      "value": 12
+    },
+    {
+      "confidence": "D",
+      "date": null,
+      "file": "activity-schedule.yaml",
+      "localPolicy": true,
+      "path": "cycle.phases[1].dayEnd",
+      "source": "local compatibility policy; historical production schedule is unavailable",
+      "status": "documented",
+      "value": 28
+    },
+    {
+      "confidence": "D",
+      "date": null,
+      "file": "activity-schedule.yaml",
+      "localPolicy": true,
+      "path": "cycle.phases[1].dayStart",
+      "source": "local compatibility policy; historical production schedule is unavailable",
+      "status": "documented",
+      "value": 0
+    },
+    {
+      "confidence": "D",
+      "date": null,
+      "file": "activity-schedule.yaml",
+      "localPolicy": true,
+      "path": "cycle.phases[1].id",
+      "source": "local compatibility policy; historical production schedule is unavailable",
+      "status": "documented",
+      "value": "shop"
+    },
+    {
+      "confidence": "D",
+      "date": null,
+      "file": "activity-schedule.yaml",
+      "localPolicy": true,
+      "path": "cycle.phases[2].activityType",
+      "source": "local compatibility policy; historical production schedule is unavailable",
+      "status": "documented",
+      "value": 25
+    },
+    {
+      "confidence": "D",
+      "date": null,
+      "file": "activity-schedule.yaml",
+      "localPolicy": true,
+      "path": "cycle.phases[2].dayEnd",
+      "source": "local compatibility policy; historical production schedule is unavailable",
+      "status": "documented",
+      "value": 21
+    },
+    {
+      "confidence": "D",
+      "date": null,
+      "file": "activity-schedule.yaml",
+      "localPolicy": true,
+      "path": "cycle.phases[2].dayStart",
+      "source": "local compatibility policy; historical production schedule is unavailable",
+      "status": "documented",
+      "value": 7
+    },
+    {
+      "confidence": "D",
+      "date": null,
+      "file": "activity-schedule.yaml",
+      "localPolicy": true,
+      "path": "cycle.phases[2].id",
+      "source": "local compatibility policy; historical production schedule is unavailable",
+      "status": "documented",
+      "value": "sandbox-gacha"
+    },
+    {
+      "confidence": "D",
+      "date": null,
+      "file": "activity-schedule.yaml",
+      "localPolicy": true,
+      "path": "management.adminEndpoint",
+      "source": "local compatibility policy; historical production schedule is unavailable",
+      "status": "documented",
+      "value": "/__local__/admin/activity-schedule"
+    },
+    {
+      "confidence": "D",
+      "date": null,
+      "file": "activity-schedule.yaml",
+      "localPolicy": true,
+      "path": "management.canAdjustAnchor",
+      "source": "local compatibility policy; historical production schedule is unavailable",
+      "status": "documented",
+      "value": true
+    },
+    {
+      "confidence": "D",
+      "date": null,
+      "file": "activity-schedule.yaml",
+      "localPolicy": true,
+      "path": "timezone",
+      "source": "local compatibility policy; historical production schedule is unavailable",
+      "status": "documented",
+      "value": "UTC"
+    },
+    {
+      "confidence": "C",
+      "date": null,
+      "file": "economy.yaml",
+      "localPolicy": false,
+      "path": "daily.activityReward.count",
+      "source": "data/local-defaults.json and data/config/Misc.json",
+      "status": "documented",
+      "value": 50
+    },
+    {
+      "confidence": "C",
+      "date": null,
+      "file": "economy.yaml",
+      "localPolicy": false,
+      "path": "daily.activityReward.id",
+      "source": "data/local-defaults.json and data/config/Misc.json",
+      "status": "documented",
+      "value": 0
+    },
+    {
+      "confidence": "C",
+      "date": null,
+      "file": "economy.yaml",
+      "localPolicy": false,
+      "path": "daily.activityReward.type",
+      "source": "data/local-defaults.json and data/config/Misc.json",
+      "status": "documented",
+      "value": 7
+    },
+    {
+      "confidence": "C",
+      "date": null,
+      "file": "economy.yaml",
+      "localPolicy": false,
+      "path": "daily.refreshTime",
+      "source": "data/local-defaults.json and data/config/Misc.json",
+      "status": "documented",
+      "value": "06:00:00"
+    },
+    {
+      "confidence": "C",
+      "date": null,
+      "file": "economy.yaml",
+      "localPolicy": false,
+      "path": "daily.signInReward.count",
+      "source": "data/local-defaults.json and data/config/Misc.json",
+      "status": "documented",
+      "value": 100
+    },
+    {
+      "confidence": "C",
+      "date": null,
+      "file": "economy.yaml",
+      "localPolicy": false,
+      "path": "daily.signInReward.id",
+      "source": "data/local-defaults.json and data/config/Misc.json",
+      "status": "documented",
+      "value": 0
+    },
+    {
+      "confidence": "C",
+      "date": null,
+      "file": "economy.yaml",
+      "localPolicy": false,
+      "path": "daily.signInReward.type",
+      "source": "data/local-defaults.json and data/config/Misc.json",
+      "status": "documented",
+      "value": 7
+    },
+    {
+      "confidence": "C",
+      "date": null,
+      "file": "economy.yaml",
+      "localPolicy": false,
+      "path": "gacha.forceOrangeCount",
+      "source": "data/local-defaults.json and data/config/Misc.json",
+      "status": "documented",
+      "value": 30
+    },
+    {
+      "confidence": "C",
+      "date": null,
+      "file": "economy.yaml",
+      "localPolicy": false,
+      "path": "gacha.freeTime",
+      "source": "data/local-defaults.json and data/config/Misc.json",
+      "status": "documented",
+      "value": "06:00:00"
+    },
+    {
+      "confidence": "C",
+      "date": null,
+      "file": "economy.yaml",
+      "localPolicy": false,
+      "path": "gacha.limitedPurpleProbability",
+      "source": "data/local-defaults.json and data/config/Misc.json",
+      "status": "documented",
+      "value": 1000
+    },
+    {
+      "confidence": "C",
+      "date": null,
+      "file": "economy.yaml",
+      "localPolicy": false,
+      "path": "gacha.maxCountOnce",
+      "source": "data/local-defaults.json and data/config/Misc.json",
+      "status": "documented",
+      "value": 100
+    },
+    {
+      "confidence": "C",
+      "date": null,
+      "file": "economy.yaml",
+      "localPolicy": false,
+      "path": "gacha.normalPurpleProbability",
+      "source": "data/local-defaults.json and data/config/Misc.json",
+      "status": "documented",
+      "value": 500
+    },
+    {
+      "confidence": "C",
+      "date": null,
+      "file": "economy.yaml",
+      "localPolicy": false,
+      "path": "resources.player_gold.initial",
+      "source": "data/local-defaults.json and data/config/Misc.json",
+      "status": "documented",
+      "value": 20000
+    },
+    {
+      "confidence": "C",
+      "date": null,
+      "file": "economy.yaml",
+      "localPolicy": false,
+      "path": "resources.player_gold.type",
+      "source": "data/local-defaults.json and data/config/Misc.json",
+      "status": "documented",
+      "value": 7
+    },
+    {
+      "confidence": "C",
+      "date": null,
+      "file": "economy.yaml",
+      "localPolicy": false,
+      "path": "resources.player_money.initial",
+      "source": "data/local-defaults.json and data/config/Misc.json",
+      "status": "documented",
+      "value": 0
+    },
+    {
+      "confidence": "C",
+      "date": null,
+      "file": "economy.yaml",
+      "localPolicy": false,
+      "path": "resources.player_money.type",
+      "source": "data/local-defaults.json and data/config/Misc.json",
+      "status": "documented",
+      "value": 5
+    },
+    {
+      "confidence": "C",
+      "date": null,
+      "file": "economy.yaml",
+      "localPolicy": false,
+      "path": "resources.player_power.capacity",
+      "source": "data/local-defaults.json and data/config/Misc.json",
+      "status": "documented",
+      "value": 120
+    },
+    {
+      "confidence": "C",
+      "date": null,
+      "file": "economy.yaml",
+      "localPolicy": false,
+      "path": "resources.player_power.initial",
+      "source": "data/local-defaults.json and data/config/Misc.json",
+      "status": "documented",
+      "value": 120
+    },
+    {
+      "confidence": "C",
+      "date": null,
+      "file": "economy.yaml",
+      "localPolicy": false,
+      "path": "resources.player_power.recoverySeconds",
+      "source": "data/local-defaults.json and data/config/Misc.json",
+      "status": "documented",
+      "value": 360
+    },
+    {
+      "confidence": "C",
+      "date": null,
+      "file": "economy.yaml",
+      "localPolicy": false,
+      "path": "resources.player_power.type",
+      "source": "data/local-defaults.json and data/config/Misc.json",
+      "status": "documented",
+      "value": 6
+    },
+    {
+      "confidence": "C",
+      "date": null,
+      "file": "economy.yaml",
+      "localPolicy": false,
+      "path": "shop.localRefreshTime",
+      "source": "data/local-defaults.json and data/config/Misc.json",
+      "status": "documented",
+      "value": "06:00:00"
+    },
+    {
+      "confidence": "C",
+      "date": null,
+      "file": "economy.yaml",
+      "localPolicy": false,
+      "path": "shop.sandboxCurrencyType",
+      "source": "data/local-defaults.json and data/config/Misc.json",
+      "status": "documented",
+      "value": 7
+    },
+    {
+      "confidence": "C",
+      "date": "2026-10-28",
+      "file": "historical-evidence.yaml",
+      "localPolicy": false,
+      "path": "facts.halloweenPuzzle.eventEnd",
+      "source": "Public historical notices and guides listed in each source record",
+      "status": "documented",
+      "value": "2018-11-11T24:00:00+08:00"
+    },
+    {
+      "confidence": "C",
+      "date": "2026-10-28",
+      "file": "historical-evidence.yaml",
+      "localPolicy": false,
+      "path": "facts.halloweenPuzzle.eventStart",
+      "source": "Public historical notices and guides listed in each source record",
+      "status": "documented",
+      "value": "2018-10-25T06:00:00+08:00"
+    },
+    {
+      "confidence": "C",
+      "date": "2026-10-28",
+      "file": "historical-evidence.yaml",
+      "localPolicy": false,
+      "path": "facts.halloweenPuzzle.explorationStageCandy",
+      "source": "Public historical notices and guides listed in each source record",
+      "status": "documented",
+      "value": 8
+    },
+    {
+      "confidence": "C",
+      "date": "2026-10-28",
+      "file": "historical-evidence.yaml",
+      "localPolicy": false,
+      "path": "facts.halloweenPuzzle.milestonePieces[0]",
+      "source": "Public historical notices and guides listed in each source record",
+      "status": "documented",
+      "value": 5
+    },
+    {
+      "confidence": "C",
+      "date": "2026-10-28",
+      "file": "historical-evidence.yaml",
+      "localPolicy": false,
+      "path": "facts.halloweenPuzzle.milestonePieces[1]",
+      "source": "Public historical notices and guides listed in each source record",
+      "status": "documented",
+      "value": 15
+    },
+    {
+      "confidence": "C",
+      "date": "2026-10-28",
+      "file": "historical-evidence.yaml",
+      "localPolicy": false,
+      "path": "facts.halloweenPuzzle.milestonePieces[2]",
+      "source": "Public historical notices and guides listed in each source record",
+      "status": "documented",
+      "value": 30
+    },
+    {
+      "confidence": "C",
+      "date": "2026-10-28",
+      "file": "historical-evidence.yaml",
+      "localPolicy": false,
+      "path": "facts.halloweenPuzzle.normalStageCandy",
+      "source": "Public historical notices and guides listed in each source record",
+      "status": "documented",
+      "value": 1
+    },
+    {
+      "confidence": "C",
+      "date": "2026-10-28",
+      "file": "historical-evidence.yaml",
+      "localPolicy": false,
+      "path": "facts.halloweenPuzzle.puzzleCostCandy",
+      "source": "Public historical notices and guides listed in each source record",
+      "status": "documented",
+      "value": 25
+    },
+    {
+      "confidence": "C",
+      "date": "2026-10-28",
+      "file": "historical-evidence.yaml",
+      "localPolicy": false,
+      "path": "facts.halloweenPuzzle.rewardStageCandy",
+      "source": "Public historical notices and guides listed in each source record",
+      "status": "documented",
+      "value": 2
+    },
+    {
+      "confidence": "C",
+      "date": "2026-10-28",
+      "file": "historical-evidence.yaml",
+      "localPolicy": false,
+      "path": "facts.halloweenPuzzle.weekendMultiplier",
+      "source": "Public historical notices and guides listed in each source record",
+      "status": "documented",
+      "value": 2
+    },
+    {
+      "confidence": "C",
+      "date": "2026-10-28",
+      "file": "historical-evidence.yaml",
+      "localPolicy": false,
+      "path": "facts.historical06HourPattern.eventOpeningTime",
+      "source": "Public historical notices and guides listed in each source record",
+      "status": "documented",
+      "value": "06:00"
+    },
+    {
+      "confidence": "C",
+      "date": "2026-10-28",
+      "file": "historical-evidence.yaml",
+      "localPolicy": false,
+      "path": "facts.historical06HourPattern.expeditionRefillDay",
+      "source": "Public historical notices and guides listed in each source record",
+      "status": "documented",
+      "value": "Monday"
+    },
+    {
+      "confidence": "C",
+      "date": "2026-10-28",
+      "file": "historical-evidence.yaml",
+      "localPolicy": false,
+      "path": "facts.historical06HourPattern.expeditionRefillTime",
+      "source": "Public historical notices and guides listed in each source record",
+      "status": "documented",
+      "value": "06:00"
+    },
+    {
+      "confidence": "C",
+      "date": "2026-10-28",
+      "file": "historical-evidence.yaml",
+      "localPolicy": false,
+      "path": "facts.historical06HourPattern.expeditionWeeklyRefill",
+      "source": "Public historical notices and guides listed in each source record",
+      "status": "documented",
+      "value": 3
+    },
+    {
+      "confidence": "C",
+      "date": "2026-10-28",
+      "file": "historical-evidence.yaml",
+      "localPolicy": false,
+      "path": "facts.shutdown.accountDataPolicy",
+      "source": "Public historical notices and guides listed in each source record",
+      "status": "documented",
+      "value": "The notice says account and character data would be deleted after shutdown, subject to its stated exceptions."
+    },
+    {
+      "confidence": "C",
+      "date": "2026-10-28",
+      "file": "historical-evidence.yaml",
+      "localPolicy": false,
+      "path": "facts.shutdown.registrationStoppedAt",
+      "source": "Public historical notices and guides listed in each source record",
+      "status": "documented",
+      "value": "2020-01-21T11:00:00+08:00"
+    },
+    {
+      "confidence": "C",
+      "date": "2026-10-28",
+      "file": "historical-evidence.yaml",
+      "localPolicy": false,
+      "path": "facts.shutdown.serviceStoppedAt",
+      "source": "Public historical notices and guides listed in each source record",
+      "status": "documented",
+      "value": "2020-03-23T11:00:00+08:00"
+    },
+    {
+      "confidence": "C",
+      "date": "2026-10-28",
+      "file": "historical-evidence.yaml",
+      "localPolicy": false,
+      "path": "sources[0].id",
+      "source": "Public historical notices and guides listed in each source record",
+      "status": "documented",
+      "value": "taptap-shutdown-notice"
+    },
+    {
+      "confidence": "C",
+      "date": "2026-10-28",
+      "file": "historical-evidence.yaml",
+      "localPolicy": false,
+      "path": "sources[0].published",
+      "source": "Public historical notices and guides listed in each source record",
+      "status": "documented",
+      "value": "2020-01-21"
+    },
+    {
+      "confidence": "C",
+      "date": "2026-10-28",
+      "file": "historical-evidence.yaml",
+      "localPolicy": false,
+      "path": "sources[0].publisher",
+      "source": "Public historical notices and guides listed in each source record",
+      "status": "documented",
+      "value": "TapTap / 电击文库：零境交错运营团队"
+    },
+    {
+      "confidence": "C",
+      "date": "2026-10-28",
+      "file": "historical-evidence.yaml",
+      "localPolicy": false,
+      "path": "sources[0].supports",
+      "source": "Public historical notices and guides listed in each source record",
+      "status": "documented",
+      "value": "Registration shutdown, service shutdown and account-data deletion schedule"
+    },
+    {
+      "confidence": "C",
+      "date": "2026-10-28",
+      "file": "historical-evidence.yaml",
+      "localPolicy": false,
+      "path": "sources[0].title",
+      "source": "Public historical notices and guides listed in each source record",
+      "status": "documented",
+      "value": "《电击文库：零境交错》停运公告"
+    },
+    {
+      "confidence": "C",
+      "date": "2026-10-28",
+      "file": "historical-evidence.yaml",
+      "localPolicy": false,
+      "path": "sources[0].url",
+      "source": "Public historical notices and guides listed in each source record",
+      "status": "documented",
+      "value": "https://www.taptap.cn/moment/15230002106729285"
+    },
+    {
+      "confidence": "C",
+      "date": "2026-10-28",
+      "file": "historical-evidence.yaml",
+      "localPolicy": false,
+      "path": "sources[1].id",
+      "source": "Public historical notices and guides listed in each source record",
+      "status": "documented",
+      "value": "taptap-2019-update-thread"
+    },
+    {
+      "confidence": "C",
+      "date": "2026-10-28",
+      "file": "historical-evidence.yaml",
+      "localPolicy": false,
+      "path": "sources[1].published",
+      "source": "Public historical notices and guides listed in each source record",
+      "status": "documented",
+      "value": "2019-03-13"
+    },
+    {
+      "confidence": "C",
+      "date": "2026-10-28",
+      "file": "historical-evidence.yaml",
+      "localPolicy": false,
+      "path": "sources[1].publisher",
+      "source": "Public historical notices and guides listed in each source record",
+      "status": "documented",
+      "value": "TapTap / 零境事务所"
+    },
+    {
+      "confidence": "C",
+      "date": "2026-10-28",
+      "file": "historical-evidence.yaml",
+      "localPolicy": false,
+      "path": "sources[1].supports",
+      "source": "Public historical notices and guides listed in each source record",
+      "status": "documented",
+      "value": "Historical 06:00 activity openings, weekly expedition ticket refill and event descriptions"
+    },
+    {
+      "confidence": "C",
+      "date": "2026-10-28",
+      "file": "historical-evidence.yaml",
+      "localPolicy": false,
+      "path": "sources[1].title",
+      "source": "Public historical notices and guides listed in each source record",
+      "status": "documented",
+      "value": "3月13日游戏更新说明：天赋异常问题处理通知/更新调整等进展公告"
+    },
+    {
+      "confidence": "C",
+      "date": "2026-10-28",
+      "file": "historical-evidence.yaml",
+      "localPolicy": false,
+      "path": "sources[1].url",
+      "source": "Public historical notices and guides listed in each source record",
+      "status": "documented",
+      "value": "https://www.taptap.cn/moment/15212131674751592"
+    },
+    {
+      "confidence": "C",
+      "date": "2026-10-28",
+      "file": "historical-evidence.yaml",
+      "localPolicy": false,
+      "path": "sources[2].id",
+      "source": "Public historical notices and guides listed in each source record",
+      "status": "documented",
+      "value": "3dm-halloween-2018"
+    },
+    {
+      "confidence": "C",
+      "date": "2026-10-28",
+      "file": "historical-evidence.yaml",
+      "localPolicy": false,
+      "path": "sources[2].published",
+      "source": "Public historical notices and guides listed in each source record",
+      "status": "documented",
+      "value": "2018-10-29"
+    },
+    {
+      "confidence": "C",
+      "date": "2026-10-28",
+      "file": "historical-evidence.yaml",
+      "localPolicy": false,
+      "path": "sources[2].publisher",
+      "source": "Public historical notices and guides listed in each source record",
+      "status": "documented",
+      "value": "3DM手游"
+    },
+    {
+      "confidence": "C",
+      "date": "2026-10-28",
+      "file": "historical-evidence.yaml",
+      "localPolicy": false,
+      "path": "sources[2].supports",
+      "source": "Public historical notices and guides listed in each source record",
+      "status": "documented",
+      "value": "Halloween puzzle event window, candy costs, stage drops and milestone rewards"
+    },
+    {
+      "confidence": "C",
+      "date": "2026-10-28",
+      "file": "historical-evidence.yaml",
+      "localPolicy": false,
+      "path": "sources[2].title",
+      "source": "Public historical notices and guides listed in each source record",
+      "status": "documented",
+      "value": "《电击文库：零境交错》万圣前夜活动玩法介绍"
+    },
+    {
+      "confidence": "C",
+      "date": "2026-10-28",
+      "file": "historical-evidence.yaml",
+      "localPolicy": false,
+      "path": "sources[2].url",
+      "source": "Public historical notices and guides listed in each source record",
+      "status": "documented",
+      "value": "https://shouyou.3dmgame.com/gl/100661.html"
+    },
+    {
+      "confidence": "D",
+      "date": "2026-10-28",
+      "file": "special-dungeons.yaml",
+      "localPolicy": true,
+      "path": "resource_types.gold",
+      "source": "local-sandbox",
+      "status": "documented",
+      "value": 7
+    },
+    {
+      "confidence": "D",
+      "date": "2026-10-28",
+      "file": "special-dungeons.yaml",
+      "localPolicy": true,
+      "path": "resource_types.power",
+      "source": "local-sandbox",
+      "status": "documented",
+      "value": 6
+    },
+    {
+      "confidence": "D",
+      "date": "2026-10-28",
+      "file": "special-dungeons.yaml",
+      "localPolicy": true,
+      "path": "stages.gold.energy_cost",
+      "source": "local-sandbox",
+      "status": "documented",
+      "value": 1
+    },
+    {
+      "confidence": "D",
+      "date": "2026-10-28",
+      "file": "special-dungeons.yaml",
+      "localPolicy": true,
+      "path": "stages.gold.id",
+      "source": "local-sandbox",
+      "status": "documented",
+      "value": 900001
+    },
+    {
+      "confidence": "D",
+      "date": "2026-10-28",
+      "file": "special-dungeons.yaml",
+      "localPolicy": true,
+      "path": "stages.gold.reward[0].count",
+      "source": "local-sandbox",
+      "status": "documented",
+      "value": 5000
+    },
+    {
+      "confidence": "D",
+      "date": "2026-10-28",
+      "file": "special-dungeons.yaml",
+      "localPolicy": true,
+      "path": "stages.gold.reward[0].id",
+      "source": "local-sandbox",
+      "status": "documented",
+      "value": 0
+    },
+    {
+      "confidence": "D",
+      "date": "2026-10-28",
+      "file": "special-dungeons.yaml",
+      "localPolicy": true,
+      "path": "stages.gold.reward[0].param",
+      "source": "local-sandbox",
+      "status": "documented",
+      "value": 0
+    },
+    {
+      "confidence": "D",
+      "date": "2026-10-28",
+      "file": "special-dungeons.yaml",
+      "localPolicy": true,
+      "path": "stages.gold.reward[0].type",
+      "source": "local-sandbox",
+      "status": "documented",
+      "value": 7
+    },
+    {
+      "confidence": "D",
+      "date": "2026-10-28",
+      "file": "special-dungeons.yaml",
+      "localPolicy": true,
+      "path": "stages.maze.energy_cost",
+      "source": "local-sandbox",
+      "status": "documented",
+      "value": 1
+    },
+    {
+      "confidence": "D",
+      "date": "2026-10-28",
+      "file": "special-dungeons.yaml",
+      "localPolicy": true,
+      "path": "stages.maze.id",
+      "source": "local-sandbox",
+      "status": "documented",
+      "value": 900201
+    },
+    {
+      "confidence": "D",
+      "date": "2026-10-28",
+      "file": "special-dungeons.yaml",
+      "localPolicy": true,
+      "path": "stages.maze.layers",
+      "source": "local-sandbox",
+      "status": "documented",
+      "value": 10
+    },
+    {
+      "confidence": "D",
+      "date": "2026-10-28",
+      "file": "special-dungeons.yaml",
+      "localPolicy": true,
+      "path": "stages.maze.reward[0].count",
+      "source": "local-sandbox",
+      "status": "documented",
+      "value": 1000
+    },
+    {
+      "confidence": "D",
+      "date": "2026-10-28",
+      "file": "special-dungeons.yaml",
+      "localPolicy": true,
+      "path": "stages.maze.reward[0].id",
+      "source": "local-sandbox",
+      "status": "documented",
+      "value": 0
+    },
+    {
+      "confidence": "D",
+      "date": "2026-10-28",
+      "file": "special-dungeons.yaml",
+      "localPolicy": true,
+      "path": "stages.maze.reward[0].param",
+      "source": "local-sandbox",
+      "status": "documented",
+      "value": 0
+    },
+    {
+      "confidence": "D",
+      "date": "2026-10-28",
+      "file": "special-dungeons.yaml",
+      "localPolicy": true,
+      "path": "stages.maze.reward[0].type",
+      "source": "local-sandbox",
+      "status": "documented",
+      "value": 7
+    },
+    {
+      "confidence": "D",
+      "date": "2026-10-28",
+      "file": "special-dungeons.yaml",
+      "localPolicy": true,
+      "path": "stages.maze.reward[1].count",
+      "source": "local-sandbox",
+      "status": "documented",
+      "value": 1
+    },
+    {
+      "confidence": "D",
+      "date": "2026-10-28",
+      "file": "special-dungeons.yaml",
+      "localPolicy": true,
+      "path": "stages.maze.reward[1].id",
+      "source": "local-sandbox",
+      "status": "documented",
+      "value": 910001
+    },
+    {
+      "confidence": "D",
+      "date": "2026-10-28",
+      "file": "special-dungeons.yaml",
+      "localPolicy": true,
+      "path": "stages.maze.reward[1].param",
+      "source": "local-sandbox",
+      "status": "documented",
+      "value": 0
+    },
+    {
+      "confidence": "D",
+      "date": "2026-10-28",
+      "file": "special-dungeons.yaml",
+      "localPolicy": true,
+      "path": "stages.maze.reward[1].type",
+      "source": "local-sandbox",
+      "status": "documented",
+      "value": 11
+    },
+    {
+      "confidence": "D",
+      "date": "2026-10-28",
+      "file": "special-dungeons.yaml",
+      "localPolicy": true,
+      "path": "stages.tournament.energy_cost",
+      "source": "local-sandbox",
+      "status": "documented",
+      "value": 0
+    },
+    {
+      "confidence": "D",
+      "date": "2026-10-28",
+      "file": "special-dungeons.yaml",
+      "localPolicy": true,
+      "path": "stages.tournament.id",
+      "source": "local-sandbox",
+      "status": "documented",
+      "value": 900301
+    },
+    {
+      "confidence": "D",
+      "date": "2026-10-28",
+      "file": "special-dungeons.yaml",
+      "localPolicy": true,
+      "path": "stages.tournament.reward[0].count",
+      "source": "local-sandbox",
+      "status": "documented",
+      "value": 1500
+    },
+    {
+      "confidence": "D",
+      "date": "2026-10-28",
+      "file": "special-dungeons.yaml",
+      "localPolicy": true,
+      "path": "stages.tournament.reward[0].id",
+      "source": "local-sandbox",
+      "status": "documented",
+      "value": 0
+    },
+    {
+      "confidence": "D",
+      "date": "2026-10-28",
+      "file": "special-dungeons.yaml",
+      "localPolicy": true,
+      "path": "stages.tournament.reward[0].param",
+      "source": "local-sandbox",
+      "status": "documented",
+      "value": 0
+    },
+    {
+      "confidence": "D",
+      "date": "2026-10-28",
+      "file": "special-dungeons.yaml",
+      "localPolicy": true,
+      "path": "stages.tournament.reward[0].type",
+      "source": "local-sandbox",
+      "status": "documented",
+      "value": 7
+    },
+    {
+      "confidence": "D",
+      "date": "2026-10-28",
+      "file": "special-dungeons.yaml",
+      "localPolicy": true,
+      "path": "stages.tournament.reward[1].count",
+      "source": "local-sandbox",
+      "status": "documented",
+      "value": 1
+    },
+    {
+      "confidence": "D",
+      "date": "2026-10-28",
+      "file": "special-dungeons.yaml",
+      "localPolicy": true,
+      "path": "stages.tournament.reward[1].id",
+      "source": "local-sandbox",
+      "status": "documented",
+      "value": 920001
+    },
+    {
+      "confidence": "D",
+      "date": "2026-10-28",
+      "file": "special-dungeons.yaml",
+      "localPolicy": true,
+      "path": "stages.tournament.reward[1].param",
+      "source": "local-sandbox",
+      "status": "documented",
+      "value": 0
+    },
+    {
+      "confidence": "D",
+      "date": "2026-10-28",
+      "file": "special-dungeons.yaml",
+      "localPolicy": true,
+      "path": "stages.tournament.reward[1].type",
+      "source": "local-sandbox",
+      "status": "documented",
+      "value": 11
+    },
+    {
+      "confidence": "D",
+      "date": "2026-10-28",
+      "file": "special-dungeons.yaml",
+      "localPolicy": true,
+      "path": "stages.tournament.stages",
+      "source": "local-sandbox",
+      "status": "documented",
+      "value": 10
+    },
+    {
+      "confidence": "D",
+      "date": "2026-10-28",
+      "file": "special-dungeons.yaml",
+      "localPolicy": true,
+      "path": "stages.tower.energy_cost",
+      "source": "local-sandbox",
+      "status": "documented",
+      "value": 0
+    },
+    {
+      "confidence": "D",
+      "date": "2026-10-28",
+      "file": "special-dungeons.yaml",
+      "localPolicy": true,
+      "path": "stages.tower.floors",
+      "source": "local-sandbox",
+      "status": "documented",
+      "value": 10
+    },
+    {
+      "confidence": "D",
+      "date": "2026-10-28",
+      "file": "special-dungeons.yaml",
+      "localPolicy": true,
+      "path": "stages.tower.id",
+      "source": "local-sandbox",
+      "status": "documented",
+      "value": 900101
+    },
+    {
+      "confidence": "D",
+      "date": "2026-10-28",
+      "file": "special-dungeons.yaml",
+      "localPolicy": true,
+      "path": "stages.tower.reward_per_floor[0].count",
+      "source": "local-sandbox",
+      "status": "documented",
+      "value": 1000
+    },
+    {
+      "confidence": "D",
+      "date": "2026-10-28",
+      "file": "special-dungeons.yaml",
+      "localPolicy": true,
+      "path": "stages.tower.reward_per_floor[0].id",
+      "source": "local-sandbox",
+      "status": "documented",
+      "value": 0
+    },
+    {
+      "confidence": "D",
+      "date": "2026-10-28",
+      "file": "special-dungeons.yaml",
+      "localPolicy": true,
+      "path": "stages.tower.reward_per_floor[0].param",
+      "source": "local-sandbox",
+      "status": "documented",
+      "value": 0
+    },
+    {
+      "confidence": "D",
+      "date": "2026-10-28",
+      "file": "special-dungeons.yaml",
+      "localPolicy": true,
+      "path": "stages.tower.reward_per_floor[0].type",
+      "source": "local-sandbox",
+      "status": "documented",
+      "value": 7
+    }
+  ],
+  "files": [
+    {
+      "entries": 17,
+      "file": "activity-schedule.yaml",
+      "status": "ok"
+    },
+    {
+      "entries": 22,
+      "file": "economy.yaml",
+      "status": "ok"
+    },
+    {
+      "entries": 35,
+      "file": "historical-evidence.yaml",
+      "status": "ok"
+    },
+    {
+      "entries": 37,
+      "file": "special-dungeons.yaml",
+      "status": "ok"
+    }
+  ],
+  "root": "I:\\workspace\\mobilegame\\local-server\\ljjc\\data\\server-only",
+  "schemaVersion": 1,
+  "summary": {
+    "byConfidence": {
+      "A": 0,
+      "B": 0,
+      "C": 57,
+      "D": 54
+    },
+    "documented": 111,
+    "entries": 111,
+    "files": 4,
+    "localPolicy": 54,
+    "needsSource": 0
+  }
+}

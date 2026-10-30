@@ -1,0 +1,44 @@
+schemaVersion: 1
+provenance:
+  source: "Public historical notices and guides listed in each source record"
+  confidence: C
+  date: "2026-10-28"
+  note: "Evidence only. These records are not wired into the local server rules and do not prove a complete official backend export."
+sources:
+  - id: taptap-shutdown-notice
+    title: "《电击文库：零境交错》停运公告"
+    url: "https://www.taptap.cn/moment/15230002106729285"
+    publisher: "TapTap / 电击文库：零境交错运营团队"
+    published: "2020-01-21"
+    supports: "Registration shutdown, service shutdown and account-data deletion schedule"
+  - id: taptap-2019-update-thread
+    title: "3月13日游戏更新说明：天赋异常问题处理通知/更新调整等进展公告"
+    url: "https://www.taptap.cn/moment/15212131674751592"
+    publisher: "TapTap / 零境事务所"
+    published: "2019-03-13"
+    supports: "Historical 06:00 activity openings, weekly expedition ticket refill and event descriptions"
+  - id: 3dm-halloween-2018
+    title: "《电击文库：零境交错》万圣前夜活动玩法介绍"
+    url: "https://shouyou.3dmgame.com/gl/100661.html"
+    publisher: "3DM手游"
+    published: "2018-10-29"
+    supports: "Halloween puzzle event window, candy costs, stage drops and milestone rewards"
+facts:
+  shutdown:
+    registrationStoppedAt: "2020-01-21T11:00:00+08:00"
+    serviceStoppedAt: "2020-03-23T11:00:00+08:00"
+    accountDataPolicy: "The notice says account and character data would be deleted after shutdown, subject to its stated exceptions."
+  historical06HourPattern:
+    eventOpeningTime: "06:00"
+    expeditionWeeklyRefill: 3
+    expeditionRefillDay: "Monday"
+    expeditionRefillTime: "06:00"
+  halloweenPuzzle:
+    eventStart: "2018-10-25T06:00:00+08:00"
+    eventEnd: "2018-11-11T24:00:00+08:00"
+    puzzleCostCandy: 25
+    normalStageCandy: 1
+    rewardStageCandy: 2
+    explorationStageCandy: 8
+    weekendMultiplier: 2
+    milestonePieces: [5, 15, 30]

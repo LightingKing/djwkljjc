@@ -1,0 +1,225 @@
+{
+  "schemaVersion": 1,
+  "table": "ActorQualityInfo",
+  "observedCount": 388,
+  "rowCount": 4,
+  "completeness": "partial",
+  "sourceFiles": [
+    "story-config.json"
+  ],
+  "sourceRecords": [
+    {
+      "name": "story-config.json",
+      "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\story-config.json",
+      "sha256": "dd1d3b4b6e4815df53852b92bc58dafdf4acbb1dada32bc3bc37d6f569d07638"
+    }
+  ],
+  "rowsSha256": "a0717517c7b2da951514cd160de5f0ee6809e2242ab69c7e3f5f24bb257b30ad",
+  "schema": {
+    "types": [
+      "object"
+    ],
+    "fields": {
+      "actorId": {
+        "types": [
+          "integer"
+        ]
+      },
+      "effectActorIdAttr": {
+        "types": [
+          "object"
+        ],
+        "fields": {
+          "attr": {
+            "types": [
+              "array"
+            ]
+          },
+          "ids": {
+            "types": [
+              "array"
+            ]
+          }
+        }
+      },
+      "effectAttrs": {
+        "types": [
+          "array"
+        ],
+        "items": {
+          "types": [
+            "object"
+          ],
+          "fields": {
+            "isRatio": {
+              "types": [
+                "boolean"
+              ]
+            },
+            "type": {
+              "types": [
+                "integer"
+              ]
+            },
+            "value": {
+              "types": [
+                "integer"
+              ]
+            }
+          }
+        }
+      },
+      "effectBookIdAttr": {
+        "types": [
+          "object"
+        ],
+        "fields": {
+          "attr": {
+            "types": [
+              "array"
+            ]
+          },
+          "ids": {
+            "types": [
+              "array"
+            ]
+          }
+        }
+      },
+      "effectRoleIdAttr": {
+        "types": [
+          "object"
+        ],
+        "fields": {
+          "attr": {
+            "types": [
+              "array"
+            ]
+          },
+          "ids": {
+            "types": [
+              "array"
+            ]
+          }
+        }
+      },
+      "quality": {
+        "types": [
+          "integer"
+        ]
+      },
+      "talentResetUpgradeFloor": {
+        "types": [
+          "integer"
+        ]
+      },
+      "talentResetUpgradeRate": {
+        "types": [
+          "integer"
+        ]
+      }
+    }
+  },
+  "rows": [
+    {
+      "actorId": 1001,
+      "effectActorIdAttr": {
+        "attr": [],
+        "ids": []
+      },
+      "effectAttrs": [
+        {
+          "isRatio": true,
+          "type": 7,
+          "value": 100
+        }
+      ],
+      "effectBookIdAttr": {
+        "attr": [],
+        "ids": []
+      },
+      "effectRoleIdAttr": {
+        "attr": [],
+        "ids": []
+      },
+      "quality": 1,
+      "talentResetUpgradeFloor": 20,
+      "talentResetUpgradeRate": 903
+    },
+    {
+      "actorId": 1002,
+      "effectActorIdAttr": {
+        "attr": [],
+        "ids": []
+      },
+      "effectAttrs": [
+        {
+          "isRatio": true,
+          "type": 7,
+          "value": 100
+        }
+      ],
+      "effectBookIdAttr": {
+        "attr": [],
+        "ids": []
+      },
+      "effectRoleIdAttr": {
+        "attr": [],
+        "ids": []
+      },
+      "quality": 1,
+      "talentResetUpgradeFloor": 20,
+      "talentResetUpgradeRate": 903
+    },
+    {
+      "actorId": 1003,
+      "effectActorIdAttr": {
+        "attr": [],
+        "ids": []
+      },
+      "effectAttrs": [
+        {
+          "isRatio": true,
+          "type": 13,
+          "value": 50
+        }
+      ],
+      "effectBookIdAttr": {
+        "attr": [],
+        "ids": []
+      },
+      "effectRoleIdAttr": {
+        "attr": [],
+        "ids": []
+      },
+      "quality": 1,
+      "talentResetUpgradeFloor": 20,
+      "talentResetUpgradeRate": 903
+    },
+    {
+      "actorId": 1004,
+      "effectActorIdAttr": {
+        "attr": [],
+        "ids": []
+      },
+      "effectAttrs": [
+        {
+          "isRatio": true,
+          "type": 13,
+          "value": 50
+        }
+      ],
+      "effectBookIdAttr": {
+        "attr": [],
+        "ids": []
+      },
+      "effectRoleIdAttr": {
+        "attr": [],
+        "ids": []
+      },
+      "quality": 1,
+      "talentResetUpgradeFloor": 20,
+      "talentResetUpgradeRate": 903
+    }
+  ]
+}

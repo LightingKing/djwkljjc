@@ -1,0 +1,58 @@
+# Values used only by the local compatibility server.  They are deliberately
+# separated from extracted APK tables; none of these entries is claimed to be
+# an authoritative value from the retired production backend.
+schemaVersion: 1
+provenance:
+  source: data/local-defaults.json and data/config/Misc.json
+  confidence: C
+  note: "Local compatibility defaults selected from checked-in runtime samples; verify against archived player records before treating as historical values."
+resources:
+  player_power:
+    type: 6
+    initial: 120
+    # capacity/recoverySeconds are only the legacy LocalGame fallback
+    # (game.py _load_energy_policy).  The client rule is level based:
+    # PlayerLevelInitConfig.incInfo[type 6] = +inc every incSeconds (1 / 450 s)
+    # up to max (60 at level 1, +2 per level, 256 at 99).  economy.py
+    # energy_policy()/apply_energy_recovery() use that table, never clamp a
+    # balance above max (level rewards, purchases), and serve
+    # fci/baseresource/update/.
+    capacity: 120
+    recoverySeconds: 360
+    levelPolicy: PlayerLevelInitConfig.incInfo
+  player_gold:
+    type: 7
+    initial: 20000
+  player_money:
+    type: 5
+    initial: 0
+daily:
+  refreshTime: "06:00:00"
+  signInReward:
+    type: 7
+    id: 0
+    count: 100
+  activityReward:
+    type: 7
+    id: 0
+    count: 50
+gacha:
+  freeTime: "06:00:00"
+  maxCountOnce: 100
+  normalPurpleProbability: 500
+  limitedPurpleProbability: 1000
+  forceOrangeCount: 30
+shop:
+  localRefreshTime: "06:00:00"
+  sandboxCurrencyType: 7
+  # Shop ids, goods, prices, limits and refresh rules: data/server-only/shop.yaml
+  catalog: shop.yaml
+resBuy:
+  # fci/resbuyprice/: the nth purchase of a RefreshPrice type in one daily
+  # bucket (06:00 reset, game.daily_key) costs the row with count == n; the
+  # number of rows is the daily limit; rows without count are unlimited.
+  priceTable: RefreshPrice
+  dailyReset: "06:00:00"
+  # Window_ResourceExchange refuses buying power at/above incInfo.max
+  # ("Window_ReachPowerLimit"); the server mirrors that check.
+  powerPurchaseRequiresBelowMax: true

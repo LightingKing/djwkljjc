@@ -1,0 +1,307 @@
+{
+  "schemaVersion": 1,
+  "table": "PlayerLevelInitConfig",
+  "observedCount": 99,
+  "rowCount": 6,
+  "completeness": "partial",
+  "sourceFiles": [
+    "config-samples-live.jsonl",
+    "starter-config-live.jsonl"
+  ],
+  "sourceRecords": [
+    {
+      "name": "config-samples-live.jsonl",
+      "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\config-samples-live.jsonl",
+      "sha256": "85e1ca251f8355208917cf14a1aee0c5f1c419e8f0ee017a5723a19996daeb54"
+    },
+    {
+      "name": "starter-config-live.jsonl",
+      "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\starter-config-live.jsonl",
+      "sha256": "bb3dd78b742365ede9dd45f359be5d9df7786d7307e6082e4e92deb9cb3acfd9"
+    }
+  ],
+  "rowsSha256": "89e78a8b9dd4583f5796545c6c86f7f471a6a34a944a8ce19d5c8f109f800af6",
+  "schema": {
+    "types": [
+      "object"
+    ],
+    "fields": {
+      "equipLevelLimit": {
+        "types": [
+          "integer"
+        ]
+      },
+      "exp": {
+        "types": [
+          "integer"
+        ]
+      },
+      "incInfo": {
+        "types": [
+          "array"
+        ],
+        "items": {
+          "types": [
+            "object"
+          ],
+          "fields": {
+            "inc": {
+              "types": [
+                "integer"
+              ]
+            },
+            "incSeconds": {
+              "types": [
+                "integer"
+              ]
+            },
+            "limit": {
+              "types": [
+                "integer"
+              ]
+            },
+            "max": {
+              "types": [
+                "integer"
+              ]
+            },
+            "type": {
+              "types": [
+                "integer"
+              ]
+            }
+          }
+        }
+      },
+      "level": {
+        "types": [
+          "integer"
+        ]
+      },
+      "levelReward": {
+        "types": [
+          "array"
+        ],
+        "items": {
+          "types": [
+            "object"
+          ],
+          "fields": {
+            "count": {
+              "types": [
+                "integer"
+              ]
+            },
+            "type": {
+              "types": [
+                "integer"
+              ]
+            }
+          }
+        }
+      },
+      "maxRecvRelationPointOneDay": {
+        "types": [
+          "integer"
+        ]
+      },
+      "nextUnlockWindow": {
+        "types": [
+          "array"
+        ],
+        "items": {
+          "types": [
+            "integer"
+          ]
+        }
+      },
+      "unlockWindow": {
+        "types": [
+          "array"
+        ],
+        "items": {
+          "types": [
+            "integer"
+          ]
+        }
+      }
+    }
+  },
+  "rows": [
+    {
+      "equipLevelLimit": 20,
+      "incInfo": [
+        {
+          "inc": 1,
+          "incSeconds": 450,
+          "limit": 120,
+          "max": 60,
+          "type": 6
+        },
+        {
+          "limit": 9999,
+          "type": 10
+        }
+      ],
+      "level": 1,
+      "levelReward": [
+        {
+          "count": 10,
+          "type": 6
+        }
+      ],
+      "maxRecvRelationPointOneDay": 400,
+      "nextUnlockWindow": [],
+      "unlockWindow": []
+    },
+    {
+      "equipLevelLimit": 20,
+      "exp": 1,
+      "incInfo": [
+        {
+          "inc": 1,
+          "incSeconds": 450,
+          "limit": 124,
+          "max": 62,
+          "type": 6
+        },
+        {
+          "limit": 9999,
+          "type": 10
+        }
+      ],
+      "level": 2,
+      "levelReward": [
+        {
+          "count": 10,
+          "type": 6
+        }
+      ],
+      "maxRecvRelationPointOneDay": 400,
+      "nextUnlockWindow": [],
+      "unlockWindow": [
+        4
+      ]
+    },
+    {
+      "equipLevelLimit": 20,
+      "exp": 6,
+      "incInfo": [
+        {
+          "inc": 1,
+          "incSeconds": 450,
+          "limit": 128,
+          "max": 64,
+          "type": 6
+        },
+        {
+          "limit": 9999,
+          "type": 10
+        }
+      ],
+      "level": 3,
+      "levelReward": [
+        {
+          "count": 10,
+          "type": 6
+        }
+      ],
+      "maxRecvRelationPointOneDay": 400,
+      "nextUnlockWindow": [
+        12,
+        34
+      ],
+      "unlockWindow": []
+    },
+    {
+      "equipLevelLimit": 20,
+      "exp": 6,
+      "incInfo": [
+        {
+          "inc": 1,
+          "incSeconds": 450,
+          "limit": 132,
+          "max": 66,
+          "type": 6
+        },
+        {
+          "limit": 9999,
+          "type": 10
+        }
+      ],
+      "level": 4,
+      "levelReward": [
+        {
+          "count": 10,
+          "type": 6
+        }
+      ],
+      "maxRecvRelationPointOneDay": 400,
+      "nextUnlockWindow": [],
+      "unlockWindow": [
+        12,
+        34
+      ]
+    },
+    {
+      "equipLevelLimit": 20,
+      "exp": 6,
+      "incInfo": [
+        {
+          "inc": 1,
+          "incSeconds": 450,
+          "limit": 136,
+          "max": 68,
+          "type": 6
+        },
+        {
+          "limit": 9999,
+          "type": 10
+        }
+      ],
+      "level": 5,
+      "levelReward": [
+        {
+          "count": 10,
+          "type": 6
+        }
+      ],
+      "maxRecvRelationPointOneDay": 400,
+      "nextUnlockWindow": [
+        19,
+        21
+      ],
+      "unlockWindow": []
+    },
+    {
+      "equipLevelLimit": 20,
+      "exp": 6,
+      "incInfo": [
+        {
+          "inc": 1,
+          "incSeconds": 450,
+          "limit": 140,
+          "max": 70,
+          "type": 6
+        },
+        {
+          "limit": 9999,
+          "type": 10
+        }
+      ],
+      "level": 6,
+      "levelReward": [
+        {
+          "count": 10,
+          "type": 6
+        }
+      ],
+      "maxRecvRelationPointOneDay": 400,
+      "nextUnlockWindow": [
+        19,
+        21
+      ],
+      "unlockWindow": []
+    }
+  ]
+}

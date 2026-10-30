@@ -1,0 +1,778 @@
+"""Local sandbox mall (商城) for the retired 零境交错 client.
+
+The client's Purchase window has three visible tabs, each fed differently
+(decompiled Lua under ``analysis/lua-decompiled``):
+
+* 迷子充值 (``window/purchase/purchasevip``): the product list is the client
+  table ``PurchaseInfo`` filtered by platform/showInShop
+  (``manager__iaphandler.lua`` Start/GetProducts).  The list is only sized on
+  the ``OnGetPurchaseActivityInfo`` event, which the stock client raises from
+  the Tencent Midas SDK callback; buying calls the Midas SDK between
+  ``fci/purchasetouch/`` and ``fci/purchasedelevery/``.  Both need the client
+  Lua patch described by :data:`IAPHANDLER_PATCH_FUNCTIONS`.
+* 等级礼包 (``window/purchase/purchaselvgift``): ``Mall`` rows with
+  ``giftPage == 1``.  The list is only built inside the ``GET fci/mall-info/``
+  callback, which iterates ``response.mallRecord.summary`` and
+  ``response.purchaseRecord.buyRecord`` with ``pairs`` -- an empty typed map
+  decodes to nil there, so the reply is plain camelCase JSON with explicit
+  (possibly empty) objects.
+* 活动礼包 (``window/purchase/purchaseactivitygift``): ``Mall`` rows with
+  ``giftPage == 2``; a row is listed only while ``ActivityList`` holds an open
+  ``ActivityType_Mall`` (15) activity with the row's ``activityId``.
+  :meth:`LocalMall.activity_rows` supplies those activity records.
+
+Buying a gift pack (``POST fci/mall-trade``) spends in-game currency and
+grants the table reward; buying a ``PurchaseInfo`` product is a sandbox
+order: ``purchasetouch`` records a pending order and returns a one-time
+``tradeData`` token, ``purchasedelevery`` redeems the token and credits the
+product immediately.  No real payment provider is contacted.
+"""
+from __future__ import annotations
+
+import json
+import re
+import secrets
+import time
+from contextlib import closing
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any, Callable, Iterable, Mapping, Optional
+from urllib.parse import urlsplit
+
+from google.protobuf import json_format, message_factory
+
+try:
+    from .grants import grant_rewards
+    from . import equipment
+except ImportError:  # pragma: no cover - direct PYTHONPATH execution
+    from grants import grant_rewards
+    import equipment
+
+
+Body = bytes | bytearray | str | None
+Response = tuple[int, Any]
+
+TABLE_DIR = Path(__file__).resolve().parent / "data" / "client-tables"
+
+RES_PLAYER_MONEY = 5        # 迷子 total (bound + paid), fci/resource/ResPlayerMoney_0
+RES_PLAYER_PAY_MONEY = 27   # paid part of the total, fci/resource/ResPlayerPayMoney_0
+RES_EQUIP = 12
+RES_ACTOR_SKIN = 29
+ACTIVITY_TYPE_MALL = 15
+
+GIFT_PAGE_LEVEL = 1
+GIFT_PAGE_ACTIVITY = 2
+GIFT_PAGE_DIRECT = 3
+
+# MallBuyIntervalType
+INTERVAL_DAY, INTERVAL_WEEK, INTERVAL_MONTH = 1, 2, 3
+RESET_HOUR_UTC = 6          # same daily reset as tasks.py
+_DAY = 86400
+
+# Mall activities are already running (start in the past, no preheat, no end)
+# so the client neither shows a preheat tag nor an expiry countdown.
+MALL_ACTIVITY_START = 1704067200  # 2024-01-01T00:00:00Z
+
+
+def _int(value: Any, default: int = 0) -> int:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def _route(path: str) -> str:
+    return (urlsplit(path or "").path or "/").rstrip("/").lower()
+
+
+def _rows(name: str, table_dir: Path = TABLE_DIR) -> list[dict[str, Any]]:
+    try:
+        payload = json.loads((table_dir / f"{name}.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError, TypeError):
+        return []
+    rows = payload.get("rows", []) if isinstance(payload, Mapping) else []
+    return [row for row in rows if isinstance(row, dict)]
+
+
+def _resource(value: Mapping[str, Any]) -> dict[str, int]:
+    return {"type": _int(value.get("type")), "id": _int(value.get("id")),
+            "count": _int(value.get("count")), "param": _int(value.get("param"))}
+
+
+def window_start(interval: int, now: int) -> int:
+    """Start of the purchase-limit window containing ``now`` (0 = never resets)."""
+
+    day = (int(now) - RESET_HOUR_UTC * 3600) // _DAY
+    offset = RESET_HOUR_UTC * 3600
+    if interval == INTERVAL_DAY:
+        return day * _DAY + offset
+    if interval == INTERVAL_WEEK:
+        monday = day - ((day + 3) % 7)  # 1970-01-01 was a Thursday
+        return monday * _DAY + offset
+    if interval == INTERVAL_MONTH:
+        moment = datetime.fromtimestamp(int(now) - offset, tz=timezone.utc)
+        first = moment.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        return int(first.timestamp()) + offset
+    return 0
+
+
+class MallCatalog:
+    """The client tables behind the mall, loaded once."""
+
+    def __init__(self, table_dir: Path = TABLE_DIR) -> None:
+        self.mall: dict[int, dict[str, Any]] = {}
+        for row in _rows("Mall", table_dir):
+            if _int(row.get("id")) > 0:
+                self.mall[_int(row["id"])] = row
+        self.products: dict[str, dict[str, Any]] = {}
+        for row in _rows("PurchaseInfo", table_dir):
+            product_id = str(row.get("productId") or "")
+            if product_id:
+                self.products[product_id] = row
+        self.delay_rewards: dict[int, list[dict[str, Any]]] = {
+            _int(row.get("activityId")): [r for r in row.get("delayReward") or [] if isinstance(r, Mapping)]
+            for row in _rows("DelayReward", table_dir)
+        }
+        self.skin_actors: dict[int, list[int]] = {
+            _int(row.get("id")): [_int(a) for a in row.get("actorIds") or []]
+            for row in _rows("ActorSkin", table_dir)
+        }
+
+    def page(self, gift_page: int) -> list[dict[str, Any]]:
+        """``PB.all("Mall"):where(isMonth == false and giftPage == page)``."""
+
+        return [row for _, row in sorted(self.mall.items())
+                if not row.get("isMonth") and _int(row.get("giftPage")) == gift_page]
+
+    def shop_products(self, platform: int) -> list[dict[str, Any]]:
+        """IAPHandler.GetProducts: platform rows with showInShop, by price."""
+
+        rows = [row for row in self.products.values()
+                if _int(row.get("platform")) == platform and row.get("showInShop")]
+        return sorted(rows, key=lambda row: float(row.get("price") or 0))
+
+    def mall_row_for_product(self, product_id: str) -> Optional[dict[str, Any]]:
+        for _, row in sorted(self.mall.items()):
+            if str(row.get("productId") or "") == product_id:
+                return row
+        return None
+
+    def activity_gift_rows(self, *, dedupe: bool = True, include_direct: bool = False) -> list[dict[str, Any]]:
+        """Event gift rows whose activities the local server keeps open.
+
+        The 104 giftPage-2 rows are 40 distinct packs re-run under new
+        activity ids; with ``dedupe`` only the newest id of each identical
+        pack (price, currency, contents, limits, delayed rewards) is opened.
+        """
+
+        pages = [GIFT_PAGE_ACTIVITY] + ([GIFT_PAGE_DIRECT] if include_direct else [])
+        rows = [row for page in pages for row in self.page(page) if _int(row.get("activityId"))]
+        if not dedupe:
+            return rows
+        newest: dict[str, dict[str, Any]] = {}
+        for row in rows:
+            key = json.dumps([
+                _int(row.get("giftPage")), str(row.get("productId") or ""), _int(row.get("price")),
+                _int(row.get("resourceType")), [_resource(r) for r in row.get("reward") or []],
+                _int(row.get("maxBuyCount")), _int(row.get("maxCountClearInterval")),
+                _int(row.get("limitLv")), bool(row.get("isDelay")), _int(row.get("sustainedDays")),
+                [_resource(r) for r in self.delay_rewards.get(_int(row.get("activityId")), [])],
+            ], sort_keys=True)
+            if key not in newest or _int(row["id"]) > _int(newest[key]["id"]):
+                newest[key] = row
+        return sorted(newest.values(), key=lambda row: _int(row["id"]))
+
+
+_CATALOG: Optional[MallCatalog] = None
+
+
+def catalog() -> MallCatalog:
+    global _CATALOG
+    if _CATALOG is None:
+        _CATALOG = MallCatalog()
+    return _CATALOG
+
+
+class MallError(Exception):
+    def __init__(self, status: int, code: str, message: str = "") -> None:
+        super().__init__(code)
+        self.status, self.code, self.message = status, code, message
+
+    def reply(self) -> Response:
+        body = {"error": self.code}
+        if self.message:
+            body["message"] = self.message
+        return self.status, body
+
+
+class LocalMall:
+    """Persistent sandbox mall: records, orders, limits and deliveries."""
+
+    def __init__(
+        self,
+        game: Any,
+        *,
+        clock: Optional[Callable[[], int]] = None,
+        mall_catalog: Optional[MallCatalog] = None,
+        dedupe_activity_gifts: bool = True,
+        include_direct_purchase: bool = False,
+    ) -> None:
+        self.game = game
+        self._lock = game._lock
+        self._clock = clock or getattr(game, "_now", None) or (lambda: int(time.time()))
+        self.catalog = mall_catalog or catalog()
+        self.activity_gifts = self.catalog.activity_gift_rows(
+            dedupe=dedupe_activity_gifts, include_direct=include_direct_purchase)
+        self.open_activity_ids = {_int(row["activityId"]) for row in self.activity_gifts}
+        with self._lock, closing(self.game._connect()) as connection, connection:
+            connection.execute(
+                """
+                CREATE TABLE IF NOT EXISTS local_mall_state (
+                    account_id INTEGER PRIMARY KEY,
+                    state_json TEXT NOT NULL,
+                    updated_at INTEGER NOT NULL
+                )
+                """
+            )
+            connection.execute(
+                """
+                CREATE TABLE IF NOT EXISTS local_mall_orders (
+                    order_id TEXT PRIMARY KEY,
+                    account_id INTEGER NOT NULL,
+                    kind TEXT NOT NULL,
+                    product_id TEXT NOT NULL DEFAULT '',
+                    mall_id INTEGER NOT NULL DEFAULT 0,
+                    price REAL NOT NULL DEFAULT 0,
+                    currency TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    created_at INTEGER NOT NULL,
+                    delivered_at INTEGER,
+                    res_change_json TEXT
+                )
+                """
+            )
+
+    # ------------------------------------------------------------- plumbing
+    def _now(self) -> int:
+        return int(self._clock())
+
+    def _state(self, profile: Mapping[str, Any]) -> dict[str, Any]:
+        account_id = int(profile["account_id"])
+        with self._lock, closing(self.game._connect()) as connection:
+            row = connection.execute(
+                "SELECT state_json FROM local_mall_state WHERE account_id = ?", (account_id,)).fetchone()
+        try:
+            state = json.loads(row["state_json"]) if row is not None else {}
+        except (TypeError, ValueError):
+            state = {}
+        if not isinstance(state, dict):
+            state = {}
+        for key in ("mall", "purchase", "pending"):
+            if not isinstance(state.get(key), dict):
+                state[key] = {}
+        return state
+
+    def _save(self, profile: Mapping[str, Any], state: Mapping[str, Any]) -> None:
+        with self._lock, closing(self.game._connect()) as connection, connection:
+            connection.execute(
+                "INSERT INTO local_mall_state(account_id, state_json, updated_at) VALUES (?, ?, ?) "
+                "ON CONFLICT(account_id) DO UPDATE SET state_json = excluded.state_json, updated_at = excluded.updated_at",
+                (int(profile["account_id"]), json.dumps(state, separators=(",", ":")), self._now()),
+            )
+
+    def _order(self, order_id: str, profile: Mapping[str, Any], *, kind: str, status: str,
+               product_id: str = "", mall_id: int = 0, price: float = 0.0, currency: str = "",
+               res_change: Optional[list] = None) -> None:
+        now = self._now()
+        with self._lock, closing(self.game._connect()) as connection, connection:
+            connection.execute(
+                "INSERT INTO local_mall_orders(order_id, account_id, kind, product_id, mall_id, price, currency, "
+                "status, created_at, delivered_at, res_change_json) VALUES (?,?,?,?,?,?,?,?,?,?,?) "
+                "ON CONFLICT(order_id) DO UPDATE SET status = excluded.status, delivered_at = excluded.delivered_at, "
+                "res_change_json = excluded.res_change_json",
+                (order_id, int(profile["account_id"]), kind, product_id, int(mall_id), float(price), currency,
+                 status, now, now if status == "delivered" else None,
+                 json.dumps(res_change, ensure_ascii=False, separators=(",", ":")) if res_change is not None else None),
+            )
+
+    def orders(self, profile: Mapping[str, Any]) -> list[dict[str, Any]]:
+        with self._lock, closing(self.game._connect()) as connection:
+            rows = connection.execute(
+                "SELECT order_id, kind, product_id, mall_id, price, currency, status, created_at, delivered_at "
+                "FROM local_mall_orders WHERE account_id = ? ORDER BY created_at, order_id",
+                (int(profile["account_id"]),)).fetchall()
+        return [dict(row) for row in rows]
+
+    def _request(self, body: Body, type_name: str) -> dict[str, Any]:
+        """Decode a JSON body or the client's native wireformat request."""
+
+        raw = body.encode("utf-8") if isinstance(body, str) else bytes(body or b"")
+        if not raw:
+            return {}
+        try:
+            value = json.loads(raw.decode("utf-8"))
+            if isinstance(value, dict):
+                return value
+        except (UnicodeDecodeError, ValueError):
+            pass
+        try:
+            message = message_factory.GetMessageClass(self.game._pool.FindMessageTypeByName(type_name))()
+            message.ParseFromString(raw)
+            return json_format.MessageToDict(message)
+        except Exception:
+            return {}
+
+    @staticmethod
+    def _effective(record: Any, interval: int, now: int) -> int:
+        if not isinstance(record, Mapping):
+            return 0
+        count = _int(record.get("buyCount"))
+        if interval in (INTERVAL_DAY, INTERVAL_WEEK, INTERVAL_MONTH) and \
+                _int(record.get("lastBuyStartTime")) < window_start(interval, now):
+            return 0
+        return count
+
+    def _bump(self, records: dict[str, Any], key: str, interval: int) -> int:
+        now = self._now()
+        current = self._effective(records.get(key), interval, now)
+        previous = records.get(key) if current else None
+        start = _int(previous.get("lastBuyStartTime")) if isinstance(previous, Mapping) else now
+        records[key] = {"buyCount": current + 1, "lastBuyStartTime": start or now}
+        return current + 1
+
+    @staticmethod
+    def _balance(profile: Mapping[str, Any], resource_type: int) -> int:
+        return sum(_int(row.get("count")) for row in profile.get("resources") or []
+                   if isinstance(row, Mapping) and _int(row.get("type")) == resource_type
+                   and _int(row.get("id")) == 0 and _int(row.get("param")) == 0)
+
+    @staticmethod
+    def _base_res(delta: Mapping[str, Any]) -> dict[str, Any]:
+        return {"baseRes": {"type": _int(delta.get("type")), "id": _int(delta.get("id")),
+                            "param": _int(delta.get("param")), "count": _int(delta.get("count")),
+                            "countDelta": _int(delta.get("countDelta"))}, "inBox": []}
+
+    # ------------------------------------------------------------ economics
+    def _spend(self, profile: Mapping[str, Any], resource_type: int, price: int) -> list[dict[str, Any]]:
+        """Charge a gift pack; 迷子 follow WU.IsEnoughMoney (bound first)."""
+
+        if price <= 0 or resource_type <= 0:
+            return []
+        if resource_type == RES_PLAYER_MONEY:
+            total, paid = self._balance(profile, RES_PLAYER_MONEY), self._balance(profile, RES_PLAYER_PAY_MONEY)
+            if total < price:
+                raise MallError(409, "insufficient_resource", "not enough 迷子")
+            paid_used = min(paid, max(0, price - max(0, total - paid)))
+            changes = [{"type": RES_PLAYER_MONEY, "id": 0, "param": 0, "count": -price}]
+            if paid_used:
+                changes.append({"type": RES_PLAYER_PAY_MONEY, "id": 0, "param": 0, "count": -paid_used})
+        elif resource_type == RES_PLAYER_PAY_MONEY:
+            paid, total = self._balance(profile, RES_PLAYER_PAY_MONEY), self._balance(profile, RES_PLAYER_MONEY)
+            if paid < price:
+                raise MallError(409, "insufficient_resource", "not enough paid 迷子")
+            changes = [{"type": RES_PLAYER_PAY_MONEY, "id": 0, "param": 0, "count": -price}]
+            if min(price, total):
+                changes.append({"type": RES_PLAYER_MONEY, "id": 0, "param": 0, "count": -min(price, total)})
+        else:
+            changes = [{"type": resource_type, "id": 0, "param": 0, "count": -price}]
+        ok, deltas, error = self.game.economy._change_resources(profile, changes)
+        if not ok:
+            raise MallError(409, error or "insufficient_resource")
+        return [self._base_res(delta) for delta in deltas]
+
+    def _grant(self, profile: Mapping[str, Any], rewards: Iterable[Mapping[str, Any]]) -> list[dict[str, Any]]:
+        """Grant STResource rows; paid 迷子 also raise the 迷子 total."""
+
+        plain: list[dict[str, int]] = []
+        equips: list[int] = []
+        skins: list[int] = []
+        for reward in rewards:
+            value = _resource(reward)
+            if value["type"] <= 0 or value["count"] <= 0:
+                continue
+            if value["type"] == RES_EQUIP and value["id"] in equipment.EQUIP_INFO:
+                equips.extend([value["id"]] * value["count"])
+                continue
+            plain.append(value)
+            if value["type"] == RES_PLAYER_PAY_MONEY:
+                plain.append({"type": RES_PLAYER_MONEY, "id": 0, "count": value["count"], "param": 0})
+            elif value["type"] == RES_ACTOR_SKIN:
+                skins.append(value["id"])
+        changes: list[dict[str, Any]] = []
+        for change in grant_rewards(self.game, profile, plain):
+            if "baseRes" in change:
+                change.setdefault("inBox", [])
+            if isinstance(change.get("actor"), dict) and not _int(change["actor"].get("countDelta")):
+                change["actor"]["countDelta"] = 1  # WU.ShowRewards only lists countDelta > 0
+            changes.append(change)
+        for equip_id in equips:
+            changes.append(equipment.grant_equipment(self.game, profile, equip_id))
+        if skins and getattr(self.game, "systems", None) is not None:
+            state = self.game.systems._state(profile)
+            unlocked = state.setdefault("unlockedSkins", {})
+            for skin_id in skins:
+                for actor_id in self.catalog.skin_actors.get(skin_id, []):
+                    owned = unlocked.setdefault(str(actor_id), [])
+                    if skin_id not in owned:
+                        owned.append(skin_id)
+            self.game.systems._save(profile, state)
+        return changes
+
+    # ---------------------------------------------------------------- views
+    def mall_info(self, profile: Mapping[str, Any]) -> dict[str, Any]:
+        """``GET fci/mall-info/`` as the camelCase object the client reads."""
+
+        state, now = self._state(profile), self._now()
+        player_id = str(profile.get("player_id", ""))
+        summary: dict[str, Any] = {}
+        for key, record in state["mall"].items():
+            row = self.catalog.mall.get(_int(key))
+            interval = _int(row.get("maxCountClearInterval")) if row else 0
+            if isinstance(record, Mapping):
+                summary[str(_int(key))] = {"buyCount": self._effective(record, interval, now),
+                                           "lastBuyStartTime": _int(record.get("lastBuyStartTime"))}
+        buy_record: dict[str, Any] = {}
+        for product_id, record in state["purchase"].items():
+            if isinstance(record, Mapping):
+                buy_record[str(product_id)] = {
+                    "buyCount": self._effective(record, self._product_interval(str(product_id)), now),
+                    "lastBuyStartTime": _int(record.get("lastBuyStartTime"))}
+        return {"mallRecord": {"playerId": player_id, "summary": summary},
+                "purchaseRecord": {"playerId": player_id, "buyRecord": buy_record}}
+
+    def redpoint_fields(self, profile: Mapping[str, Any]) -> dict[str, Any]:
+        """``fci/redpoint/data.mallInfoResult`` (RestifizerManager stores it as fci/mall-info)."""
+
+        return {"mallInfoResult": self.mall_info(profile)}
+
+    def activity_rows(self) -> list[dict[str, Any]]:
+        """Open ``ActivityType_Mall`` records for the event gift tab (ActivityList)."""
+
+        rows = []
+        for activity_id in sorted(self.open_activity_ids):
+            rows.append({
+                "type": ACTIVITY_TYPE_MALL, "activityId": activity_id,
+                "timePreheat": "local", "timeStart": "local", "timeEnd": "local",
+                # timestampPreheat must be a number: the client compares it
+                # unconditionally; 0 = no preheat.  timestampEnd 0 = no end.
+                "timestampPreheat": 0, "timestampStart": MALL_ACTIVITY_START, "timestampEnd": 0,
+                "forever": True, "category": 0, "weekdays": [], "timeClose": "", "timestampClose": 0,
+                "dropFloorChannel": 0, "levelLimit": 0, "dayOpenTime": [], "season": 0,
+                "weekdayPreheart": 0, "timeType": 0, "versionLimit": "", "preOpenTime": 0,
+            })
+        return rows
+
+    def merge_activity_list(self, method: str, path: str, result: Optional[Response]) -> Optional[Response]:
+        """Append :meth:`activity_rows` to a ``GET fci/activity/`` list reply."""
+
+        if (method.upper() != "GET" or _route(path) != "/fci/activity" or not isinstance(result, tuple)
+                or len(result) != 2 or result[0] != 200 or not isinstance(result[1], list)):
+            return result
+        present = {(_int(row.get("type")), _int(row.get("activityId")))
+                   for row in result[1] if isinstance(row, Mapping)}
+        extra = [row for row in self.activity_rows() if (row["type"], row["activityId"]) not in present]
+        return 200, list(result[1]) + extra
+
+    def _product_interval(self, product_id: str) -> int:
+        product = self.catalog.products.get(product_id) or {}
+        interval = _int(product.get("maxCountClearInterval"))
+        if not interval:
+            row = self.catalog.mall_row_for_product(product_id)
+            interval = _int(row.get("maxCountClearInterval")) if row else 0
+        return interval
+
+    def _product_limit(self, product_id: str) -> int:
+        product = self.catalog.products.get(product_id) or {}
+        limit = _int(product.get("maxBuyCount"))
+        if not limit:
+            row = self.catalog.mall_row_for_product(product_id)
+            limit = _int(row.get("maxBuyCount")) if row else 0
+        return limit
+
+    # -------------------------------------------------------------- actions
+    def mall_trade(self, profile: Mapping[str, Any], body: Body) -> Optional[Response]:
+        """``POST fci/mall-trade`` {id}: buy a gift pack with in-game currency.
+
+        Ids outside the client ``Mall`` table return None (left to economy.py).
+        """
+
+        mall_id = _int(self._request(body, "ApiMallTrade").get("id"))
+        row = self.catalog.mall.get(mall_id)
+        if row is None:
+            return None
+        if row.get("isMonth"):
+            raise MallError(404, "mall_good_not_found")
+        if str(row.get("productId") or ""):
+            raise MallError(400, "mall_good_requires_purchase", "buy this pack through fci/purchasetouch/")
+        activity_id = _int(row.get("activityId"))
+        if activity_id and activity_id not in self.open_activity_ids:
+            raise MallError(409, "mall_activity_closed")
+        if _int(profile.get("level"), 1) < _int(row.get("limitLv")):
+            raise MallError(409, "player_level_too_low", f"requires level {_int(row.get('limitLv'))}")
+        state = self._state(profile)
+        interval, limit = _int(row.get("maxCountClearInterval")), _int(row.get("maxBuyCount"))
+        if limit and self._effective(state["mall"].get(str(mall_id)), interval, self._now()) >= limit:
+            raise MallError(409, "mall_good_limit_reached")
+        res_change = self._spend(profile, _int(row.get("resourceType")), _int(row.get("price")))
+        rewards = list(row.get("reward") or [])
+        if row.get("isDelay"):
+            # Sandbox: the daily delayed rewards (DelayReward, normally mailed
+            # over sustainedDays) are granted up front with the pack.
+            days = max(1, _int(row.get("sustainedDays"), 1))
+            rewards += list(self.catalog.delay_rewards.get(activity_id, [])) * days
+        res_change += self._grant(profile, rewards)
+        buy_count = self._bump(state["mall"], str(mall_id), interval)
+        self._save(profile, state)
+        self._order(f"mall-{secrets.token_hex(8)}", profile, kind="mall", status="delivered", mall_id=mall_id,
+                    price=float(_int(row.get("price"))), currency=f"res:{_int(row.get('resourceType'))}",
+                    res_change=res_change)
+        return 200, {"resChange": res_change, "buyCount": buy_count}
+
+    def purchase_touch(self, profile: Mapping[str, Any], body: Body) -> Optional[Response]:
+        """``POST fci/purchasetouch/``: open a sandbox order for a PurchaseInfo product.
+
+        Product ids outside ``PurchaseInfo`` return None (economy.py's
+        ``local.sandbox.*`` seam keeps handling those).
+        """
+
+        request = self._request(body, "ApiPurchaseTouchProduct")
+        product_id = str(request.get("productId") or request.get("product_id") or "")
+        product = self.catalog.products.get(product_id)
+        if product is None:
+            return None
+        row = self.catalog.mall_row_for_product(product_id)
+        if row is not None and _int(profile.get("level"), 1) < _int(row.get("limitLv")):
+            raise MallError(409, "player_level_too_low")
+        state = self._state(profile)
+        limit = self._product_limit(product_id)
+        if limit and self._effective(state["purchase"].get(product_id), self._product_interval(product_id),
+                                     self._now()) >= limit:
+            raise MallError(409, "purchase_limit_reached")
+        token = "local-sandbox:" + secrets.token_urlsafe(18)
+        order_id = "iap-" + secrets.token_hex(8)
+        # ``count`` from the client is the product's 迷子 amount (presetCount),
+        # not a quantity: one order always delivers one product.
+        state["pending"][token] = {"productId": product_id, "orderId": order_id, "createdAt": self._now(),
+                                   "channel": _int(request.get("channel"))}
+        self._save(profile, state)
+        self._order(order_id, profile, kind="iap", status="pending", product_id=product_id,
+                    price=float(product.get("price") or 0), currency="CNY_SANDBOX")
+        return 200, {"tradeData": token, "isSandbox": True, "productId": product_id, "orderId": order_id}
+
+    def _delivery_contents(self, product: Mapping[str, Any]) -> list[dict[str, Any]]:
+        goods = [r for r in product.get("purchaseRes") or [] if isinstance(r, Mapping) and _int(r.get("type"))]
+        if goods:
+            return goods
+        count, bonus = _int(product.get("count")), _int(product.get("promotionCnt"))
+        contents = [{"type": RES_PLAYER_PAY_MONEY, "id": 0, "count": count}]  # also raises the total
+        if bonus:
+            contents.append({"type": RES_PLAYER_MONEY, "id": 0, "count": bonus})  # bound bonus 迷子
+        return contents
+
+    def purchase_delivery(self, profile: Mapping[str, Any], body: Body) -> Optional[Response]:
+        """``POST fci/purchasedelevery/``: redeem the sandbox token and credit the product.
+
+        Tokens this mall did not issue return None (economy.py answers them,
+        including its 402 for a missing/forged token).
+        """
+
+        request = self._request(body, "ApiPurchaseDelevery")
+        state = self._state(profile)
+        token = ""
+        for key in ("tradeData", "trade_data", "transactionReceipt", "transactionId", "orderId"):
+            candidate = str(request.get(key) or "")
+            if candidate.startswith("local-sandbox:"):
+                token = candidate
+                break
+        if token and token not in state["pending"]:
+            done = state.get("delivered", {}).get(token)
+            if isinstance(done, Mapping):  # retried delivery: no second credit
+                return 200, dict(done)
+            return None
+        if not token:
+            return None
+        pending = state["pending"].pop(token)
+        product_id = str(pending.get("productId") or "")
+        product = self.catalog.products.get(product_id)
+        if product is None:
+            raise MallError(409, "pending_product_unavailable")
+        res_change = self._grant(profile, self._delivery_contents(product))
+        buy_count = self._bump(state["purchase"], product_id, self._product_interval(product_id))
+        reply = {
+            "transactionId": str(pending.get("orderId") or token.removeprefix("local-sandbox:")),
+            "googlePurchaseToken": "",
+            "channel": _int(request.get("channel"), _int(pending.get("channel"))),
+            "productId": product_id, "buyCount": buy_count, "resChange": res_change, "sandbox": True,
+        }
+        delivered = state.setdefault("delivered", {})
+        delivered[token] = reply
+        for old in list(delivered)[:-20]:  # keep the last few for retries only
+            delivered.pop(old, None)
+        self._save(profile, state)
+        self._order(str(pending.get("orderId") or token), profile, kind="iap", status="delivered",
+                    product_id=product_id, price=float(product.get("price") or 0), currency="CNY_SANDBOX",
+                    res_change=res_change)
+        return 200, reply
+
+    # ------------------------------------------------------------- dispatch
+    def handle_http(self, method: str, path: str, body: Body, profile: Mapping[str, Any]) -> Optional[Response]:
+        route, method = _route(path), method.upper()
+        handlers = {
+            ("GET", "/fci/mall-info"): lambda: (200, self.mall_info(profile)),
+            ("POST", "/fci/mall-trade"): lambda: self.mall_trade(profile, body),
+            ("POST", "/fci/purchasetouch"): lambda: self.purchase_touch(profile, body),
+            ("POST", "/fci/purchasedelevery"): lambda: self.purchase_delivery(profile, body),
+            # IAPHandler.SyncMidas: no Midas account exists locally.
+            ("PATCH", "/fci/syncmidas"): lambda: (200, {}),
+            ("POST", "/fci/syncmidas"): lambda: (200, {}),
+        }
+        handler = handlers.get((method, route))
+        if handler is None:
+            if route in {path for _, path in handlers}:
+                return 405, {"error": "method_not_allowed"}
+            return None
+        with self._lock:
+            try:
+                return handler()
+            except MallError as error:
+                return error.reply()
+
+
+# ---------------------------------------------------------------------------
+# Client Lua patch for Manager/IAPHandler (spec; built and delivered by the
+# hot-update channel, runtime/build_lua_bundle.py + runtime/deliver_patch.py).
+# Each entry replaces the top-level function of that name in
+# analysis/lua-decompiled/manager__iaphandler.lua; OnLocalDelivered and
+# LocalPurchaseFailed are appended.
+IAPHANDLER_PATCH_FUNCTIONS: dict[str, str] = {
+    # Prices: always the local "Purchase_LocalPrice" strings from PurchaseInfo
+    # (the remote branch waits for the Midas/App Store SDK).
+    "UseRemoteProduct": """function UseRemoteProduct()
+  return false
+end
+""",
+    "Refresh": """function Refresh()
+  ResolveProductPrice()
+end
+""",
+    "GetLocalizedPrice": """function GetLocalizedPrice(productId)
+  if m_localPrice == nil and m_products ~= nil then
+    ResolveProductPrice()
+  end
+  if m_localPrice ~= nil then
+    return m_localPrice[productId]
+  end
+end
+""",
+    # The recharge list (PurchaseVip) is sized only on this event, which the
+    # stock client raises from the Midas SDK activity callback.
+    # Deferred like the stock Midas callback: PurchaseVip.OnEnable calls this
+    # before Start(), which resets the list to 0 rows, so an immediate
+    # broadcast would be wiped.
+    "GetActivityInfo": """function GetActivityInfo()
+  m_activityInfo = {}
+  this:DelayInvokeInSeconds(0.1, function()
+    this:BroadcastGameEvent("OnGetPurchaseActivityInfo")
+  end)
+end
+""",
+    # No MSDK login locally: WGGetLoginRecord() fails and the stock proxy
+    # resets the game (it also wraps every 迷子 spend via WU.TryToPay).
+    "MidasProxy": """function MidasProxy(callback)
+  if callback ~= nil then
+    callback()
+  end
+end
+""",
+    # PushService.OnScLoginBegin calls this with m_midasInfoCache == nil
+    # (IAPHandler.bytes:407).  The huge TssReportInterval keeps the TSS MTP
+    # report loop started right after this call parked, as it was while the
+    # nil-index error aborted OnScLoginBegin here.
+    "SyncMidas": """function SyncMidas(callback)
+  if m_midasInfoCache == nil then
+    this:SetData("TssReportInterval", 1000000000)
+  end
+  if callback ~= nil then
+    callback()
+  end
+end
+""",
+    # Sandbox order: purchasetouch -> purchasedelevery, no m_iap:Purchase.
+    "PurchaseImpl": """function PurchaseImpl(product, channel, count)
+  m_channel = channel
+  if m_timeout ~= nil then
+    this:StopCoroutine(m_timeout)
+  end
+  m_timeout = this:DelayInvokeInSeconds(30, function()
+    m_timeout = nil
+    LocalPurchaseFailed()
+  end)
+  WU.SetLockFlag(WU.LockInputFlag.Purchase, true)
+  local accountCache = this:GetData("accountCache") or {}
+  this:GameRequest("fci/purchasetouch/"):Post({
+    isGuest = accountCache.entryType == "guest",
+    productId = product.productId,
+    platform = m_platform,
+    channel = m_channel,
+    count = count
+  }, function(response)
+    if response == nil or response.tradeData == nil or response.tradeData == "" then
+      LocalPurchaseFailed()
+      return
+    end
+    this:GameRequest("fci/purchasedelevery/"):Post({
+      productId = product.productId,
+      tradeData = response.tradeData,
+      platform = m_platform,
+      channel = m_channel
+    }, function(result)
+      OnLocalDelivered(product, result)
+    end, LocalPurchaseFailed)
+  end, LocalPurchaseFailed)
+end
+""",
+}
+
+IAPHANDLER_APPENDED_FUNCTIONS = """
+function LocalPurchaseFailed()
+  WU.ShowHintText(WU.GetString("Purchase_PurchaseFailed"))
+  FinishPurchase()
+end
+
+function OnLocalDelivered(product, result)
+  if result ~= nil and result.resChange ~= nil then
+    require("Manager/DataBindingHandler").ResChange(result.resChange)
+  end
+  DB:HandleRemoteChanged("fci/baseresource/")
+  if result ~= nil and result.buyCount ~= nil then
+    this:BroadcastGameEvent("PushTypePurchaseBuyRecord", {
+      product.productId,
+      tostring(result.buyCount)
+    })
+  end
+  if IsGoods(product) then
+    this:BroadcastGameEvent("HandlePurchaseGoodsNew", product.productId)
+  elseif result ~= nil and result.resChange ~= nil then
+    WU.ShowRewards(result.resChange)
+  end
+  FinishPurchase()
+end
+"""
+
+
+def build_iaphandler_patch(source: str) -> str:
+    """Apply :data:`IAPHANDLER_PATCH_FUNCTIONS` to the decompiled module source."""
+
+    source = source.replace("\r\n", "\n").rstrip("\n") + "\n"
+    for name, replacement in IAPHANDLER_PATCH_FUNCTIONS.items():
+        pattern = re.compile(rf"^function {re.escape(name)}\(.*?^end\n", re.M | re.S)
+        source, count = pattern.subn(lambda _match: replacement, source, count=1)
+        if count != 1:
+            raise ValueError(f"function {name} not found in IAPHandler source")
+    return source.rstrip("\n") + "\n" + IAPHANDLER_APPENDED_FUNCTIONS
+
+
+__all__ = [
+    "LocalMall", "MallCatalog", "MallError", "catalog", "window_start",
+    "IAPHANDLER_PATCH_FUNCTIONS", "IAPHANDLER_APPENDED_FUNCTIONS", "build_iaphandler_patch",
+]

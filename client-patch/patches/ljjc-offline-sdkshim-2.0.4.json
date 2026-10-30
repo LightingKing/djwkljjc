@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "name": "ljjc-offline-sdkshim",
+  "version": "2.0.4",
+  "abi": "universal",
+  "expectedSha256": "b997dbac9ff1764b46809486d83e4a65c6d511cae17fee6f8063ef598d66a776",
+  "operations": [
+    {
+      "kind": "replace_file",
+      "target": "smali/com/actgames/fci/AppDelegater.smali",
+      "source": "offline-smali/com/actgames/fci/AppDelegater.smali"
+    }
+  ]
+}

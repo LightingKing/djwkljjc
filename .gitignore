@@ -1,0 +1,60 @@
+# Local Python state
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Runtime state and logs (accounts and game saves are private, generated data)
+state/
+*.sqlite3
+*.sqlite3-shm
+*.sqlite3-wal
+*.db
+*.jsonl
+logs/
+backups/
+
+# Client binaries and unpacked build output
+*.apk
+*.aab
+*.apks
+build/
+dist/
+out/
+client-patch/work/
+client-patch/output/
+client-patch/keystore/
+
+# Reverse-engineering and capture artifacts can be very large or contain data
+data/golden-traces/
+data/apk-inventory.json
+!data/apk-inventory.json
+analysis/
+screenshots/
+
+# Tool-local files and editor settings
+.idea/
+.vscode/
+*.iml
+*.log
+*.tmp
+*.bak
+Thumbs.db
+Desktop.ini
+
+# Private signing material and local certificates
+*.jks
+*.keystore
+*.p12
+*.pem
+*.key
+certs/*key*
+
+# Runtime bundle created by start-server.cmd
+runtime/
+
+# Intermediate configuration extraction output
+tmp/

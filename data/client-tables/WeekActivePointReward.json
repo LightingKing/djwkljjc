@@ -1,0 +1,1 @@
+{"table":"WeekActivePointReward","source":"analysis/lua-decompiled/xlsx__weekactivepointreward.lua","sourceSha256":"0888f45a408a86c63a366d9a47badad3eeefb83bf5e2d996a34ec9769b65642c","provenance":"original APK 2.0.4 config module (FCI-decoded, unluac-decompiled), evaluated as data","rowCount":1,"rows":[{"activePoint":99999,"reward":[{"type":11,"id":60001,"count":1}]}]}

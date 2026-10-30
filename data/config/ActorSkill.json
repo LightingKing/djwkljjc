@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "table": "ActorSkill",
+  "observedCount": 836,
+  "rowCount": 6,
+  "completeness": "partial",
+  "sourceFiles": [
+    "combat-config-live.jsonl"
+  ],
+  "sourceRecords": [
+    {
+      "name": "combat-config-live.jsonl",
+      "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\combat-config-live.jsonl",
+      "sha256": "dbf87819c02e022903c42ddfe6db813c7496a08dacca5f48e45d2fa060ba2abc"
+    }
+  ],
+  "rowsSha256": "536adfb4f18a0130801a5e155359a32d0f30610388328c141edf8d7f98b2e618",
+  "schema": {
+    "types": [
+      "object"
+    ],
+    "fields": {
+      "actorId": {
+        "types": [
+          "integer"
+        ]
+      },
+      "cmdStr": {
+        "types": [
+          "string"
+        ]
+      },
+      "costIndex": {
+        "types": [
+          "integer"
+        ]
+      },
+      "displayIndex": {
+        "types": [
+          "integer"
+        ]
+      },
+      "followSkill": {
+        "types": [
+          "integer"
+        ]
+      },
+      "name": {
+        "types": [
+          "string"
+        ]
+      },
+      "resIndex": {
+        "types": [
+          "integer"
+        ]
+      },
+      "skillId": {
+        "types": [
+          "integer"
+        ]
+      },
+      "specialIndex": {
+        "types": [
+          "array"
+        ]
+      },
+      "target": {
+        "types": [
+          "integer"
+        ]
+      }
+    }
+  },
+  "rows": [
+    {
+      "actorId": 1001,
+      "cmdStr": "InputCardCmd10001",
+      "costIndex": 2,
+      "displayIndex": 2,
+      "followSkill": 1001004,
+      "name": "御坂美琴",
+      "resIndex": 2,
+      "skillId": 1001001,
+      "specialIndex": [],
+      "target": 1
+    },
+    {
+      "actorId": 1001,
+      "cmdStr": "InputCardCmd10002",
+      "costIndex": 1,
+      "displayIndex": 1,
+      "name": "御坂美琴",
+      "resIndex": 1,
+      "skillId": 1001002,
+      "specialIndex": [],
+      "target": 1
+    },
+    {
+      "actorId": 1001,
+      "cmdStr": "InputCardCmd10003",
+      "name": "御坂美琴",
+      "skillId": 1001003,
+      "specialIndex": [],
+      "target": 1
+    },
+    {
+      "actorId": 1001,
+      "cmdStr": "InputCardCmd10004",
+      "name": "御坂美琴",
+      "skillId": 1001004,
+      "specialIndex": [],
+      "target": 2
+    },
+    {
+      "actorId": 1001,
+      "cmdStr": "InputCardCmd10005",
+      "name": "御坂美琴",
+      "skillId": 1001005,
+      "specialIndex": [],
+      "target": 1
+    },
+    {
+      "actorId": 1001,
+      "cmdStr": "InputCardCmd10006",
+      "name": "御坂美琴",
+      "skillId": 1001006,
+      "specialIndex": [],
+      "target": 1
+    }
+  ]
+}

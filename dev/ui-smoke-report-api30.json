@@ -1,0 +1,17 @@
+﻿{
+    "serial":  "emulator-5560",
+    "package":  "com.tencent.tmgp.fcicv",
+    "runs":  1,
+    "passed":  true,
+    "records":  [
+                    {
+                        "run":  1,
+                        "focusedPackage":  true,
+                        "fatalLogLines":  0,
+                        "uiXml":  "I:\\workspace\\mobilegame\\local-server\\ljjc\\dev\\ui-smoke-report-api30\\ui-1.xml",
+                        "uiXmlSha256":  "b3d80341d6d9543270d0f6b3363dec095fa55b8330bad132d9190e6aeeff4d07",
+                        "screenshot":  "I:\\workspace\\mobilegame\\local-server\\ljjc\\dev\\ui-smoke-report-api30\\screen-1.png",
+                        "screenshotSha256":  "8a7c3346ce9834599ea62030b03cb15e0b9dbc48005d4f602befa169ef4c7503"
+                    }
+                ]
+}

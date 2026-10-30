@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "table": "Tutorial",
+  "observedCount": 55,
+  "rowCount": 6,
+  "completeness": "partial",
+  "sourceFiles": [
+    "config-samples-live.jsonl"
+  ],
+  "sourceRecords": [
+    {
+      "name": "config-samples-live.jsonl",
+      "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\config-samples-live.jsonl",
+      "sha256": "85e1ca251f8355208917cf14a1aee0c5f1c419e8f0ee017a5723a19996daeb54"
+    }
+  ],
+  "rowsSha256": "f0df05fae64d668dc0af0e16847654751afbcea0402a0d63e78093a5108fc664",
+  "schema": {
+    "types": [
+      "object"
+    ],
+    "fields": {
+      "id": {
+        "types": [
+          "integer"
+        ]
+      },
+      "sequence": {
+        "types": [
+          "integer"
+        ]
+      }
+    }
+  },
+  "rows": [
+    {
+      "id": 1,
+      "sequence": 1
+    },
+    {
+      "id": 2,
+      "sequence": 2
+    },
+    {
+      "id": 3,
+      "sequence": 3
+    },
+    {
+      "id": 5,
+      "sequence": 4
+    },
+    {
+      "id": 7,
+      "sequence": 5
+    },
+    {
+      "id": 9,
+      "sequence": 6
+    }
+  ]
+}

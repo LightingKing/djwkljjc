@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 1,
+  "table": "Signboard",
+  "observedCount": 96,
+  "rowCount": 6,
+  "completeness": "partial",
+  "sourceFiles": [
+    "config-samples-live.jsonl"
+  ],
+  "sourceRecords": [
+    {
+      "name": "config-samples-live.jsonl",
+      "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\config-samples-live.jsonl",
+      "sha256": "85e1ca251f8355208917cf14a1aee0c5f1c419e8f0ee017a5723a19996daeb54"
+    }
+  ],
+  "rowsSha256": "b9efe295cb0e06283a5f36d6d6163ffb1e89149fa19b2c9ad36fa743c978d75f",
+  "schema": {
+    "types": [
+      "object"
+    ],
+    "fields": {
+      "BoardOfAnimRes": {
+        "types": [
+          "integer"
+        ]
+      },
+      "BoardOfEmote": {
+        "types": [
+          "integer"
+        ]
+      },
+      "FavourLevel": {
+        "types": [
+          "integer"
+        ]
+      },
+      "active": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "activeTime": {
+        "types": [
+          "string"
+        ]
+      },
+      "roleId": {
+        "types": [
+          "integer"
+        ]
+      },
+      "roleNotepadRes": {
+        "types": [
+          "string"
+        ]
+      },
+      "signboardId": {
+        "types": [
+          "integer"
+        ]
+      },
+      "type": {
+        "types": [
+          "integer"
+        ]
+      },
+      "unlockParams": {
+        "types": [
+          "array"
+        ]
+      },
+      "unlockType": {
+        "types": [
+          "integer"
+        ]
+      }
+    }
+  },
+  "rows": [
+    {
+      "BoardOfEmote": 1001,
+      "active": true,
+      "roleId": 1,
+      "signboardId": 101,
+      "type": 1,
+      "unlockParams": [],
+      "unlockType": 1
+    },
+    {
+      "BoardOfAnimRes": 1001,
+      "BoardOfEmote": 1001,
+      "FavourLevel": 1,
+      "active": true,
+      "roleId": 1,
+      "signboardId": 102,
+      "type": 2,
+      "unlockParams": [],
+      "unlockType": 1
+    },
+    {
+      "BoardOfEmote": 1401,
+      "FavourLevel": 4,
+      "active": true,
+      "roleId": 1,
+      "signboardId": 103,
+      "type": 1,
+      "unlockParams": [],
+      "unlockType": 3
+    },
+    {
+      "BoardOfAnimRes": 1401,
+      "BoardOfEmote": 1401,
+      "FavourLevel": 2,
+      "active": true,
+      "roleId": 1,
+      "signboardId": 104,
+      "type": 2,
+      "unlockParams": [],
+      "unlockType": 3
+    },
+    {
+      "BoardOfAnimRes": 2001,
+      "BoardOfEmote": 1001,
+      "FavourLevel": 4,
+      "active": true,
+      "roleId": 1,
+      "signboardId": 105,
+      "type": 2,
+      "unlockParams": [],
+      "unlockType": 1
+    },
+    {
+      "BoardOfAnimRes": 5001,
+      "BoardOfEmote": 1001,
+      "FavourLevel": 1,
+      "active": true,
+      "activeTime": "2018-12-12 06:00:00",
+      "roleId": 1,
+      "roleNotepadRes": "5001a",
+      "signboardId": 106,
+      "type": 2,
+      "unlockParams": [],
+      "unlockType": 4
+    }
+  ]
+}

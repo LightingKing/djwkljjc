@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "table": "SingleActorGroup",
+  "observedCount": 5,
+  "rowCount": 4,
+  "completeness": "partial",
+  "sourceFiles": [
+    "story-config.json"
+  ],
+  "sourceRecords": [
+    {
+      "name": "story-config.json",
+      "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\story-config.json",
+      "sha256": "dd1d3b4b6e4815df53852b92bc58dafdf4acbb1dada32bc3bc37d6f569d07638"
+    }
+  ],
+  "rowsSha256": "8082bf7519473789677c441864a774dce1d531049dae5b1f2c5f4966a113c4ee",
+  "schema": {
+    "types": [
+      "object"
+    ],
+    "fields": {
+      "groupID": {
+        "types": [
+          "integer"
+        ]
+      },
+      "groupmember": {
+        "types": [
+          "array"
+        ],
+        "items": {
+          "types": [
+            "integer"
+          ]
+        }
+      }
+    }
+  },
+  "rows": [
+    {
+      "groupID": 1,
+      "groupmember": [
+        1002,
+        1003,
+        1008,
+        2132,
+        2105,
+        2108
+      ]
+    },
+    {
+      "groupID": 2,
+      "groupmember": []
+    },
+    {
+      "groupID": 3,
+      "groupmember": []
+    },
+    {
+      "groupID": 4,
+      "groupmember": []
+    }
+  ]
+}

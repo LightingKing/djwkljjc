@@ -1,0 +1,231 @@
+{
+  "schemaVersion": 1,
+  "table": "ActorAttrStarPromotion",
+  "observedCount": 577,
+  "rowCount": 4,
+  "completeness": "partial",
+  "sourceFiles": [
+    "story-config.json"
+  ],
+  "sourceRecords": [
+    {
+      "name": "story-config.json",
+      "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\story-config.json",
+      "sha256": "dd1d3b4b6e4815df53852b92bc58dafdf4acbb1dada32bc3bc37d6f569d07638"
+    }
+  ],
+  "rowsSha256": "575ad338e6e75d6f6f02b11517a636df22d61e23c08167518f7c44dcba191ae7",
+  "schema": {
+    "types": [
+      "object"
+    ],
+    "fields": {
+      "actorId": {
+        "types": [
+          "integer"
+        ]
+      },
+      "attrs": {
+        "types": [
+          "array"
+        ],
+        "items": {
+          "types": [
+            "object"
+          ],
+          "fields": {
+            "type": {
+              "types": [
+                "integer"
+              ]
+            },
+            "value": {
+              "types": [
+                "integer"
+              ]
+            }
+          }
+        }
+      },
+      "levelLimit": {
+        "types": [
+          "integer"
+        ]
+      },
+      "star": {
+        "types": [
+          "integer"
+        ]
+      },
+      "starCost": {
+        "types": [
+          "array"
+        ],
+        "items": {
+          "types": [
+            "object"
+          ],
+          "fields": {
+            "count": {
+              "types": [
+                "integer"
+              ]
+            },
+            "id": {
+              "types": [
+                "integer"
+              ]
+            },
+            "type": {
+              "types": [
+                "integer"
+              ]
+            }
+          }
+        }
+      },
+      "starCulDegree": {
+        "types": [
+          "integer"
+        ]
+      },
+      "unlockSkillId": {
+        "types": [
+          "integer"
+        ]
+      }
+    }
+  },
+  "rows": [
+    {
+      "actorId": 1001,
+      "attrs": [
+        {
+          "type": 1
+        },
+        {
+          "type": 3
+        },
+        {
+          "type": 5
+        },
+        {
+          "type": 6
+        }
+      ],
+      "star": 1,
+      "starCost": [],
+      "starCulDegree": 12
+    },
+    {
+      "actorId": 1001,
+      "attrs": [
+        {
+          "type": 1,
+          "value": 104
+        },
+        {
+          "type": 3,
+          "value": 41
+        },
+        {
+          "type": 5,
+          "value": 8
+        },
+        {
+          "type": 6,
+          "value": 8
+        }
+      ],
+      "levelLimit": 5,
+      "star": 2,
+      "starCost": [
+        {
+          "count": 5,
+          "id": 30001,
+          "type": 11
+        }
+      ],
+      "starCulDegree": 60
+    },
+    {
+      "actorId": 1001,
+      "attrs": [
+        {
+          "type": 1,
+          "value": 196
+        },
+        {
+          "type": 3,
+          "value": 77
+        },
+        {
+          "type": 5,
+          "value": 15
+        },
+        {
+          "type": 6,
+          "value": 14
+        }
+      ],
+      "levelLimit": 20,
+      "star": 3,
+      "starCost": [
+        {
+          "count": 10,
+          "id": 30006,
+          "type": 11
+        },
+        {
+          "count": 10,
+          "id": 30007,
+          "type": 11
+        }
+      ],
+      "starCulDegree": 140,
+      "unlockSkillId": 1001900
+    },
+    {
+      "actorId": 1001,
+      "attrs": [
+        {
+          "type": 1,
+          "value": 287
+        },
+        {
+          "type": 3,
+          "value": 114
+        },
+        {
+          "type": 5,
+          "value": 22
+        },
+        {
+          "type": 6,
+          "value": 21
+        }
+      ],
+      "levelLimit": 35,
+      "star": 4,
+      "starCost": [
+        {
+          "count": 20,
+          "id": 30011,
+          "type": 11
+        },
+        {
+          "count": 20,
+          "id": 30012,
+          "type": 11
+        },
+        {
+          "count": 20,
+          "id": 30013,
+          "type": 11
+        }
+      ],
+      "starCulDegree": 225,
+      "unlockSkillId": 1001901
+    }
+  ]
+}

@@ -1,0 +1,138 @@
+{
+  "schemaVersion": 1,
+  "table": "ActorAttrLevelPromotion",
+  "observedCount": 97,
+  "rowCount": 4,
+  "completeness": "partial",
+  "sourceFiles": [
+    "story-config.json"
+  ],
+  "sourceRecords": [
+    {
+      "name": "story-config.json",
+      "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\story-config.json",
+      "sha256": "dd1d3b4b6e4815df53852b92bc58dafdf4acbb1dada32bc3bc37d6f569d07638"
+    }
+  ],
+  "rowsSha256": "a84af934e75640be10e661751643e1cd6a3b281a5b7bfbdab9d5e5c9c502f158",
+  "schema": {
+    "types": [
+      "object"
+    ],
+    "fields": {
+      "actorId": {
+        "types": [
+          "integer"
+        ]
+      },
+      "attrs": {
+        "types": [
+          "array"
+        ],
+        "items": {
+          "types": [
+            "object"
+          ],
+          "fields": {
+            "type": {
+              "types": [
+                "integer"
+              ]
+            },
+            "value": {
+              "types": [
+                "integer"
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "rows": [
+    {
+      "actorId": 1001,
+      "attrs": [
+        {
+          "type": 1,
+          "value": 1153
+        },
+        {
+          "type": 3,
+          "value": 456
+        },
+        {
+          "type": 5,
+          "value": 86
+        },
+        {
+          "type": 6,
+          "value": 83
+        }
+      ]
+    },
+    {
+      "actorId": 1002,
+      "attrs": [
+        {
+          "type": 1,
+          "value": 1406
+        },
+        {
+          "type": 3,
+          "value": 395
+        },
+        {
+          "type": 5,
+          "value": 134
+        },
+        {
+          "type": 6,
+          "value": 131
+        }
+      ]
+    },
+    {
+      "actorId": 1003,
+      "attrs": [
+        {
+          "type": 1,
+          "value": 1162
+        },
+        {
+          "type": 3,
+          "value": 453
+        },
+        {
+          "type": 5,
+          "value": 85
+        },
+        {
+          "type": 6,
+          "value": 87
+        }
+      ]
+    },
+    {
+      "actorId": 1004,
+      "attrs": [
+        {
+          "type": 1,
+          "value": 1620
+        },
+        {
+          "type": 3,
+          "value": 276
+        },
+        {
+          "type": 5,
+          "value": 183
+        },
+        {
+          "type": 6,
+          "value": 181
+        }
+      ]
+    }
+  ]
+}

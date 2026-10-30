@@ -1,0 +1,2575 @@
+schemaVersion: 1
+source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+statusLegend:
+  observed_unverified: Extracted from client descriptors; server implementation still
+    needs contract tests.
+  implemented: Covered by a local route test and response-shape assertion.
+  fixture: Served from a captured fixture without local business logic.
+  unimplemented: Known client interface with no local route yet.
+summary:
+  interfaceCount: 84
+  uniqueRoutes: 83
+  byFile:
+    account91.proto: 38
+    api.proto: 10
+    dir.proto: 8
+    playeraction.proto: 28
+interfaces:
+- interface: ReqDir
+  file: dir.proto
+  view: DirView
+  route: /Dir/
+  description: null
+  requestFields:
+  - number: 1
+    name: client_version
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 2
+    name: device_type
+    label: LABEL_OPTIONAL
+    type: uint32
+    type_name: ''
+    json_name: ''
+  - number: 3
+    name: player_type
+    label: LABEL_OPTIONAL
+    type: enum
+    type_name: .PlayerType
+    json_name: ''
+  responseFields:
+    result:
+    - number: 1
+      name: dir_stat
+      label: LABEL_OPTIONAL
+      type: message
+      type_name: .DirStat
+      json_name: ''
+    - number: 3
+      name: dir_world
+      label: LABEL_OPTIONAL
+      type: message
+      type_name: .DirWorld
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ReqWorldConfig
+  file: dir.proto
+  view: WorldConfigView
+  route: /WorldConfig/
+  description: null
+  requestFields:
+  - number: 1
+    name: world_config_save
+    label: LABEL_OPTIONAL
+    type: message
+    type_name: .WorldInfoConfig
+    json_name: ''
+  responseFields:
+    result:
+    - number: 2
+      name: ret
+      label: LABEL_OPTIONAL
+      type: int32
+      type_name: ''
+      json_name: ''
+    - number: 3
+      name: world_config_get
+      label: LABEL_OPTIONAL
+      type: message
+      type_name: .WorldInfoConfig
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ReqDirStat
+  file: dir.proto
+  view: DirStatView
+  route: /DirStat/
+  description: null
+  requestFields:
+  - number: 1
+    name: dir_stat_save
+    label: LABEL_OPTIONAL
+    type: message
+    type_name: .DirStat
+    json_name: ''
+  responseFields:
+    result:
+    - number: 2
+      name: ret
+      label: LABEL_OPTIONAL
+      type: int32
+      type_name: ''
+      json_name: ''
+    - number: 3
+      name: dir_stat_get
+      label: LABEL_OPTIONAL
+      type: message
+      type_name: .DirStat
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ReqCommitVersion
+  file: dir.proto
+  view: CommitVersionView
+  route: /CommitVersion/
+  description: null
+  requestFields:
+  - number: 1
+    name: commit_version_save
+    label: LABEL_OPTIONAL
+    type: message
+    type_name: .CommitVersionConfig
+    json_name: ''
+  responseFields:
+    result:
+    - number: 2
+      name: ret
+      label: LABEL_OPTIONAL
+      type: int32
+      type_name: ''
+      json_name: ''
+    - number: 3
+      name: commit_version_get
+      label: LABEL_OPTIONAL
+      type: message
+      type_name: .CommitVersionConfig
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ReqFormalVersion
+  file: dir.proto
+  view: FormalVersionView
+  route: /FormalVersion/
+  description: null
+  requestFields:
+  - number: 1
+    name: formal_version_save
+    label: LABEL_OPTIONAL
+    type: message
+    type_name: .FormalVersionConfig
+    json_name: ''
+  responseFields:
+    result:
+    - number: 2
+      name: ret
+      label: LABEL_OPTIONAL
+      type: int32
+      type_name: ''
+      json_name: ''
+    - number: 3
+      name: formal_version_get
+      label: LABEL_OPTIONAL
+      type: message
+      type_name: .FormalVersionConfig
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ReqAllConfig
+  file: dir.proto
+  view: AllConfigView
+  route: /AllConfig/
+  description: null
+  requestFields:
+  - number: 1
+    name: formal_version_save
+    label: LABEL_OPTIONAL
+    type: message
+    type_name: .FormalVersionConfig
+    json_name: ''
+  - number: 2
+    name: commit_version_save
+    label: LABEL_OPTIONAL
+    type: message
+    type_name: .CommitVersionConfig
+    json_name: ''
+  - number: 3
+    name: world_config_save
+    label: LABEL_OPTIONAL
+    type: message
+    type_name: .WorldInfoConfig
+    json_name: ''
+  - number: 4
+    name: dir_stat_save
+    label: LABEL_OPTIONAL
+    type: message
+    type_name: .DirStat
+    json_name: ''
+  - number: 5
+    name: account_switch_save
+    label: LABEL_OPTIONAL
+    type: message
+    type_name: .AccountSwitch
+    json_name: ''
+  responseFields:
+    result:
+    - number: 10
+      name: ret
+      label: LABEL_OPTIONAL
+      type: int32
+      type_name: ''
+      json_name: ''
+    - number: 11
+      name: formal_version_get
+      label: LABEL_OPTIONAL
+      type: message
+      type_name: .FormalVersionConfig
+      json_name: ''
+    - number: 12
+      name: commit_version_get
+      label: LABEL_OPTIONAL
+      type: message
+      type_name: .CommitVersionConfig
+      json_name: ''
+    - number: 13
+      name: world_config_get
+      label: LABEL_OPTIONAL
+      type: message
+      type_name: .WorldInfoConfig
+      json_name: ''
+    - number: 14
+      name: dir_stat_get
+      label: LABEL_OPTIONAL
+      type: message
+      type_name: .DirStat
+      json_name: ''
+    - number: 15
+      name: account_switch_get
+      label: LABEL_OPTIONAL
+      type: message
+      type_name: .AccountSwitch
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiIpLimit
+  file: dir.proto
+  view: IpLimitView
+  route: /iplimit/
+  description: null
+  requestFields:
+  - number: 1
+    name: ip_list
+    label: LABEL_REPEATED
+    type: message
+    type_name: .ApiIpLimit.ip
+    json_name: ''
+  responseFields:
+    ip:
+    - number: 1
+      name: begin
+      label: LABEL_OPTIONAL
+      type: string
+      type_name: ''
+      json_name: ''
+    - number: 2
+      name: end
+      label: LABEL_OPTIONAL
+      type: string
+      type_name: ''
+      json_name: ''
+    result:
+    - number: 1
+      name: ip_list
+      label: LABEL_REPEATED
+      type: message
+      type_name: .ApiIpLimit.ip
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ReqDirAccount
+  file: dir.proto
+  view: DirAccountView
+  route: /DirAccount/
+  description: null
+  requestFields:
+  - number: 1
+    name: client_version
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 2
+    name: device_type
+    label: LABEL_OPTIONAL
+    type: uint32
+    type_name: ''
+    json_name: ''
+  responseFields:
+    result:
+    - number: 1
+      name: dir_stat
+      label: LABEL_OPTIONAL
+      type: message
+      type_name: .DirStat
+      json_name: ''
+    - number: 2
+      name: account_url
+      label: LABEL_OPTIONAL
+      type: string
+      type_name: ''
+      json_name: ''
+    - number: 3
+      name: account_web_url
+      label: LABEL_OPTIONAL
+      type: string
+      type_name: ''
+      json_name: ''
+    - number: 4
+      name: account_switch
+      label: LABEL_OPTIONAL
+      type: message
+      type_name: .GameAccountSwitch
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiTest
+  file: account91.proto
+  view: testView
+  route: /test/
+  description: null
+  requestFields: []
+  responseFields:
+    result:
+    - number: 2
+      name: test
+      label: LABEL_OPTIONAL
+      type: string
+      type_name: ''
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiAccountSwitch
+  file: account91.proto
+  view: AccountSwitchView
+  route: /accountswitch/
+  description: null
+  requestFields:
+  - number: 1
+    name: white_id_switch
+    label: LABEL_OPTIONAL
+    type: bool
+    type_name: ''
+    json_name: ''
+  - number: 2
+    name: cdkey_switch
+    label: LABEL_OPTIONAL
+    type: bool
+    type_name: ''
+    json_name: ''
+  - number: 3
+    name: booking_full_switch
+    label: LABEL_OPTIONAL
+    type: bool
+    type_name: ''
+    json_name: ''
+  - number: 4
+    name: mizi_pay_switch
+    label: LABEL_OPTIONAL
+    type: bool
+    type_name: ''
+    json_name: ''
+  responseFields:
+    result:
+    - number: 1
+      name: result
+      label: LABEL_OPTIONAL
+      type: message
+      type_name: .DbAccountSwitch
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiManageAuthInfo
+  file: account91.proto
+  view: ManageAuthInfoView
+  route: /ManageAuthInfo/
+  description: null
+  requestFields: []
+  responseFields:
+    get:
+    - number: 1
+      name: get
+      label: LABEL_OPTIONAL
+      type: message
+      type_name: .DbAccountSession
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiManageSession
+  file: account91.proto
+  view: ManageSessionView
+  route: /ManageSession/
+  description: 这里可以加中文说明
+  requestFields:
+  - number: 1
+    name: ldap_account
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 2
+    name: ldap_password
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 3
+    name: client_type
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  responseFields:
+    result:
+    - number: 2
+      name: result
+      label: LABEL_OPTIONAL
+      type: message
+      type_name: .DbAccountSession
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiAppById
+  file: account91.proto
+  view: AppViewById
+  route: /App/<string:app_id>/
+  description: null
+  requestFields: []
+  responseFields:
+    get:
+    - number: 2
+      name: get
+      label: LABEL_OPTIONAL
+      type: message
+      type_name: .DbAppInfo
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiApp
+  file: account91.proto
+  view: AppView
+  route: /App/
+  description: null
+  requestFields:
+  - number: 1
+    name: app_id
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 2
+    name: app_key
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 3
+    name: app_key_type
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  responseFields:
+    get:
+    - number: 2
+      name: apps
+      label: LABEL_REPEATED
+      type: string
+      type_name: ''
+      json_name: ''
+    post:
+    - number: 1
+      name: post
+      label: LABEL_OPTIONAL
+      type: message
+      type_name: .DbAppInfo
+      json_name: ''
+    patch:
+    - number: 2
+      name: patch
+      label: LABEL_OPTIONAL
+      type: message
+      type_name: .DbAppInfo
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiAccountSession
+  file: account91.proto
+  view: AccountSessionView
+  route: /AccountSession/
+  description: null
+  requestFields:
+  - number: 1
+    name: app_id
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 2
+    name: app_key
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 3
+    name: entry_type
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 4
+    name: channel
+    label: LABEL_OPTIONAL
+    type: uint32
+    type_name: ''
+    json_name: ''
+  - number: 5
+    name: device_id
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 6
+    name: device_type
+    label: LABEL_OPTIONAL
+    type: uint32
+    type_name: ''
+    json_name: ''
+  - number: 7
+    name: device
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  responseFields:
+    result:
+    - number: 2
+      name: result
+      label: LABEL_OPTIONAL
+      type: message
+      type_name: .DbAccountSession
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiVerifyCode
+  file: account91.proto
+  view: VerifyCodeView
+  route: /VerifyCode/
+  description: null
+  requestFields:
+  - number: 1
+    name: verify_code
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 2
+    name: verify_code_passed
+    label: LABEL_OPTIONAL
+    type: bool
+    type_name: ''
+    json_name: ''
+  responseFields:
+    result:
+    - number: 2
+      name: verify_code_passed
+      label: LABEL_OPTIONAL
+      type: bool
+      type_name: ''
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiPasswordVerifyCode
+  file: account91.proto
+  view: PasswordVerifyCodeView
+  route: /PasswordVerifyCode/
+  description: null
+  requestFields:
+  - number: 1
+    name: password_verify_code
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 2
+    name: password_verify_code_passed
+    label: LABEL_OPTIONAL
+    type: bool
+    type_name: ''
+    json_name: ''
+  - number: 3
+    name: entry
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 4
+    name: entry_type
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  responseFields:
+    result:
+    - number: 2
+      name: password_verify_code_passed
+      label: LABEL_OPTIONAL
+      type: bool
+      type_name: ''
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiCurrentEntryModifyVerifyCode
+  file: account91.proto
+  view: EntryModifyVerifyCodeCurrentView
+  route: /CurrentEntryModifyVerifyCode/
+  description: null
+  requestFields:
+  - number: 1
+    name: social_tokey
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 2
+    name: verify_code
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 3
+    name: verify_code_passed
+    label: LABEL_OPTIONAL
+    type: bool
+    type_name: ''
+    json_name: ''
+  - number: 4
+    name: entry
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 5
+    name: entry_type
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  responseFields:
+    result:
+    - number: 2
+      name: verify_code_passed
+      label: LABEL_OPTIONAL
+      type: bool
+      type_name: ''
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiNewEntryModifyVerifyCode
+  file: account91.proto
+  view: EntryModifyVerifyCodeNewView
+  route: /NewEntryModifyVerifyCode/,/exist-entry-verify-code/
+  description: null
+  requestFields:
+  - number: 2
+    name: verify_code
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 3
+    name: verify_code_passed
+    label: LABEL_OPTIONAL
+    type: bool
+    type_name: ''
+    json_name: ''
+  responseFields:
+    result:
+    - number: 2
+      name: verify_code_passed
+      label: LABEL_OPTIONAL
+      type: bool
+      type_name: ''
+      json_name: ''
+    - number: 3
+      name: auth
+      label: LABEL_OPTIONAL
+      type: message
+      type_name: .DbAuthInfo
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiNewEntry
+  file: account91.proto
+  view: NewEntryView
+  route: /NewEntry/
+  description: null
+  requestFields:
+  - number: 1
+    name: entry
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 2
+    name: entry_type
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 3
+    name: social_type
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 4
+    name: social_token
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 5
+    name: password
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  responseFields:
+    post:
+    - number: 2
+      name: entry
+      label: LABEL_OPTIONAL
+      type: string
+      type_name: ''
+      json_name: ''
+    - number: 3
+      name: entry_type
+      label: LABEL_OPTIONAL
+      type: string
+      type_name: ''
+      json_name: ''
+    - number: 5
+      name: social_type
+      label: LABEL_OPTIONAL
+      type: string
+      type_name: ''
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiExistEntry
+  file: account91.proto
+  view: ExistEntryView
+  route: /exist-entry/
+  description: null
+  requestFields:
+  - number: 1
+    name: entry
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 2
+    name: entry_type
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 3
+    name: social_type
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 4
+    name: social_token
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 5
+    name: bbrr_uin
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  responseFields:
+    post: []
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiEntryReg
+  file: account91.proto
+  view: EntryRegView
+  route: /EntryReg/
+  description: null
+  requestFields:
+  - number: 1
+    name: entry
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 2
+    name: entry_type
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 3
+    name: password
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 4
+    name: ad_track_id
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 5
+    name: social_type
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 10
+    name: bbrr_uin
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  responseFields:
+    result:
+    - number: 2
+      name: entry
+      label: LABEL_OPTIONAL
+      type: string
+      type_name: ''
+      json_name: ''
+    - number: 3
+      name: entry_type
+      label: LABEL_OPTIONAL
+      type: string
+      type_name: ''
+      json_name: ''
+    - number: 5
+      name: social_type
+      label: LABEL_OPTIONAL
+      type: string
+      type_name: ''
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiCaptcha
+  file: account91.proto
+  view: CaptchaView
+  route: /Captcha/
+  description: null
+  requestFields:
+  - number: 1
+    name: captcha
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 2
+    name: captcha_passed
+    label: LABEL_OPTIONAL
+    type: bool
+    type_name: ''
+    json_name: ''
+  responseFields:
+    result:
+    - number: 2
+      name: captcha
+      label: LABEL_OPTIONAL
+      type: string
+      type_name: ''
+      json_name: ''
+    - number: 3
+      name: captcha_passed
+      label: LABEL_OPTIONAL
+      type: bool
+      type_name: ''
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiExtraInfo
+  file: account91.proto
+  view: ExtraInfoView
+  route: /ExtraInfo/
+  description: null
+  requestFields:
+  - number: 1
+    name: id_china
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 2
+    name: name
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  responseFields:
+    result:
+    - number: 1
+      name: id_china
+      label: LABEL_OPTIONAL
+      type: string
+      type_name: ''
+      json_name: ''
+    - number: 2
+      name: name
+      label: LABEL_OPTIONAL
+      type: string
+      type_name: ''
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiExtraInfoByAuth
+  file: account91.proto
+  view: ExtraInfoByAuthView
+  route: /ExtraInfoByAuth/
+  description: null
+  requestFields:
+  - number: 1
+    name: id_china
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 2
+    name: name
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  responseFields:
+    result:
+    - number: 1
+      name: id_china
+      label: LABEL_OPTIONAL
+      type: string
+      type_name: ''
+      json_name: ''
+    - number: 2
+      name: name
+      label: LABEL_OPTIONAL
+      type: string
+      type_name: ''
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiPassword
+  file: account91.proto
+  view: PasswordView
+  route: /Password/
+  description: null
+  requestFields:
+  - number: 1
+    name: password
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  responseFields: {}
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiGmPassword
+  file: account91.proto
+  view: ApiGmPasswordView
+  route: /gm-password/
+  description: null
+  requestFields:
+  - number: 1
+    name: password
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 2
+    name: account_id
+    label: LABEL_OPTIONAL
+    type: uint64
+    type_name: ''
+    json_name: ''
+  responseFields: {}
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiPasswordReset
+  file: account91.proto
+  view: PasswordResetView
+  route: /Password/reset/
+  description: gm重置密码
+  requestFields:
+  - number: 1
+    name: account_id
+    label: LABEL_OPTIONAL
+    type: uint64
+    type_name: ''
+    json_name: ''
+  responseFields:
+    result:
+    - number: 1
+      name: new_password
+      label: LABEL_OPTIONAL
+      type: string
+      type_name: ''
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiAccount
+  file: account91.proto
+  view: AccountView
+  route: /Account/,/Account/<string:account_id_or_open_id>/
+  description: null
+  requestFields:
+  - number: 7
+    name: gm
+    label: LABEL_OPTIONAL
+    type: bool
+    type_name: ''
+    json_name: ''
+  - number: 8
+    name: forbidden
+    label: LABEL_OPTIONAL
+    type: bool
+    type_name: ''
+    json_name: ''
+  - number: 9
+    name: forbid_end_time
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  responseFields:
+    post:
+    - number: 2
+      name: account
+      label: LABEL_OPTIONAL
+      type: message
+      type_name: .DbAccount
+      json_name: ''
+    - number: 3
+      name: entry
+      label: LABEL_OPTIONAL
+      type: message
+      type_name: .DbAccountEntry
+      json_name: ''
+    get:
+    - number: 1
+      name: entrys
+      label: LABEL_REPEATED
+      type: message
+      type_name: .DbAccountEntry
+      json_name: ''
+    - number: 2
+      name: account
+      label: LABEL_OPTIONAL
+      type: message
+      type_name: .DbAccount
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiAccountEntry
+  file: account91.proto
+  view: AccountEntryView
+  route: /AccountEntry/,/AccountEntry/<string:entry>/
+  description: null
+  requestFields:
+  - number: 1
+    name: entry
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 2
+    name: entry_type
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 3
+    name: account_id
+    label: LABEL_OPTIONAL
+    type: uint64
+    type_name: ''
+    json_name: ''
+  - number: 4
+    name: verified
+    label: LABEL_OPTIONAL
+    type: bool
+    type_name: ''
+    json_name: ''
+  - number: 5
+    name: forbidden
+    label: LABEL_OPTIONAL
+    type: bool
+    type_name: ''
+    json_name: ''
+  - number: 6
+    name: forbid_end_time
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  responseFields:
+    result:
+    - number: 2
+      name: result
+      label: LABEL_OPTIONAL
+      type: message
+      type_name: .DbAccountEntry
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiGmAccountEntry
+  file: account91.proto
+  view: ApiGmAccountEntryView
+  route: /gm-account-entry/,/gm-add-entry/
+  description: null
+  requestFields:
+  - number: 1
+    name: entry
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 2
+    name: entry_type
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 3
+    name: account_id
+    label: LABEL_OPTIONAL
+    type: uint64
+    type_name: ''
+    json_name: ''
+  - number: 4
+    name: verified
+    label: LABEL_OPTIONAL
+    type: bool
+    type_name: ''
+    json_name: ''
+  - number: 5
+    name: forbidden
+    label: LABEL_OPTIONAL
+    type: bool
+    type_name: ''
+    json_name: ''
+  responseFields:
+    result:
+    - number: 2
+      name: result
+      label: LABEL_OPTIONAL
+      type: message
+      type_name: .DbAccountEntry
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiAccountEntryExist
+  file: account91.proto
+  view: ApiAccountEntryExistView
+  route: /AccountEntry/<string:entry>/exist/
+  description: null
+  requestFields: []
+  responseFields:
+    result:
+    - number: 1
+      name: result
+      label: LABEL_OPTIONAL
+      type: bool
+      type_name: ''
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiAccountGuestBind
+  file: account91.proto
+  view: ApiAccountBindView
+  route: /AccountEntry/bind/
+  description: null
+  requestFields: []
+  responseFields:
+    post:
+    - number: 2
+      name: post
+      label: LABEL_OPTIONAL
+      type: message
+      type_name: .DbAccount
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiAccountBbrrOldBind
+  file: account91.proto
+  view: ApiAccountBindBbrrOldView
+  route: /AccountEntry/bind-bbrr-old/
+  description: null
+  requestFields: []
+  responseFields:
+    post:
+    - number: 2
+      name: post
+      label: LABEL_OPTIONAL
+      type: message
+      type_name: .DbAccount
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiAuthInfo
+  file: account91.proto
+  view: AuthView
+  route: /Auth/,/Auth/<string:verify_token>/
+  description: null
+  requestFields:
+  - number: 1
+    name: entry
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 2
+    name: entry_type
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 3
+    name: social_type
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 4
+    name: password
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 5
+    name: social_token
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 6
+    name: social_platform
+    label: LABEL_OPTIONAL
+    type: uint32
+    type_name: ''
+    json_name: ''
+  - number: 7
+    name: social_expire
+    label: LABEL_OPTIONAL
+    type: uint32
+    type_name: ''
+    json_name: ''
+  - number: 8
+    name: device_type
+    label: LABEL_OPTIONAL
+    type: uint32
+    type_name: ''
+    json_name: ''
+  - number: 9
+    name: cdkey
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  responseFields:
+    result:
+    - number: 2
+      name: result
+      label: LABEL_OPTIONAL
+      type: message
+      type_name: .DbAuthInfo
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiAuthByLdap
+  file: account91.proto
+  view: ApiAuthByLdapView
+  route: /Auth-ldap/
+  description: 通过ldap认证登陆任意玩家
+  requestFields:
+  - number: 1
+    name: open_id
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 3
+    name: ldap_account
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 4
+    name: ldap_password
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  responseFields:
+    result:
+    - number: 2
+      name: result
+      label: LABEL_OPTIONAL
+      type: message
+      type_name: .DbAuthInfo
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiBbrrImport
+  file: account91.proto
+  view: BbrrImportView
+  route: /bbrr-import/
+  description: 导入bbrr账号
+  requestFields:
+  - number: 1
+    name: uid
+    label: LABEL_OPTIONAL
+    type: uint32
+    type_name: ''
+    json_name: ''
+  - number: 2
+    name: uin
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 3
+    name: src
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  responseFields:
+    post:
+    - number: 1
+      name: new_user_id
+      label: LABEL_OPTIONAL
+      type: string
+      type_name: ''
+      json_name: ''
+    - number: 2
+      name: new_password
+      label: LABEL_OPTIONAL
+      type: string
+      type_name: ''
+      json_name: ''
+    - number: 5
+      name: open_id
+      label: LABEL_OPTIONAL
+      type: string
+      type_name: ''
+      json_name: ''
+    - number: 6
+      name: account_id
+      label: LABEL_OPTIONAL
+      type: uint64
+      type_name: ''
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiRealNameVerified
+  file: account91.proto
+  view: ApiRealNameVerifiedView
+  route: /real-name-verified/<string:open_id>/
+  description: null
+  requestFields: []
+  responseFields:
+    get:
+    - number: 1
+      name: get
+      label: LABEL_OPTIONAL
+      type: bool
+      type_name: ''
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiCheckMailEntryExist
+  file: account91.proto
+  view: ApiCheckMailEntryExistView
+  route: /entry-exist/email/<string:open_id>/
+  description: null
+  requestFields: []
+  responseFields:
+    get:
+    - number: 1
+      name: get
+      label: LABEL_OPTIONAL
+      type: bool
+      type_name: ''
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiCheckPhoneEntryExist
+  file: account91.proto
+  view: ApiCheckPhoneEntryExistView
+  route: /entry-exist/phone/<string:open_id>/
+  description: null
+  requestFields: []
+  responseFields:
+    get:
+    - number: 1
+      name: get
+      label: LABEL_OPTIONAL
+      type: bool
+      type_name: ''
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiCheckOpenIdExist
+  file: account91.proto
+  view: ApiCheckOpenIdExistView
+  route: /openid-exist/<string:open_id>/
+  description: null
+  requestFields: []
+  responseFields:
+    get:
+    - number: 1
+      name: get
+      label: LABEL_OPTIONAL
+      type: bool
+      type_name: ''
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiClickGame
+  file: account91.proto
+  view: ClickGameView
+  route: /ClickGame/
+  description: 记录玩家点击游戏行为请求
+  requestFields:
+  - number: 1
+    name: device
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 2
+    name: channel
+    label: LABEL_OPTIONAL
+    type: uint32
+    type_name: ''
+    json_name: ''
+  - number: 3
+    name: client_version
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 4
+    name: device_type
+    label: LABEL_OPTIONAL
+    type: uint32
+    type_name: ''
+    json_name: ''
+  - number: 5
+    name: device_id
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  responseFields:
+    result:
+    - number: 1
+      name: result
+      label: LABEL_OPTIONAL
+      type: uint32
+      type_name: ''
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiWhiteOpenId
+  file: account91.proto
+  view: WhiteOpenIdView
+  route: /WhiteOpenId/,/WhiteOpenId/<string:openid>/
+  description: openid白名单
+  requestFields:
+  - number: 1
+    name: open_ids
+    label: LABEL_REPEATED
+    type: string
+    type_name: ''
+    json_name: ''
+  responseFields:
+    result:
+    - number: 1
+      name: result
+      label: LABEL_OPTIONAL
+      type: bool
+      type_name: ''
+      json_name: ''
+    - number: 2
+      name: white_count
+      label: LABEL_OPTIONAL
+      type: uint32
+      type_name: ''
+      json_name: ''
+    - number: 3
+      name: open_ids
+      label: LABEL_REPEATED
+      type: string
+      type_name: ''
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiUploadWhiteOpenId
+  file: account91.proto
+  view: UploadWhiteOpenIdView
+  route: /UploadWhiteOpenId/
+  description: openid白名单
+  requestFields: []
+  responseFields:
+    result:
+    - number: 1
+      name: result
+      label: LABEL_OPTIONAL
+      type: bool
+      type_name: ''
+      json_name: ''
+    - number: 2
+      name: white_count
+      label: LABEL_OPTIONAL
+      type: uint32
+      type_name: ''
+      json_name: ''
+    - number: 3
+      name: open_ids
+      label: LABEL_REPEATED
+      type: string
+      type_name: ''
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiDelWhiteOpenId
+  file: account91.proto
+  view: DelWhiteOpenIdView
+  route: /DelWhiteOpenId/
+  description: 删除指定openid白名单
+  requestFields:
+  - number: 1
+    name: open_ids
+    label: LABEL_REPEATED
+    type: string
+    type_name: ''
+    json_name: ''
+  responseFields:
+    result:
+    - number: 1
+      name: result
+      label: LABEL_OPTIONAL
+      type: bool
+      type_name: ''
+      json_name: ''
+    - number: 2
+      name: white_count
+      label: LABEL_OPTIONAL
+      type: uint32
+      type_name: ''
+      json_name: ''
+    - number: 3
+      name: open_ids
+      label: LABEL_REPEATED
+      type: string
+      type_name: ''
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiDelAllWhiteOpenId
+  file: account91.proto
+  view: DelAllWhiteOpenIdView
+  route: /DelAllWhiteOpenId/
+  description: 全部删除openid白名单
+  requestFields: []
+  responseFields:
+    result:
+    - number: 1
+      name: result
+      label: LABEL_OPTIONAL
+      type: bool
+      type_name: ''
+      json_name: ''
+    - number: 2
+      name: white_count
+      label: LABEL_OPTIONAL
+      type: uint32
+      type_name: ''
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiShutDown
+  file: playeraction.proto
+  view: shutDownView
+  route: /shutDown/
+  description: 获取访问者的ip地址
+  requestFields: []
+  responseFields:
+    result:
+    - number: 1
+      name: result
+      label: LABEL_OPTIONAL
+      type: int32
+      type_name: ''
+      json_name: ''
+    - number: 2
+      name: msg
+      label: LABEL_OPTIONAL
+      type: string
+      type_name: ''
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiKickAll
+  file: playeraction.proto
+  view: KickAllView
+  route: /kickall/
+  description: 踢掉所有玩家
+  requestFields: []
+  responseFields:
+    result:
+    - number: 1
+      name: result
+      label: LABEL_OPTIONAL
+      type: int32
+      type_name: ''
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiTempEntranceSwitch
+  file: playeraction.proto
+  view: TempEntranceSwitchView
+  route: /temp-entrance-switch/
+  description: 临时入口开关
+  requestFields: []
+  responseFields:
+    get:
+    - number: 1
+      name: switch_info
+      label: LABEL_REPEATED
+      type: message
+      type_name: .DbTempEntranceSwitch.Switch_Info
+      json_name: ''
+    post:
+    - number: 1
+      name: result
+      label: LABEL_OPTIONAL
+      type: int32
+      type_name: ''
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiDirtyCheck
+  file: playeraction.proto
+  view: DirtyCheckView
+  route: /dirtycheck/<string:content>/
+  description: 脏字屏蔽
+  requestFields: []
+  responseFields:
+    result:
+    - number: 1
+      name: result
+      label: LABEL_OPTIONAL
+      type: string
+      type_name: ''
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiChangeServerTime
+  file: playeraction.proto
+  view: ChangeServerTimeView
+  route: /changetime/
+  description: 改变服务器时间
+  requestFields:
+  - number: 1
+    name: target_time
+    label: LABEL_OPTIONAL
+    type: uint32
+    type_name: ''
+    json_name: ''
+  responseFields:
+    result:
+    - number: 1
+      name: server_time_second
+      label: LABEL_OPTIONAL
+      type: uint32
+      type_name: ''
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiPlayerSyncMidasInfo
+  file: playeraction.proto
+  view: PlayerSyncMidasInfoView
+  route: /syncmidas/
+  description: 米大师同步
+  requestFields:
+  - number: 1
+    name: midas_info
+    label: LABEL_OPTIONAL
+    type: message
+    type_name: .DBGamePlayer.MidasKey
+    json_name: ''
+  responseFields: {}
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiPlayerASMIadInfo
+  file: playeraction.proto
+  view: PlayerASMIadInfoView
+  route: /asmiadinfo/
+  description: ios搜索下载信息
+  requestFields:
+  - number: 1
+    name: attribution
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 2
+    name: org_name
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 3
+    name: campaign_id
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 4
+    name: campaign_name
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 5
+    name: conversion_date
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 6
+    name: click_date
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 7
+    name: adgroup_id
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 8
+    name: adgroup_name
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 9
+    name: key_word
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  responseFields: {}
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiPlayerLogin
+  file: playeraction.proto
+  view: LoginView
+  route: /login/
+  description: 通过account拿到的token进行游戏登陆请求
+  requestFields: []
+  responseFields:
+    result:
+    - number: 1
+      name: login_ret
+      label: LABEL_OPTIONAL
+      type: bool
+      type_name: ''
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiPlayerLogout
+  file: playeraction.proto
+  view: PlayerLogoutView
+  route: /logout/
+  description: PushServer调用,通知Fci玩家登出
+  requestFields: []
+  responseFields:
+    result:
+    - number: 1
+      name: logout_ret
+      label: LABEL_OPTIONAL
+      type: bool
+      type_name: ''
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiPlayerBaseInfo
+  file: playeraction.proto
+  view: PlayerBaseInfoView
+  route: /baseinfo/
+  description: player的baseinfo的GET操作
+  requestFields: []
+  responseFields:
+    result:
+    - number: 1
+      name: level
+      label: LABEL_OPTIONAL
+      type: uint32
+      type_name: ''
+      json_name: ''
+    - number: 2
+      name: name
+      label: LABEL_OPTIONAL
+      type: string
+      type_name: ''
+      json_name: ''
+    - number: 3
+      name: last_login_time
+      label: LABEL_OPTIONAL
+      type: uint32
+      type_name: ''
+      json_name: ''
+    - number: 4
+      name: social_picture
+      label: LABEL_OPTIONAL
+      type: string
+      type_name: ''
+      json_name: ''
+    - number: 5
+      name: head_photo
+      label: LABEL_OPTIONAL
+      type: uint32
+      type_name: ''
+      json_name: ''
+    - number: 6
+      name: fight_medal
+      label: LABEL_OPTIONAL
+      type: uint32
+      type_name: ''
+      json_name: ''
+    - number: 7
+      name: sex
+      label: LABEL_OPTIONAL
+      type: uint32
+      type_name: ''
+      json_name: ''
+    - number: 8
+      name: home_back_ground
+      label: LABEL_OPTIONAL
+      type: message
+      type_name: .DBGamePlayer.HomeBackGround
+      json_name: ''
+    - number: 9
+      name: friend_apply_level_limit
+      label: LABEL_OPTIONAL
+      type: uint32
+      type_name: ''
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiPlayerName
+  file: playeraction.proto
+  view: PlayerNameView
+  route: /name/
+  description: "\b修改玩家名字"
+  requestFields:
+  - number: 1
+    name: name
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  responseFields:
+    get:
+    - number: 1
+      name: notFirstRename
+      label: LABEL_OPTIONAL
+      type: bool
+      type_name: ''
+      json_name: ''
+    patch:
+    - number: 1
+      name: name
+      label: LABEL_OPTIONAL
+      type: string
+      type_name: ''
+      json_name: ''
+    - number: 5
+      name: res_change
+      label: LABEL_REPEATED
+      type: message
+      type_name: .STResourceDynamic
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiPlayerSocialPicture
+  file: playeraction.proto
+  view: PlayerSocialPictureView
+  route: /socialpicture/
+  description: 同步社交头像
+  requestFields:
+  - number: 1
+    name: social_picture
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 2
+    name: sex
+    label: LABEL_OPTIONAL
+    type: uint32
+    type_name: ''
+    json_name: ''
+  responseFields:
+    result:
+    - number: 1
+      name: sex
+      label: LABEL_OPTIONAL
+      type: uint32
+      type_name: ''
+      json_name: ''
+    - number: 2
+      name: social_picture
+      label: LABEL_OPTIONAL
+      type: string
+      type_name: ''
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiPlayerLevel
+  file: playeraction.proto
+  view: ApiPlayerLevelView
+  route: /baseresource/level/
+  description: player的level的操作,gm修改等级
+  requestFields:
+  - number: 1
+    name: level
+    label: LABEL_OPTIONAL
+    type: uint32
+    type_name: ''
+    json_name: ''
+  responseFields:
+    result:
+    - number: 1
+      name: result
+      label: LABEL_OPTIONAL
+      type: uint32
+      type_name: ''
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiGmRemovePlayer
+  file: playeraction.proto
+  view: ApiGmRemovePlayerView
+  route: /remove-player/
+  description: 删除该账号游戏数据
+  requestFields:
+  - number: 1
+    name: player_id
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  responseFields:
+    result: []
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiPlayerIdByName
+  file: playeraction.proto
+  view: PlayerIdByNameView
+  route: /playeridbyname/
+  description: 根据玩家名字查询玩家id
+  requestFields:
+  - number: 1
+    name: player_name
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  responseFields:
+    result:
+    - number: 1
+      name: player_id
+      label: LABEL_OPTIONAL
+      type: string
+      type_name: ''
+      json_name: ''
+    - number: 2
+      name: entry
+      label: LABEL_OPTIONAL
+      type: string
+      type_name: ''
+      json_name: ''
+    - number: 3
+      name: account_id
+      label: LABEL_OPTIONAL
+      type: string
+      type_name: ''
+      json_name: ''
+    - number: 4
+      name: open_id
+      label: LABEL_OPTIONAL
+      type: string
+      type_name: ''
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiOpenIdByPlayerId
+  file: playeraction.proto
+  view: OpenIdByPlayerIdView
+  route: /openidbyplayerid/
+  description: 根据玩家id查询msdk open id
+  requestFields:
+  - number: 1
+    name: player_id
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  responseFields:
+    result:
+    - number: 1
+      name: player_id
+      label: LABEL_OPTIONAL
+      type: string
+      type_name: ''
+      json_name: ''
+    - number: 3
+      name: msdk_open_id
+      label: LABEL_OPTIONAL
+      type: string
+      type_name: ''
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiBanPlayer
+  file: playeraction.proto
+  view: ApiBanPlayerView
+  route: /banplayer/,/banplayer/<string:playerId>/
+  description: 封号
+  requestFields:
+  - number: 1
+    name: player_id
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 2
+    name: ban_stat
+    label: LABEL_OPTIONAL
+    type: bool
+    type_name: ''
+    json_name: ''
+  - number: 3
+    name: ban_end_time
+    label: LABEL_OPTIONAL
+    type: uint32
+    type_name: ''
+    json_name: ''
+  responseFields:
+    result:
+    - number: 1
+      name: result
+      label: LABEL_OPTIONAL
+      type: int32
+      type_name: ''
+      json_name: ''
+    - number: 2
+      name: player_id
+      label: LABEL_OPTIONAL
+      type: string
+      type_name: ''
+      json_name: ''
+    - number: 3
+      name: ban_stat
+      label: LABEL_OPTIONAL
+      type: bool
+      type_name: ''
+      json_name: ''
+    - number: 4
+      name: ban_end_time
+      label: LABEL_OPTIONAL
+      type: uint32
+      type_name: ''
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiPlayerFuncBan
+  file: playeraction.proto
+  view: ApiPlayerFuncBanView
+  route: /funcban/
+  description: 玩家功能封停
+  requestFields:
+  - number: 1
+    name: ban_type
+    label: LABEL_OPTIONAL
+    type: uint32
+    type_name: ''
+    json_name: ''
+  - number: 2
+    name: ban_start_time
+    label: LABEL_OPTIONAL
+    type: uint32
+    type_name: ''
+    json_name: ''
+  - number: 3
+    name: ban_end_time
+    label: LABEL_OPTIONAL
+    type: uint32
+    type_name: ''
+    json_name: ''
+  - number: 4
+    name: ban_reason
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  responseFields:
+    result:
+    - number: 1
+      name: func_ban_info
+      label: LABEL_OPTIONAL
+      type: message
+      type_name: .DBGamePlayer.FuncBanInfo
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiKickPlayer
+  file: playeraction.proto
+  view: ApiKickPlayerView
+  route: /kickplayer/,/kickplayer/<string:playerId>/
+  description: 踢玩家下线
+  requestFields:
+  - number: 1
+    name: player_id
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  responseFields:
+    result:
+    - number: 1
+      name: result
+      label: LABEL_OPTIONAL
+      type: int32
+      type_name: ''
+      json_name: ''
+    - number: 2
+      name: player_id
+      label: LABEL_OPTIONAL
+      type: string
+      type_name: ''
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiGameCenter
+  file: playeraction.proto
+  view: ApiGameCenterView
+  route: /gamecenter/
+  description: QQ,wechat平台信息
+  requestFields:
+  - number: 1
+    name: social_token
+    label: LABEL_OPTIONAL
+    type: string
+    type_name: ''
+    json_name: ''
+  - number: 2
+    name: is_gamecenter_login
+    label: LABEL_OPTIONAL
+    type: bool
+    type_name: ''
+    json_name: ''
+  - number: 3
+    name: is_xinyue_click
+    label: LABEL_OPTIONAL
+    type: bool
+    type_name: ''
+    json_name: ''
+  - number: 4
+    name: is_race_click
+    label: LABEL_OPTIONAL
+    type: bool
+    type_name: ''
+    json_name: ''
+  - number: 5
+    name: is_anime_movie_click
+    label: LABEL_OPTIONAL
+    type: bool
+    type_name: ''
+    json_name: ''
+  - number: 6
+    name: is_anime_movie_oct_click
+    label: LABEL_OPTIONAL
+    type: bool
+    type_name: ''
+    json_name: ''
+  responseFields:
+    result:
+    - number: 1
+      name: gamecenter_login_time
+      label: LABEL_OPTIONAL
+      type: uint32
+      type_name: ''
+      json_name: ''
+    - number: 2
+      name: gamecenter_click_time
+      label: LABEL_OPTIONAL
+      type: uint32
+      type_name: ''
+      json_name: ''
+    - number: 3
+      name: qqvip
+      label: LABEL_OPTIONAL
+      type: uint32
+      type_name: ''
+      json_name: ''
+    - number: 4
+      name: xinyue_click_time
+      label: LABEL_OPTIONAL
+      type: uint32
+      type_name: ''
+      json_name: ''
+    - number: 5
+      name: race_click_time
+      label: LABEL_OPTIONAL
+      type: uint32
+      type_name: ''
+      json_name: ''
+    - number: 6
+      name: anime_movie_click_time
+      label: LABEL_OPTIONAL
+      type: uint32
+      type_name: ''
+      json_name: ''
+    - number: 7
+      name: anime_movie_oct_click_time
+      label: LABEL_OPTIONAL
+      type: uint32
+      type_name: ''
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiXinyueVipInfo
+  file: playeraction.proto
+  view: ApiXinyueVipInfoView
+  route: /xinyue-vipinfo/
+  description: 心悦会员信息查询
+  requestFields: []
+  responseFields:
+    result:
+    - number: 1
+      name: ret
+      label: LABEL_OPTIONAL
+      type: int32
+      type_name: ''
+      json_name: ''
+    - number: 2
+      name: msg
+      label: LABEL_OPTIONAL
+      type: string
+      type_name: ''
+      json_name: ''
+    - number: 3
+      name: ilevel
+      label: LABEL_OPTIONAL
+      type: int32
+      type_name: ''
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiServerUpdateInfo
+  file: playeraction.proto
+  view: ApiServerUpdateInfoView
+  route: /server-update-info/
+  description: 服务器更新信息
+  requestFields: []
+  responseFields:
+    result:
+    - number: 1
+      name: time_info
+      label: LABEL_REPEATED
+      type: message
+      type_name: .ApiServerUpdateInfo.result.TimeInfoEntry
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiCloseWebSocket
+  file: playeraction.proto
+  view: ApiCloseWebSocketView
+  route: /close_ws/
+  description: 关闭player的web socket
+  requestFields: []
+  responseFields: {}
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiPresentTargetActor
+  file: playeraction.proto
+  view: ApiPresentTargetActorView
+  route: /present-target-actor/
+  description: 设定想要的金皮角色
+  requestFields:
+  - number: 1
+    name: present_target_actor
+    label: LABEL_OPTIONAL
+    type: uint32
+    type_name: ''
+    json_name: ''
+  responseFields:
+    result:
+    - number: 1
+      name: present_target_actor
+      label: LABEL_OPTIONAL
+      type: uint32
+      type_name: ''
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiHomeBackGround
+  file: playeraction.proto
+  view: ApiHomeBackGroundView
+  route: /home-back-ground/
+  description: 设定主界面背景
+  requestFields:
+  - number: 1
+    name: home_back_ground
+    label: LABEL_OPTIONAL
+    type: uint32
+    type_name: ''
+    json_name: ''
+  - number: 2
+    name: is_random
+    label: LABEL_OPTIONAL
+    type: uint32
+    type_name: ''
+    json_name: ''
+  responseFields:
+    result:
+    - number: 1
+      name: home_back_ground
+      label: LABEL_OPTIONAL
+      type: message
+      type_name: .DBGamePlayer.HomeBackGround
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiGmCachePlayerClean
+  file: playeraction.proto
+  view: ApiGmCachePlayerCleanView
+  route: /gm-cache-player-clean/
+  description: 清理cacheplayer db的使用
+  requestFields:
+  - number: 1
+    name: open_id_start
+    label: LABEL_OPTIONAL
+    type: uint32
+    type_name: ''
+    json_name: ''
+  - number: 2
+    name: open_id_end
+    label: LABEL_OPTIONAL
+    type: uint32
+    type_name: ''
+    json_name: ''
+  - number: 3
+    name: world_id
+    label: LABEL_OPTIONAL
+    type: uint32
+    type_name: ''
+    json_name: ''
+  responseFields:
+    result:
+    - number: 1
+      name: clean_cnt
+      label: LABEL_OPTIONAL
+      type: uint32
+      type_name: ''
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiChipExchange
+  file: playeraction.proto
+  view: ChipExchangeView
+  route: /chipexchange/
+  description: 灵子兑换活动设置
+  requestFields:
+  - number: 1
+    name: chips
+    label: LABEL_REPEATED
+    type: uint32
+    type_name: ''
+    json_name: ''
+  responseFields:
+    result:
+    - number: 1
+      name: chip_exchange_info
+      label: LABEL_OPTIONAL
+      type: message
+      type_name: .DBGamePlayer.ChipExchangeInfo
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiGuildDungeonPlayerRecord
+  file: playeraction.proto
+  view: ApiGuildDungeonPlayerRecordView
+  route: /guild-dungeon-record/
+  description: 公会副本个人记录查询
+  requestFields: []
+  responseFields:
+    result:
+    - number: 1
+      name: dungeon_records
+      label: LABEL_REPEATED
+      type: message
+      type_name: .DBGamePlayer.GuildDungeonRecord.DungeonRecord
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiHealth
+  file: api.proto
+  view: HealthView
+  route: /health/
+  description: 健康检查
+  requestFields: []
+  responseFields: {}
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiInfo
+  file: api.proto
+  view: InfoView
+  route: /info/,/Info/
+  description: 此服务器的基本信息和一些调试信息
+  requestFields: []
+  responseFields:
+    get:
+    - number: 1
+      name: settings
+      label: LABEL_OPTIONAL
+      type: string
+      type_name: ''
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiInfoRes
+  file: api.proto
+  view: InfoResView
+  route: /info/res/
+  description: 此服务器的资源信息
+  requestFields: []
+  responseFields: {}
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiStatus
+  file: api.proto
+  view: StatusView
+  route: /status/,/Status/
+  description: 服务器状态
+  requestFields:
+  - number: 1
+    name: status
+    label: LABEL_OPTIONAL
+    type: uint32
+    type_name: ''
+    json_name: ''
+  responseFields:
+    result:
+    - number: 1
+      name: status
+      label: LABEL_OPTIONAL
+      type: uint32
+      type_name: ''
+      json_name: ''
+    - number: 2
+      name: msg
+      label: LABEL_OPTIONAL
+      type: string
+      type_name: ''
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiMyIp
+  file: api.proto
+  view: ViewMyIp
+  route: /myip/
+  description: 获取访问者的ip地址
+  requestFields: []
+  responseFields:
+    get:
+    - number: 2
+      name: get
+      label: LABEL_OPTIONAL
+      type: string
+      type_name: ''
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiDbAccess
+  file: api.proto
+  view: ApiDbAccessView
+  route: /db-access/
+  description: db访问情况
+  requestFields: []
+  responseFields:
+    result:
+    - number: 1
+      name: result
+      label: LABEL_REPEATED
+      type: message
+      type_name: .ApiDbAccess.result.ResultEntry
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiViewTest
+  file: api.proto
+  view: ViewTest
+  route: /test/
+  description: 测试接口
+  requestFields: []
+  responseFields: {}
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiIsOpen
+  file: api.proto
+  view: IsOpenView
+  route: /isopen/,/IsOpen/
+  description: 服务器是否开启
+  requestFields: []
+  responseFields: {}
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiModelDetailInfo
+  file: api.proto
+  view: ModelDetailInfoView
+  route: /models/,/models/<string:name>/,/models/<string:name>/<string:key>/
+  description: 返回指定model的信息
+  requestFields: []
+  responseFields: {}
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json
+- interface: ApiCheckPlayerData
+  file: api.proto
+  view: CheckPlayerDataView
+  route: /checkdata/<string:name>/<string:key>/
+  description: 检查玩家的数据是否合法
+  requestFields: []
+  responseFields:
+    result:
+    - number: 1
+      name: data
+      label: LABEL_OPTIONAL
+      type: string
+      type_name: ''
+      json_name: ''
+  implementationStatus: observed_unverified
+  source: I:\workspace\mobilegame\analysis\ljjc-local\protocols\interface-map.json

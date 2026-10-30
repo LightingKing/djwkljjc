@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "table": "CartoonConfig",
+  "observedCount": 82,
+  "rowCount": 6,
+  "completeness": "partial",
+  "sourceFiles": [
+    "combat-config-live.jsonl"
+  ],
+  "sourceRecords": [
+    {
+      "name": "combat-config-live.jsonl",
+      "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\combat-config-live.jsonl",
+      "sha256": "dbf87819c02e022903c42ddfe6db813c7496a08dacca5f48e45d2fa060ba2abc"
+    }
+  ],
+  "rowsSha256": "65aeb4bb5b4654c8a2805f5e3524f2656358265cb411242498589c19d67f9897",
+  "schema": {
+    "types": [
+      "object"
+    ],
+    "fields": {
+      "chapterId": {
+        "types": [
+          "integer"
+        ]
+      },
+      "dungeonId": {
+        "types": [
+          "integer"
+        ]
+      },
+      "id": {
+        "types": [
+          "integer"
+        ]
+      },
+      "movieIcon": {
+        "types": [
+          "string"
+        ]
+      },
+      "res": {
+        "types": [
+          "string"
+        ]
+      },
+      "roleID": {
+        "types": [
+          "array"
+        ]
+      },
+      "storyType": {
+        "types": [
+          "integer"
+        ]
+      },
+      "winPlay": {
+        "types": [
+          "integer"
+        ]
+      }
+    }
+  },
+  "rows": [
+    {
+      "chapterId": 1000,
+      "dungeonId": 1004,
+      "id": 1,
+      "movieIcon": "xx",
+      "res": "01_Test_0014",
+      "roleID": [],
+      "storyType": 1
+    },
+    {
+      "chapterId": 1000,
+      "dungeonId": 1005,
+      "id": 2,
+      "movieIcon": "xx",
+      "res": "01_Test_0005",
+      "roleID": [],
+      "storyType": 1
+    },
+    {
+      "chapterId": 1001,
+      "dungeonId": 2011,
+      "id": 3,
+      "movieIcon": "jouney_video_1001",
+      "res": "C01_S01A",
+      "roleID": [],
+      "storyType": 1
+    },
+    {
+      "chapterId": 1001,
+      "dungeonId": 2012,
+      "id": 4,
+      "movieIcon": "jouney_video_1002",
+      "res": "C01_S02A",
+      "roleID": [],
+      "storyType": 1
+    },
+    {
+      "chapterId": 1001,
+      "dungeonId": 2012,
+      "id": 5,
+      "movieIcon": "jouney_video_1003",
+      "res": "C01_S02B",
+      "roleID": [],
+      "storyType": 1,
+      "winPlay": 1
+    },
+    {
+      "chapterId": 1001,
+      "dungeonId": 2013,
+      "id": 6,
+      "movieIcon": "jouney_video_1004",
+      "res": "C01_S03A",
+      "roleID": [],
+      "storyType": 1
+    }
+  ]
+}

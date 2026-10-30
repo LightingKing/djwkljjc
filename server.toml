@@ -1,0 +1,16 @@
+# Local-only defaults. The one-click start-service.ps1 launcher is HTTP-only
+# and refuses non-loopback bind_host values. For phone/LAN testing, run
+# server.py explicitly with a certificate/key and review the exposed routes.
+[server]
+bind_host = "127.0.0.1"
+public_base_url = "http://127.0.0.1:19080"
+http_port = 19080
+tls_port = 19102
+enable_tls = true
+legacy_tls = true
+time_offset_seconds = 0
+unified_store_path = "local.sqlite3"
+backup_dir = "runtime/backups"
+auto_backup = true
+backup_retention = 7
+backup_check_interval_seconds = 60

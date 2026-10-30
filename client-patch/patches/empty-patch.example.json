@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "name": "ljjc-offline",
+  "version": "2.0.4",
+  "abi": "universal",
+  "expectedSha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "operations": []
+}

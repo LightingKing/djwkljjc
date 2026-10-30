@@ -1,0 +1,233 @@
+{
+  "schemaVersion": 1,
+  "table": "ActorInfo",
+  "observedCount": 428,
+  "rowCount": 4,
+  "completeness": "partial",
+  "sourceFiles": [
+    "story-config.json"
+  ],
+  "sourceRecords": [
+    {
+      "name": "story-config.json",
+      "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\story-config.json",
+      "sha256": "dd1d3b4b6e4815df53852b92bc58dafdf4acbb1dada32bc3bc37d6f569d07638"
+    }
+  ],
+  "rowsSha256": "5e63ce2119444d778504290b952b14131931256fce7591b4f89e18684ab93be5",
+  "schema": {
+    "types": [
+      "object"
+    ],
+    "fields": {
+      "attrs": {
+        "types": [
+          "array"
+        ],
+        "items": {
+          "types": [
+            "object"
+          ],
+          "fields": {
+            "isRatio": {
+              "types": [
+                "boolean"
+              ]
+            },
+            "type": {
+              "types": [
+                "integer"
+              ]
+            },
+            "value": {
+              "types": [
+                "integer"
+              ]
+            }
+          }
+        }
+      },
+      "id": {
+        "types": [
+          "integer"
+        ]
+      },
+      "quality": {
+        "types": [
+          "integer"
+        ]
+      },
+      "qualityAttrRatio": {
+        "types": [
+          "number"
+        ]
+      }
+    }
+  },
+  "rows": [
+    {
+      "attrs": [
+        {
+          "type": 1,
+          "value": 253
+        },
+        {
+          "type": 3,
+          "value": 100
+        },
+        {
+          "type": 5,
+          "value": 19
+        },
+        {
+          "type": 6,
+          "value": 18
+        },
+        {
+          "isRatio": true,
+          "type": 13,
+          "value": 100
+        },
+        {
+          "isRatio": true,
+          "type": 14,
+          "value": 1000
+        },
+        {
+          "type": 22,
+          "value": 43
+        },
+        {
+          "type": 25,
+          "value": 550
+        }
+      ],
+      "id": 1001,
+      "quality": 1,
+      "qualityAttrRatio": 1.0
+    },
+    {
+      "attrs": [
+        {
+          "type": 1,
+          "value": 308
+        },
+        {
+          "type": 3,
+          "value": 87
+        },
+        {
+          "type": 5,
+          "value": 29
+        },
+        {
+          "type": 6,
+          "value": 28
+        },
+        {
+          "isRatio": true,
+          "type": 13,
+          "value": 100
+        },
+        {
+          "isRatio": true,
+          "type": 14,
+          "value": 1000
+        },
+        {
+          "type": 22,
+          "value": 43
+        },
+        {
+          "type": 25,
+          "value": 800
+        }
+      ],
+      "id": 1002,
+      "quality": 1,
+      "qualityAttrRatio": 1.0
+    },
+    {
+      "attrs": [
+        {
+          "type": 1,
+          "value": 255
+        },
+        {
+          "type": 3,
+          "value": 99
+        },
+        {
+          "type": 5,
+          "value": 18
+        },
+        {
+          "type": 6,
+          "value": 19
+        },
+        {
+          "isRatio": true,
+          "type": 13,
+          "value": 100
+        },
+        {
+          "isRatio": true,
+          "type": 14,
+          "value": 1000
+        },
+        {
+          "type": 22,
+          "value": 43
+        },
+        {
+          "type": 25,
+          "value": 400
+        }
+      ],
+      "id": 1003,
+      "quality": 1,
+      "qualityAttrRatio": 1.0
+    },
+    {
+      "attrs": [
+        {
+          "type": 1,
+          "value": 355
+        },
+        {
+          "type": 3,
+          "value": 60
+        },
+        {
+          "type": 5,
+          "value": 40
+        },
+        {
+          "type": 6,
+          "value": 39
+        },
+        {
+          "isRatio": true,
+          "type": 13,
+          "value": 100
+        },
+        {
+          "isRatio": true,
+          "type": 14,
+          "value": 1000
+        },
+        {
+          "type": 22,
+          "value": 43
+        },
+        {
+          "type": 25,
+          "value": 450
+        }
+      ],
+      "id": 1004,
+      "quality": 1,
+      "qualityAttrRatio": 1.0
+    }
+  ]
+}

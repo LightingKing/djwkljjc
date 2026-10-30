@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "name": "ljjc-offline-target24",
+  "version": "2.0.4",
+  "abi": "universal",
+  "expectedSha256": "b997dbac9ff1764b46809486d83e4a65c6d511cae17fee6f8063ef598d66a776",
+  "operations": [
+    {
+      "kind": "replace_text",
+      "target": "apktool.yml",
+      "find": "targetSdkVersion: 22",
+      "replace": "targetSdkVersion: 24",
+      "count": 1
+    }
+  ]
+}

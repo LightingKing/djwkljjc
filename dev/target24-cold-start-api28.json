@@ -1,0 +1,185 @@
+{
+  "apk": "I:\\workspace\\mobilegame\\local-server\\ljjc\\client-patch\\output\\target24\\ljjc-offline-target24-2.0.4-universal.apk",
+  "coldStart": {
+    "installedCheck": {
+      "artifactMatches": true,
+      "command": [
+        "C:\\Users\\Administrator\\AppData\\Local\\Android\\Sdk\\platform-tools\\adb.exe",
+        "-s",
+        "emulator-5564",
+        "shell",
+        "pm",
+        "path",
+        "com.tencent.tmgp.fcicv"
+      ],
+      "digestCommand": {
+        "command": [
+          "C:\\Users\\Administrator\\AppData\\Local\\Android\\Sdk\\platform-tools\\adb.exe",
+          "-s",
+          "emulator-5564",
+          "shell",
+          "sha256sum",
+          "/data/app/com.tencent.tmgp.fcicv-hx7SU4RnzJmctc5bFADejg==/base.apk"
+        ],
+        "outputSha256": "e74fa69e883e766be61e491bb121ff90ec4bcc7e94606ee23c2ffb45539a0b77",
+        "returncode": 0
+      },
+      "exitCode": 0,
+      "installed": true,
+      "installedSha256": "8e63b130cb925adb2c690f64b6a2802d4c4e223f1bf9db843ca4635bf6d2639d",
+      "outputSha256": "6f257fd27483e28faf01d4ddc657e3100a67953be25d440670dd410d6cd5a714",
+      "remoteApk": "/data/app/com.tencent.tmgp.fcicv-hx7SU4RnzJmctc5bFADejg==/base.apk",
+      "returncode": 0
+    },
+    "package": "com.tencent.tmgp.fcicv",
+    "passed": false,
+    "records": [
+      {
+        "activityOutputSha256": "f93804c8038f5d0186871ca6c5a4ec4697e8d9cafcd25c1fe7560f8a00909983",
+        "crashLogLines": [],
+        "focusedPackage": true,
+        "forceStopExitCode": 0,
+        "logcatOutputSha256": "48cc5a69b0c8771f5962f8b9b4ff38f00cbd94e3e8b95184fdd69a4abae79e59",
+        "matchedLogLines": [],
+        "monkeyExitCode": 0,
+        "passed": true,
+        "pid": "5457",
+        "processAlive": true,
+        "processExitCode": null,
+        "run": 1,
+        "startedAt": "2026-10-28T00:00:25.541634+00:00",
+        "tpshellObserved": false
+      },
+      {
+        "activityOutputSha256": "bc846e037c7f824f4fc55823a03b4d0298f1e83ae282ff592c499a624d678b75",
+        "crashLogLines": [
+          "10-28 00:00:29.541  1926  2059 I ActivityManager: Process com.tencent.tmgp.fcicv (pid 5491) has died: fore TOP "
+        ],
+        "focusedPackage": true,
+        "forceStopExitCode": 0,
+        "logcatOutputSha256": "43d02aa949a71737ea5540a0e278418c1d71d813c4a509e1d62c121d8545c369",
+        "matchedLogLines": [
+          "10-28 00:00:29.541  1926  2059 I ActivityManager: Process com.tencent.tmgp.fcicv (pid 5491) has died: fore TOP "
+        ],
+        "monkeyExitCode": 0,
+        "passed": false,
+        "pid": "5588",
+        "processAlive": true,
+        "processExitCode": null,
+        "run": 2,
+        "startedAt": "2026-10-28T00:00:28.245261+00:00",
+        "tpshellObserved": false
+      },
+      {
+        "activityOutputSha256": "125723b81c10aa38a13167d7064f48f79d15b92fb0ad893deee463f291aec34b",
+        "crashLogLines": [
+          "10-28 00:00:31.851  1926  2599 I ActivityManager: Process com.tencent.tmgp.fcicv (pid 5728) has died: fore TOP ",
+          "10-28 00:00:32.612  1926  3822 I ActivityManager: Process com.tencent.tmgp.fcicv (pid 5790) has died: fore TOP "
+        ],
+        "focusedPackage": true,
+        "forceStopExitCode": 0,
+        "logcatOutputSha256": "c618157805e5544bfb8822d7716e81ad674ffa6efed2042e7a5c50f67df92ea3",
+        "matchedLogLines": [
+          "10-28 00:00:31.851  1926  2599 I ActivityManager: Process com.tencent.tmgp.fcicv (pid 5728) has died: fore TOP ",
+          "10-28 00:00:32.612  1926  3822 I ActivityManager: Process com.tencent.tmgp.fcicv (pid 5790) has died: fore TOP "
+        ],
+        "monkeyExitCode": 0,
+        "passed": false,
+        "pid": "",
+        "processAlive": false,
+        "processExitCode": null,
+        "run": 3,
+        "startedAt": "2026-10-28T00:00:30.888383+00:00",
+        "tpshellObserved": false
+      },
+      {
+        "activityOutputSha256": "4259fa602d226b3ba99b078e1a046889556cae741b3016a0a8ae7abbcd89bc6c",
+        "crashLogLines": [
+          "10-28 00:00:34.489  1926  1938 I ActivityManager: Process com.tencent.tmgp.fcicv (pid 5960) has died: fore TOP "
+        ],
+        "focusedPackage": true,
+        "forceStopExitCode": 0,
+        "logcatOutputSha256": "bd41020ec75681c9b2bd51e90a4d62a9e6082376a2ec5ff9248b3de9da41b7a8",
+        "matchedLogLines": [
+          "10-28 00:00:34.489  1926  1938 I ActivityManager: Process com.tencent.tmgp.fcicv (pid 5960) has died: fore TOP "
+        ],
+        "monkeyExitCode": 0,
+        "passed": false,
+        "pid": "6041",
+        "processAlive": true,
+        "processExitCode": null,
+        "run": 4,
+        "startedAt": "2026-10-28T00:00:33.470791+00:00",
+        "tpshellObserved": false
+      },
+      {
+        "activityOutputSha256": "b5787551874f54c33c2c4110809ddd04ff2d010997719f15f8e8812b5d93d5ac",
+        "crashLogLines": [
+          "10-28 00:00:36.779  1926  2242 I ActivityManager: Process com.tencent.tmgp.fcicv (pid 6202) has died: fore TOP ",
+          "10-28 00:00:37.462  1926  1937 I ActivityManager: Process com.tencent.tmgp.fcicv (pid 6270) has died: fore TOP "
+        ],
+        "focusedPackage": true,
+        "forceStopExitCode": 0,
+        "logcatOutputSha256": "508a0bf976f1830b9c398a7a86ba7c0ecc30b339196703e442f499f5d754a314",
+        "matchedLogLines": [
+          "10-28 00:00:36.779  1926  2242 I ActivityManager: Process com.tencent.tmgp.fcicv (pid 6202) has died: fore TOP ",
+          "10-28 00:00:37.462  1926  1937 I ActivityManager: Process com.tencent.tmgp.fcicv (pid 6270) has died: fore TOP "
+        ],
+        "monkeyExitCode": 0,
+        "passed": false,
+        "pid": "6332",
+        "processAlive": true,
+        "processExitCode": null,
+        "run": 5,
+        "startedAt": "2026-10-28T00:00:35.937117+00:00",
+        "tpshellObserved": false
+      }
+    ],
+    "requestedRuns": 5,
+    "serial": "emulator-5564"
+  },
+  "metadata": {
+    "command": [
+      "C:\\Users\\Administrator\\AppData\\Local\\Android\\Sdk\\build-tools\\37.0.0\\aapt2.exe",
+      "dump",
+      "badging",
+      "I:\\workspace\\mobilegame\\local-server\\ljjc\\client-patch\\output\\target24\\ljjc-offline-target24-2.0.4-universal.apk"
+    ],
+    "exitCode": 0,
+    "outputSha256": "9897223f6e6ad38d52c76130a027f03973c0d975979b1a3da31cb9488492de83",
+    "package": "com.tencent.tmgp.fcicv",
+    "returncode": 0,
+    "targetSdk": "24",
+    "tool": "C:\\Users\\Administrator\\AppData\\Local\\Android\\Sdk\\build-tools\\37.0.0\\aapt2.exe",
+    "versionCode": "59162",
+    "versionName": "2.0.4"
+  },
+  "passed": false,
+  "schemaVersion": 1,
+  "sha256": {
+    "actual": "8e63b130cb925adb2c690f64b6a2802d4c4e223f1bf9db843ca4635bf6d2639d",
+    "expected": "8e63b130cb925adb2c690f64b6a2802d4c4e223f1bf9db843ca4635bf6d2639d",
+    "matches": true
+  },
+  "signature": {
+    "command": [
+      "C:\\Users\\Administrator\\AppData\\Local\\Android\\Sdk\\build-tools\\37.0.0\\apksigner.bat",
+      "verify",
+      "--verbose",
+      "I:\\workspace\\mobilegame\\local-server\\ljjc\\client-patch\\output\\target24\\ljjc-offline-target24-2.0.4-universal.apk"
+    ],
+    "exitCode": 0,
+    "outputSha256": "ba69c4fcb7da8726cf4807ad67511bbfa99034016c90330535de1d1743555df9",
+    "returncode": 0,
+    "schemes": {
+      "v1": true,
+      "v2": true,
+      "v3": true,
+      "v3.1": false,
+      "v3.2": false
+    },
+    "signerCount": 1,
+    "tool": "C:\\Users\\Administrator\\AppData\\Local\\Android\\Sdk\\build-tools\\37.0.0\\apksigner.bat",
+    "verified": true
+  }
+}

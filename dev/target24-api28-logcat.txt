@@ -1,0 +1,1357 @@
+--------- beginning of main
+10-28 00:01:05.232  8777  8777 W System.err: 	at android.app.servertransaction.TransactionExecutor.executeCallbacks(TransactionExecutor.java:108)
+10-28 00:01:05.232  8777  8777 W System.err: 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:68)
+10-28 00:01:05.232  8777  8777 W System.err: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1808)
+10-28 00:01:05.232  8777  8777 W System.err: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+10-28 00:01:05.232  8777  8777 W System.err: 	at android.os.Looper.loop(Looper.java:193)
+10-28 00:01:05.232  8777  8777 W System.err: 	at android.app.ActivityThread.main(ActivityThread.java:6669)
+10-28 00:01:05.233  8777  8777 W System.err: 	at java.lang.reflect.Method.invoke(Native Method)
+10-28 00:01:05.233  8777  8777 W System.err: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+10-28 00:01:05.233  8777  8777 W System.err: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:858)
+10-28 00:01:05.233  8777  8777 W System.err: java.lang.NumberFormatException: For input string: "3000000000"
+10-28 00:01:05.233  8777  8777 W System.err: 	at java.lang.Integer.parseInt(Integer.java:618)
+10-28 00:01:05.233  8777  8777 W System.err: 	at java.lang.Integer.parseInt(Integer.java:650)
+10-28 00:01:05.233  8777  8777 W System.err: 	at com.tencent.msdk.stat.DeviceInfo.getCpuInfo(DeviceInfo.java:344)
+10-28 00:01:05.233  8777  8777 W System.err: 	at com.tencent.msdk.stat.DeviceInfo.getAllDeviceInfo(DeviceInfo.java:400)
+10-28 00:01:05.233  8777  8777 W System.err: 	at com.tencent.msdk.framework.tools.MSDKJniHelper.getDeciceInfoStr(MSDKJniHelper.java:421)
+10-28 00:01:05.233  8777  8777 W System.err: 	at com.tencent.msdk.api.refactor.MSDKInterfaceNative.init(Native Method)
+10-28 00:01:05.233  8777  8777 W System.err: 	at com.tencent.msdk.api.refactor.MSDKInterfaceImpl.Initialized(MSDKInterfaceImpl.java:74)
+10-28 00:01:05.233  8777  8777 W System.err: 	at com.tencent.msdk.api.WGPlatform.Initialized(WGPlatform.java:88)
+10-28 00:01:05.233  8777  8777 W System.err: 	at com.actgames.fci.AppDelegater.onCreate(AppDelegater.java:61)
+10-28 00:01:05.233  8777  8777 W System.err: 	at com.actgames.fci.MainActivity.onCreate(MainActivity.java:53)
+10-28 00:01:05.233  8777  8777 W System.err: 	at android.app.Activity.performCreate(Activity.java:7136)
+10-28 00:01:05.234  8777  8777 W System.err: 	at android.app.Activity.performCreate(Activity.java:7127)
+10-28 00:01:05.234  8777  8777 W System.err: 	at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1271)
+10-28 00:01:05.234  8777  8777 W System.err: 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2893)
+10-28 00:01:05.234  8777  8777 W System.err: 	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:3048)
+10-28 00:01:05.234  8777  8777 W System.err: 	at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:78)
+10-28 00:01:05.234  8777  8777 W System.err: 	at android.app.servertransaction.TransactionExecutor.executeCallbacks(TransactionExecutor.java:108)
+10-28 00:01:05.234  8777  8777 W System.err: 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:68)
+10-28 00:01:05.234  8777  8777 W System.err: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1808)
+10-28 00:01:05.234  8777  8777 W System.err: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+10-28 00:01:05.234  8777  8777 W System.err: 	at android.os.Looper.loop(Looper.java:193)
+10-28 00:01:05.234  8777  8777 W System.err: 	at android.app.ActivityThread.main(ActivityThread.java:6669)
+10-28 00:01:05.234  8777  8777 W System.err: 	at java.lang.reflect.Method.invoke(Native Method)
+10-28 00:01:05.234  8777  8777 W System.err: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+10-28 00:01:05.234  8777  8777 W System.err: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:858)
+10-28 00:01:05.250  8777  8821 E MtaSDK  : 
+10-28 00:01:05.250  8777  8821 E MtaSDK  : org.apache.http.conn.HttpHostConnectException: Connection to http://pingma.qq.com:80 refused
+10-28 00:01:05.250  8777  8821 E MtaSDK  : 	at org.apache.http.impl.conn.DefaultClientConnectionOperator.openConnection(DefaultClientConnectionOperator.java:193)
+10-28 00:01:05.250  8777  8821 E MtaSDK  : 	at org.apache.http.impl.conn.AbstractPoolEntry.open(AbstractPoolEntry.java:170)
+10-28 00:01:05.250  8777  8821 E MtaSDK  : 	at org.apache.http.impl.conn.AbstractPooledConnAdapter.open(AbstractPooledConnAdapter.java:124)
+10-28 00:01:05.250  8777  8821 E MtaSDK  : 	at org.apache.http.impl.client.DefaultRequestDirector.execute(DefaultRequestDirector.java:366)
+10-28 00:01:05.250  8777  8821 E MtaSDK  : 	at org.apache.http.impl.client.AbstractHttpClient.execute(AbstractHttpClient.java:560)
+10-28 00:01:05.250  8777  8821 E MtaSDK  : 	at org.apache.http.impl.client.AbstractHttpClient.execute(AbstractHttpClient.java:492)
+10-28 00:01:05.250  8777  8821 E MtaSDK  : 	at org.apache.http.impl.client.AbstractHttpClient.execute(AbstractHttpClient.java:470)
+10-28 00:01:05.250  8777  8821 E MtaSDK  : 	at com.tencent.stat.g.a(Unknown Source:426)
+10-28 00:01:05.250  8777  8821 E MtaSDK  : 	at com.tencent.stat.i.run(Unknown Source:6)
+10-28 00:01:05.250  8777  8821 E MtaSDK  : 	at android.os.Handler.handleCallback(Handler.java:873)
+10-28 00:01:05.250  8777  8821 E MtaSDK  : 	at android.os.Handler.dispatchMessage(Handler.java:99)
+10-28 00:01:05.250  8777  8821 E MtaSDK  : 	at android.os.Looper.loop(Looper.java:193)
+10-28 00:01:05.250  8777  8821 E MtaSDK  : 	at android.os.HandlerThread.run(HandlerThread.java:65)
+10-28 00:01:05.250  8777  8821 E MtaSDK  : Caused by: java.net.ConnectException: failed to connect to /0.0.0.1 (port 80) from /:: (port 0) after 10000ms: connect failed: EINVAL (Invalid argument)
+10-28 00:01:05.250  8777  8821 E MtaSDK  : 	at libcore.io.IoBridge.connect(IoBridge.java:137)
+10-28 00:01:05.250  8777  8821 E MtaSDK  : 	at java.net.PlainSocketImpl.socketConnect(PlainSocketImpl.java:137)
+10-28 00:01:05.250  8777  8821 E MtaSDK  : 	at java.net.AbstractPlainSocketImpl.doConnect(AbstractPlainSocketImpl.java:390)
+10-28 00:01:05.250  8777  8821 E MtaSDK  : 	at java.net.AbstractPlainSocketImpl.connectToAddress(AbstractPlainSocketImpl.java:230)
+10-28 00:01:05.250  8777  8821 E MtaSDK  : 	at java.net.AbstractPlainSocketImpl.connect(AbstractPlainSocketImpl.java:212)
+10-28 00:01:05.250  8777  8821 E MtaSDK  : 	at java.net.SocksSocketImpl.connect(SocksSocketImpl.java:436)
+10-28 00:01:05.250  8777  8821 E MtaSDK  : 	at java.net.Socket.connect(Socket.java:621)
+10-28 00:01:05.250  8777  8821 E MtaSDK  : 	at org.apache.http.conn.scheme.PlainSocketFactory.connectSocket(PlainSocketFactory.java:124)
+10-28 00:01:05.250  8777  8821 E MtaSDK  : 	at org.apache.http.impl.conn.DefaultClientConnectionOperator.openConnection(DefaultClientConnectionOperator.java:149)
+10-28 00:01:05.250  8777  8821 E MtaSDK  : 	... 12 more
+10-28 00:01:05.250  8777  8821 E MtaSDK  : Caused by: android.system.ErrnoException: connect failed: EINVAL (Invalid argument)
+10-28 00:01:05.250  8777  8821 E MtaSDK  : 	at libcore.io.Linux.connect(Native Method)
+10-28 00:01:05.250  8777  8821 E MtaSDK  : 	at libcore.io.BlockGuardOs.connect(BlockGuardOs.java:118)
+10-28 00:01:05.250  8777  8821 E MtaSDK  : 	at libcore.io.IoBridge.connectErrno(IoBridge.java:168)
+10-28 00:01:05.250  8777  8821 E MtaSDK  : 	at libcore.io.IoBridge.connect(IoBridge.java:129)
+10-28 00:01:05.250  8777  8821 E MtaSDK  : 	... 20 more
+10-28 00:01:05.293  8777  8830 I MID     : >>>   queryMatchContentProviders size:1
+10-28 00:01:05.293  8777  8830 D MID     : >>>   appPrivateMidMap size:0,content:
+10-28 00:01:05.300  8777  8834 I MID     : >>>   queryMatchContentProviders size:1
+10-28 00:01:05.300  8777  8834 D MID     : >>>   appPrivateMidMap size:0,content:
+10-28 00:01:05.302  8777  8777 D WeGame DeviceInfo.getApn:  typeName:WIFI
+10-28 00:01:05.303  8777  8777 W System.err: java.lang.SecurityException: getSubscriberId
+10-28 00:01:05.303  8777  8777 W System.err: 	at android.os.Parcel.createException(Parcel.java:1950)
+10-28 00:01:05.303  8777  8777 W System.err: 	at android.os.Parcel.readException(Parcel.java:1918)
+10-28 00:01:05.303  8777  8777 W System.err: 	at android.os.Parcel.readException(Parcel.java:1868)
+10-28 00:01:05.303  8777  8777 W System.err: 	at com.android.internal.telephony.IPhoneSubInfo$Stub$Proxy.getSubscriberIdForSubscriber(IPhoneSubInfo.java:578)
+10-28 00:01:05.303  8777  8777 W System.err: 	at android.telephony.TelephonyManager.getSubscriberId(TelephonyManager.java:2881)
+10-28 00:01:05.303  8777  8777 W System.err: 	at android.telephony.TelephonyManager.getSubscriberId(TelephonyManager.java:2864)
+10-28 00:01:05.304  8777  8777 W System.err: 	at com.tencent.msdk.stat.DeviceInfo.getProvidersName(DeviceInfo.java:162)
+10-28 00:01:05.304  8777  8777 W System.err: 	at com.tencent.msdk.stat.DeviceInfo.getAllDeviceInfo(DeviceInfo.java:388)
+10-28 00:01:05.304  8777  8777 W System.err: 	at com.tencent.msdk.framework.tools.MSDKJniHelper.getDeciceInfoStr(MSDKJniHelper.java:421)
+10-28 00:01:05.304  8777  8777 W System.err: 	at com.tencent.msdk.api.refactor.MSDKInterfaceNative.init(Native Method)
+10-28 00:01:05.304  8777  8777 W System.err: 	at com.tencent.msdk.api.refactor.MSDKInterfaceImpl.Initialized(MSDKInterfaceImpl.java:74)
+10-28 00:01:05.304  8777  8777 W System.err: 	at com.tencent.msdk.api.WGPlatform.Initialized(WGPlatform.java:88)
+10-28 00:01:05.304  8777  8777 W System.err: 	at com.actgames.fci.AppDelegater.onCreate(AppDelegater.java:61)
+10-28 00:01:05.304  8777  8777 W System.err: 	at com.actgames.fci.MainActivity.onCreate(MainActivity.java:53)
+10-28 00:01:05.304  8777  8777 W System.err: 	at android.app.Activity.performCreate(Activity.java:7136)
+10-28 00:01:05.304  8777  8777 W System.err: 	at android.app.Activity.performCreate(Activity.java:7127)
+10-28 00:01:05.304  8777  8777 W System.err: 	at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1271)
+10-28 00:01:05.304  8777  8777 W System.err: 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2893)
+10-28 00:01:05.304  8777  8777 W System.err: 	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:3048)
+10-28 00:01:05.304  8777  8777 W System.err: 	at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:78)
+10-28 00:01:05.304  8777  8777 W System.err: 	at android.app.servertransaction.TransactionExecutor.executeCallbacks(TransactionExecutor.java:108)
+10-28 00:01:05.304  8777  8777 W System.err: 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:68)
+10-28 00:01:05.304  8777  8777 W System.err: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1808)
+10-28 00:01:05.304  8777  8777 W System.err: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+10-28 00:01:05.304  8777  8777 W System.err: 	at android.os.Looper.loop(Looper.java:193)
+10-28 00:01:05.304  8777  8777 W System.err: 	at android.app.ActivityThread.main(ActivityThread.java:6669)
+10-28 00:01:05.304  8777  8777 W System.err: 	at java.lang.reflect.Method.invoke(Native Method)
+10-28 00:01:05.304  8777  8777 W System.err: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+10-28 00:01:05.304  8777  8777 W System.err: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:858)
+10-28 00:01:05.304  8777  8777 W System.err: java.lang.NumberFormatException: For input string: "3000000000"
+10-28 00:01:05.304  8777  8777 W System.err: 	at java.lang.Integer.parseInt(Integer.java:618)
+10-28 00:01:05.304  8777  8777 W System.err: 	at java.lang.Integer.parseInt(Integer.java:650)
+10-28 00:01:05.304  8777  8777 W System.err: 	at com.tencent.msdk.stat.DeviceInfo.getCpuInfo(DeviceInfo.java:344)
+10-28 00:01:05.304  8777  8777 W System.err: 	at com.tencent.msdk.stat.DeviceInfo.getAllDeviceInfo(DeviceInfo.java:400)
+10-28 00:01:05.304  8777  8777 W System.err: 	at com.tencent.msdk.framework.tools.MSDKJniHelper.getDeciceInfoStr(MSDKJniHelper.java:421)
+10-28 00:01:05.304  8777  8777 W System.err: 	at com.tencent.msdk.api.refactor.MSDKInterfaceNative.init(Native Method)
+10-28 00:01:05.304  8777  8777 W System.err: 	at com.tencent.msdk.api.refactor.MSDKInterfaceImpl.Initialized(MSDKInterfaceImpl.java:74)
+10-28 00:01:05.304  8777  8777 W System.err: 	at com.tencent.msdk.api.WGPlatform.Initialized(WGPlatform.java:88)
+10-28 00:01:05.304  8777  8777 W System.err: 	at com.actgames.fci.AppDelegater.onCreate(AppDelegater.java:61)
+10-28 00:01:05.304  8777  8777 W System.err: 	at com.actgames.fci.MainActivity.onCreate(MainActivity.java:53)
+10-28 00:01:05.304  8777  8777 W System.err: 	at android.app.Activity.performCreate(Activity.java:7136)
+10-28 00:01:05.304  8777  8777 W System.err: 	at android.app.Activity.performCreate(Activity.java:7127)
+10-28 00:01:05.304  8777  8777 W System.err: 	at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1271)
+10-28 00:01:05.304  8777  8777 W System.err: 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2893)
+10-28 00:01:05.304  8777  8777 W System.err: 	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:3048)
+10-28 00:01:05.304  8777  8777 W System.err: 	at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:78)
+10-28 00:01:05.304  8777  8777 W System.err: 	at android.app.servertransaction.TransactionExecutor.executeCallbacks(TransactionExecutor.java:108)
+10-28 00:01:05.304  8777  8777 W System.err: 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:68)
+10-28 00:01:05.304  8777  8777 W System.err: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1808)
+10-28 00:01:05.304  8777  8777 W System.err: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+10-28 00:01:05.304  8777  8777 W System.err: 	at android.os.Looper.loop(Looper.java:193)
+10-28 00:01:05.304  8777  8777 W System.err: 	at android.app.ActivityThread.main(ActivityThread.java:6669)
+10-28 00:01:05.304  8777  8777 W System.err: 	at java.lang.reflect.Method.invoke(Native Method)
+10-28 00:01:05.304  8777  8777 W System.err: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+10-28 00:01:05.304  8777  8777 W System.err: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:858)
+10-28 00:01:05.338  8777  8786 W System  : A resource failed to call close. 
+10-28 00:01:05.338  8777  8786 W System  : A resource failed to call close. 
+10-28 00:01:05.377  1771  1771 I Zygote  : Process 8777 exited cleanly (4)
+--------- beginning of system
+10-28 00:01:05.380  1926  3980 I ActivityManager: Process com.tencent.tmgp.fcicv (pid 8777) has died: fore TOP 
+10-28 00:01:05.380  1926  1944 W libprocessgroup: kill(-8777, 9) failed: No such process
+10-28 00:01:05.380  1926  1944 I libprocessgroup: Successfully killed process cgroup uid 10085 pid 8777 in 0ms
+10-28 00:01:05.386  8839  8839 W cent.tmgp.fcic: Unexpected CPU variant for X86 using defaults: x86
+10-28 00:01:05.393  1926  3980 I ActivityManager: Start proc 8839:com.tencent.tmgp.fcicv/u0a85 for activity com.tencent.tmgp.fcicv/com.actgames.fci.MainActivity
+10-28 00:01:05.399  8839  8839 I cent.tmgp.fcic: The ClassLoaderContext is a special shared library.
+10-28 00:01:05.475  1926  2295 I GnssLocationProvider: WakeLock acquired by sendMessage(REPORT_SV_STATUS, 0, com.android.server.location.GnssLocationProvider$SvStatusInfo@51b4a92)
+10-28 00:01:05.475  1926  1940 I GnssLocationProvider: WakeLock released by handleMessage(REPORT_SV_STATUS, 0, com.android.server.location.GnssLocationProvider$SvStatusInfo@51b4a92)
+10-28 00:01:05.532  8839  8839 I TpnsSecurity: JNI_OnLoad
+10-28 00:01:05.564  8839  8839 W Unity   : Failed to get permission info for android.permission.RECEIVE_USER_PRESENT, manifest likely missing custom permission declaration
+10-28 00:01:05.564  8839  8839 W Unity   : Permission android.permission.RECEIVE_USER_PRESENT ignored
+10-28 00:01:05.710  8839  8839 D OpenGLRenderer: HWUI GL Pipeline
+10-28 00:01:05.741  8839  8839 D CrashReport: Bugly has been disabled in this device
+10-28 00:01:05.721  8839  8839 W cent.tmgp.fcicv: type=1400 audit(0.0:91): avc: denied { read } for name="anr" dev="dm-1" ino=237569 scontext=u:r:untrusted_app_25:s0:c512,c768 tcontext=u:object_r:anr_data_file:s0 tclass=dir permissive=0
+10-28 00:01:05.757  8839  8839 I MSDK    : [1][A.I][20261028 +0.0 00:01:05.757][8839,8839][,,0]:UMSDK JNI_OnLoad for MSDK init
+10-28 00:01:05.757  8839  8839 I MSDK    : [2][A.I][20261028 +0.0 00:01:05.757][8839,8839][,,0]:MSDKJNI init pthread_key
+10-28 00:01:05.762  8839  8839 D WeGame  cpp:  MSDKAdapter JNI_OnLoad
+10-28 00:01:05.762  8839  8839 D MSDK    : MSDK try to load libMSDKSystem.so
+10-28 00:01:05.762  8839  8839 D MSDK    : MSDK try to load libMSDKSystem.so
+10-28 00:01:05.762  8839  8839 I MSDK    : [3][A.I][20261028 +0.0 00:01:05.762][8839,8839][MSDKLifecycleManager,init,39]:Lifecycle first registerActivityLifecycleCallbacks
+10-28 00:01:05.762  8839  8839 D WeGame Router.loadConfig:  loadConfig
+10-28 00:01:05.763  8839  8839 I MSDK    : [4][A.I][20261028 +0.0 00:01:05.763][8839,8839][SettingDBHelper,get,15]:Get MSDKCloudConfig.log.level from SettingTable is 
+10-28 00:01:05.763  8839  8839 I MSDK    : [5][A.I][20261028 +0.0 00:01:05.763][8839,8839][SettingDBHelper,get,15]:Get MSDKCloudConfig.log.mode from SettingTable is 
+10-28 00:01:05.764  8839  8839 I MSDK    : [ASSERT((null))][A.I][2026-10-28 +0.0 00:01:05.764][8839, 8839][msdk_cloud_config_tool.cpp, LoadDBData, 262] : log_level_ = , log_mode_ = 
+10-28 00:01:05.764  8839  8839 I MSDK    : [ASSERT((null))][A.I][2026-10-28 +0.0 00:01:05.764][8839, 8839][msdk_cloud_config_tool.cpp, LoadDBData, 274] : load CS_LOG_LEVEL,CS_LOG_MODE is empty, (level, mode):(, )
+10-28 00:01:05.764  8839  8839 I MSDK    : [6][A.I][20261028 +0.0 00:01:05.764][8839,8839][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.notice_switch from SettingTable is 
+10-28 00:01:05.764  8839  8839 I MSDK    : [7][A.I][20261028 +0.0 00:01:05.764][8839,8839][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.xg_open_switch from SettingTable is 
+10-28 00:01:05.764  8839  8839 I MSDK    : [8][A.I][20261028 +0.0 00:01:05.764][8839,8839][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.stat_open_switch from SettingTable is 
+10-28 00:01:05.764  8839  8839 I MSDK    : [9][A.I][20261028 +0.0 00:01:05.764][8839,8839][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.bugly_open_switch from SettingTable is 
+10-28 00:01:05.765  8839  8839 I MSDK    : [10][A.I][20261028 +0.0 00:01:05.765][8839,8839][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.yyb_update_switch from SettingTable is 
+10-28 00:01:05.765  8839  8839 I MSDK    : [11][A.I][20261028 +0.0 00:01:05.765][8839,8839][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.msdk_url from SettingTable is 
+10-28 00:01:05.765  8839  8839 I MSDK    : [12][A.I][20261028 +0.0 00:01:05.765][8839,8839][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.gray_test_switch from SettingTable is 
+10-28 00:01:05.765  8839  8839 I MSDK    : [13][A.I][20261028 +0.0 00:01:05.765][8839,8839][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.real_name_auth_switch from SettingTable is 
+10-28 00:01:05.766  8839  8839 I MSDK    : [14][A.I][20261028 +0.0 00:01:05.766][8839,8839][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.beta_switch from SettingTable is 
+10-28 00:01:05.766  8839  8839 I MSDK    : [15][A.I][20261028 +0.0 00:01:05.766][8839,8839][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.wxtoken_refresh from SettingTable is 
+10-28 00:01:05.766  8839  8839 I MSDK    : [16][A.I][20261028 +0.0 00:01:05.766][8839,8839][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.kill_webview_process from SettingTable is 
+10-28 00:01:05.766  8839  8839 I MSDK    : [17][A.I][20261028 +0.0 00:01:05.766][8839,8839][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.event_report_switch from SettingTable is 
+10-28 00:01:05.766  8839  8839 I MSDK    : [18][A.I][20261028 +0.0 00:01:05.766][8839,8839][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.report_ip_switch from SettingTable is 
+10-28 00:01:05.767  8839  8839 I MSDK    : [19][A.I][20261028 +0.0 00:01:05.767][8839,8839][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.cpp_msdk_version from SettingTable is 
+10-28 00:01:05.767  8839  8839 I MSDK    : [20][A.I][20261028 +0.0 00:01:05.767][8839,8839][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.webview_close_x5 from SettingTable is 
+10-28 00:01:05.767  8839  8839 I MSDK    : [21][A.I][20261028 +0.0 00:01:05.767][8839,8839][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.httpdns_switch from SettingTable is 
+10-28 00:01:05.768  8839  8839 I MSDK    : [22][A.I][20261028 +0.0 00:01:05.768][8839,8839][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.use_single_thread_mode from SettingTable is 
+10-28 00:01:05.768  8839  8839 I MSDK    : [ASSERT((null))][A.I][2026-10-28 +0.0 00:01:05.768][8839, 8839][msdk_cloud_config_tool.cpp, LoadDBData, 727] : [LoadDBData]notice_switch_ = , xg_open_switch_ = , stat_open_switch_ = , need_autotest_ = , auto_test_apkurl_ = , cpp_msdk_version_ = , single_thread_switch_ =  
+10-28 00:01:05.768  8839  8839 I MSDK    : [23][A.I][20261028 +0.0 00:01:05.768][8839,8839][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.k1 from SettingTable is 
+10-28 00:01:05.768  8839  8839 I MSDK    : [24][A.I][20261028 +0.0 00:01:05.768][8839,8839][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.k2 from SettingTable is 
+10-28 00:01:05.768  8839  8839 I MSDK    : [25][A.I][20261028 +0.0 00:01:05.768][8839,8839][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.k3 from SettingTable is 
+10-28 00:01:05.769  8839  8839 I MSDK    : [26][A.I][20261028 +0.0 00:01:05.769][8839,8839][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.k4 from SettingTable is 
+10-28 00:01:05.769  8839  8839 I MSDK    : [27][A.I][20261028 +0.0 00:01:05.769][8839,8839][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.k5 from SettingTable is 
+10-28 00:01:05.769  8839  8839 I MSDK    : [28][A.I][20261028 +0.0 00:01:05.769][8839,8839][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.k6 from SettingTable is 
+10-28 00:01:05.769  8839  8839 I MSDK    : [29][A.I][20261028 +0.0 00:01:05.769][8839,8839][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.k7 from SettingTable is 
+10-28 00:01:05.770  8839  8839 I MSDK    : [30][A.I][20261028 +0.0 00:01:05.770][8839,8839][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.k8 from SettingTable is 
+10-28 00:01:05.770  8839  8839 I MSDK    : [31][A.I][20261028 +0.0 00:01:05.770][8839,8839][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.k9 from SettingTable is 
+10-28 00:01:05.770  8839  8839 I MSDK    : [32][A.I][20261028 +0.0 00:01:05.770][8839,8839][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.k10 from SettingTable is 
+10-28 00:01:05.770  8839  8839 I MSDK    : [ASSERT((null))][A.I][2026-10-28 +0.0 00:01:05.770][8839, 8839][msdk_cloud_config_tool.cpp, LoadDBData, 752] : [LoadDBData] k1_ = , k2_ = ,k3_ = , k4_ = , k5_ = , k6_ = , k7_ = , k8_ = , k9_ = , k10_ =  
+10-28 00:01:05.771  8839  8839 I MSDK    : [33][A.I][20261028 +0.0 00:01:05.771][8839,8839][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.log.level from SettingTable is 0
+10-28 00:01:05.771  8839  8839 I MSDK    : [34][A.I][20261028 +0.0 00:01:05.771][8839,8839][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.log.mode from SettingTable is 0
+10-28 00:01:05.771  8839  8839 I MSDK    : [35][A.I][20261028 +0.0 00:01:05.771][8839,8839][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.notice_switch from SettingTable is 0
+10-28 00:01:05.771  8839  8839 I MSDK    : [36][A.I][20261028 +0.0 00:01:05.771][8839,8839][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.xg_open_switch from SettingTable is 0
+10-28 00:01:05.771  8839  8839 I MSDK    : [37][A.I][20261028 +0.0 00:01:05.771][8839,8839][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.stat_open_switch from SettingTable is 0
+10-28 00:01:05.772  8839  8839 I MSDK    : [38][A.I][20261028 +0.0 00:01:05.772][8839,8839][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.bugly_open_switch from SettingTable is 0
+10-28 00:01:05.772  8839  8839 I MSDK    : [39][A.I][20261028 +0.0 00:01:05.772][8839,8839][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.yyb_update_switch from SettingTable is 0
+10-28 00:01:05.772  8839  8839 I MSDK    : [40][A.I][20261028 +0.0 00:01:05.772][8839,8839][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.msdk_url from SettingTable is 0
+10-28 00:01:05.772  8839  8839 I MSDK    : [41][A.I][20261028 +0.0 00:01:05.772][8839,8839][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.gray_test_switch from SettingTable is 0
+10-28 00:01:05.772  8839  8839 I MSDK    : [42][A.I][20261028 +0.0 00:01:05.772][8839,8839][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.real_name_auth_switch from SettingTable is 0
+10-28 00:01:05.772  8839  8839 I MSDK    : [43][A.I][20261028 +0.0 00:01:05.772][8839,8839][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.beta_switch from SettingTable is 0
+10-28 00:01:05.772  8839  8839 I MSDK    : [44][A.I][20261028 +0.0 00:01:05.772][8839,8839][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.wxtoken_refresh from SettingTable is 0
+10-28 00:01:05.772  8839  8839 I MSDK    : [45][A.I][20261028 +0.0 00:01:05.772][8839,8839][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.kill_webview_process from SettingTable is 0
+10-28 00:01:05.773  8839  8839 I MSDK    : [46][A.I][20261028 +0.0 00:01:05.773][8839,8839][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.event_report_switch from SettingTable is 0
+10-28 00:01:05.773  8839  8839 I MSDK    : [47][A.I][20261028 +0.0 00:01:05.773][8839,8839][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.report_ip_switch from SettingTable is 0
+10-28 00:01:05.773  8839  8839 I MSDK    : [48][A.I][20261028 +0.0 00:01:05.773][8839,8839][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.need_auto_test from SettingTable is 0
+10-28 00:01:05.773  8839  8839 I MSDK    : [49][A.I][20261028 +0.0 00:01:05.773][8839,8839][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.auto_test_apkurl from SettingTable is 0
+10-28 00:01:05.773  8839  8839 I MSDK    : [50][A.I][20261028 +0.0 00:01:05.773][8839,8839][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.cpp_msdk_version from SettingTable is 0
+10-28 00:01:05.773  8839  8839 I MSDK    : [51][A.I][20261028 +0.0 00:01:05.773][8839,8839][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.webview_close_x5 from SettingTable is 0
+10-28 00:01:05.773  8839  8839 I MSDK    : [52][A.I][20261028 +0.0 00:01:05.773][8839,8839][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.httpdns_switch from SettingTable is 0
+10-28 00:01:05.773  8839  8839 I MSDK    : [53][A.I][20261028 +0.0 00:01:05.773][8839,8839][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.use_single_thread_mode from SettingTable is 0
+10-28 00:01:05.773  8839  8839 I MSDK    : [54][A.I][20261028 +0.0 00:01:05.773][8839,8839][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.k1 from SettingTable is 0
+10-28 00:01:05.774  8839  8839 I MSDK    : [55][A.I][20261028 +0.0 00:01:05.774][8839,8839][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.k2 from SettingTable is 0
+10-28 00:01:05.774  8839  8839 I MSDK    : [56][A.I][20261028 +0.0 00:01:05.774][8839,8839][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.k3 from SettingTable is 0
+10-28 00:01:05.774  8839  8839 I MSDK    : [57][A.I][20261028 +0.0 00:01:05.774][8839,8839][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.k4 from SettingTable is 0
+10-28 00:01:05.774  8839  8839 I MSDK    : [58][A.I][20261028 +0.0 00:01:05.774][8839,8839][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.k5 from SettingTable is 0
+10-28 00:01:05.774  8839  8839 I MSDK    : [59][A.I][20261028 +0.0 00:01:05.774][8839,8839][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.k6 from SettingTable is 0
+10-28 00:01:05.774  8839  8839 I MSDK    : [60][A.I][20261028 +0.0 00:01:05.774][8839,8839][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.k7 from SettingTable is 0
+10-28 00:01:05.775  8839  8839 I MSDK    : [61][A.I][20261028 +0.0 00:01:05.775][8839,8839][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.k8 from SettingTable is 0
+10-28 00:01:05.775  8839  8839 I MSDK    : [62][A.I][20261028 +0.0 00:01:05.775][8839,8839][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.k9 from SettingTable is 0
+10-28 00:01:05.775  8839  8839 I MSDK    : [63][A.I][20261028 +0.0 00:01:05.775][8839,8839][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.k10 from SettingTable is 0
+10-28 00:01:05.775  8839  8839 I MSDK    : [64][A.I][20261028 +0.0 00:01:05.775][8839,8839][,,0]:LoadConfig run_cpp_code_:true
+10-28 00:01:05.775  8839  8839 D WeGame Router.loadConfig:  [loadConfig]runCppCode: true
+10-28 00:01:05.775  8839  8839 D WeGame Router.init:  runCppCode: true
+10-28 00:01:05.776  8839  8839 I MSDK    : [65][A.I][20261028 +0.0 00:01:05.776][8839,8839][MSDKInterfaceImpl,Initialized,61]:Initialized start
+10-28 00:01:05.780  8839  8839 W SoundPool: Use of stream types is deprecated for operations other than volume control
+10-28 00:01:05.780  8839  8839 W SoundPool: See the documentation of SoundPool() for what to use instead with android.media.AudioAttributes to qualify your playback use case
+10-28 00:01:05.782  8839  8839 D MicroMsg.PaySdk.WXFactory: createWXAPI, appId = wx687f4629ba7c3086, checkSignature = false
+10-28 00:01:05.782  8839  8839 D MicroMsg.SDK.WXApiImplV10: <init>, appId = wx687f4629ba7c3086, checkSignature = false
+10-28 00:01:05.782  8839  8839 D MicroMsg.SDK.WXMsgImplComm: ignore wechat app signature validation
+10-28 00:01:05.782  8839  8839 D MicroMsg.SDK.WXApiImplV10: registerApp, appId = wx687f4629ba7c3086
+10-28 00:01:05.782  8839  8839 D MicroMsg.SDK.WXApiImplV10: registerApp, appId = wx687f4629ba7c3086
+10-28 00:01:05.782  8839  8839 D MicroMsg.SDK.WXApiImplV10: register app com.tencent.tmgp.fcicv
+10-28 00:01:05.782  8839  8839 D MicroMsg.SDK.MMessage: send mm message, intent=Intent { act=com.tencent.mm.plugin.openapi.Intent.ACTION_HANDLE_APP_REGISTER (has extras) }, perm=com.tencent.mm.permission.MM_MESSAGE
+10-28 00:01:05.785  8839  8839 E openSDK_LOG: com.tencent.tmgp.fcicv SDK_VERSION:3.3.0.lite
+10-28 00:01:05.785  8839  8839 I openSDK_LOG.Tencent: createInstance()  -- start, appId = 1106429722
+10-28 00:01:05.785  8839  8839 I openSDK_LOG.QQAuth: QQAuth -- createInstance() --start
+10-28 00:01:05.786  8839  8839 I openSDK_LOG.QQAuth: new QQAuth() --start
+10-28 00:01:05.786  8839  8839 I openSDK_LOG.AuthAgent: is x86 architecture
+10-28 00:01:05.789  8839  8873 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+10-28 00:01:05.791  8839  8839 I openSDK_LOG.QQAuth: new QQAuth() --end
+10-28 00:01:05.792  8839  8839 I openSDK_LOG.QQAuth: QQAuth -- createInstance()  --end
+10-28 00:01:05.793  8839  8839 I openSDK_LOG.Tencent: createInstance()  -- end
+10-28 00:01:05.793  8839  8839 I MSDK    : [66][A.I][20261028 +0.0 00:01:05.793][8839,8839][MSDKMethodC2J,init,29]:mainActivity is com.actgames.fci.MainActivity@533e75f
+10-28 00:01:05.793  8839  8839 I MSDK    : [ASSERT((null))][A.I][2026-10-28 +0.0 00:01:05.793][8839, 8839][msdk_cpp_interface.cpp, Init, 62] : Into Init
+10-28 00:01:05.825  8839  8878 I MID     : >>>   queryMatchContentProviders size:1
+10-28 00:01:05.825  8839  8878 D MID     : >>>   appPrivateMidMap size:0,content:
+10-28 00:01:05.879  8839  8839 I MSDK    : [67][A.I][20261028 +0.0 00:01:05.879][8839,8839][,,0]:json in callJavaMethod:
+10-28 00:01:05.879  8839  8839 I MSDK    : [68][A.I][20261028 +0.0 00:01:05.879][8839,8839][MSDKMethodC2J,callJavaMethod,80]:functionName:getMSDKSVNcode
+10-28 00:01:05.879  8839  8839 I MSDK    : [69][A.I][20261028 +0.0 00:01:05.879][8839,8839][MSDKJniHelper,getMSDKVersion,301]:getMSDKVersion:3.2.17a
+10-28 00:01:05.879  8839  8839 I MSDK    : [70][A.I][20261028 +0.0 00:01:05.879][8839,8839][,,0]:ModuleManager log Init_ed MSDK version is:3.2.17a, SVN:96009
+10-28 00:01:05.879  8839  8839 I MSDK    : [ASSERT((null))][A.I][2026-10-28 +0.0 00:01:05.879][8839, 8839][msdk_config_tool.cpp, GetLogMode, 405] : isvalid = 0, mode = 1
+10-28 00:01:05.879  8839  8839 I MSDK    : [ASSERT((null))][A.I][2026-10-28 +0.0 00:01:05.879][8839, 8839][msdk_config_tool.cpp, GetLogMode, 405] : isvalid = 0, mode = 1
+10-28 00:01:05.879  8839  8839 I MSDK    : [71][A.I][20261028 +0.0 00:01:05.879][8839,8839][,,0]:MloggerWrapper level=4 mode=1, ConfigTool mode=7, expert realtime config mode=7
+10-28 00:01:05.880  8839  8839 I MSDK    : [72][A.I][20261028 +0.0 00:01:05.880][8839,8839][MSDKJniHelper,getFreeRamPercent,182]:total size 6094400KB free size 4551312KB free percent 74.68023%
+10-28 00:01:05.893  8839  8876 E MtaSDK  : Could not get permission of android.permission.READ_PHONE_STATE
+10-28 00:01:05.894  8839  8839 D WeGame DeviceInfo.getApn:  typeName:WIFI
+10-28 00:01:05.894  8839  8839 W System.err: java.lang.NumberFormatException: For input string: "3000000000"
+10-28 00:01:05.894  8839  8839 W System.err: 	at java.lang.Integer.parseInt(Integer.java:618)
+10-28 00:01:05.894  8839  8839 W System.err: 	at java.lang.Integer.parseInt(Integer.java:650)
+10-28 00:01:05.894  8839  8839 W System.err: 	at com.tencent.msdk.stat.DeviceInfo.getCpuInfo(DeviceInfo.java:344)
+10-28 00:01:05.894  8839  8839 W System.err: 	at com.tencent.msdk.framework.tools.MSDKJniHelper.getCPUType(MSDKJniHelper.java:193)
+10-28 00:01:05.894  8839  8839 W System.err: 	at com.tencent.msdk.api.refactor.MSDKInterfaceNative.init(Native Method)
+10-28 00:01:05.894  8839  8839 W System.err: 	at com.tencent.msdk.api.refactor.MSDKInterfaceImpl.Initialized(MSDKInterfaceImpl.java:74)
+10-28 00:01:05.894  8839  8839 W System.err: 	at com.tencent.msdk.api.WGPlatform.Initialized(WGPlatform.java:88)
+10-28 00:01:05.894  8839  8839 W System.err: 	at com.actgames.fci.AppDelegater.onCreate(AppDelegater.java:61)
+10-28 00:01:05.894  8839  8839 W System.err: 	at com.actgames.fci.MainActivity.onCreate(MainActivity.java:53)
+10-28 00:01:05.894  8839  8839 W System.err: 	at android.app.Activity.performCreate(Activity.java:7136)
+10-28 00:01:05.894  8839  8839 W System.err: 	at android.app.Activity.performCreate(Activity.java:7127)
+10-28 00:01:05.894  8839  8839 W System.err: 	at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1271)
+10-28 00:01:05.894  8839  8839 W System.err: 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2893)
+10-28 00:01:05.894  8839  8839 W System.err: 	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:3048)
+10-28 00:01:05.894  8839  8839 W System.err: 	at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:78)
+10-28 00:01:05.894  8839  8839 W System.err: 	at android.app.servertransaction.TransactionExecutor.executeCallbacks(TransactionExecutor.java:108)
+10-28 00:01:05.894  8839  8839 W System.err: 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:68)
+10-28 00:01:05.894  8839  8839 W System.err: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1808)
+10-28 00:01:05.894  8839  8839 W System.err: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+10-28 00:01:05.894  8839  8839 W System.err: 	at android.os.Looper.loop(Looper.java:193)
+10-28 00:01:05.894  8839  8839 W System.err: 	at android.app.ActivityThread.main(ActivityThread.java:6669)
+10-28 00:01:05.894  8839  8839 W System.err: 	at java.lang.reflect.Method.invoke(Native Method)
+10-28 00:01:05.894  8839  8839 W System.err: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+10-28 00:01:05.894  8839  8839 W System.err: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:858)
+10-28 00:01:05.945  8839  8885 I MID     : >>>   queryMatchContentProviders size:1
+10-28 00:01:05.946  8839  8885 D MID     : >>>   appPrivateMidMap size:0,content:
+10-28 00:01:05.959  8839  8839 D WeGame DeviceInfo.getApn:  typeName:WIFI
+10-28 00:01:05.960  8839  8848 W System  : A resource failed to call close. 
+10-28 00:01:05.961  8839  8839 W System.err: java.lang.SecurityException: getSubscriberId
+10-28 00:01:05.961  8839  8839 W System.err: 	at android.os.Parcel.createException(Parcel.java:1950)
+10-28 00:01:05.961  8839  8839 W System.err: 	at android.os.Parcel.readException(Parcel.java:1918)
+10-28 00:01:05.961  8839  8839 W System.err: 	at android.os.Parcel.readException(Parcel.java:1868)
+10-28 00:01:05.961  8839  8839 W System.err: 	at com.android.internal.telephony.IPhoneSubInfo$Stub$Proxy.getSubscriberIdForSubscriber(IPhoneSubInfo.java:578)
+10-28 00:01:05.961  8839  8839 W System.err: 	at android.telephony.TelephonyManager.getSubscriberId(TelephonyManager.java:2881)
+10-28 00:01:05.961  8839  8839 W System.err: 	at android.telephony.TelephonyManager.getSubscriberId(TelephonyManager.java:2864)
+10-28 00:01:05.962  8839  8839 W System.err: 	at com.tencent.msdk.stat.DeviceInfo.getProvidersName(DeviceInfo.java:162)
+10-28 00:01:05.962  8839  8839 W System.err: 	at com.tencent.msdk.stat.DeviceInfo.getAllDeviceInfo(DeviceInfo.java:388)
+10-28 00:01:05.962  8839  8839 W System.err: 	at com.tencent.msdk.framework.tools.MSDKJniHelper.getDeciceInfoStr(MSDKJniHelper.java:421)
+10-28 00:01:05.962  8839  8839 W System.err: 	at com.tencent.msdk.api.refactor.MSDKInterfaceNative.init(Native Method)
+10-28 00:01:05.962  8839  8839 W System.err: 	at com.tencent.msdk.api.refactor.MSDKInterfaceImpl.Initialized(MSDKInterfaceImpl.java:74)
+10-28 00:01:05.962  8839  8839 W System.err: 	at com.tencent.msdk.api.WGPlatform.Initialized(WGPlatform.java:88)
+10-28 00:01:05.962  8839  8839 W System.err: 	at com.actgames.fci.AppDelegater.onCreate(AppDelegater.java:61)
+10-28 00:01:05.962  8839  8839 W System.err: 	at com.actgames.fci.MainActivity.onCreate(MainActivity.java:53)
+10-28 00:01:05.962  8839  8839 W System.err: 	at android.app.Activity.performCreate(Activity.java:7136)
+10-28 00:01:05.962  8839  8839 W System.err: 	at android.app.Activity.performCreate(Activity.java:7127)
+10-28 00:01:05.962  8839  8839 W System.err: 	at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1271)
+10-28 00:01:05.962  8839  8839 W System.err: 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2893)
+10-28 00:01:05.962  8839  8839 W System.err: 	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:3048)
+10-28 00:01:05.962  8839  8839 W System.err: 	at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:78)
+10-28 00:01:05.962  8839  8839 W System.err: 	at android.app.servertransaction.TransactionExecutor.executeCallbacks(TransactionExecutor.java:108)
+10-28 00:01:05.962  8839  8839 W System.err: 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:68)
+10-28 00:01:05.962  8839  8839 W System.err: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1808)
+10-28 00:01:05.962  8839  8839 W System.err: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+10-28 00:01:05.962  8839  8839 W System.err: 	at android.os.Looper.loop(Looper.java:193)
+10-28 00:01:05.962  8839  8839 W System.err: 	at android.app.ActivityThread.main(ActivityThread.java:6669)
+10-28 00:01:05.962  8839  8839 W System.err: 	at java.lang.reflect.Method.invoke(Native Method)
+10-28 00:01:05.962  8839  8839 W System.err: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+10-28 00:01:05.962  8839  8839 W System.err: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:858)
+10-28 00:01:05.962  8839  8839 W System.err: java.lang.NumberFormatException: For input string: "3000000000"
+10-28 00:01:05.962  8839  8839 W System.err: 	at java.lang.Integer.parseInt(Integer.java:618)
+10-28 00:01:05.962  8839  8839 W System.err: 	at java.lang.Integer.parseInt(Integer.java:650)
+10-28 00:01:05.962  8839  8839 W System.err: 	at com.tencent.msdk.stat.DeviceInfo.getCpuInfo(DeviceInfo.java:344)
+10-28 00:01:05.962  8839  8839 W System.err: 	at com.tencent.msdk.stat.DeviceInfo.getAllDeviceInfo(DeviceInfo.java:400)
+10-28 00:01:05.962  8839  8839 W System.err: 	at com.tencent.msdk.framework.tools.MSDKJniHelper.getDeciceInfoStr(MSDKJniHelper.java:421)
+10-28 00:01:05.962  8839  8839 W System.err: 	at com.tencent.msdk.api.refactor.MSDKInterfaceNative.init(Native Method)
+10-28 00:01:05.962  8839  8839 W System.err: 	at com.tencent.msdk.api.refactor.MSDKInterfaceImpl.Initialized(MSDKInterfaceImpl.java:74)
+10-28 00:01:05.962  8839  8839 W System.err: 	at com.tencent.msdk.api.WGPlatform.Initialized(WGPlatform.java:88)
+10-28 00:01:05.962  8839  8839 W System.err: 	at com.actgames.fci.AppDelegater.onCreate(AppDelegater.java:61)
+10-28 00:01:05.962  8839  8839 W System.err: 	at com.actgames.fci.MainActivity.onCreate(MainActivity.java:53)
+10-28 00:01:05.962  8839  8839 W System.err: 	at android.app.Activity.performCreate(Activity.java:7136)
+10-28 00:01:05.962  8839  8839 W System.err: 	at android.app.Activity.performCreate(Activity.java:7127)
+10-28 00:01:05.962  8839  8839 W System.err: 	at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1271)
+10-28 00:01:05.962  8839  8839 W System.err: 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2893)
+10-28 00:01:05.962  8839  8839 W System.err: 	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:3048)
+10-28 00:01:05.962  8839  8839 W System.err: 	at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:78)
+10-28 00:01:05.962  8839  8839 W System.err: 	at android.app.servertransaction.TransactionExecutor.executeCallbacks(TransactionExecutor.java:108)
+10-28 00:01:05.962  8839  8839 W System.err: 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:68)
+10-28 00:01:05.962  8839  8839 W System.err: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1808)
+10-28 00:01:05.962  8839  8839 W System.err: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+10-28 00:01:05.962  8839  8839 W System.err: 	at android.os.Looper.loop(Looper.java:193)
+10-28 00:01:05.962  8839  8839 W System.err: 	at android.app.ActivityThread.main(ActivityThread.java:6669)
+10-28 00:01:05.962  8839  8839 W System.err: 	at java.lang.reflect.Method.invoke(Native Method)
+10-28 00:01:05.962  8839  8839 W System.err: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+10-28 00:01:05.962  8839  8839 W System.err: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:858)
+10-28 00:01:05.963  8839  8887 I MID     : >>>   queryMatchContentProviders size:1
+10-28 00:01:05.963  8839  8887 D MID     : >>>   appPrivateMidMap size:0,content:
+10-28 00:01:05.965  8839  8876 W MtaSDK  : [StatService(524): null:115] - can not get the permission of android.permission.WRITE_EXTERNAL_STORAGE
+10-28 00:01:05.994  8839  8883 E MtaSDK  : 
+10-28 00:01:05.994  8839  8883 E MtaSDK  : org.apache.http.conn.HttpHostConnectException: Connection to http://pingma.qq.com:80 refused
+10-28 00:01:05.994  8839  8883 E MtaSDK  : 	at org.apache.http.impl.conn.DefaultClientConnectionOperator.openConnection(DefaultClientConnectionOperator.java:193)
+10-28 00:01:05.994  8839  8883 E MtaSDK  : 	at org.apache.http.impl.conn.AbstractPoolEntry.open(AbstractPoolEntry.java:170)
+10-28 00:01:05.994  8839  8883 E MtaSDK  : 	at org.apache.http.impl.conn.AbstractPooledConnAdapter.open(AbstractPooledConnAdapter.java:124)
+10-28 00:01:05.994  8839  8883 E MtaSDK  : 	at org.apache.http.impl.client.DefaultRequestDirector.execute(DefaultRequestDirector.java:366)
+10-28 00:01:05.994  8839  8883 E MtaSDK  : 	at org.apache.http.impl.client.AbstractHttpClient.execute(AbstractHttpClient.java:560)
+10-28 00:01:05.994  8839  8883 E MtaSDK  : 	at org.apache.http.impl.client.AbstractHttpClient.execute(AbstractHttpClient.java:492)
+10-28 00:01:05.994  8839  8883 E MtaSDK  : 	at org.apache.http.impl.client.AbstractHttpClient.execute(AbstractHttpClient.java:470)
+10-28 00:01:05.994  8839  8883 E MtaSDK  : 	at com.tencent.stat.g.a(Unknown Source:426)
+10-28 00:01:05.994  8839  8883 E MtaSDK  : 	at com.tencent.stat.i.run(Unknown Source:6)
+10-28 00:01:05.994  8839  8883 E MtaSDK  : 	at android.os.Handler.handleCallback(Handler.java:873)
+10-28 00:01:05.994  8839  8883 E MtaSDK  : 	at android.os.Handler.dispatchMessage(Handler.java:99)
+10-28 00:01:05.994  8839  8883 E MtaSDK  : 	at android.os.Looper.loop(Looper.java:193)
+10-28 00:01:05.994  8839  8883 E MtaSDK  : 	at android.os.HandlerThread.run(HandlerThread.java:65)
+10-28 00:01:05.994  8839  8883 E MtaSDK  : Caused by: java.net.ConnectException: failed to connect to /0.0.0.1 (port 80) from /:: (port 0) after 10000ms: connect failed: EINVAL (Invalid argument)
+10-28 00:01:05.994  8839  8883 E MtaSDK  : 	at libcore.io.IoBridge.connect(IoBridge.java:137)
+10-28 00:01:05.994  8839  8883 E MtaSDK  : 	at java.net.PlainSocketImpl.socketConnect(PlainSocketImpl.java:137)
+10-28 00:01:05.994  8839  8883 E MtaSDK  : 	at java.net.AbstractPlainSocketImpl.doConnect(AbstractPlainSocketImpl.java:390)
+10-28 00:01:05.994  8839  8883 E MtaSDK  : 	at java.net.AbstractPlainSocketImpl.connectToAddress(AbstractPlainSocketImpl.java:230)
+10-28 00:01:05.994  8839  8883 E MtaSDK  : 	at java.net.AbstractPlainSocketImpl.connect(AbstractPlainSocketImpl.java:212)
+10-28 00:01:05.994  8839  8883 E MtaSDK  : 	at java.net.SocksSocketImpl.connect(SocksSocketImpl.java:436)
+10-28 00:01:05.994  8839  8883 E MtaSDK  : 	at java.net.Socket.connect(Socket.java:621)
+10-28 00:01:05.994  8839  8883 E MtaSDK  : 	at org.apache.http.conn.scheme.PlainSocketFactory.connectSocket(PlainSocketFactory.java:124)
+10-28 00:01:05.994  8839  8883 E MtaSDK  : 	at org.apache.http.impl.conn.DefaultClientConnectionOperator.openConnection(DefaultClientConnectionOperator.java:149)
+10-28 00:01:05.994  8839  8883 E MtaSDK  : 	... 12 more
+10-28 00:01:05.994  8839  8883 E MtaSDK  : Caused by: android.system.ErrnoException: connect failed: EINVAL (Invalid argument)
+10-28 00:01:05.994  8839  8883 E MtaSDK  : 	at libcore.io.Linux.connect(Native Method)
+10-28 00:01:05.994  8839  8883 E MtaSDK  : 	at libcore.io.BlockGuardOs.connect(BlockGuardOs.java:118)
+10-28 00:01:05.994  8839  8883 E MtaSDK  : 	at libcore.io.IoBridge.connectErrno(IoBridge.java:168)
+10-28 00:01:05.994  8839  8883 E MtaSDK  : 	at libcore.io.IoBridge.connect(IoBridge.java:129)
+10-28 00:01:05.994  8839  8883 E MtaSDK  : 	... 20 more
+10-28 00:01:06.025  8839  8890 I MID     : >>>   queryMatchContentProviders size:1
+10-28 00:01:06.026  8839  8890 D MID     : >>>   appPrivateMidMap size:0,content:
+10-28 00:01:06.027  8839  8839 D WeGame DeviceInfo.getApn:  typeName:WIFI
+10-28 00:01:06.029  8839  8889 I MID     : >>>   queryMatchContentProviders size:1
+10-28 00:01:06.029  8839  8889 D MID     : >>>   appPrivateMidMap size:0,content:
+10-28 00:01:06.029  8839  8839 W System.err: java.lang.SecurityException: getSubscriberId
+10-28 00:01:06.029  8839  8839 W System.err: 	at android.os.Parcel.createException(Parcel.java:1950)
+10-28 00:01:06.029  8839  8839 W System.err: 	at android.os.Parcel.readException(Parcel.java:1918)
+10-28 00:01:06.029  8839  8839 W System.err: 	at android.os.Parcel.readException(Parcel.java:1868)
+10-28 00:01:06.029  8839  8839 W System.err: 	at com.android.internal.telephony.IPhoneSubInfo$Stub$Proxy.getSubscriberIdForSubscriber(IPhoneSubInfo.java:578)
+10-28 00:01:06.029  8839  8839 W System.err: 	at android.telephony.TelephonyManager.getSubscriberId(TelephonyManager.java:2881)
+10-28 00:01:06.029  8839  8839 W System.err: 	at android.telephony.TelephonyManager.getSubscriberId(TelephonyManager.java:2864)
+10-28 00:01:06.029  8839  8839 W System.err: 	at com.tencent.msdk.stat.DeviceInfo.getProvidersName(DeviceInfo.java:162)
+10-28 00:01:06.029  8839  8839 W System.err: 	at com.tencent.msdk.stat.DeviceInfo.getAllDeviceInfo(DeviceInfo.java:388)
+10-28 00:01:06.029  8839  8839 W System.err: 	at com.tencent.msdk.framework.tools.MSDKJniHelper.getDeciceInfoStr(MSDKJniHelper.java:421)
+10-28 00:01:06.029  8839  8839 W System.err: 	at com.tencent.msdk.api.refactor.MSDKInterfaceNative.init(Native Method)
+10-28 00:01:06.029  8839  8839 W System.err: 	at com.tencent.msdk.api.refactor.MSDKInterfaceImpl.Initialized(MSDKInterfaceImpl.java:74)
+10-28 00:01:06.029  8839  8839 W System.err: 	at com.tencent.msdk.api.WGPlatform.Initialized(WGPlatform.java:88)
+10-28 00:01:06.029  8839  8839 W System.err: 	at com.actgames.fci.AppDelegater.onCreate(AppDelegater.java:61)
+10-28 00:01:06.029  8839  8839 W System.err: 	at com.actgames.fci.MainActivity.onCreate(MainActivity.java:53)
+10-28 00:01:06.029  8839  8839 W System.err: 	at android.app.Activity.performCreate(Activity.java:7136)
+10-28 00:01:06.029  8839  8839 W System.err: 	at android.app.Activity.performCreate(Activity.java:7127)
+10-28 00:01:06.030  8839  8839 W System.err: 	at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1271)
+10-28 00:01:06.030  8839  8839 W System.err: 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2893)
+10-28 00:01:06.030  8839  8839 W System.err: 	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:3048)
+10-28 00:01:06.030  8839  8839 W System.err: 	at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:78)
+10-28 00:01:06.030  8839  8839 W System.err: 	at android.app.servertransaction.TransactionExecutor.executeCallbacks(TransactionExecutor.java:108)
+10-28 00:01:06.030  8839  8839 W System.err: 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:68)
+10-28 00:01:06.030  8839  8839 W System.err: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1808)
+10-28 00:01:06.030  8839  8839 W System.err: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+10-28 00:01:06.030  8839  8839 W System.err: 	at android.os.Looper.loop(Looper.java:193)
+10-28 00:01:06.030  8839  8839 W System.err: 	at android.app.ActivityThread.main(ActivityThread.java:6669)
+10-28 00:01:06.030  8839  8839 W System.err: 	at java.lang.reflect.Method.invoke(Native Method)
+10-28 00:01:06.030  8839  8839 W System.err: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+10-28 00:01:06.030  8839  8839 W System.err: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:858)
+10-28 00:01:06.030  8839  8839 W System.err: java.lang.NumberFormatException: For input string: "3000000000"
+10-28 00:01:06.030  8839  8839 W System.err: 	at java.lang.Integer.parseInt(Integer.java:618)
+10-28 00:01:06.030  8839  8839 W System.err: 	at java.lang.Integer.parseInt(Integer.java:650)
+10-28 00:01:06.030  8839  8839 W System.err: 	at com.tencent.msdk.stat.DeviceInfo.getCpuInfo(DeviceInfo.java:344)
+10-28 00:01:06.030  8839  8839 W System.err: 	at com.tencent.msdk.stat.DeviceInfo.getAllDeviceInfo(DeviceInfo.java:400)
+10-28 00:01:06.030  8839  8839 W System.err: 	at com.tencent.msdk.framework.tools.MSDKJniHelper.getDeciceInfoStr(MSDKJniHelper.java:421)
+10-28 00:01:06.030  8839  8839 W System.err: 	at com.tencent.msdk.api.refactor.MSDKInterfaceNative.init(Native Method)
+10-28 00:01:06.030  8839  8839 W System.err: 	at com.tencent.msdk.api.refactor.MSDKInterfaceImpl.Initialized(MSDKInterfaceImpl.java:74)
+10-28 00:01:06.030  8839  8839 W System.err: 	at com.tencent.msdk.api.WGPlatform.Initialized(WGPlatform.java:88)
+10-28 00:01:06.030  8839  8839 W System.err: 	at com.actgames.fci.AppDelegater.onCreate(AppDelegater.java:61)
+10-28 00:01:06.030  8839  8839 W System.err: 	at com.actgames.fci.MainActivity.onCreate(MainActivity.java:53)
+10-28 00:01:06.030  8839  8839 W System.err: 	at android.app.Activity.performCreate(Activity.java:7136)
+10-28 00:01:06.030  8839  8839 W System.err: 	at android.app.Activity.performCreate(Activity.java:7127)
+10-28 00:01:06.030  8839  8839 W System.err: 	at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1271)
+10-28 00:01:06.030  8839  8839 W System.err: 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2893)
+10-28 00:01:06.030  8839  8839 W System.err: 	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:3048)
+10-28 00:01:06.030  8839  8839 W System.err: 	at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:78)
+10-28 00:01:06.030  8839  8839 W System.err: 	at android.app.servertransaction.TransactionExecutor.executeCallbacks(TransactionExecutor.java:108)
+10-28 00:01:06.030  8839  8839 W System.err: 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:68)
+10-28 00:01:06.030  8839  8839 W System.err: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1808)
+10-28 00:01:06.030  8839  8839 W System.err: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+10-28 00:01:06.030  8839  8839 W System.err: 	at android.os.Looper.loop(Looper.java:193)
+10-28 00:01:06.030  8839  8839 W System.err: 	at android.app.ActivityThread.main(ActivityThread.java:6669)
+10-28 00:01:06.030  8839  8839 W System.err: 	at java.lang.reflect.Method.invoke(Native Method)
+10-28 00:01:06.030  8839  8839 W System.err: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+10-28 00:01:06.030  8839  8839 W System.err: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:858)
+10-28 00:01:06.108  1771  1771 I Zygote  : Process 8839 exited cleanly (4)
+10-28 00:01:06.110  1926  3980 I ActivityManager: Process com.tencent.tmgp.fcicv (pid 8839) has died: fore TOP 
+10-28 00:01:06.110  1926  1944 W libprocessgroup: kill(-8839, 9) failed: No such process
+10-28 00:01:06.110  1926  1944 I libprocessgroup: Successfully killed process cgroup uid 10085 pid 8839 in 0ms
+10-28 00:01:06.117  8901  8901 W cent.tmgp.fcic: Unexpected CPU variant for X86 using defaults: x86
+10-28 00:01:06.123  1926  3980 I ActivityManager: Start proc 8901:com.tencent.tmgp.fcicv/u0a85 for activity com.tencent.tmgp.fcicv/com.actgames.fci.MainActivity
+10-28 00:01:06.129  8901  8901 I cent.tmgp.fcic: The ClassLoaderContext is a special shared library.
+10-28 00:01:06.263  8901  8901 I TpnsSecurity: JNI_OnLoad
+10-28 00:01:06.282  8901  8901 W Unity   : Failed to get permission info for android.permission.RECEIVE_USER_PRESENT, manifest likely missing custom permission declaration
+10-28 00:01:06.282  8901  8901 W Unity   : Permission android.permission.RECEIVE_USER_PRESENT ignored
+10-28 00:01:06.426  8901  8901 D OpenGLRenderer: HWUI GL Pipeline
+10-28 00:01:06.456  8901  8901 D CrashReport: Bugly has been disabled in this device
+10-28 00:01:06.441  8901  8901 W cent.tmgp.fcicv: type=1400 audit(0.0:92): avc: denied { read } for name="anr" dev="dm-1" ino=237569 scontext=u:r:untrusted_app_25:s0:c512,c768 tcontext=u:object_r:anr_data_file:s0 tclass=dir permissive=0
+10-28 00:01:06.472  8901  8901 I MSDK    : [1][A.I][20261028 +0.0 00:01:06.472][8901,8901][,,0]:UMSDK JNI_OnLoad for MSDK init
+10-28 00:01:06.472  8901  8901 I MSDK    : [2][A.I][20261028 +0.0 00:01:06.472][8901,8901][,,0]:MSDKJNI init pthread_key
+10-28 00:01:06.475  1926  2295 I GnssLocationProvider: WakeLock acquired by sendMessage(REPORT_SV_STATUS, 0, com.android.server.location.GnssLocationProvider$SvStatusInfo@eb45724)
+10-28 00:01:06.475  1926  1940 I GnssLocationProvider: WakeLock released by handleMessage(REPORT_SV_STATUS, 0, com.android.server.location.GnssLocationProvider$SvStatusInfo@eb45724)
+10-28 00:01:06.476  8901  8901 D WeGame  cpp:  MSDKAdapter JNI_OnLoad
+10-28 00:01:06.476  8901  8901 D MSDK    : MSDK try to load libMSDKSystem.so
+10-28 00:01:06.476  8901  8901 D MSDK    : MSDK try to load libMSDKSystem.so
+10-28 00:01:06.476  8901  8901 I MSDK    : [3][A.I][20261028 +0.0 00:01:06.476][8901,8901][MSDKLifecycleManager,init,39]:Lifecycle first registerActivityLifecycleCallbacks
+10-28 00:01:06.477  8901  8901 D WeGame Router.loadConfig:  loadConfig
+10-28 00:01:06.478  8901  8901 I MSDK    : [4][A.I][20261028 +0.0 00:01:06.478][8901,8901][SettingDBHelper,get,15]:Get MSDKCloudConfig.log.level from SettingTable is 
+10-28 00:01:06.478  8901  8901 I MSDK    : [5][A.I][20261028 +0.0 00:01:06.478][8901,8901][SettingDBHelper,get,15]:Get MSDKCloudConfig.log.mode from SettingTable is 
+10-28 00:01:06.478  8901  8901 I MSDK    : [ASSERT((null))][A.I][2026-10-28 +0.0 00:01:06.478][8901, 8901][msdk_cloud_config_tool.cpp, LoadDBData, 262] : log_level_ = , log_mode_ = 
+10-28 00:01:06.478  8901  8901 I MSDK    : [ASSERT((null))][A.I][2026-10-28 +0.0 00:01:06.478][8901, 8901][msdk_cloud_config_tool.cpp, LoadDBData, 274] : load CS_LOG_LEVEL,CS_LOG_MODE is empty, (level, mode):(, )
+10-28 00:01:06.478  8901  8901 I MSDK    : [6][A.I][20261028 +0.0 00:01:06.478][8901,8901][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.notice_switch from SettingTable is 
+10-28 00:01:06.479  8901  8901 I MSDK    : [7][A.I][20261028 +0.0 00:01:06.479][8901,8901][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.xg_open_switch from SettingTable is 
+10-28 00:01:06.479  8901  8901 I MSDK    : [8][A.I][20261028 +0.0 00:01:06.479][8901,8901][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.stat_open_switch from SettingTable is 
+10-28 00:01:06.479  8901  8901 I MSDK    : [9][A.I][20261028 +0.0 00:01:06.479][8901,8901][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.bugly_open_switch from SettingTable is 
+10-28 00:01:06.479  8901  8901 I MSDK    : [10][A.I][20261028 +0.0 00:01:06.479][8901,8901][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.yyb_update_switch from SettingTable is 
+10-28 00:01:06.479  8901  8901 I MSDK    : [11][A.I][20261028 +0.0 00:01:06.479][8901,8901][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.msdk_url from SettingTable is 
+10-28 00:01:06.480  8901  8901 I MSDK    : [12][A.I][20261028 +0.0 00:01:06.480][8901,8901][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.gray_test_switch from SettingTable is 
+10-28 00:01:06.480  8901  8901 I MSDK    : [13][A.I][20261028 +0.0 00:01:06.480][8901,8901][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.real_name_auth_switch from SettingTable is 
+10-28 00:01:06.480  8901  8901 I MSDK    : [14][A.I][20261028 +0.0 00:01:06.480][8901,8901][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.beta_switch from SettingTable is 
+10-28 00:01:06.480  8901  8901 I MSDK    : [15][A.I][20261028 +0.0 00:01:06.480][8901,8901][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.wxtoken_refresh from SettingTable is 
+10-28 00:01:06.481  8901  8901 I MSDK    : [16][A.I][20261028 +0.0 00:01:06.481][8901,8901][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.kill_webview_process from SettingTable is 
+10-28 00:01:06.481  8901  8901 I MSDK    : [17][A.I][20261028 +0.0 00:01:06.481][8901,8901][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.event_report_switch from SettingTable is 
+10-28 00:01:06.481  8901  8901 I MSDK    : [18][A.I][20261028 +0.0 00:01:06.481][8901,8901][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.report_ip_switch from SettingTable is 
+10-28 00:01:06.481  8901  8901 I MSDK    : [19][A.I][20261028 +0.0 00:01:06.481][8901,8901][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.cpp_msdk_version from SettingTable is 
+10-28 00:01:06.481  8901  8901 I MSDK    : [20][A.I][20261028 +0.0 00:01:06.481][8901,8901][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.webview_close_x5 from SettingTable is 
+10-28 00:01:06.482  8901  8901 I MSDK    : [21][A.I][20261028 +0.0 00:01:06.482][8901,8901][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.httpdns_switch from SettingTable is 
+10-28 00:01:06.482  8901  8901 I MSDK    : [22][A.I][20261028 +0.0 00:01:06.482][8901,8901][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.use_single_thread_mode from SettingTable is 
+10-28 00:01:06.482  8901  8901 I MSDK    : [ASSERT((null))][A.I][2026-10-28 +0.0 00:01:06.482][8901, 8901][msdk_cloud_config_tool.cpp, LoadDBData, 727] : [LoadDBData]notice_switch_ = , xg_open_switch_ = , stat_open_switch_ = , need_autotest_ = , auto_test_apkurl_ = , cpp_msdk_version_ = , single_thread_switch_ =  
+10-28 00:01:06.482  8901  8901 I MSDK    : [23][A.I][20261028 +0.0 00:01:06.482][8901,8901][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.k1 from SettingTable is 
+10-28 00:01:06.482  8901  8901 I MSDK    : [24][A.I][20261028 +0.0 00:01:06.482][8901,8901][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.k2 from SettingTable is 
+10-28 00:01:06.482  8901  8901 I MSDK    : [25][A.I][20261028 +0.0 00:01:06.482][8901,8901][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.k3 from SettingTable is 
+10-28 00:01:06.483  8901  8901 I MSDK    : [26][A.I][20261028 +0.0 00:01:06.483][8901,8901][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.k4 from SettingTable is 
+10-28 00:01:06.483  8901  8901 I MSDK    : [27][A.I][20261028 +0.0 00:01:06.483][8901,8901][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.k5 from SettingTable is 
+10-28 00:01:06.483  8901  8901 I MSDK    : [28][A.I][20261028 +0.0 00:01:06.483][8901,8901][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.k6 from SettingTable is 
+10-28 00:01:06.483  8901  8901 I MSDK    : [29][A.I][20261028 +0.0 00:01:06.483][8901,8901][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.k7 from SettingTable is 
+10-28 00:01:06.483  8901  8901 I MSDK    : [30][A.I][20261028 +0.0 00:01:06.483][8901,8901][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.k8 from SettingTable is 
+10-28 00:01:06.484  8901  8901 I MSDK    : [31][A.I][20261028 +0.0 00:01:06.484][8901,8901][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.k9 from SettingTable is 
+10-28 00:01:06.484  8901  8901 I MSDK    : [32][A.I][20261028 +0.0 00:01:06.484][8901,8901][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.k10 from SettingTable is 
+10-28 00:01:06.484  8901  8901 I MSDK    : [ASSERT((null))][A.I][2026-10-28 +0.0 00:01:06.484][8901, 8901][msdk_cloud_config_tool.cpp, LoadDBData, 752] : [LoadDBData] k1_ = , k2_ = ,k3_ = , k4_ = , k5_ = , k6_ = , k7_ = , k8_ = , k9_ = , k10_ =  
+10-28 00:01:06.484  8901  8901 I MSDK    : [33][A.I][20261028 +0.0 00:01:06.484][8901,8901][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.log.level from SettingTable is 0
+10-28 00:01:06.484  8901  8901 I MSDK    : [34][A.I][20261028 +0.0 00:01:06.484][8901,8901][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.log.mode from SettingTable is 0
+10-28 00:01:06.485  8901  8901 I MSDK    : [35][A.I][20261028 +0.0 00:01:06.485][8901,8901][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.notice_switch from SettingTable is 0
+10-28 00:01:06.485  8901  8901 I MSDK    : [36][A.I][20261028 +0.0 00:01:06.485][8901,8901][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.xg_open_switch from SettingTable is 0
+10-28 00:01:06.485  8901  8901 I MSDK    : [37][A.I][20261028 +0.0 00:01:06.485][8901,8901][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.stat_open_switch from SettingTable is 0
+10-28 00:01:06.485  8901  8901 I MSDK    : [38][A.I][20261028 +0.0 00:01:06.485][8901,8901][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.bugly_open_switch from SettingTable is 0
+10-28 00:01:06.485  8901  8901 I MSDK    : [39][A.I][20261028 +0.0 00:01:06.485][8901,8901][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.yyb_update_switch from SettingTable is 0
+10-28 00:01:06.485  8901  8901 I MSDK    : [40][A.I][20261028 +0.0 00:01:06.485][8901,8901][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.msdk_url from SettingTable is 0
+10-28 00:01:06.486  8901  8901 I MSDK    : [41][A.I][20261028 +0.0 00:01:06.486][8901,8901][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.gray_test_switch from SettingTable is 0
+10-28 00:01:06.486  8901  8901 I MSDK    : [42][A.I][20261028 +0.0 00:01:06.486][8901,8901][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.real_name_auth_switch from SettingTable is 0
+10-28 00:01:06.486  8901  8901 I MSDK    : [43][A.I][20261028 +0.0 00:01:06.486][8901,8901][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.beta_switch from SettingTable is 0
+10-28 00:01:06.486  8901  8901 I MSDK    : [44][A.I][20261028 +0.0 00:01:06.486][8901,8901][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.wxtoken_refresh from SettingTable is 0
+10-28 00:01:06.486  8901  8901 I MSDK    : [45][A.I][20261028 +0.0 00:01:06.486][8901,8901][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.kill_webview_process from SettingTable is 0
+10-28 00:01:06.486  8901  8901 I MSDK    : [46][A.I][20261028 +0.0 00:01:06.486][8901,8901][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.event_report_switch from SettingTable is 0
+10-28 00:01:06.487  8901  8901 I MSDK    : [47][A.I][20261028 +0.0 00:01:06.487][8901,8901][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.report_ip_switch from SettingTable is 0
+10-28 00:01:06.487  8901  8901 I MSDK    : [48][A.I][20261028 +0.0 00:01:06.487][8901,8901][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.need_auto_test from SettingTable is 0
+10-28 00:01:06.487  8901  8901 I MSDK    : [49][A.I][20261028 +0.0 00:01:06.487][8901,8901][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.auto_test_apkurl from SettingTable is 0
+10-28 00:01:06.487  8901  8901 I MSDK    : [50][A.I][20261028 +0.0 00:01:06.487][8901,8901][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.cpp_msdk_version from SettingTable is 0
+10-28 00:01:06.487  8901  8901 I MSDK    : [51][A.I][20261028 +0.0 00:01:06.487][8901,8901][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.webview_close_x5 from SettingTable is 0
+10-28 00:01:06.487  8901  8901 I MSDK    : [52][A.I][20261028 +0.0 00:01:06.487][8901,8901][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.httpdns_switch from SettingTable is 0
+10-28 00:01:06.487  8901  8901 I MSDK    : [53][A.I][20261028 +0.0 00:01:06.487][8901,8901][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.use_single_thread_mode from SettingTable is 0
+10-28 00:01:06.487  8901  8901 I MSDK    : [54][A.I][20261028 +0.0 00:01:06.487][8901,8901][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.k1 from SettingTable is 0
+10-28 00:01:06.488  8901  8901 I MSDK    : [55][A.I][20261028 +0.0 00:01:06.488][8901,8901][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.k2 from SettingTable is 0
+10-28 00:01:06.488  8901  8901 I MSDK    : [56][A.I][20261028 +0.0 00:01:06.488][8901,8901][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.k3 from SettingTable is 0
+10-28 00:01:06.488  8901  8901 I MSDK    : [57][A.I][20261028 +0.0 00:01:06.488][8901,8901][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.k4 from SettingTable is 0
+10-28 00:01:06.488  8901  8901 I MSDK    : [58][A.I][20261028 +0.0 00:01:06.488][8901,8901][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.k5 from SettingTable is 0
+10-28 00:01:06.488  8901  8901 I MSDK    : [59][A.I][20261028 +0.0 00:01:06.488][8901,8901][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.k6 from SettingTable is 0
+10-28 00:01:06.488  8901  8901 I MSDK    : [60][A.I][20261028 +0.0 00:01:06.488][8901,8901][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.k7 from SettingTable is 0
+10-28 00:01:06.488  8901  8901 I MSDK    : [61][A.I][20261028 +0.0 00:01:06.488][8901,8901][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.k8 from SettingTable is 0
+10-28 00:01:06.488  8901  8901 I MSDK    : [62][A.I][20261028 +0.0 00:01:06.488][8901,8901][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.k9 from SettingTable is 0
+10-28 00:01:06.489  8901  8901 I MSDK    : [63][A.I][20261028 +0.0 00:01:06.489][8901,8901][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.k10 from SettingTable is 0
+10-28 00:01:06.489  8901  8901 I MSDK    : [64][A.I][20261028 +0.0 00:01:06.489][8901,8901][,,0]:LoadConfig run_cpp_code_:true
+10-28 00:01:06.489  8901  8901 D WeGame Router.loadConfig:  [loadConfig]runCppCode: true
+10-28 00:01:06.489  8901  8901 D WeGame Router.init:  runCppCode: true
+10-28 00:01:06.490  8901  8901 I MSDK    : [65][A.I][20261028 +0.0 00:01:06.490][8901,8901][MSDKInterfaceImpl,Initialized,61]:Initialized start
+10-28 00:01:06.493  8901  8901 W SoundPool: Use of stream types is deprecated for operations other than volume control
+10-28 00:01:06.493  8901  8901 W SoundPool: See the documentation of SoundPool() for what to use instead with android.media.AudioAttributes to qualify your playback use case
+10-28 00:01:06.495  8901  8901 D MicroMsg.PaySdk.WXFactory: createWXAPI, appId = wx687f4629ba7c3086, checkSignature = false
+10-28 00:01:06.495  8901  8901 D MicroMsg.SDK.WXApiImplV10: <init>, appId = wx687f4629ba7c3086, checkSignature = false
+10-28 00:01:06.495  8901  8901 D MicroMsg.SDK.WXMsgImplComm: ignore wechat app signature validation
+10-28 00:01:06.495  8901  8901 D MicroMsg.SDK.WXApiImplV10: registerApp, appId = wx687f4629ba7c3086
+10-28 00:01:06.495  8901  8901 D MicroMsg.SDK.WXApiImplV10: registerApp, appId = wx687f4629ba7c3086
+10-28 00:01:06.495  8901  8901 D MicroMsg.SDK.WXApiImplV10: register app com.tencent.tmgp.fcicv
+10-28 00:01:06.495  8901  8901 D MicroMsg.SDK.MMessage: send mm message, intent=Intent { act=com.tencent.mm.plugin.openapi.Intent.ACTION_HANDLE_APP_REGISTER (has extras) }, perm=com.tencent.mm.permission.MM_MESSAGE
+10-28 00:01:06.497  8901  8901 E openSDK_LOG: com.tencent.tmgp.fcicv SDK_VERSION:3.3.0.lite
+10-28 00:01:06.498  8901  8901 I openSDK_LOG.Tencent: createInstance()  -- start, appId = 1106429722
+10-28 00:01:06.498  8901  8901 I openSDK_LOG.QQAuth: QQAuth -- createInstance() --start
+10-28 00:01:06.498  8901  8901 I openSDK_LOG.QQAuth: new QQAuth() --start
+10-28 00:01:06.499  8901  8901 I openSDK_LOG.AuthAgent: is x86 architecture
+10-28 00:01:06.503  8901  8934 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+10-28 00:01:06.504  8901  8901 I openSDK_LOG.QQAuth: new QQAuth() --end
+10-28 00:01:06.504  8901  8901 I openSDK_LOG.QQAuth: QQAuth -- createInstance()  --end
+10-28 00:01:06.505  8901  8901 I openSDK_LOG.Tencent: createInstance()  -- end
+10-28 00:01:06.505  8901  8901 I MSDK    : [66][A.I][20261028 +0.0 00:01:06.505][8901,8901][MSDKMethodC2J,init,29]:mainActivity is com.actgames.fci.MainActivity@c026e03
+10-28 00:01:06.506  8901  8901 I MSDK    : [ASSERT((null))][A.I][2026-10-28 +0.0 00:01:06.506][8901, 8901][msdk_cpp_interface.cpp, Init, 62] : Into Init
+10-28 00:01:06.544  8901  8939 I MID     : >>>   queryMatchContentProviders size:1
+10-28 00:01:06.545  8901  8939 D MID     : >>>   appPrivateMidMap size:0,content:
+10-28 00:01:06.592  8901  8936 E MtaSDK  : Could not get permission of android.permission.READ_PHONE_STATE
+10-28 00:01:06.602  8901  8901 I MSDK    : [67][A.I][20261028 +0.0 00:01:06.602][8901,8901][,,0]:json in callJavaMethod:
+10-28 00:01:06.602  8901  8901 I MSDK    : [68][A.I][20261028 +0.0 00:01:06.602][8901,8901][MSDKMethodC2J,callJavaMethod,80]:functionName:getMSDKSVNcode
+10-28 00:01:06.602  8901  8901 I MSDK    : [69][A.I][20261028 +0.0 00:01:06.602][8901,8901][MSDKJniHelper,getMSDKVersion,301]:getMSDKVersion:3.2.17a
+10-28 00:01:06.602  8901  8901 I MSDK    : [70][A.I][20261028 +0.0 00:01:06.602][8901,8901][,,0]:ModuleManager log Init_ed MSDK version is:3.2.17a, SVN:96009
+10-28 00:01:06.602  8901  8901 I MSDK    : [ASSERT((null))][A.I][2026-10-28 +0.0 00:01:06.602][8901, 8901][msdk_config_tool.cpp, GetLogMode, 405] : isvalid = 0, mode = 1
+10-28 00:01:06.602  8901  8901 I MSDK    : [ASSERT((null))][A.I][2026-10-28 +0.0 00:01:06.602][8901, 8901][msdk_config_tool.cpp, GetLogMode, 405] : isvalid = 0, mode = 1
+10-28 00:01:06.602  8901  8901 I MSDK    : [71][A.I][20261028 +0.0 00:01:06.602][8901,8901][,,0]:MloggerWrapper level=4 mode=1, ConfigTool mode=7, expert realtime config mode=7
+10-28 00:01:06.611  8901  8901 I MSDK    : [72][A.I][20261028 +0.0 00:01:06.611][8901,8901][MSDKJniHelper,getFreeRamPercent,182]:total size 6094400KB free size 4551312KB free percent 74.68023%
+10-28 00:01:06.616  8901  8901 D WeGame DeviceInfo.getApn:  typeName:WIFI
+10-28 00:01:06.617  8901  8901 W System.err: java.lang.NumberFormatException: For input string: "3000000000"
+10-28 00:01:06.617  8901  8901 W System.err: 	at java.lang.Integer.parseInt(Integer.java:618)
+10-28 00:01:06.617  8901  8901 W System.err: 	at java.lang.Integer.parseInt(Integer.java:650)
+10-28 00:01:06.617  8901  8901 W System.err: 	at com.tencent.msdk.stat.DeviceInfo.getCpuInfo(DeviceInfo.java:344)
+10-28 00:01:06.617  8901  8901 W System.err: 	at com.tencent.msdk.framework.tools.MSDKJniHelper.getCPUType(MSDKJniHelper.java:193)
+10-28 00:01:06.617  8901  8901 W System.err: 	at com.tencent.msdk.api.refactor.MSDKInterfaceNative.init(Native Method)
+10-28 00:01:06.617  8901  8901 W System.err: 	at com.tencent.msdk.api.refactor.MSDKInterfaceImpl.Initialized(MSDKInterfaceImpl.java:74)
+10-28 00:01:06.617  8901  8901 W System.err: 	at com.tencent.msdk.api.WGPlatform.Initialized(WGPlatform.java:88)
+10-28 00:01:06.617  8901  8901 W System.err: 	at com.actgames.fci.AppDelegater.onCreate(AppDelegater.java:61)
+10-28 00:01:06.617  8901  8901 W System.err: 	at com.actgames.fci.MainActivity.onCreate(MainActivity.java:53)
+10-28 00:01:06.617  8901  8901 W System.err: 	at android.app.Activity.performCreate(Activity.java:7136)
+10-28 00:01:06.617  8901  8901 W System.err: 	at android.app.Activity.performCreate(Activity.java:7127)
+10-28 00:01:06.617  8901  8901 W System.err: 	at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1271)
+10-28 00:01:06.617  8901  8901 W System.err: 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2893)
+10-28 00:01:06.617  8901  8901 W System.err: 	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:3048)
+10-28 00:01:06.617  8901  8901 W System.err: 	at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:78)
+10-28 00:01:06.617  8901  8901 W System.err: 	at android.app.servertransaction.TransactionExecutor.executeCallbacks(TransactionExecutor.java:108)
+10-28 00:01:06.617  8901  8901 W System.err: 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:68)
+10-28 00:01:06.617  8901  8901 W System.err: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1808)
+10-28 00:01:06.617  8901  8901 W System.err: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+10-28 00:01:06.617  8901  8901 W System.err: 	at android.os.Looper.loop(Looper.java:193)
+10-28 00:01:06.617  8901  8901 W System.err: 	at android.app.ActivityThread.main(ActivityThread.java:6669)
+10-28 00:01:06.617  8901  8901 W System.err: 	at java.lang.reflect.Method.invoke(Native Method)
+10-28 00:01:06.617  8901  8901 W System.err: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+10-28 00:01:06.617  8901  8901 W System.err: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:858)
+10-28 00:01:06.655  8901  8945 I MID     : >>>   queryMatchContentProviders size:1
+10-28 00:01:06.655  8901  8945 D MID     : >>>   appPrivateMidMap size:0,content:
+10-28 00:01:06.661  8901  8936 W MtaSDK  : [StatService(526): null:115] - can not get the permission of android.permission.WRITE_EXTERNAL_STORAGE
+10-28 00:01:06.665  8901  8910 W System  : A resource failed to call close. 
+10-28 00:01:06.669  8901  8948 I MID     : >>>   queryMatchContentProviders size:1
+10-28 00:01:06.670  8901  8948 D MID     : >>>   appPrivateMidMap size:0,content:
+10-28 00:01:06.682  8901  8901 D WeGame DeviceInfo.getApn:  typeName:WIFI
+10-28 00:01:06.684  8901  8901 W System.err: java.lang.SecurityException: getSubscriberId
+10-28 00:01:06.684  8901  8901 W System.err: 	at android.os.Parcel.createException(Parcel.java:1950)
+10-28 00:01:06.684  8901  8901 W System.err: 	at android.os.Parcel.readException(Parcel.java:1918)
+10-28 00:01:06.684  8901  8901 W System.err: 	at android.os.Parcel.readException(Parcel.java:1868)
+10-28 00:01:06.684  8901  8901 W System.err: 	at com.android.internal.telephony.IPhoneSubInfo$Stub$Proxy.getSubscriberIdForSubscriber(IPhoneSubInfo.java:578)
+10-28 00:01:06.684  8901  8901 W System.err: 	at android.telephony.TelephonyManager.getSubscriberId(TelephonyManager.java:2881)
+10-28 00:01:06.684  8901  8901 W System.err: 	at android.telephony.TelephonyManager.getSubscriberId(TelephonyManager.java:2864)
+10-28 00:01:06.684  8901  8901 W System.err: 	at com.tencent.msdk.stat.DeviceInfo.getProvidersName(DeviceInfo.java:162)
+10-28 00:01:06.684  8901  8901 W System.err: 	at com.tencent.msdk.stat.DeviceInfo.getAllDeviceInfo(DeviceInfo.java:388)
+10-28 00:01:06.684  8901  8901 W System.err: 	at com.tencent.msdk.framework.tools.MSDKJniHelper.getDeciceInfoStr(MSDKJniHelper.java:421)
+10-28 00:01:06.684  8901  8901 W System.err: 	at com.tencent.msdk.api.refactor.MSDKInterfaceNative.init(Native Method)
+10-28 00:01:06.684  8901  8901 W System.err: 	at com.tencent.msdk.api.refactor.MSDKInterfaceImpl.Initialized(MSDKInterfaceImpl.java:74)
+10-28 00:01:06.684  8901  8901 W System.err: 	at com.tencent.msdk.api.WGPlatform.Initialized(WGPlatform.java:88)
+10-28 00:01:06.684  8901  8901 W System.err: 	at com.actgames.fci.AppDelegater.onCreate(AppDelegater.java:61)
+10-28 00:01:06.684  8901  8901 W System.err: 	at com.actgames.fci.MainActivity.onCreate(MainActivity.java:53)
+10-28 00:01:06.684  8901  8901 W System.err: 	at android.app.Activity.performCreate(Activity.java:7136)
+10-28 00:01:06.685  8901  8901 W System.err: 	at android.app.Activity.performCreate(Activity.java:7127)
+10-28 00:01:06.685  8901  8901 W System.err: 	at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1271)
+10-28 00:01:06.685  8901  8901 W System.err: 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2893)
+10-28 00:01:06.685  8901  8901 W System.err: 	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:3048)
+10-28 00:01:06.685  8901  8901 W System.err: 	at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:78)
+10-28 00:01:06.685  8901  8901 W System.err: 	at android.app.servertransaction.TransactionExecutor.executeCallbacks(TransactionExecutor.java:108)
+10-28 00:01:06.685  8901  8901 W System.err: 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:68)
+10-28 00:01:06.685  8901  8901 W System.err: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1808)
+10-28 00:01:06.685  8901  8901 W System.err: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+10-28 00:01:06.685  8901  8901 W System.err: 	at android.os.Looper.loop(Looper.java:193)
+10-28 00:01:06.685  8901  8901 W System.err: 	at android.app.ActivityThread.main(ActivityThread.java:6669)
+10-28 00:01:06.685  8901  8901 W System.err: 	at java.lang.reflect.Method.invoke(Native Method)
+10-28 00:01:06.685  8901  8901 W System.err: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+10-28 00:01:06.685  8901  8901 W System.err: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:858)
+10-28 00:01:06.685  8901  8901 W System.err: java.lang.NumberFormatException: For input string: "3000000000"
+10-28 00:01:06.685  8901  8901 W System.err: 	at java.lang.Integer.parseInt(Integer.java:618)
+10-28 00:01:06.685  8901  8901 W System.err: 	at java.lang.Integer.parseInt(Integer.java:650)
+10-28 00:01:06.685  8901  8901 W System.err: 	at com.tencent.msdk.stat.DeviceInfo.getCpuInfo(DeviceInfo.java:344)
+10-28 00:01:06.685  8901  8901 W System.err: 	at com.tencent.msdk.stat.DeviceInfo.getAllDeviceInfo(DeviceInfo.java:400)
+10-28 00:01:06.685  8901  8901 W System.err: 	at com.tencent.msdk.framework.tools.MSDKJniHelper.getDeciceInfoStr(MSDKJniHelper.java:421)
+10-28 00:01:06.685  8901  8901 W System.err: 	at com.tencent.msdk.api.refactor.MSDKInterfaceNative.init(Native Method)
+10-28 00:01:06.685  8901  8901 W System.err: 	at com.tencent.msdk.api.refactor.MSDKInterfaceImpl.Initialized(MSDKInterfaceImpl.java:74)
+10-28 00:01:06.685  8901  8901 W System.err: 	at com.tencent.msdk.api.WGPlatform.Initialized(WGPlatform.java:88)
+10-28 00:01:06.685  8901  8901 W System.err: 	at com.actgames.fci.AppDelegater.onCreate(AppDelegater.java:61)
+10-28 00:01:06.685  8901  8901 W System.err: 	at com.actgames.fci.MainActivity.onCreate(MainActivity.java:53)
+10-28 00:01:06.685  8901  8901 W System.err: 	at android.app.Activity.performCreate(Activity.java:7136)
+10-28 00:01:06.685  8901  8901 W System.err: 	at android.app.Activity.performCreate(Activity.java:7127)
+10-28 00:01:06.685  8901  8901 W System.err: 	at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1271)
+10-28 00:01:06.686  8901  8901 W System.err: 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2893)
+10-28 00:01:06.686  8901  8901 W System.err: 	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:3048)
+10-28 00:01:06.686  8901  8901 W System.err: 	at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:78)
+10-28 00:01:06.686  8901  8901 W System.err: 	at android.app.servertransaction.TransactionExecutor.executeCallbacks(TransactionExecutor.java:108)
+10-28 00:01:06.686  8901  8901 W System.err: 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:68)
+10-28 00:01:06.686  8901  8901 W System.err: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1808)
+10-28 00:01:06.686  8901  8901 W System.err: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+10-28 00:01:06.686  8901  8901 W System.err: 	at android.os.Looper.loop(Looper.java:193)
+10-28 00:01:06.686  8901  8901 W System.err: 	at android.app.ActivityThread.main(ActivityThread.java:6669)
+10-28 00:01:06.686  8901  8901 W System.err: 	at java.lang.reflect.Method.invoke(Native Method)
+10-28 00:01:06.686  8901  8901 W System.err: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+10-28 00:01:06.686  8901  8901 W System.err: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:858)
+10-28 00:01:06.709  8901  8942 E MtaSDK  : 
+10-28 00:01:06.709  8901  8942 E MtaSDK  : org.apache.http.conn.HttpHostConnectException: Connection to http://pingma.qq.com:80 refused
+10-28 00:01:06.709  8901  8942 E MtaSDK  : 	at org.apache.http.impl.conn.DefaultClientConnectionOperator.openConnection(DefaultClientConnectionOperator.java:193)
+10-28 00:01:06.709  8901  8942 E MtaSDK  : 	at org.apache.http.impl.conn.AbstractPoolEntry.open(AbstractPoolEntry.java:170)
+10-28 00:01:06.709  8901  8942 E MtaSDK  : 	at org.apache.http.impl.conn.AbstractPooledConnAdapter.open(AbstractPooledConnAdapter.java:124)
+10-28 00:01:06.709  8901  8942 E MtaSDK  : 	at org.apache.http.impl.client.DefaultRequestDirector.execute(DefaultRequestDirector.java:366)
+10-28 00:01:06.709  8901  8942 E MtaSDK  : 	at org.apache.http.impl.client.AbstractHttpClient.execute(AbstractHttpClient.java:560)
+10-28 00:01:06.709  8901  8942 E MtaSDK  : 	at org.apache.http.impl.client.AbstractHttpClient.execute(AbstractHttpClient.java:492)
+10-28 00:01:06.709  8901  8942 E MtaSDK  : 	at org.apache.http.impl.client.AbstractHttpClient.execute(AbstractHttpClient.java:470)
+10-28 00:01:06.709  8901  8942 E MtaSDK  : 	at com.tencent.stat.g.a(Unknown Source:426)
+10-28 00:01:06.709  8901  8942 E MtaSDK  : 	at com.tencent.stat.i.run(Unknown Source:6)
+10-28 00:01:06.709  8901  8942 E MtaSDK  : 	at android.os.Handler.handleCallback(Handler.java:873)
+10-28 00:01:06.709  8901  8942 E MtaSDK  : 	at android.os.Handler.dispatchMessage(Handler.java:99)
+10-28 00:01:06.709  8901  8942 E MtaSDK  : 	at android.os.Looper.loop(Looper.java:193)
+10-28 00:01:06.709  8901  8942 E MtaSDK  : 	at android.os.HandlerThread.run(HandlerThread.java:65)
+10-28 00:01:06.709  8901  8942 E MtaSDK  : Caused by: java.net.ConnectException: failed to connect to /0.0.0.1 (port 80) from /:: (port 0) after 10000ms: connect failed: EINVAL (Invalid argument)
+10-28 00:01:06.709  8901  8942 E MtaSDK  : 	at libcore.io.IoBridge.connect(IoBridge.java:137)
+10-28 00:01:06.709  8901  8942 E MtaSDK  : 	at java.net.PlainSocketImpl.socketConnect(PlainSocketImpl.java:137)
+10-28 00:01:06.709  8901  8942 E MtaSDK  : 	at java.net.AbstractPlainSocketImpl.doConnect(AbstractPlainSocketImpl.java:390)
+10-28 00:01:06.709  8901  8942 E MtaSDK  : 	at java.net.AbstractPlainSocketImpl.connectToAddress(AbstractPlainSocketImpl.java:230)
+10-28 00:01:06.709  8901  8942 E MtaSDK  : 	at java.net.AbstractPlainSocketImpl.connect(AbstractPlainSocketImpl.java:212)
+10-28 00:01:06.709  8901  8942 E MtaSDK  : 	at java.net.SocksSocketImpl.connect(SocksSocketImpl.java:436)
+10-28 00:01:06.709  8901  8942 E MtaSDK  : 	at java.net.Socket.connect(Socket.java:621)
+10-28 00:01:06.709  8901  8942 E MtaSDK  : 	at org.apache.http.conn.scheme.PlainSocketFactory.connectSocket(PlainSocketFactory.java:124)
+10-28 00:01:06.709  8901  8942 E MtaSDK  : 	at org.apache.http.impl.conn.DefaultClientConnectionOperator.openConnection(DefaultClientConnectionOperator.java:149)
+10-28 00:01:06.709  8901  8942 E MtaSDK  : 	... 12 more
+10-28 00:01:06.709  8901  8942 E MtaSDK  : Caused by: android.system.ErrnoException: connect failed: EINVAL (Invalid argument)
+10-28 00:01:06.709  8901  8942 E MtaSDK  : 	at libcore.io.Linux.connect(Native Method)
+10-28 00:01:06.709  8901  8942 E MtaSDK  : 	at libcore.io.BlockGuardOs.connect(BlockGuardOs.java:118)
+10-28 00:01:06.709  8901  8942 E MtaSDK  : 	at libcore.io.IoBridge.connectErrno(IoBridge.java:168)
+10-28 00:01:06.709  8901  8942 E MtaSDK  : 	at libcore.io.IoBridge.connect(IoBridge.java:129)
+10-28 00:01:06.709  8901  8942 E MtaSDK  : 	... 20 more
+10-28 00:01:06.726  8901  8953 I MID     : >>>   queryMatchContentProviders size:1
+10-28 00:01:06.726  8901  8953 D MID     : >>>   appPrivateMidMap size:0,content:
+10-28 00:01:06.761  8901  8957 I MID     : >>>   queryMatchContentProviders size:1
+10-28 00:01:06.761  8901  8957 D MID     : >>>   appPrivateMidMap size:0,content:
+10-28 00:01:06.763  8901  8901 D WeGame DeviceInfo.getApn:  typeName:WIFI
+10-28 00:01:06.764  8901  8901 W System.err: java.lang.SecurityException: getSubscriberId
+10-28 00:01:06.764  8901  8901 W System.err: 	at android.os.Parcel.createException(Parcel.java:1950)
+10-28 00:01:06.765  8901  8901 W System.err: 	at android.os.Parcel.readException(Parcel.java:1918)
+10-28 00:01:06.765  8901  8901 W System.err: 	at android.os.Parcel.readException(Parcel.java:1868)
+10-28 00:01:06.765  8901  8901 W System.err: 	at com.android.internal.telephony.IPhoneSubInfo$Stub$Proxy.getSubscriberIdForSubscriber(IPhoneSubInfo.java:578)
+10-28 00:01:06.765  8901  8901 W System.err: 	at android.telephony.TelephonyManager.getSubscriberId(TelephonyManager.java:2881)
+10-28 00:01:06.765  8901  8901 W System.err: 	at android.telephony.TelephonyManager.getSubscriberId(TelephonyManager.java:2864)
+10-28 00:01:06.765  8901  8901 W System.err: 	at com.tencent.msdk.stat.DeviceInfo.getProvidersName(DeviceInfo.java:162)
+10-28 00:01:06.765  8901  8901 W System.err: 	at com.tencent.msdk.stat.DeviceInfo.getAllDeviceInfo(DeviceInfo.java:388)
+10-28 00:01:06.765  8901  8901 W System.err: 	at com.tencent.msdk.framework.tools.MSDKJniHelper.getDeciceInfoStr(MSDKJniHelper.java:421)
+10-28 00:01:06.765  8901  8901 W System.err: 	at com.tencent.msdk.api.refactor.MSDKInterfaceNative.init(Native Method)
+10-28 00:01:06.765  8901  8901 W System.err: 	at com.tencent.msdk.api.refactor.MSDKInterfaceImpl.Initialized(MSDKInterfaceImpl.java:74)
+10-28 00:01:06.765  8901  8901 W System.err: 	at com.tencent.msdk.api.WGPlatform.Initialized(WGPlatform.java:88)
+10-28 00:01:06.765  8901  8901 W System.err: 	at com.actgames.fci.AppDelegater.onCreate(AppDelegater.java:61)
+10-28 00:01:06.765  8901  8901 W System.err: 	at com.actgames.fci.MainActivity.onCreate(MainActivity.java:53)
+10-28 00:01:06.765  8901  8901 W System.err: 	at android.app.Activity.performCreate(Activity.java:7136)
+10-28 00:01:06.765  8901  8901 W System.err: 	at android.app.Activity.performCreate(Activity.java:7127)
+10-28 00:01:06.765  8901  8901 W System.err: 	at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1271)
+10-28 00:01:06.765  8901  8901 W System.err: 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2893)
+10-28 00:01:06.765  8901  8901 W System.err: 	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:3048)
+10-28 00:01:06.765  8901  8901 W System.err: 	at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:78)
+10-28 00:01:06.765  8901  8901 W System.err: 	at android.app.servertransaction.TransactionExecutor.executeCallbacks(TransactionExecutor.java:108)
+10-28 00:01:06.765  8901  8901 W System.err: 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:68)
+10-28 00:01:06.765  8901  8901 W System.err: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1808)
+10-28 00:01:06.765  8901  8901 W System.err: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+10-28 00:01:06.765  8901  8901 W System.err: 	at android.os.Looper.loop(Looper.java:193)
+10-28 00:01:06.765  8901  8901 W System.err: 	at android.app.ActivityThread.main(ActivityThread.java:6669)
+10-28 00:01:06.765  8901  8901 W System.err: 	at java.lang.reflect.Method.invoke(Native Method)
+10-28 00:01:06.765  8901  8901 W System.err: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+10-28 00:01:06.765  8901  8901 W System.err: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:858)
+10-28 00:01:06.765  8901  8901 W System.err: java.lang.NumberFormatException: For input string: "3000000000"
+10-28 00:01:06.765  8901  8901 W System.err: 	at java.lang.Integer.parseInt(Integer.java:618)
+10-28 00:01:06.765  8901  8901 W System.err: 	at java.lang.Integer.parseInt(Integer.java:650)
+10-28 00:01:06.765  8901  8901 W System.err: 	at com.tencent.msdk.stat.DeviceInfo.getCpuInfo(DeviceInfo.java:344)
+10-28 00:01:06.765  8901  8901 W System.err: 	at com.tencent.msdk.stat.DeviceInfo.getAllDeviceInfo(DeviceInfo.java:400)
+10-28 00:01:06.765  8901  8901 W System.err: 	at com.tencent.msdk.framework.tools.MSDKJniHelper.getDeciceInfoStr(MSDKJniHelper.java:421)
+10-28 00:01:06.765  8901  8901 W System.err: 	at com.tencent.msdk.api.refactor.MSDKInterfaceNative.init(Native Method)
+10-28 00:01:06.765  8901  8901 W System.err: 	at com.tencent.msdk.api.refactor.MSDKInterfaceImpl.Initialized(MSDKInterfaceImpl.java:74)
+10-28 00:01:06.766  8901  8901 W System.err: 	at com.tencent.msdk.api.WGPlatform.Initialized(WGPlatform.java:88)
+10-28 00:01:06.766  8901  8901 W System.err: 	at com.actgames.fci.AppDelegater.onCreate(AppDelegater.java:61)
+10-28 00:01:06.766  8901  8901 W System.err: 	at com.actgames.fci.MainActivity.onCreate(MainActivity.java:53)
+10-28 00:01:06.766  8901  8901 W System.err: 	at android.app.Activity.performCreate(Activity.java:7136)
+10-28 00:01:06.766  8901  8901 W System.err: 	at android.app.Activity.performCreate(Activity.java:7127)
+10-28 00:01:06.766  8901  8901 W System.err: 	at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1271)
+10-28 00:01:06.766  8901  8901 W System.err: 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2893)
+10-28 00:01:06.766  8901  8901 W System.err: 	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:3048)
+10-28 00:01:06.766  8901  8901 W System.err: 	at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:78)
+10-28 00:01:06.766  8901  8901 W System.err: 	at android.app.servertransaction.TransactionExecutor.executeCallbacks(TransactionExecutor.java:108)
+10-28 00:01:06.766  8901  8901 W System.err: 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:68)
+10-28 00:01:06.766  8901  8901 W System.err: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1808)
+10-28 00:01:06.766  8901  8901 W System.err: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+10-28 00:01:06.766  8901  8901 W System.err: 	at android.os.Looper.loop(Looper.java:193)
+10-28 00:01:06.766  8901  8901 W System.err: 	at android.app.ActivityThread.main(ActivityThread.java:6669)
+10-28 00:01:06.766  8901  8901 W System.err: 	at java.lang.reflect.Method.invoke(Native Method)
+10-28 00:01:06.766  8901  8901 W System.err: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+10-28 00:01:06.766  8901  8901 W System.err: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:858)
+10-28 00:01:06.771  8901  8910 W System  : A resource failed to call close. 
+10-28 00:01:06.771  8901  8910 W System  : A resource failed to call close. 
+10-28 00:01:06.781  8901  8959 I MID     : >>>   queryMatchContentProviders size:1
+10-28 00:01:06.781  8901  8959 D MID     : >>>   appPrivateMidMap size:0,content:
+10-28 00:01:06.817  1771  1771 I Zygote  : Process 8901 exited cleanly (4)
+10-28 00:01:06.820  1926  3979 I ActivityManager: Process com.tencent.tmgp.fcicv (pid 8901) has died: fore TOP 
+10-28 00:01:06.820  1926  1944 W libprocessgroup: kill(-8901, 9) failed: No such process
+10-28 00:01:06.820  1926  1944 I libprocessgroup: Successfully killed process cgroup uid 10085 pid 8901 in 0ms
+10-28 00:01:06.827  8964  8964 W cent.tmgp.fcic: Unexpected CPU variant for X86 using defaults: x86
+10-28 00:01:06.834  1926  1943 I ActivityManager: Start proc 8964:com.tencent.tmgp.fcicv/u0a85 for activity com.tencent.tmgp.fcicv/com.actgames.fci.MainActivity
+10-28 00:01:06.840  8964  8964 I cent.tmgp.fcic: The ClassLoaderContext is a special shared library.
+10-28 00:01:06.972  8964  8964 I TpnsSecurity: JNI_OnLoad
+10-28 00:01:06.991  8964  8964 W Unity   : Failed to get permission info for android.permission.RECEIVE_USER_PRESENT, manifest likely missing custom permission declaration
+10-28 00:01:06.991  8964  8964 W Unity   : Permission android.permission.RECEIVE_USER_PRESENT ignored
+10-28 00:01:07.137  8964  8964 D OpenGLRenderer: HWUI GL Pipeline
+10-28 00:01:07.167  8964  8964 D CrashReport: Bugly has been disabled in this device
+10-28 00:01:07.151  8964  8964 W cent.tmgp.fcicv: type=1400 audit(0.0:93): avc: denied { read } for name="anr" dev="dm-1" ino=237569 scontext=u:r:untrusted_app_25:s0:c512,c768 tcontext=u:object_r:anr_data_file:s0 tclass=dir permissive=0
+10-28 00:01:07.193  8964  8964 I MSDK    : [1][A.I][20261028 +0.0 00:01:07.193][8964,8964][,,0]:UMSDK JNI_OnLoad for MSDK init
+10-28 00:01:07.193  8964  8964 I MSDK    : [2][A.I][20261028 +0.0 00:01:07.193][8964,8964][,,0]:MSDKJNI init pthread_key
+10-28 00:01:07.198  8964  8964 D WeGame  cpp:  MSDKAdapter JNI_OnLoad
+10-28 00:01:07.198  8964  8964 D MSDK    : MSDK try to load libMSDKSystem.so
+10-28 00:01:07.198  8964  8964 D MSDK    : MSDK try to load libMSDKSystem.so
+10-28 00:01:07.198  8964  8964 I MSDK    : [3][A.I][20261028 +0.0 00:01:07.198][8964,8964][MSDKLifecycleManager,init,39]:Lifecycle first registerActivityLifecycleCallbacks
+10-28 00:01:07.198  8964  8964 D WeGame Router.loadConfig:  loadConfig
+10-28 00:01:07.200  8964  8964 I MSDK    : [4][A.I][20261028 +0.0 00:01:07.200][8964,8964][SettingDBHelper,get,15]:Get MSDKCloudConfig.log.level from SettingTable is 
+10-28 00:01:07.200  8964  8964 I MSDK    : [5][A.I][20261028 +0.0 00:01:07.200][8964,8964][SettingDBHelper,get,15]:Get MSDKCloudConfig.log.mode from SettingTable is 
+10-28 00:01:07.200  8964  8964 I MSDK    : [ASSERT((null))][A.I][2026-10-28 +0.0 00:01:07.200][8964, 8964][msdk_cloud_config_tool.cpp, LoadDBData, 262] : log_level_ = , log_mode_ = 
+10-28 00:01:07.200  8964  8964 I MSDK    : [ASSERT((null))][A.I][2026-10-28 +0.0 00:01:07.200][8964, 8964][msdk_cloud_config_tool.cpp, LoadDBData, 274] : load CS_LOG_LEVEL,CS_LOG_MODE is empty, (level, mode):(, )
+10-28 00:01:07.200  8964  8964 I MSDK    : [6][A.I][20261028 +0.0 00:01:07.200][8964,8964][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.notice_switch from SettingTable is 
+10-28 00:01:07.200  8964  8964 I MSDK    : [7][A.I][20261028 +0.0 00:01:07.200][8964,8964][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.xg_open_switch from SettingTable is 
+10-28 00:01:07.201  8964  8964 I MSDK    : [8][A.I][20261028 +0.0 00:01:07.201][8964,8964][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.stat_open_switch from SettingTable is 
+10-28 00:01:07.201  8964  8964 I MSDK    : [9][A.I][20261028 +0.0 00:01:07.201][8964,8964][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.bugly_open_switch from SettingTable is 
+10-28 00:01:07.201  8964  8964 I MSDK    : [10][A.I][20261028 +0.0 00:01:07.201][8964,8964][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.yyb_update_switch from SettingTable is 
+10-28 00:01:07.202  8964  8964 I MSDK    : [11][A.I][20261028 +0.0 00:01:07.202][8964,8964][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.msdk_url from SettingTable is 
+10-28 00:01:07.202  8964  8964 I MSDK    : [12][A.I][20261028 +0.0 00:01:07.202][8964,8964][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.gray_test_switch from SettingTable is 
+10-28 00:01:07.202  8964  8964 I MSDK    : [13][A.I][20261028 +0.0 00:01:07.202][8964,8964][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.real_name_auth_switch from SettingTable is 
+10-28 00:01:07.202  8964  8964 I MSDK    : [14][A.I][20261028 +0.0 00:01:07.202][8964,8964][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.beta_switch from SettingTable is 
+10-28 00:01:07.203  8964  8964 I MSDK    : [15][A.I][20261028 +0.0 00:01:07.203][8964,8964][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.wxtoken_refresh from SettingTable is 
+10-28 00:01:07.203  8964  8964 I MSDK    : [16][A.I][20261028 +0.0 00:01:07.203][8964,8964][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.kill_webview_process from SettingTable is 
+10-28 00:01:07.203  8964  8964 I MSDK    : [17][A.I][20261028 +0.0 00:01:07.203][8964,8964][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.event_report_switch from SettingTable is 
+10-28 00:01:07.203  8964  8964 I MSDK    : [18][A.I][20261028 +0.0 00:01:07.203][8964,8964][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.report_ip_switch from SettingTable is 
+10-28 00:01:07.204  8964  8964 I MSDK    : [19][A.I][20261028 +0.0 00:01:07.204][8964,8964][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.cpp_msdk_version from SettingTable is 
+10-28 00:01:07.204  8964  8964 I MSDK    : [20][A.I][20261028 +0.0 00:01:07.204][8964,8964][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.webview_close_x5 from SettingTable is 
+10-28 00:01:07.204  8964  8964 I MSDK    : [21][A.I][20261028 +0.0 00:01:07.204][8964,8964][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.httpdns_switch from SettingTable is 
+10-28 00:01:07.204  8964  8964 I MSDK    : [22][A.I][20261028 +0.0 00:01:07.204][8964,8964][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.use_single_thread_mode from SettingTable is 
+10-28 00:01:07.204  8964  8964 I MSDK    : [ASSERT((null))][A.I][2026-10-28 +0.0 00:01:07.204][8964, 8964][msdk_cloud_config_tool.cpp, LoadDBData, 727] : [LoadDBData]notice_switch_ = , xg_open_switch_ = , stat_open_switch_ = , need_autotest_ = , auto_test_apkurl_ = , cpp_msdk_version_ = , single_thread_switch_ =  
+10-28 00:01:07.205  8964  8964 I MSDK    : [23][A.I][20261028 +0.0 00:01:07.205][8964,8964][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.k1 from SettingTable is 
+10-28 00:01:07.205  8964  8964 I MSDK    : [24][A.I][20261028 +0.0 00:01:07.205][8964,8964][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.k2 from SettingTable is 
+10-28 00:01:07.205  8964  8964 I MSDK    : [25][A.I][20261028 +0.0 00:01:07.205][8964,8964][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.k3 from SettingTable is 
+10-28 00:01:07.205  8964  8964 I MSDK    : [26][A.I][20261028 +0.0 00:01:07.205][8964,8964][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.k4 from SettingTable is 
+10-28 00:01:07.206  8964  8964 I MSDK    : [27][A.I][20261028 +0.0 00:01:07.206][8964,8964][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.k5 from SettingTable is 
+10-28 00:01:07.206  8964  8964 I MSDK    : [28][A.I][20261028 +0.0 00:01:07.206][8964,8964][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.k6 from SettingTable is 
+10-28 00:01:07.206  8964  8964 I MSDK    : [29][A.I][20261028 +0.0 00:01:07.206][8964,8964][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.k7 from SettingTable is 
+10-28 00:01:07.206  8964  8964 I MSDK    : [30][A.I][20261028 +0.0 00:01:07.206][8964,8964][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.k8 from SettingTable is 
+10-28 00:01:07.207  8964  8964 I MSDK    : [31][A.I][20261028 +0.0 00:01:07.207][8964,8964][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.k9 from SettingTable is 
+10-28 00:01:07.207  8964  8964 I MSDK    : [32][A.I][20261028 +0.0 00:01:07.207][8964,8964][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.k10 from SettingTable is 
+10-28 00:01:07.207  8964  8964 I MSDK    : [ASSERT((null))][A.I][2026-10-28 +0.0 00:01:07.207][8964, 8964][msdk_cloud_config_tool.cpp, LoadDBData, 752] : [LoadDBData] k1_ = , k2_ = ,k3_ = , k4_ = , k5_ = , k6_ = , k7_ = , k8_ = , k9_ = , k10_ =  
+10-28 00:01:07.208  8964  8964 I MSDK    : [33][A.I][20261028 +0.0 00:01:07.208][8964,8964][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.log.level from SettingTable is 0
+10-28 00:01:07.208  8964  8964 I MSDK    : [34][A.I][20261028 +0.0 00:01:07.208][8964,8964][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.log.mode from SettingTable is 0
+10-28 00:01:07.208  8964  8964 I MSDK    : [35][A.I][20261028 +0.0 00:01:07.208][8964,8964][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.notice_switch from SettingTable is 0
+10-28 00:01:07.208  8964  8964 I MSDK    : [36][A.I][20261028 +0.0 00:01:07.208][8964,8964][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.xg_open_switch from SettingTable is 0
+10-28 00:01:07.208  8964  8964 I MSDK    : [37][A.I][20261028 +0.0 00:01:07.208][8964,8964][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.stat_open_switch from SettingTable is 0
+10-28 00:01:07.208  8964  8964 I MSDK    : [38][A.I][20261028 +0.0 00:01:07.208][8964,8964][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.bugly_open_switch from SettingTable is 0
+10-28 00:01:07.209  8964  8964 I MSDK    : [39][A.I][20261028 +0.0 00:01:07.209][8964,8964][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.yyb_update_switch from SettingTable is 0
+10-28 00:01:07.209  8964  8964 I MSDK    : [40][A.I][20261028 +0.0 00:01:07.209][8964,8964][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.msdk_url from SettingTable is 0
+10-28 00:01:07.209  8964  8964 I MSDK    : [41][A.I][20261028 +0.0 00:01:07.209][8964,8964][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.gray_test_switch from SettingTable is 0
+10-28 00:01:07.209  8964  8964 I MSDK    : [42][A.I][20261028 +0.0 00:01:07.209][8964,8964][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.real_name_auth_switch from SettingTable is 0
+10-28 00:01:07.209  8964  8964 I MSDK    : [43][A.I][20261028 +0.0 00:01:07.209][8964,8964][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.beta_switch from SettingTable is 0
+10-28 00:01:07.209  8964  8964 I MSDK    : [44][A.I][20261028 +0.0 00:01:07.209][8964,8964][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.wxtoken_refresh from SettingTable is 0
+10-28 00:01:07.209  8964  8964 I MSDK    : [45][A.I][20261028 +0.0 00:01:07.209][8964,8964][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.kill_webview_process from SettingTable is 0
+10-28 00:01:07.210  8964  8964 I MSDK    : [46][A.I][20261028 +0.0 00:01:07.210][8964,8964][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.event_report_switch from SettingTable is 0
+10-28 00:01:07.210  8964  8964 I MSDK    : [47][A.I][20261028 +0.0 00:01:07.210][8964,8964][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.report_ip_switch from SettingTable is 0
+10-28 00:01:07.210  8964  8964 I MSDK    : [48][A.I][20261028 +0.0 00:01:07.210][8964,8964][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.need_auto_test from SettingTable is 0
+10-28 00:01:07.210  8964  8964 I MSDK    : [49][A.I][20261028 +0.0 00:01:07.210][8964,8964][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.auto_test_apkurl from SettingTable is 0
+10-28 00:01:07.210  8964  8964 I MSDK    : [50][A.I][20261028 +0.0 00:01:07.210][8964,8964][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.cpp_msdk_version from SettingTable is 0
+10-28 00:01:07.210  8964  8964 I MSDK    : [51][A.I][20261028 +0.0 00:01:07.210][8964,8964][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.webview_close_x5 from SettingTable is 0
+10-28 00:01:07.210  8964  8964 I MSDK    : [52][A.I][20261028 +0.0 00:01:07.210][8964,8964][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.httpdns_switch from SettingTable is 0
+10-28 00:01:07.211  8964  8964 I MSDK    : [53][A.I][20261028 +0.0 00:01:07.211][8964,8964][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.use_single_thread_mode from SettingTable is 0
+10-28 00:01:07.211  8964  8964 I MSDK    : [54][A.I][20261028 +0.0 00:01:07.211][8964,8964][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.k1 from SettingTable is 0
+10-28 00:01:07.211  8964  8964 I MSDK    : [55][A.I][20261028 +0.0 00:01:07.211][8964,8964][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.k2 from SettingTable is 0
+10-28 00:01:07.211  8964  8964 I MSDK    : [56][A.I][20261028 +0.0 00:01:07.211][8964,8964][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.k3 from SettingTable is 0
+10-28 00:01:07.211  8964  8964 I MSDK    : [57][A.I][20261028 +0.0 00:01:07.211][8964,8964][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.k4 from SettingTable is 0
+10-28 00:01:07.211  8964  8964 I MSDK    : [58][A.I][20261028 +0.0 00:01:07.211][8964,8964][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.k5 from SettingTable is 0
+10-28 00:01:07.211  8964  8964 I MSDK    : [59][A.I][20261028 +0.0 00:01:07.211][8964,8964][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.k6 from SettingTable is 0
+10-28 00:01:07.212  8964  8964 I MSDK    : [60][A.I][20261028 +0.0 00:01:07.212][8964,8964][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.k7 from SettingTable is 0
+10-28 00:01:07.212  8964  8964 I MSDK    : [61][A.I][20261028 +0.0 00:01:07.212][8964,8964][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.k8 from SettingTable is 0
+10-28 00:01:07.212  8964  8964 I MSDK    : [62][A.I][20261028 +0.0 00:01:07.212][8964,8964][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.k9 from SettingTable is 0
+10-28 00:01:07.212  8964  8964 I MSDK    : [63][A.I][20261028 +0.0 00:01:07.212][8964,8964][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.k10 from SettingTable is 0
+10-28 00:01:07.212  8964  8964 I MSDK    : [64][A.I][20261028 +0.0 00:01:07.212][8964,8964][,,0]:LoadConfig run_cpp_code_:true
+10-28 00:01:07.213  8964  8964 D WeGame Router.loadConfig:  [loadConfig]runCppCode: true
+10-28 00:01:07.213  8964  8964 D WeGame Router.init:  runCppCode: true
+10-28 00:01:07.214  8964  8964 I MSDK    : [65][A.I][20261028 +0.0 00:01:07.214][8964,8964][MSDKInterfaceImpl,Initialized,61]:Initialized start
+10-28 00:01:07.217  8964  8964 W SoundPool: Use of stream types is deprecated for operations other than volume control
+10-28 00:01:07.217  8964  8964 W SoundPool: See the documentation of SoundPool() for what to use instead with android.media.AudioAttributes to qualify your playback use case
+10-28 00:01:07.218  8964  8964 D MicroMsg.PaySdk.WXFactory: createWXAPI, appId = wx687f4629ba7c3086, checkSignature = false
+10-28 00:01:07.218  8964  8964 D MicroMsg.SDK.WXApiImplV10: <init>, appId = wx687f4629ba7c3086, checkSignature = false
+10-28 00:01:07.218  8964  8964 D MicroMsg.SDK.WXMsgImplComm: ignore wechat app signature validation
+10-28 00:01:07.218  8964  8964 D MicroMsg.SDK.WXApiImplV10: registerApp, appId = wx687f4629ba7c3086
+10-28 00:01:07.218  8964  8964 D MicroMsg.SDK.WXApiImplV10: registerApp, appId = wx687f4629ba7c3086
+10-28 00:01:07.218  8964  8964 D MicroMsg.SDK.WXApiImplV10: register app com.tencent.tmgp.fcicv
+10-28 00:01:07.219  8964  8964 D MicroMsg.SDK.MMessage: send mm message, intent=Intent { act=com.tencent.mm.plugin.openapi.Intent.ACTION_HANDLE_APP_REGISTER (has extras) }, perm=com.tencent.mm.permission.MM_MESSAGE
+10-28 00:01:07.221  8964  8964 E openSDK_LOG: com.tencent.tmgp.fcicv SDK_VERSION:3.3.0.lite
+10-28 00:01:07.221  8964  8964 I openSDK_LOG.Tencent: createInstance()  -- start, appId = 1106429722
+10-28 00:01:07.221  8964  8964 I openSDK_LOG.QQAuth: QQAuth -- createInstance() --start
+10-28 00:01:07.222  8964  8964 I openSDK_LOG.QQAuth: new QQAuth() --start
+10-28 00:01:07.222  8964  8964 I openSDK_LOG.AuthAgent: is x86 architecture
+10-28 00:01:07.226  8964  8998 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+10-28 00:01:07.227  8964  8964 I openSDK_LOG.QQAuth: new QQAuth() --end
+10-28 00:01:07.227  8964  8964 I openSDK_LOG.QQAuth: QQAuth -- createInstance()  --end
+10-28 00:01:07.227  8964  8964 I openSDK_LOG.Tencent: createInstance()  -- end
+10-28 00:01:07.228  8964  8964 I MSDK    : [66][A.I][20261028 +0.0 00:01:07.227][8964,8964][MSDKMethodC2J,init,29]:mainActivity is com.actgames.fci.MainActivity@3dff180
+10-28 00:01:07.228  8964  8964 I MSDK    : [ASSERT((null))][A.I][2026-10-28 +0.0 00:01:07.228][8964, 8964][msdk_cpp_interface.cpp, Init, 62] : Into Init
+10-28 00:01:07.271  8964  9003 I MID     : >>>   queryMatchContentProviders size:1
+10-28 00:01:07.271  8964  9003 D MID     : >>>   appPrivateMidMap size:0,content:
+10-28 00:01:07.312  8964  9000 E MtaSDK  : Could not get permission of android.permission.READ_PHONE_STATE
+10-28 00:01:07.321  8964  8964 I MSDK    : [67][A.I][20261028 +0.0 00:01:07.321][8964,8964][,,0]:json in callJavaMethod:
+10-28 00:01:07.321  8964  8964 I MSDK    : [68][A.I][20261028 +0.0 00:01:07.321][8964,8964][MSDKMethodC2J,callJavaMethod,80]:functionName:getMSDKSVNcode
+10-28 00:01:07.322  8964  8964 I MSDK    : [69][A.I][20261028 +0.0 00:01:07.322][8964,8964][MSDKJniHelper,getMSDKVersion,301]:getMSDKVersion:3.2.17a
+10-28 00:01:07.322  8964  8964 I MSDK    : [70][A.I][20261028 +0.0 00:01:07.322][8964,8964][,,0]:ModuleManager log Init_ed MSDK version is:3.2.17a, SVN:96009
+10-28 00:01:07.322  8964  8964 I MSDK    : [ASSERT((null))][A.I][2026-10-28 +0.0 00:01:07.322][8964, 8964][msdk_config_tool.cpp, GetLogMode, 405] : isvalid = 0, mode = 1
+10-28 00:01:07.322  8964  8964 I MSDK    : [ASSERT((null))][A.I][2026-10-28 +0.0 00:01:07.322][8964, 8964][msdk_config_tool.cpp, GetLogMode, 405] : isvalid = 0, mode = 1
+10-28 00:01:07.322  8964  8964 I MSDK    : [71][A.I][20261028 +0.0 00:01:07.322][8964,8964][,,0]:MloggerWrapper level=4 mode=1, ConfigTool mode=7, expert realtime config mode=7
+10-28 00:01:07.323  8964  8964 I MSDK    : [72][A.I][20261028 +0.0 00:01:07.323][8964,8964][MSDKJniHelper,getFreeRamPercent,182]:total size 6094400KB free size 4551312KB free percent 74.68023%
+10-28 00:01:07.326  8964  8964 D WeGame DeviceInfo.getApn:  typeName:WIFI
+10-28 00:01:07.326  8964  8964 W System.err: java.lang.NumberFormatException: For input string: "3000000000"
+10-28 00:01:07.326  8964  8964 W System.err: 	at java.lang.Integer.parseInt(Integer.java:618)
+10-28 00:01:07.326  8964  8964 W System.err: 	at java.lang.Integer.parseInt(Integer.java:650)
+10-28 00:01:07.326  8964  8964 W System.err: 	at com.tencent.msdk.stat.DeviceInfo.getCpuInfo(DeviceInfo.java:344)
+10-28 00:01:07.326  8964  8964 W System.err: 	at com.tencent.msdk.framework.tools.MSDKJniHelper.getCPUType(MSDKJniHelper.java:193)
+10-28 00:01:07.326  8964  8964 W System.err: 	at com.tencent.msdk.api.refactor.MSDKInterfaceNative.init(Native Method)
+10-28 00:01:07.326  8964  8964 W System.err: 	at com.tencent.msdk.api.refactor.MSDKInterfaceImpl.Initialized(MSDKInterfaceImpl.java:74)
+10-28 00:01:07.326  8964  8964 W System.err: 	at com.tencent.msdk.api.WGPlatform.Initialized(WGPlatform.java:88)
+10-28 00:01:07.326  8964  8964 W System.err: 	at com.actgames.fci.AppDelegater.onCreate(AppDelegater.java:61)
+10-28 00:01:07.326  8964  8964 W System.err: 	at com.actgames.fci.MainActivity.onCreate(MainActivity.java:53)
+10-28 00:01:07.326  8964  8964 W System.err: 	at android.app.Activity.performCreate(Activity.java:7136)
+10-28 00:01:07.326  8964  8964 W System.err: 	at android.app.Activity.performCreate(Activity.java:7127)
+10-28 00:01:07.326  8964  8964 W System.err: 	at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1271)
+10-28 00:01:07.326  8964  8964 W System.err: 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2893)
+10-28 00:01:07.326  8964  8964 W System.err: 	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:3048)
+10-28 00:01:07.326  8964  8964 W System.err: 	at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:78)
+10-28 00:01:07.326  8964  8964 W System.err: 	at android.app.servertransaction.TransactionExecutor.executeCallbacks(TransactionExecutor.java:108)
+10-28 00:01:07.326  8964  8964 W System.err: 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:68)
+10-28 00:01:07.326  8964  8964 W System.err: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1808)
+10-28 00:01:07.326  8964  8964 W System.err: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+10-28 00:01:07.326  8964  8964 W System.err: 	at android.os.Looper.loop(Looper.java:193)
+10-28 00:01:07.326  8964  8964 W System.err: 	at android.app.ActivityThread.main(ActivityThread.java:6669)
+10-28 00:01:07.326  8964  8964 W System.err: 	at java.lang.reflect.Method.invoke(Native Method)
+10-28 00:01:07.326  8964  8964 W System.err: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+10-28 00:01:07.326  8964  8964 W System.err: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:858)
+10-28 00:01:07.369  8964  8973 W System  : A resource failed to call close. 
+10-28 00:01:07.372  8964  9009 I MID     : >>>   queryMatchContentProviders size:1
+10-28 00:01:07.372  8964  9009 D MID     : >>>   appPrivateMidMap size:0,content:
+10-28 00:01:07.375  8964  9000 W MtaSDK  : [StatService(531): null:115] - can not get the permission of android.permission.WRITE_EXTERNAL_STORAGE
+10-28 00:01:07.394  8964  9012 I MID     : >>>   queryMatchContentProviders size:1
+10-28 00:01:07.394  8964  9012 D MID     : >>>   appPrivateMidMap size:0,content:
+10-28 00:01:07.397  8964  8964 D WeGame DeviceInfo.getApn:  typeName:WIFI
+10-28 00:01:07.399  8964  8964 W System.err: java.lang.SecurityException: getSubscriberId
+10-28 00:01:07.399  8964  8964 W System.err: 	at android.os.Parcel.createException(Parcel.java:1950)
+10-28 00:01:07.399  8964  8964 W System.err: 	at android.os.Parcel.readException(Parcel.java:1918)
+10-28 00:01:07.399  8964  8964 W System.err: 	at android.os.Parcel.readException(Parcel.java:1868)
+10-28 00:01:07.399  8964  8964 W System.err: 	at com.android.internal.telephony.IPhoneSubInfo$Stub$Proxy.getSubscriberIdForSubscriber(IPhoneSubInfo.java:578)
+10-28 00:01:07.399  8964  8964 W System.err: 	at android.telephony.TelephonyManager.getSubscriberId(TelephonyManager.java:2881)
+10-28 00:01:07.399  8964  8964 W System.err: 	at android.telephony.TelephonyManager.getSubscriberId(TelephonyManager.java:2864)
+10-28 00:01:07.399  8964  8964 W System.err: 	at com.tencent.msdk.stat.DeviceInfo.getProvidersName(DeviceInfo.java:162)
+10-28 00:01:07.399  8964  8964 W System.err: 	at com.tencent.msdk.stat.DeviceInfo.getAllDeviceInfo(DeviceInfo.java:388)
+10-28 00:01:07.399  8964  8964 W System.err: 	at com.tencent.msdk.framework.tools.MSDKJniHelper.getDeciceInfoStr(MSDKJniHelper.java:421)
+10-28 00:01:07.399  8964  8964 W System.err: 	at com.tencent.msdk.api.refactor.MSDKInterfaceNative.init(Native Method)
+10-28 00:01:07.400  8964  8964 W System.err: 	at com.tencent.msdk.api.refactor.MSDKInterfaceImpl.Initialized(MSDKInterfaceImpl.java:74)
+10-28 00:01:07.400  8964  8964 W System.err: 	at com.tencent.msdk.api.WGPlatform.Initialized(WGPlatform.java:88)
+10-28 00:01:07.400  8964  8964 W System.err: 	at com.actgames.fci.AppDelegater.onCreate(AppDelegater.java:61)
+10-28 00:01:07.400  8964  8964 W System.err: 	at com.actgames.fci.MainActivity.onCreate(MainActivity.java:53)
+10-28 00:01:07.400  8964  8964 W System.err: 	at android.app.Activity.performCreate(Activity.java:7136)
+10-28 00:01:07.400  8964  8964 W System.err: 	at android.app.Activity.performCreate(Activity.java:7127)
+10-28 00:01:07.400  8964  8964 W System.err: 	at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1271)
+10-28 00:01:07.400  8964  8964 W System.err: 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2893)
+10-28 00:01:07.400  8964  8964 W System.err: 	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:3048)
+10-28 00:01:07.400  8964  8964 W System.err: 	at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:78)
+10-28 00:01:07.400  8964  8964 W System.err: 	at android.app.servertransaction.TransactionExecutor.executeCallbacks(TransactionExecutor.java:108)
+10-28 00:01:07.400  8964  8964 W System.err: 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:68)
+10-28 00:01:07.400  8964  8964 W System.err: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1808)
+10-28 00:01:07.400  8964  8964 W System.err: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+10-28 00:01:07.400  8964  8964 W System.err: 	at android.os.Looper.loop(Looper.java:193)
+10-28 00:01:07.400  8964  8964 W System.err: 	at android.app.ActivityThread.main(ActivityThread.java:6669)
+10-28 00:01:07.400  8964  8964 W System.err: 	at java.lang.reflect.Method.invoke(Native Method)
+10-28 00:01:07.400  8964  8964 W System.err: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+10-28 00:01:07.400  8964  8964 W System.err: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:858)
+10-28 00:01:07.400  8964  8964 W System.err: java.lang.NumberFormatException: For input string: "3000000000"
+10-28 00:01:07.400  8964  8964 W System.err: 	at java.lang.Integer.parseInt(Integer.java:618)
+10-28 00:01:07.400  8964  8964 W System.err: 	at java.lang.Integer.parseInt(Integer.java:650)
+10-28 00:01:07.400  8964  8964 W System.err: 	at com.tencent.msdk.stat.DeviceInfo.getCpuInfo(DeviceInfo.java:344)
+10-28 00:01:07.400  8964  8964 W System.err: 	at com.tencent.msdk.stat.DeviceInfo.getAllDeviceInfo(DeviceInfo.java:400)
+10-28 00:01:07.400  8964  8964 W System.err: 	at com.tencent.msdk.framework.tools.MSDKJniHelper.getDeciceInfoStr(MSDKJniHelper.java:421)
+10-28 00:01:07.400  8964  8964 W System.err: 	at com.tencent.msdk.api.refactor.MSDKInterfaceNative.init(Native Method)
+10-28 00:01:07.400  8964  8964 W System.err: 	at com.tencent.msdk.api.refactor.MSDKInterfaceImpl.Initialized(MSDKInterfaceImpl.java:74)
+10-28 00:01:07.400  8964  8964 W System.err: 	at com.tencent.msdk.api.WGPlatform.Initialized(WGPlatform.java:88)
+10-28 00:01:07.400  8964  8964 W System.err: 	at com.actgames.fci.AppDelegater.onCreate(AppDelegater.java:61)
+10-28 00:01:07.400  8964  8964 W System.err: 	at com.actgames.fci.MainActivity.onCreate(MainActivity.java:53)
+10-28 00:01:07.400  8964  8964 W System.err: 	at android.app.Activity.performCreate(Activity.java:7136)
+10-28 00:01:07.400  8964  8964 W System.err: 	at android.app.Activity.performCreate(Activity.java:7127)
+10-28 00:01:07.400  8964  8964 W System.err: 	at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1271)
+10-28 00:01:07.400  8964  8964 W System.err: 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2893)
+10-28 00:01:07.400  8964  8964 W System.err: 	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:3048)
+10-28 00:01:07.400  8964  8964 W System.err: 	at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:78)
+10-28 00:01:07.400  8964  8964 W System.err: 	at android.app.servertransaction.TransactionExecutor.executeCallbacks(TransactionExecutor.java:108)
+10-28 00:01:07.400  8964  8964 W System.err: 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:68)
+10-28 00:01:07.400  8964  8964 W System.err: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1808)
+10-28 00:01:07.400  8964  8964 W System.err: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+10-28 00:01:07.400  8964  8964 W System.err: 	at android.os.Looper.loop(Looper.java:193)
+10-28 00:01:07.400  8964  8964 W System.err: 	at android.app.ActivityThread.main(ActivityThread.java:6669)
+10-28 00:01:07.401  8964  8964 W System.err: 	at java.lang.reflect.Method.invoke(Native Method)
+10-28 00:01:07.401  8964  8964 W System.err: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+10-28 00:01:07.401  8964  8964 W System.err: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:858)
+10-28 00:01:07.401  8964  9006 E MtaSDK  : 
+10-28 00:01:07.401  8964  9006 E MtaSDK  : org.apache.http.conn.HttpHostConnectException: Connection to http://pingma.qq.com:80 refused
+10-28 00:01:07.401  8964  9006 E MtaSDK  : 	at org.apache.http.impl.conn.DefaultClientConnectionOperator.openConnection(DefaultClientConnectionOperator.java:193)
+10-28 00:01:07.401  8964  9006 E MtaSDK  : 	at org.apache.http.impl.conn.AbstractPoolEntry.open(AbstractPoolEntry.java:170)
+10-28 00:01:07.401  8964  9006 E MtaSDK  : 	at org.apache.http.impl.conn.AbstractPooledConnAdapter.open(AbstractPooledConnAdapter.java:124)
+10-28 00:01:07.401  8964  9006 E MtaSDK  : 	at org.apache.http.impl.client.DefaultRequestDirector.execute(DefaultRequestDirector.java:366)
+10-28 00:01:07.401  8964  9006 E MtaSDK  : 	at org.apache.http.impl.client.AbstractHttpClient.execute(AbstractHttpClient.java:560)
+10-28 00:01:07.401  8964  9006 E MtaSDK  : 	at org.apache.http.impl.client.AbstractHttpClient.execute(AbstractHttpClient.java:492)
+10-28 00:01:07.401  8964  9006 E MtaSDK  : 	at org.apache.http.impl.client.AbstractHttpClient.execute(AbstractHttpClient.java:470)
+10-28 00:01:07.401  8964  9006 E MtaSDK  : 	at com.tencent.stat.g.a(Unknown Source:426)
+10-28 00:01:07.401  8964  9006 E MtaSDK  : 	at com.tencent.stat.i.run(Unknown Source:6)
+10-28 00:01:07.401  8964  9006 E MtaSDK  : 	at android.os.Handler.handleCallback(Handler.java:873)
+10-28 00:01:07.401  8964  9006 E MtaSDK  : 	at android.os.Handler.dispatchMessage(Handler.java:99)
+10-28 00:01:07.401  8964  9006 E MtaSDK  : 	at android.os.Looper.loop(Looper.java:193)
+10-28 00:01:07.401  8964  9006 E MtaSDK  : 	at android.os.HandlerThread.run(HandlerThread.java:65)
+10-28 00:01:07.401  8964  9006 E MtaSDK  : Caused by: java.net.ConnectException: failed to connect to /0.0.0.1 (port 80) from /:: (port 0) after 10000ms: connect failed: EINVAL (Invalid argument)
+10-28 00:01:07.401  8964  9006 E MtaSDK  : 	at libcore.io.IoBridge.connect(IoBridge.java:137)
+10-28 00:01:07.401  8964  9006 E MtaSDK  : 	at java.net.PlainSocketImpl.socketConnect(PlainSocketImpl.java:137)
+10-28 00:01:07.401  8964  9006 E MtaSDK  : 	at java.net.AbstractPlainSocketImpl.doConnect(AbstractPlainSocketImpl.java:390)
+10-28 00:01:07.401  8964  9006 E MtaSDK  : 	at java.net.AbstractPlainSocketImpl.connectToAddress(AbstractPlainSocketImpl.java:230)
+10-28 00:01:07.401  8964  9006 E MtaSDK  : 	at java.net.AbstractPlainSocketImpl.connect(AbstractPlainSocketImpl.java:212)
+10-28 00:01:07.401  8964  9006 E MtaSDK  : 	at java.net.SocksSocketImpl.connect(SocksSocketImpl.java:436)
+10-28 00:01:07.401  8964  9006 E MtaSDK  : 	at java.net.Socket.connect(Socket.java:621)
+10-28 00:01:07.401  8964  9006 E MtaSDK  : 	at org.apache.http.conn.scheme.PlainSocketFactory.connectSocket(PlainSocketFactory.java:124)
+10-28 00:01:07.401  8964  9006 E MtaSDK  : 	at org.apache.http.impl.conn.DefaultClientConnectionOperator.openConnection(DefaultClientConnectionOperator.java:149)
+10-28 00:01:07.401  8964  9006 E MtaSDK  : 	... 12 more
+10-28 00:01:07.401  8964  9006 E MtaSDK  : Caused by: android.system.ErrnoException: connect failed: EINVAL (Invalid argument)
+10-28 00:01:07.401  8964  9006 E MtaSDK  : 	at libcore.io.Linux.connect(Native Method)
+10-28 00:01:07.401  8964  9006 E MtaSDK  : 	at libcore.io.BlockGuardOs.connect(BlockGuardOs.java:118)
+10-28 00:01:07.401  8964  9006 E MtaSDK  : 	at libcore.io.IoBridge.connectErrno(IoBridge.java:168)
+10-28 00:01:07.401  8964  9006 E MtaSDK  : 	at libcore.io.IoBridge.connect(IoBridge.java:129)
+10-28 00:01:07.401  8964  9006 E MtaSDK  : 	... 20 more
+10-28 00:01:07.449  8964  9021 I MID     : >>>   queryMatchContentProviders size:1
+10-28 00:01:07.449  8964  9021 D MID     : >>>   appPrivateMidMap size:0,content:
+10-28 00:01:07.458  8964  9022 I MID     : >>>   queryMatchContentProviders size:1
+10-28 00:01:07.458  8964  9022 D MID     : >>>   appPrivateMidMap size:0,content:
+10-28 00:01:07.459  8964  8964 D WeGame DeviceInfo.getApn:  typeName:WIFI
+10-28 00:01:07.461  8964  8964 W System.err: java.lang.SecurityException: getSubscriberId
+10-28 00:01:07.461  8964  8964 W System.err: 	at android.os.Parcel.createException(Parcel.java:1950)
+10-28 00:01:07.461  8964  8964 W System.err: 	at android.os.Parcel.readException(Parcel.java:1918)
+10-28 00:01:07.461  8964  8964 W System.err: 	at android.os.Parcel.readException(Parcel.java:1868)
+10-28 00:01:07.461  8964  8964 W System.err: 	at com.android.internal.telephony.IPhoneSubInfo$Stub$Proxy.getSubscriberIdForSubscriber(IPhoneSubInfo.java:578)
+10-28 00:01:07.461  8964  8964 W System.err: 	at android.telephony.TelephonyManager.getSubscriberId(TelephonyManager.java:2881)
+10-28 00:01:07.461  8964  8964 W System.err: 	at android.telephony.TelephonyManager.getSubscriberId(TelephonyManager.java:2864)
+10-28 00:01:07.461  8964  8964 W System.err: 	at com.tencent.msdk.stat.DeviceInfo.getProvidersName(DeviceInfo.java:162)
+10-28 00:01:07.461  8964  8964 W System.err: 	at com.tencent.msdk.stat.DeviceInfo.getAllDeviceInfo(DeviceInfo.java:388)
+10-28 00:01:07.461  8964  8964 W System.err: 	at com.tencent.msdk.framework.tools.MSDKJniHelper.getDeciceInfoStr(MSDKJniHelper.java:421)
+10-28 00:01:07.461  8964  8964 W System.err: 	at com.tencent.msdk.api.refactor.MSDKInterfaceNative.init(Native Method)
+10-28 00:01:07.461  8964  8964 W System.err: 	at com.tencent.msdk.api.refactor.MSDKInterfaceImpl.Initialized(MSDKInterfaceImpl.java:74)
+10-28 00:01:07.461  8964  8964 W System.err: 	at com.tencent.msdk.api.WGPlatform.Initialized(WGPlatform.java:88)
+10-28 00:01:07.461  8964  8964 W System.err: 	at com.actgames.fci.AppDelegater.onCreate(AppDelegater.java:61)
+10-28 00:01:07.461  8964  8964 W System.err: 	at com.actgames.fci.MainActivity.onCreate(MainActivity.java:53)
+10-28 00:01:07.461  8964  8964 W System.err: 	at android.app.Activity.performCreate(Activity.java:7136)
+10-28 00:01:07.461  8964  8964 W System.err: 	at android.app.Activity.performCreate(Activity.java:7127)
+10-28 00:01:07.461  8964  8964 W System.err: 	at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1271)
+10-28 00:01:07.461  8964  8964 W System.err: 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2893)
+10-28 00:01:07.461  8964  8964 W System.err: 	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:3048)
+10-28 00:01:07.461  8964  8964 W System.err: 	at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:78)
+10-28 00:01:07.461  8964  8964 W System.err: 	at android.app.servertransaction.TransactionExecutor.executeCallbacks(TransactionExecutor.java:108)
+10-28 00:01:07.461  8964  8964 W System.err: 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:68)
+10-28 00:01:07.461  8964  8964 W System.err: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1808)
+10-28 00:01:07.461  8964  8964 W System.err: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+10-28 00:01:07.461  8964  8964 W System.err: 	at android.os.Looper.loop(Looper.java:193)
+10-28 00:01:07.461  8964  8964 W System.err: 	at android.app.ActivityThread.main(ActivityThread.java:6669)
+10-28 00:01:07.461  8964  8964 W System.err: 	at java.lang.reflect.Method.invoke(Native Method)
+10-28 00:01:07.461  8964  8964 W System.err: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+10-28 00:01:07.462  8964  8964 W System.err: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:858)
+10-28 00:01:07.462  8964  8964 W System.err: java.lang.NumberFormatException: For input string: "3000000000"
+10-28 00:01:07.462  8964  8964 W System.err: 	at java.lang.Integer.parseInt(Integer.java:618)
+10-28 00:01:07.462  8964  8964 W System.err: 	at java.lang.Integer.parseInt(Integer.java:650)
+10-28 00:01:07.462  8964  8964 W System.err: 	at com.tencent.msdk.stat.DeviceInfo.getCpuInfo(DeviceInfo.java:344)
+10-28 00:01:07.462  8964  8964 W System.err: 	at com.tencent.msdk.stat.DeviceInfo.getAllDeviceInfo(DeviceInfo.java:400)
+10-28 00:01:07.462  8964  8964 W System.err: 	at com.tencent.msdk.framework.tools.MSDKJniHelper.getDeciceInfoStr(MSDKJniHelper.java:421)
+10-28 00:01:07.462  8964  8964 W System.err: 	at com.tencent.msdk.api.refactor.MSDKInterfaceNative.init(Native Method)
+10-28 00:01:07.462  8964  8964 W System.err: 	at com.tencent.msdk.api.refactor.MSDKInterfaceImpl.Initialized(MSDKInterfaceImpl.java:74)
+10-28 00:01:07.462  8964  8964 W System.err: 	at com.tencent.msdk.api.WGPlatform.Initialized(WGPlatform.java:88)
+10-28 00:01:07.462  8964  8964 W System.err: 	at com.actgames.fci.AppDelegater.onCreate(AppDelegater.java:61)
+10-28 00:01:07.462  8964  8964 W System.err: 	at com.actgames.fci.MainActivity.onCreate(MainActivity.java:53)
+10-28 00:01:07.462  8964  8964 W System.err: 	at android.app.Activity.performCreate(Activity.java:7136)
+10-28 00:01:07.462  8964  8964 W System.err: 	at android.app.Activity.performCreate(Activity.java:7127)
+10-28 00:01:07.462  8964  8964 W System.err: 	at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1271)
+10-28 00:01:07.462  8964  8964 W System.err: 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2893)
+10-28 00:01:07.462  8964  8964 W System.err: 	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:3048)
+10-28 00:01:07.462  8964  8964 W System.err: 	at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:78)
+10-28 00:01:07.462  8964  8964 W System.err: 	at android.app.servertransaction.TransactionExecutor.executeCallbacks(TransactionExecutor.java:108)
+10-28 00:01:07.462  8964  8964 W System.err: 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:68)
+10-28 00:01:07.462  8964  8964 W System.err: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1808)
+10-28 00:01:07.462  8964  8964 W System.err: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+10-28 00:01:07.462  8964  8964 W System.err: 	at android.os.Looper.loop(Looper.java:193)
+10-28 00:01:07.462  8964  8964 W System.err: 	at android.app.ActivityThread.main(ActivityThread.java:6669)
+10-28 00:01:07.462  8964  8964 W System.err: 	at java.lang.reflect.Method.invoke(Native Method)
+10-28 00:01:07.462  8964  8964 W System.err: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+10-28 00:01:07.462  8964  8964 W System.err: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:858)
+10-28 00:01:07.467  8964  8973 W System  : A resource failed to call close. 
+10-28 00:01:07.476  1926  2295 I GnssLocationProvider: WakeLock acquired by sendMessage(REPORT_SV_STATUS, 0, com.android.server.location.GnssLocationProvider$SvStatusInfo@5a758a7)
+10-28 00:01:07.476  1926  1940 I GnssLocationProvider: WakeLock released by handleMessage(REPORT_SV_STATUS, 0, com.android.server.location.GnssLocationProvider$SvStatusInfo@5a758a7)
+10-28 00:01:07.547  1771  1771 I Zygote  : Process 8964 exited cleanly (4)
+10-28 00:01:07.550  1926  3822 I ActivityManager: Process com.tencent.tmgp.fcicv (pid 8964) has died: fore TOP 
+10-28 00:01:07.550  1926  1944 W libprocessgroup: kill(-8964, 9) failed: No such process
+10-28 00:01:07.550  1926  1944 I libprocessgroup: Successfully killed process cgroup uid 10085 pid 8964 in 0ms
+10-28 00:01:07.562  9026  9026 W cent.tmgp.fcic: Unexpected CPU variant for X86 using defaults: x86
+10-28 00:01:07.568  1926  3822 I ActivityManager: Start proc 9026:com.tencent.tmgp.fcicv/u0a85 for activity com.tencent.tmgp.fcicv/com.actgames.fci.MainActivity
+10-28 00:01:07.574  9026  9026 I cent.tmgp.fcic: The ClassLoaderContext is a special shared library.
+10-28 00:01:07.705  9026  9026 I TpnsSecurity: JNI_OnLoad
+10-28 00:01:07.725  9026  9026 W Unity   : Failed to get permission info for android.permission.RECEIVE_USER_PRESENT, manifest likely missing custom permission declaration
+10-28 00:01:07.725  9026  9026 W Unity   : Permission android.permission.RECEIVE_USER_PRESENT ignored
+10-28 00:01:07.870  9026  9026 D OpenGLRenderer: HWUI GL Pipeline
+10-28 00:01:07.899  9026  9026 D CrashReport: Bugly has been disabled in this device
+10-28 00:01:07.891  9026  9026 W cent.tmgp.fcicv: type=1400 audit(0.0:94): avc: denied { read } for name="anr" dev="dm-1" ino=237569 scontext=u:r:untrusted_app_25:s0:c512,c768 tcontext=u:object_r:anr_data_file:s0 tclass=dir permissive=0
+10-28 00:01:07.920  9026  9026 I MSDK    : [1][A.I][20261028 +0.0 00:01:07.920][9026,9026][,,0]:UMSDK JNI_OnLoad for MSDK init
+10-28 00:01:07.920  9026  9026 I MSDK    : [2][A.I][20261028 +0.0 00:01:07.920][9026,9026][,,0]:MSDKJNI init pthread_key
+10-28 00:01:07.924  9026  9026 D WeGame  cpp:  MSDKAdapter JNI_OnLoad
+10-28 00:01:07.924  9026  9026 D MSDK    : MSDK try to load libMSDKSystem.so
+10-28 00:01:07.924  9026  9026 D MSDK    : MSDK try to load libMSDKSystem.so
+10-28 00:01:07.925  9026  9026 I MSDK    : [3][A.I][20261028 +0.0 00:01:07.925][9026,9026][MSDKLifecycleManager,init,39]:Lifecycle first registerActivityLifecycleCallbacks
+10-28 00:01:07.925  9026  9026 D WeGame Router.loadConfig:  loadConfig
+10-28 00:01:07.926  9026  9026 I MSDK    : [4][A.I][20261028 +0.0 00:01:07.926][9026,9026][SettingDBHelper,get,15]:Get MSDKCloudConfig.log.level from SettingTable is 
+10-28 00:01:07.926  9026  9026 I MSDK    : [5][A.I][20261028 +0.0 00:01:07.926][9026,9026][SettingDBHelper,get,15]:Get MSDKCloudConfig.log.mode from SettingTable is 
+10-28 00:01:07.926  9026  9026 I MSDK    : [ASSERT((null))][A.I][2026-10-28 +0.0 00:01:07.926][9026, 9026][msdk_cloud_config_tool.cpp, LoadDBData, 262] : log_level_ = , log_mode_ = 
+10-28 00:01:07.926  9026  9026 I MSDK    : [ASSERT((null))][A.I][2026-10-28 +0.0 00:01:07.926][9026, 9026][msdk_cloud_config_tool.cpp, LoadDBData, 274] : load CS_LOG_LEVEL,CS_LOG_MODE is empty, (level, mode):(, )
+10-28 00:01:07.927  9026  9026 I MSDK    : [6][A.I][20261028 +0.0 00:01:07.927][9026,9026][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.notice_switch from SettingTable is 
+10-28 00:01:07.927  9026  9026 I MSDK    : [7][A.I][20261028 +0.0 00:01:07.927][9026,9026][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.xg_open_switch from SettingTable is 
+10-28 00:01:07.927  9026  9026 I MSDK    : [8][A.I][20261028 +0.0 00:01:07.927][9026,9026][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.stat_open_switch from SettingTable is 
+10-28 00:01:07.927  9026  9026 I MSDK    : [9][A.I][20261028 +0.0 00:01:07.927][9026,9026][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.bugly_open_switch from SettingTable is 
+10-28 00:01:07.928  9026  9026 I MSDK    : [10][A.I][20261028 +0.0 00:01:07.927][9026,9026][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.yyb_update_switch from SettingTable is 
+10-28 00:01:07.928  9026  9026 I MSDK    : [11][A.I][20261028 +0.0 00:01:07.928][9026,9026][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.msdk_url from SettingTable is 
+10-28 00:01:07.928  9026  9026 I MSDK    : [12][A.I][20261028 +0.0 00:01:07.928][9026,9026][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.gray_test_switch from SettingTable is 
+10-28 00:01:07.928  9026  9026 I MSDK    : [13][A.I][20261028 +0.0 00:01:07.928][9026,9026][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.real_name_auth_switch from SettingTable is 
+10-28 00:01:07.928  9026  9026 I MSDK    : [14][A.I][20261028 +0.0 00:01:07.928][9026,9026][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.beta_switch from SettingTable is 
+10-28 00:01:07.928  9026  9026 I MSDK    : [15][A.I][20261028 +0.0 00:01:07.928][9026,9026][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.wxtoken_refresh from SettingTable is 
+10-28 00:01:07.929  9026  9026 I MSDK    : [16][A.I][20261028 +0.0 00:01:07.929][9026,9026][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.kill_webview_process from SettingTable is 
+10-28 00:01:07.929  9026  9026 I MSDK    : [17][A.I][20261028 +0.0 00:01:07.929][9026,9026][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.event_report_switch from SettingTable is 
+10-28 00:01:07.929  9026  9026 I MSDK    : [18][A.I][20261028 +0.0 00:01:07.929][9026,9026][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.report_ip_switch from SettingTable is 
+10-28 00:01:07.929  9026  9026 I MSDK    : [19][A.I][20261028 +0.0 00:01:07.929][9026,9026][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.cpp_msdk_version from SettingTable is 
+10-28 00:01:07.930  9026  9026 I MSDK    : [20][A.I][20261028 +0.0 00:01:07.930][9026,9026][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.webview_close_x5 from SettingTable is 
+10-28 00:01:07.930  9026  9026 I MSDK    : [21][A.I][20261028 +0.0 00:01:07.930][9026,9026][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.httpdns_switch from SettingTable is 
+10-28 00:01:07.930  9026  9026 I MSDK    : [22][A.I][20261028 +0.0 00:01:07.930][9026,9026][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.use_single_thread_mode from SettingTable is 
+10-28 00:01:07.930  9026  9026 I MSDK    : [ASSERT((null))][A.I][2026-10-28 +0.0 00:01:07.930][9026, 9026][msdk_cloud_config_tool.cpp, LoadDBData, 727] : [LoadDBData]notice_switch_ = , xg_open_switch_ = , stat_open_switch_ = , need_autotest_ = , auto_test_apkurl_ = , cpp_msdk_version_ = , single_thread_switch_ =  
+10-28 00:01:07.930  9026  9026 I MSDK    : [23][A.I][20261028 +0.0 00:01:07.930][9026,9026][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.k1 from SettingTable is 
+10-28 00:01:07.931  9026  9026 I MSDK    : [24][A.I][20261028 +0.0 00:01:07.931][9026,9026][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.k2 from SettingTable is 
+10-28 00:01:07.931  9026  9026 I MSDK    : [25][A.I][20261028 +0.0 00:01:07.931][9026,9026][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.k3 from SettingTable is 
+10-28 00:01:07.931  9026  9026 I MSDK    : [26][A.I][20261028 +0.0 00:01:07.931][9026,9026][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.k4 from SettingTable is 
+10-28 00:01:07.931  9026  9026 I MSDK    : [27][A.I][20261028 +0.0 00:01:07.931][9026,9026][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.k5 from SettingTable is 
+10-28 00:01:07.931  9026  9026 I MSDK    : [28][A.I][20261028 +0.0 00:01:07.931][9026,9026][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.k6 from SettingTable is 
+10-28 00:01:07.932  9026  9026 I MSDK    : [29][A.I][20261028 +0.0 00:01:07.932][9026,9026][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.k7 from SettingTable is 
+10-28 00:01:07.932  9026  9026 I MSDK    : [30][A.I][20261028 +0.0 00:01:07.932][9026,9026][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.k8 from SettingTable is 
+10-28 00:01:07.933  9026  9026 I MSDK    : [31][A.I][20261028 +0.0 00:01:07.933][9026,9026][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.k9 from SettingTable is 
+10-28 00:01:07.933  9026  9026 I MSDK    : [32][A.I][20261028 +0.0 00:01:07.933][9026,9026][SettingDBHelper,get,15]:Get MSDKCloudConfig.cfg.k10 from SettingTable is 
+10-28 00:01:07.933  9026  9026 I MSDK    : [ASSERT((null))][A.I][2026-10-28 +0.0 00:01:07.933][9026, 9026][msdk_cloud_config_tool.cpp, LoadDBData, 752] : [LoadDBData] k1_ = , k2_ = ,k3_ = , k4_ = , k5_ = , k6_ = , k7_ = , k8_ = , k9_ = , k10_ =  
+10-28 00:01:07.933  9026  9026 I MSDK    : [33][A.I][20261028 +0.0 00:01:07.933][9026,9026][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.log.level from SettingTable is 0
+10-28 00:01:07.934  9026  9026 I MSDK    : [34][A.I][20261028 +0.0 00:01:07.934][9026,9026][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.log.mode from SettingTable is 0
+10-28 00:01:07.934  9026  9026 I MSDK    : [35][A.I][20261028 +0.0 00:01:07.934][9026,9026][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.notice_switch from SettingTable is 0
+10-28 00:01:07.934  9026  9026 I MSDK    : [36][A.I][20261028 +0.0 00:01:07.934][9026,9026][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.xg_open_switch from SettingTable is 0
+10-28 00:01:07.934  9026  9026 I MSDK    : [37][A.I][20261028 +0.0 00:01:07.934][9026,9026][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.stat_open_switch from SettingTable is 0
+10-28 00:01:07.934  9026  9026 I MSDK    : [38][A.I][20261028 +0.0 00:01:07.934][9026,9026][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.bugly_open_switch from SettingTable is 0
+10-28 00:01:07.935  9026  9026 I MSDK    : [39][A.I][20261028 +0.0 00:01:07.935][9026,9026][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.yyb_update_switch from SettingTable is 0
+10-28 00:01:07.935  9026  9026 I MSDK    : [40][A.I][20261028 +0.0 00:01:07.935][9026,9026][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.msdk_url from SettingTable is 0
+10-28 00:01:07.935  9026  9026 I MSDK    : [41][A.I][20261028 +0.0 00:01:07.935][9026,9026][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.gray_test_switch from SettingTable is 0
+10-28 00:01:07.935  9026  9026 I MSDK    : [42][A.I][20261028 +0.0 00:01:07.935][9026,9026][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.real_name_auth_switch from SettingTable is 0
+10-28 00:01:07.935  9026  9026 I MSDK    : [43][A.I][20261028 +0.0 00:01:07.935][9026,9026][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.beta_switch from SettingTable is 0
+10-28 00:01:07.935  9026  9026 I MSDK    : [44][A.I][20261028 +0.0 00:01:07.935][9026,9026][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.wxtoken_refresh from SettingTable is 0
+10-28 00:01:07.936  9026  9026 I MSDK    : [45][A.I][20261028 +0.0 00:01:07.936][9026,9026][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.kill_webview_process from SettingTable is 0
+10-28 00:01:07.936  9026  9026 I MSDK    : [46][A.I][20261028 +0.0 00:01:07.936][9026,9026][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.event_report_switch from SettingTable is 0
+10-28 00:01:07.936  9026  9026 I MSDK    : [47][A.I][20261028 +0.0 00:01:07.936][9026,9026][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.report_ip_switch from SettingTable is 0
+10-28 00:01:07.936  9026  9026 I MSDK    : [48][A.I][20261028 +0.0 00:01:07.936][9026,9026][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.need_auto_test from SettingTable is 0
+10-28 00:01:07.936  9026  9026 I MSDK    : [49][A.I][20261028 +0.0 00:01:07.936][9026,9026][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.auto_test_apkurl from SettingTable is 0
+10-28 00:01:07.936  9026  9026 I MSDK    : [50][A.I][20261028 +0.0 00:01:07.936][9026,9026][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.cpp_msdk_version from SettingTable is 0
+10-28 00:01:07.936  9026  9026 I MSDK    : [51][A.I][20261028 +0.0 00:01:07.936][9026,9026][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.webview_close_x5 from SettingTable is 0
+10-28 00:01:07.936  9026  9026 I MSDK    : [52][A.I][20261028 +0.0 00:01:07.936][9026,9026][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.httpdns_switch from SettingTable is 0
+10-28 00:01:07.937  9026  9026 I MSDK    : [53][A.I][20261028 +0.0 00:01:07.937][9026,9026][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.use_single_thread_mode from SettingTable is 0
+10-28 00:01:07.937  9026  9026 I MSDK    : [54][A.I][20261028 +0.0 00:01:07.937][9026,9026][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.k1 from SettingTable is 0
+10-28 00:01:07.937  9026  9026 I MSDK    : [55][A.I][20261028 +0.0 00:01:07.937][9026,9026][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.k2 from SettingTable is 0
+10-28 00:01:07.937  9026  9026 I MSDK    : [56][A.I][20261028 +0.0 00:01:07.937][9026,9026][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.k3 from SettingTable is 0
+10-28 00:01:07.937  9026  9026 I MSDK    : [57][A.I][20261028 +0.0 00:01:07.937][9026,9026][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.k4 from SettingTable is 0
+10-28 00:01:07.937  9026  9026 I MSDK    : [58][A.I][20261028 +0.0 00:01:07.937][9026,9026][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.k5 from SettingTable is 0
+10-28 00:01:07.937  9026  9026 I MSDK    : [59][A.I][20261028 +0.0 00:01:07.937][9026,9026][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.k6 from SettingTable is 0
+10-28 00:01:07.938  9026  9026 I MSDK    : [60][A.I][20261028 +0.0 00:01:07.938][9026,9026][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.k7 from SettingTable is 0
+10-28 00:01:07.938  9026  9026 I MSDK    : [61][A.I][20261028 +0.0 00:01:07.938][9026,9026][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.k8 from SettingTable is 0
+10-28 00:01:07.938  9026  9026 I MSDK    : [62][A.I][20261028 +0.0 00:01:07.938][9026,9026][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.k9 from SettingTable is 0
+10-28 00:01:07.938  9026  9026 I MSDK    : [63][A.I][20261028 +0.0 00:01:07.938][9026,9026][SettingDBHelper,delete,33]:Delete MSDKCloudConfig.cfg.k10 from SettingTable is 0
+10-28 00:01:07.938  9026  9026 I MSDK    : [64][A.I][20261028 +0.0 00:01:07.938][9026,9026][,,0]:LoadConfig run_cpp_code_:true
+10-28 00:01:07.938  9026  9026 D WeGame Router.loadConfig:  [loadConfig]runCppCode: true
+10-28 00:01:07.938  9026  9026 D WeGame Router.init:  runCppCode: true
+10-28 00:01:07.939  9026  9026 I MSDK    : [65][A.I][20261028 +0.0 00:01:07.939][9026,9026][MSDKInterfaceImpl,Initialized,61]:Initialized start
+10-28 00:01:07.943  9026  9026 W SoundPool: Use of stream types is deprecated for operations other than volume control
+10-28 00:01:07.943  9026  9026 W SoundPool: See the documentation of SoundPool() for what to use instead with android.media.AudioAttributes to qualify your playback use case
+10-28 00:01:07.944  9026  9026 D MicroMsg.PaySdk.WXFactory: createWXAPI, appId = wx687f4629ba7c3086, checkSignature = false
+10-28 00:01:07.945  9026  9026 D MicroMsg.SDK.WXApiImplV10: <init>, appId = wx687f4629ba7c3086, checkSignature = false
+10-28 00:01:07.945  9026  9026 D MicroMsg.SDK.WXMsgImplComm: ignore wechat app signature validation
+10-28 00:01:07.945  9026  9026 D MicroMsg.SDK.WXApiImplV10: registerApp, appId = wx687f4629ba7c3086
+10-28 00:01:07.945  9026  9026 D MicroMsg.SDK.WXApiImplV10: registerApp, appId = wx687f4629ba7c3086
+10-28 00:01:07.945  9026  9026 D MicroMsg.SDK.WXApiImplV10: register app com.tencent.tmgp.fcicv
+10-28 00:01:07.945  9026  9026 D MicroMsg.SDK.MMessage: send mm message, intent=Intent { act=com.tencent.mm.plugin.openapi.Intent.ACTION_HANDLE_APP_REGISTER (has extras) }, perm=com.tencent.mm.permission.MM_MESSAGE
+10-28 00:01:07.947  9026  9026 E openSDK_LOG: com.tencent.tmgp.fcicv SDK_VERSION:3.3.0.lite
+10-28 00:01:07.948  9026  9026 I openSDK_LOG.Tencent: createInstance()  -- start, appId = 1106429722
+10-28 00:01:07.948  9026  9026 I openSDK_LOG.QQAuth: QQAuth -- createInstance() --start
+10-28 00:01:07.948  9026  9026 I openSDK_LOG.QQAuth: new QQAuth() --start
+10-28 00:01:07.949  9026  9026 I openSDK_LOG.AuthAgent: is x86 architecture
+10-28 00:01:07.952  9026  9059 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+10-28 00:01:07.954  9026  9026 I openSDK_LOG.QQAuth: new QQAuth() --end
+10-28 00:01:07.955  9026  9026 I openSDK_LOG.QQAuth: QQAuth -- createInstance()  --end
+10-28 00:01:07.956  9026  9026 I openSDK_LOG.Tencent: createInstance()  -- end
+10-28 00:01:07.956  9026  9026 I MSDK    : [66][A.I][20261028 +0.0 00:01:07.956][9026,9026][MSDKMethodC2J,init,29]:mainActivity is com.actgames.fci.MainActivity@3dff180
+10-28 00:01:07.956  9026  9026 I MSDK    : [ASSERT((null))][A.I][2026-10-28 +0.0 00:01:07.956][9026, 9026][msdk_cpp_interface.cpp, Init, 62] : Into Init
+10-28 00:01:08.002  9026  9064 I MID     : >>>   queryMatchContentProviders size:1
+10-28 00:01:08.002  9026  9064 D MID     : >>>   appPrivateMidMap size:0,content:
+10-28 00:01:08.042  9026  9062 E MtaSDK  : Could not get permission of android.permission.READ_PHONE_STATE
+10-28 00:01:08.050  9026  9026 I MSDK    : [67][A.I][20261028 +0.0 00:01:08.050][9026,9026][,,0]:json in callJavaMethod:
+10-28 00:01:08.051  9026  9026 I MSDK    : [68][A.I][20261028 +0.0 00:01:08.051][9026,9026][MSDKMethodC2J,callJavaMethod,80]:functionName:getMSDKSVNcode
+10-28 00:01:08.051  9026  9026 I MSDK    : [69][A.I][20261028 +0.0 00:01:08.051][9026,9026][MSDKJniHelper,getMSDKVersion,301]:getMSDKVersion:3.2.17a
+10-28 00:01:08.051  9026  9026 I MSDK    : [70][A.I][20261028 +0.0 00:01:08.051][9026,9026][,,0]:ModuleManager log Init_ed MSDK version is:3.2.17a, SVN:96009
+10-28 00:01:08.051  9026  9026 I MSDK    : [ASSERT((null))][A.I][2026-10-28 +0.0 00:01:08.051][9026, 9026][msdk_config_tool.cpp, GetLogMode, 405] : isvalid = 0, mode = 1
+10-28 00:01:08.051  9026  9026 I MSDK    : [ASSERT((null))][A.I][2026-10-28 +0.0 00:01:08.051][9026, 9026][msdk_config_tool.cpp, GetLogMode, 405] : isvalid = 0, mode = 1
+10-28 00:01:08.051  9026  9026 I MSDK    : [71][A.I][20261028 +0.0 00:01:08.051][9026,9026][,,0]:MloggerWrapper level=4 mode=1, ConfigTool mode=7, expert realtime config mode=7
+10-28 00:01:08.052  9026  9026 I MSDK    : [72][A.I][20261028 +0.0 00:01:08.052][9026,9026][MSDKJniHelper,getFreeRamPercent,182]:total size 6094400KB free size 4551312KB free percent 74.68023%
+10-28 00:01:08.056  9026  9026 D WeGame DeviceInfo.getApn:  typeName:WIFI
+10-28 00:01:08.056  9026  9026 W System.err: java.lang.NumberFormatException: For input string: "3000000000"
+10-28 00:01:08.056  9026  9026 W System.err: 	at java.lang.Integer.parseInt(Integer.java:618)
+10-28 00:01:08.056  9026  9026 W System.err: 	at java.lang.Integer.parseInt(Integer.java:650)
+10-28 00:01:08.056  9026  9026 W System.err: 	at com.tencent.msdk.stat.DeviceInfo.getCpuInfo(DeviceInfo.java:344)
+10-28 00:01:08.056  9026  9026 W System.err: 	at com.tencent.msdk.framework.tools.MSDKJniHelper.getCPUType(MSDKJniHelper.java:193)
+10-28 00:01:08.056  9026  9026 W System.err: 	at com.tencent.msdk.api.refactor.MSDKInterfaceNative.init(Native Method)
+10-28 00:01:08.056  9026  9026 W System.err: 	at com.tencent.msdk.api.refactor.MSDKInterfaceImpl.Initialized(MSDKInterfaceImpl.java:74)
+10-28 00:01:08.056  9026  9026 W System.err: 	at com.tencent.msdk.api.WGPlatform.Initialized(WGPlatform.java:88)
+10-28 00:01:08.056  9026  9026 W System.err: 	at com.actgames.fci.AppDelegater.onCreate(AppDelegater.java:61)
+10-28 00:01:08.056  9026  9026 W System.err: 	at com.actgames.fci.MainActivity.onCreate(MainActivity.java:53)
+10-28 00:01:08.056  9026  9026 W System.err: 	at android.app.Activity.performCreate(Activity.java:7136)
+10-28 00:01:08.056  9026  9026 W System.err: 	at android.app.Activity.performCreate(Activity.java:7127)
+10-28 00:01:08.056  9026  9026 W System.err: 	at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1271)
+10-28 00:01:08.056  9026  9026 W System.err: 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2893)
+10-28 00:01:08.056  9026  9026 W System.err: 	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:3048)
+10-28 00:01:08.056  9026  9026 W System.err: 	at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:78)
+10-28 00:01:08.056  9026  9026 W System.err: 	at android.app.servertransaction.TransactionExecutor.executeCallbacks(TransactionExecutor.java:108)
+10-28 00:01:08.056  9026  9026 W System.err: 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:68)
+10-28 00:01:08.056  9026  9026 W System.err: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1808)
+10-28 00:01:08.056  9026  9026 W System.err: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+10-28 00:01:08.056  9026  9026 W System.err: 	at android.os.Looper.loop(Looper.java:193)
+10-28 00:01:08.056  9026  9026 W System.err: 	at android.app.ActivityThread.main(ActivityThread.java:6669)
+10-28 00:01:08.056  9026  9026 W System.err: 	at java.lang.reflect.Method.invoke(Native Method)
+10-28 00:01:08.056  9026  9026 W System.err: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+10-28 00:01:08.056  9026  9026 W System.err: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:858)
+10-28 00:01:08.098  9026  9035 W System  : A resource failed to call close. 
+10-28 00:01:08.099  9026  9070 I MID     : >>>   queryMatchContentProviders size:1
+10-28 00:01:08.099  9026  9070 D MID     : >>>   appPrivateMidMap size:0,content:
+10-28 00:01:08.101  9026  9062 W MtaSDK  : [StatService(535): null:115] - can not get the permission of android.permission.WRITE_EXTERNAL_STORAGE
+10-28 00:01:08.122  9026  9073 I MID     : >>>   queryMatchContentProviders size:1
+10-28 00:01:08.122  9026  9073 D MID     : >>>   appPrivateMidMap size:0,content:
+10-28 00:01:08.125  9026  9026 D WeGame DeviceInfo.getApn:  typeName:WIFI
+10-28 00:01:08.127  9026  9026 W System.err: java.lang.SecurityException: getSubscriberId
+10-28 00:01:08.127  9026  9026 W System.err: 	at android.os.Parcel.createException(Parcel.java:1950)
+10-28 00:01:08.127  9026  9026 W System.err: 	at android.os.Parcel.readException(Parcel.java:1918)
+10-28 00:01:08.127  9026  9026 W System.err: 	at android.os.Parcel.readException(Parcel.java:1868)
+10-28 00:01:08.127  9026  9026 W System.err: 	at com.android.internal.telephony.IPhoneSubInfo$Stub$Proxy.getSubscriberIdForSubscriber(IPhoneSubInfo.java:578)
+10-28 00:01:08.127  9026  9026 W System.err: 	at android.telephony.TelephonyManager.getSubscriberId(TelephonyManager.java:2881)
+10-28 00:01:08.127  9026  9026 W System.err: 	at android.telephony.TelephonyManager.getSubscriberId(TelephonyManager.java:2864)
+10-28 00:01:08.127  9026  9026 W System.err: 	at com.tencent.msdk.stat.DeviceInfo.getProvidersName(DeviceInfo.java:162)
+10-28 00:01:08.127  9026  9026 W System.err: 	at com.tencent.msdk.stat.DeviceInfo.getAllDeviceInfo(DeviceInfo.java:388)
+10-28 00:01:08.127  9026  9026 W System.err: 	at com.tencent.msdk.framework.tools.MSDKJniHelper.getDeciceInfoStr(MSDKJniHelper.java:421)
+10-28 00:01:08.127  9026  9026 W System.err: 	at com.tencent.msdk.api.refactor.MSDKInterfaceNative.init(Native Method)
+10-28 00:01:08.127  9026  9026 W System.err: 	at com.tencent.msdk.api.refactor.MSDKInterfaceImpl.Initialized(MSDKInterfaceImpl.java:74)
+10-28 00:01:08.127  9026  9026 W System.err: 	at com.tencent.msdk.api.WGPlatform.Initialized(WGPlatform.java:88)
+10-28 00:01:08.127  9026  9026 W System.err: 	at com.actgames.fci.AppDelegater.onCreate(AppDelegater.java:61)
+10-28 00:01:08.127  9026  9026 W System.err: 	at com.actgames.fci.MainActivity.onCreate(MainActivity.java:53)
+10-28 00:01:08.127  9026  9026 W System.err: 	at android.app.Activity.performCreate(Activity.java:7136)
+10-28 00:01:08.127  9026  9026 W System.err: 	at android.app.Activity.performCreate(Activity.java:7127)
+10-28 00:01:08.127  9026  9026 W System.err: 	at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1271)
+10-28 00:01:08.127  9026  9026 W System.err: 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2893)
+10-28 00:01:08.127  9026  9026 W System.err: 	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:3048)
+10-28 00:01:08.127  9026  9026 W System.err: 	at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:78)
+10-28 00:01:08.127  9026  9026 W System.err: 	at android.app.servertransaction.TransactionExecutor.executeCallbacks(TransactionExecutor.java:108)
+10-28 00:01:08.127  9026  9026 W System.err: 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:68)
+10-28 00:01:08.127  9026  9026 W System.err: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1808)
+10-28 00:01:08.127  9026  9026 W System.err: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+10-28 00:01:08.127  9026  9026 W System.err: 	at android.os.Looper.loop(Looper.java:193)
+10-28 00:01:08.127  9026  9026 W System.err: 	at android.app.ActivityThread.main(ActivityThread.java:6669)
+10-28 00:01:08.127  9026  9026 W System.err: 	at java.lang.reflect.Method.invoke(Native Method)
+10-28 00:01:08.127  9026  9026 W System.err: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+10-28 00:01:08.127  9026  9026 W System.err: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:858)
+10-28 00:01:08.127  9026  9026 W System.err: java.lang.NumberFormatException: For input string: "3000000000"
+10-28 00:01:08.127  9026  9026 W System.err: 	at java.lang.Integer.parseInt(Integer.java:618)
+10-28 00:01:08.127  9026  9026 W System.err: 	at java.lang.Integer.parseInt(Integer.java:650)
+10-28 00:01:08.127  9026  9026 W System.err: 	at com.tencent.msdk.stat.DeviceInfo.getCpuInfo(DeviceInfo.java:344)
+10-28 00:01:08.127  9026  9026 W System.err: 	at com.tencent.msdk.stat.DeviceInfo.getAllDeviceInfo(DeviceInfo.java:400)
+10-28 00:01:08.127  9026  9026 W System.err: 	at com.tencent.msdk.framework.tools.MSDKJniHelper.getDeciceInfoStr(MSDKJniHelper.java:421)
+10-28 00:01:08.127  9026  9026 W System.err: 	at com.tencent.msdk.api.refactor.MSDKInterfaceNative.init(Native Method)
+10-28 00:01:08.127  9026  9026 W System.err: 	at com.tencent.msdk.api.refactor.MSDKInterfaceImpl.Initialized(MSDKInterfaceImpl.java:74)
+10-28 00:01:08.127  9026  9026 W System.err: 	at com.tencent.msdk.api.WGPlatform.Initialized(WGPlatform.java:88)
+10-28 00:01:08.127  9026  9026 W System.err: 	at com.actgames.fci.AppDelegater.onCreate(AppDelegater.java:61)
+10-28 00:01:08.127  9026  9026 W System.err: 	at com.actgames.fci.MainActivity.onCreate(MainActivity.java:53)
+10-28 00:01:08.127  9026  9026 W System.err: 	at android.app.Activity.performCreate(Activity.java:7136)
+10-28 00:01:08.127  9026  9026 W System.err: 	at android.app.Activity.performCreate(Activity.java:7127)
+10-28 00:01:08.127  9026  9026 W System.err: 	at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1271)
+10-28 00:01:08.127  9026  9026 W System.err: 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2893)
+10-28 00:01:08.128  9026  9026 W System.err: 	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:3048)
+10-28 00:01:08.128  9026  9026 W System.err: 	at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:78)
+10-28 00:01:08.128  9026  9026 W System.err: 	at android.app.servertransaction.TransactionExecutor.executeCallbacks(TransactionExecutor.java:108)
+10-28 00:01:08.128  9026  9026 W System.err: 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:68)
+10-28 00:01:08.128  9026  9026 W System.err: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1808)
+10-28 00:01:08.128  9026  9026 W System.err: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+10-28 00:01:08.128  9026  9026 W System.err: 	at android.os.Looper.loop(Looper.java:193)
+10-28 00:01:08.128  9026  9026 W System.err: 	at android.app.ActivityThread.main(ActivityThread.java:6669)
+10-28 00:01:08.128  9026  9026 W System.err: 	at java.lang.reflect.Method.invoke(Native Method)
+10-28 00:01:08.128  9026  9026 W System.err: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+10-28 00:01:08.128  9026  9026 W System.err: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:858)
+10-28 00:01:08.129  9026  9067 E MtaSDK  : 
+10-28 00:01:08.129  9026  9067 E MtaSDK  : org.apache.http.conn.HttpHostConnectException: Connection to http://pingma.qq.com:80 refused
+10-28 00:01:08.129  9026  9067 E MtaSDK  : 	at org.apache.http.impl.conn.DefaultClientConnectionOperator.openConnection(DefaultClientConnectionOperator.java:193)
+10-28 00:01:08.129  9026  9067 E MtaSDK  : 	at org.apache.http.impl.conn.AbstractPoolEntry.open(AbstractPoolEntry.java:170)
+10-28 00:01:08.129  9026  9067 E MtaSDK  : 	at org.apache.http.impl.conn.AbstractPooledConnAdapter.open(AbstractPooledConnAdapter.java:124)
+10-28 00:01:08.129  9026  9067 E MtaSDK  : 	at org.apache.http.impl.client.DefaultRequestDirector.execute(DefaultRequestDirector.java:366)
+10-28 00:01:08.129  9026  9067 E MtaSDK  : 	at org.apache.http.impl.client.AbstractHttpClient.execute(AbstractHttpClient.java:560)
+10-28 00:01:08.129  9026  9067 E MtaSDK  : 	at org.apache.http.impl.client.AbstractHttpClient.execute(AbstractHttpClient.java:492)
+10-28 00:01:08.129  9026  9067 E MtaSDK  : 	at org.apache.http.impl.client.AbstractHttpClient.execute(AbstractHttpClient.java:470)
+10-28 00:01:08.129  9026  9067 E MtaSDK  : 	at com.tencent.stat.g.a(Unknown Source:426)
+10-28 00:01:08.129  9026  9067 E MtaSDK  : 	at com.tencent.stat.i.run(Unknown Source:6)
+10-28 00:01:08.129  9026  9067 E MtaSDK  : 	at android.os.Handler.handleCallback(Handler.java:873)
+10-28 00:01:08.129  9026  9067 E MtaSDK  : 	at android.os.Handler.dispatchMessage(Handler.java:99)
+10-28 00:01:08.129  9026  9067 E MtaSDK  : 	at android.os.Looper.loop(Looper.java:193)
+10-28 00:01:08.129  9026  9067 E MtaSDK  : 	at android.os.HandlerThread.run(HandlerThread.java:65)
+10-28 00:01:08.129  9026  9067 E MtaSDK  : Caused by: java.net.ConnectException: failed to connect to /0.0.0.1 (port 80) from /:: (port 0) after 10000ms: connect failed: EINVAL (Invalid argument)
+10-28 00:01:08.129  9026  9067 E MtaSDK  : 	at libcore.io.IoBridge.connect(IoBridge.java:137)
+10-28 00:01:08.129  9026  9067 E MtaSDK  : 	at java.net.PlainSocketImpl.socketConnect(PlainSocketImpl.java:137)
+10-28 00:01:08.129  9026  9067 E MtaSDK  : 	at java.net.AbstractPlainSocketImpl.doConnect(AbstractPlainSocketImpl.java:390)
+10-28 00:01:08.129  9026  9067 E MtaSDK  : 	at java.net.AbstractPlainSocketImpl.connectToAddress(AbstractPlainSocketImpl.java:230)
+10-28 00:01:08.129  9026  9067 E MtaSDK  : 	at java.net.AbstractPlainSocketImpl.connect(AbstractPlainSocketImpl.java:212)
+10-28 00:01:08.129  9026  9067 E MtaSDK  : 	at java.net.SocksSocketImpl.connect(SocksSocketImpl.java:436)
+10-28 00:01:08.129  9026  9067 E MtaSDK  : 	at java.net.Socket.connect(Socket.java:621)
+10-28 00:01:08.129  9026  9067 E MtaSDK  : 	at org.apache.http.conn.scheme.PlainSocketFactory.connectSocket(PlainSocketFactory.java:124)
+10-28 00:01:08.129  9026  9067 E MtaSDK  : 	at org.apache.http.impl.conn.DefaultClientConnectionOperator.openConnection(DefaultClientConnectionOperator.java:149)
+10-28 00:01:08.129  9026  9067 E MtaSDK  : 	... 12 more
+10-28 00:01:08.129  9026  9067 E MtaSDK  : Caused by: android.system.ErrnoException: connect failed: EINVAL (Invalid argument)
+10-28 00:01:08.129  9026  9067 E MtaSDK  : 	at libcore.io.Linux.connect(Native Method)
+10-28 00:01:08.129  9026  9067 E MtaSDK  : 	at libcore.io.BlockGuardOs.connect(BlockGuardOs.java:118)
+10-28 00:01:08.129  9026  9067 E MtaSDK  : 	at libcore.io.IoBridge.connectErrno(IoBridge.java:168)
+10-28 00:01:08.129  9026  9067 E MtaSDK  : 	at libcore.io.IoBridge.connect(IoBridge.java:129)
+10-28 00:01:08.129  9026  9067 E MtaSDK  : 	... 20 more
+10-28 00:01:08.173  9026  9083 I MID     : >>>   queryMatchContentProviders size:1
+10-28 00:01:08.174  9026  9083 D MID     : >>>   appPrivateMidMap size:0,content:
+10-28 00:01:08.179  9026  9026 D WeGame DeviceInfo.getApn:  typeName:WIFI
+10-28 00:01:08.180  9026  9082 I MID     : >>>   queryMatchContentProviders size:1
+10-28 00:01:08.180  9026  9082 D MID     : >>>   appPrivateMidMap size:0,content:
+10-28 00:01:08.181  9026  9026 W System.err: java.lang.SecurityException: getSubscriberId
+10-28 00:01:08.181  9026  9026 W System.err: 	at android.os.Parcel.createException(Parcel.java:1950)
+10-28 00:01:08.181  9026  9026 W System.err: 	at android.os.Parcel.readException(Parcel.java:1918)
+10-28 00:01:08.181  9026  9026 W System.err: 	at android.os.Parcel.readException(Parcel.java:1868)
+10-28 00:01:08.181  9026  9026 W System.err: 	at com.android.internal.telephony.IPhoneSubInfo$Stub$Proxy.getSubscriberIdForSubscriber(IPhoneSubInfo.java:578)
+10-28 00:01:08.181  9026  9026 W System.err: 	at android.telephony.TelephonyManager.getSubscriberId(TelephonyManager.java:2881)
+10-28 00:01:08.181  9026  9026 W System.err: 	at android.telephony.TelephonyManager.getSubscriberId(TelephonyManager.java:2864)
+10-28 00:01:08.181  9026  9026 W System.err: 	at com.tencent.msdk.stat.DeviceInfo.getProvidersName(DeviceInfo.java:162)
+10-28 00:01:08.181  9026  9026 W System.err: 	at com.tencent.msdk.stat.DeviceInfo.getAllDeviceInfo(DeviceInfo.java:388)
+10-28 00:01:08.181  9026  9026 W System.err: 	at com.tencent.msdk.framework.tools.MSDKJniHelper.getDeciceInfoStr(MSDKJniHelper.java:421)
+10-28 00:01:08.181  9026  9026 W System.err: 	at com.tencent.msdk.api.refactor.MSDKInterfaceNative.init(Native Method)
+10-28 00:01:08.181  9026  9026 W System.err: 	at com.tencent.msdk.api.refactor.MSDKInterfaceImpl.Initialized(MSDKInterfaceImpl.java:74)
+10-28 00:01:08.181  9026  9026 W System.err: 	at com.tencent.msdk.api.WGPlatform.Initialized(WGPlatform.java:88)
+10-28 00:01:08.181  9026  9026 W System.err: 	at com.actgames.fci.AppDelegater.onCreate(AppDelegater.java:61)
+10-28 00:01:08.181  9026  9026 W System.err: 	at com.actgames.fci.MainActivity.onCreate(MainActivity.java:53)
+10-28 00:01:08.181  9026  9026 W System.err: 	at android.app.Activity.performCreate(Activity.java:7136)
+10-28 00:01:08.181  9026  9026 W System.err: 	at android.app.Activity.performCreate(Activity.java:7127)
+10-28 00:01:08.181  9026  9026 W System.err: 	at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1271)
+10-28 00:01:08.181  9026  9026 W System.err: 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2893)
+10-28 00:01:08.181  9026  9026 W System.err: 	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:3048)
+10-28 00:01:08.181  9026  9026 W System.err: 	at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:78)
+10-28 00:01:08.181  9026  9026 W System.err: 	at android.app.servertransaction.TransactionExecutor.executeCallbacks(TransactionExecutor.java:108)
+10-28 00:01:08.181  9026  9026 W System.err: 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:68)
+10-28 00:01:08.181  9026  9026 W System.err: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1808)
+10-28 00:01:08.181  9026  9026 W System.err: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+10-28 00:01:08.181  9026  9026 W System.err: 	at android.os.Looper.loop(Looper.java:193)
+10-28 00:01:08.181  9026  9026 W System.err: 	at android.app.ActivityThread.main(ActivityThread.java:6669)
+10-28 00:01:08.181  9026  9026 W System.err: 	at java.lang.reflect.Method.invoke(Native Method)
+10-28 00:01:08.181  9026  9026 W System.err: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+10-28 00:01:08.181  9026  9026 W System.err: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:858)
+10-28 00:01:08.181  9026  9026 W System.err: java.lang.NumberFormatException: For input string: "3000000000"
+10-28 00:01:08.181  9026  9026 W System.err: 	at java.lang.Integer.parseInt(Integer.java:618)
+10-28 00:01:08.181  9026  9026 W System.err: 	at java.lang.Integer.parseInt(Integer.java:650)
+10-28 00:01:08.181  9026  9026 W System.err: 	at com.tencent.msdk.stat.DeviceInfo.getCpuInfo(DeviceInfo.java:344)
+10-28 00:01:08.181  9026  9026 W System.err: 	at com.tencent.msdk.stat.DeviceInfo.getAllDeviceInfo(DeviceInfo.java:400)
+10-28 00:01:08.181  9026  9026 W System.err: 	at com.tencent.msdk.framework.tools.MSDKJniHelper.getDeciceInfoStr(MSDKJniHelper.java:421)
+10-28 00:01:08.181  9026  9026 W System.err: 	at com.tencent.msdk.api.refactor.MSDKInterfaceNative.init(Native Method)
+10-28 00:01:08.181  9026  9026 W System.err: 	at com.tencent.msdk.api.refactor.MSDKInterfaceImpl.Initialized(MSDKInterfaceImpl.java:74)
+10-28 00:01:08.181  9026  9026 W System.err: 	at com.tencent.msdk.api.WGPlatform.Initialized(WGPlatform.java:88)
+10-28 00:01:08.182  9026  9026 W System.err: 	at com.actgames.fci.AppDelegater.onCreate(AppDelegater.java:61)
+10-28 00:01:08.182  9026  9026 W System.err: 	at com.actgames.fci.MainActivity.onCreate(MainActivity.java:53)
+10-28 00:01:08.182  9026  9026 W System.err: 	at android.app.Activity.performCreate(Activity.java:7136)
+10-28 00:01:08.182  9026  9026 W System.err: 	at android.app.Activity.performCreate(Activity.java:7127)
+10-28 00:01:08.182  9026  9026 W System.err: 	at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1271)
+10-28 00:01:08.182  9026  9026 W System.err: 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2893)
+10-28 00:01:08.182  9026  9026 W System.err: 	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:3048)
+10-28 00:01:08.182  9026  9026 W System.err: 	at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:78)
+10-28 00:01:08.182  9026  9026 W System.err: 	at android.app.servertransaction.TransactionExecutor.executeCallbacks(TransactionExecutor.java:108)
+10-28 00:01:08.182  9026  9026 W System.err: 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:68)
+10-28 00:01:08.182  9026  9026 W System.err: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1808)
+10-28 00:01:08.182  9026  9026 W System.err: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+10-28 00:01:08.182  9026  9026 W System.err: 	at android.os.Looper.loop(Looper.java:193)
+10-28 00:01:08.182  9026  9026 W System.err: 	at android.app.ActivityThread.main(ActivityThread.java:6669)
+10-28 00:01:08.182  9026  9026 W System.err: 	at java.lang.reflect.Method.invoke(Native Method)
+10-28 00:01:08.182  9026  9026 W System.err: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+10-28 00:01:08.182  9026  9026 W System.err: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:858)
+10-28 00:01:08.197  9026  9035 W System  : A resource failed to call close. 
+10-28 00:01:08.290  1926  2242 I ActivityManager: Process com.tencent.tmgp.fcicv (pid 9026) has died: fore TOP 
+10-28 00:01:08.197  9026  9035 W System  : A resource failed to call close. 
+10-28 00:01:08.290  1771  1771 I Zygote  : Process 9026 exited cleanly (4)
+10-28 00:01:08.291  1926  1944 W libprocessgroup: kill(-9026, 9) failed: No such process
+10-28 00:01:08.291  1926  1944 I libprocessgroup: Successfully killed process cgroup uid 10085 pid 9026 in 0ms
+10-28 00:01:08.297  9087  9087 W cent.tmgp.fcic: Unexpected CPU variant for X86 using defaults: x86
+10-28 00:01:08.305  1926  1943 I ActivityManager: Start proc 9087:com.tencent.tmgp.fcicv/u0a85 for activity com.tencent.tmgp.fcicv/com.actgames.fci.MainActivity
+10-28 00:01:08.313  9087  9087 I cent.tmgp.fcic: The ClassLoaderContext is a special shared library.
+10-28 00:01:08.448  9087  9087 I TpnsSecurity: JNI_OnLoad

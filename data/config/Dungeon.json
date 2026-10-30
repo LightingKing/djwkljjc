@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "table": "Dungeon",
+  "observedCount": 0,
+  "rowCount": 0,
+  "completeness": "error",
+  "sourceFiles": [
+    "config-samples-live.jsonl"
+  ],
+  "sourceRecords": [
+    {
+      "name": "config-samples-live.jsonl",
+      "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\config-samples-live.jsonl",
+      "sha256": "85e1ca251f8355208917cf14a1aee0c5f1c419e8f0ee017a5723a19996daeb54"
+    }
+  ],
+  "rowsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+  "schema": {
+    "types": [
+      "unknown"
+    ]
+  },
+  "rows": [],
+  "selectedError": "attempt to get length of a nil value"
+}

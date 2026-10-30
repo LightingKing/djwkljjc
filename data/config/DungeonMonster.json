@@ -1,0 +1,312 @@
+{
+  "schemaVersion": 1,
+  "table": "DungeonMonster",
+  "observedCount": 916,
+  "rowCount": 4,
+  "completeness": "partial",
+  "sourceFiles": [
+    "story-config.json"
+  ],
+  "sourceRecords": [
+    {
+      "name": "story-config.json",
+      "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\story-config.json",
+      "sha256": "dd1d3b4b6e4815df53852b92bc58dafdf4acbb1dada32bc3bc37d6f569d07638"
+    }
+  ],
+  "rowsSha256": "30c1ab0ef9d2bf9dfe7982de1bd6ac7b13350de692e5da897b3e13302f777f66",
+  "schema": {
+    "types": [
+      "object"
+    ],
+    "fields": {
+      "aiFilename": {
+        "types": [
+          "string"
+        ]
+      },
+      "bornAnim": {
+        "types": [
+          "array"
+        ],
+        "items": {
+          "types": [
+            "integer"
+          ]
+        }
+      },
+      "dungeonID": {
+        "types": [
+          "integer"
+        ]
+      },
+      "failedDesc": {
+        "types": [
+          "array"
+        ],
+        "items": {
+          "types": [
+            "integer"
+          ]
+        }
+      },
+      "hintShow": {
+        "types": [
+          "integer"
+        ]
+      },
+      "level": {
+        "types": [
+          "array"
+        ],
+        "items": {
+          "types": [
+            "integer"
+          ]
+        }
+      },
+      "levelUpIndex": {
+        "types": [
+          "array"
+        ]
+      },
+      "monsterId": {
+        "types": [
+          "array"
+        ],
+        "items": {
+          "types": [
+            "integer"
+          ]
+        }
+      },
+      "musicID": {
+        "types": [
+          "string"
+        ]
+      },
+      "recommendID": {
+        "types": [
+          "array"
+        ]
+      },
+      "showDesc": {
+        "types": [
+          "array"
+        ]
+      },
+      "showType": {
+        "types": [
+          "array"
+        ],
+        "items": {
+          "types": [
+            "integer"
+          ]
+        }
+      },
+      "stageID": {
+        "types": [
+          "string"
+        ]
+      },
+      "stageIcon": {
+        "types": [
+          "integer"
+        ]
+      },
+      "team1Affix": {
+        "types": [
+          "array"
+        ]
+      },
+      "team2Affix": {
+        "types": [
+          "array"
+        ]
+      },
+      "winParam": {
+        "types": [
+          "array"
+        ],
+        "items": {
+          "types": [
+            "integer"
+          ]
+        }
+      }
+    }
+  },
+  "rows": [
+    {
+      "aiFilename": "team_ai_1",
+      "bornAnim": [
+        0,
+        0,
+        0
+      ],
+      "dungeonID": 1,
+      "failedDesc": [
+        3,
+        43,
+        0,
+        0
+      ],
+      "level": [
+        6,
+        6,
+        6,
+        6,
+        6,
+        6
+      ],
+      "levelUpIndex": [],
+      "monsterId": [
+        3004001,
+        3003001,
+        1008005,
+        4001098,
+        0,
+        0
+      ],
+      "musicID": "Stage_04",
+      "recommendID": [],
+      "showDesc": [],
+      "showType": [],
+      "stageID": "Stage_04",
+      "team1Affix": [],
+      "team2Affix": [],
+      "winParam": [
+        1
+      ]
+    },
+    {
+      "aiFilename": "Main_1_2_0002",
+      "bornAnim": [],
+      "dungeonID": 2,
+      "failedDesc": [
+        4,
+        14,
+        0,
+        0
+      ],
+      "level": [
+        5,
+        5,
+        5,
+        5,
+        5,
+        5
+      ],
+      "levelUpIndex": [],
+      "monsterId": [
+        1004005,
+        7008005,
+        0,
+        2013098,
+        2116098,
+        0
+      ],
+      "musicID": "Stage_04",
+      "recommendID": [],
+      "showDesc": [],
+      "showType": [],
+      "stageID": "Stage_04",
+      "stageIcon": 200041,
+      "team1Affix": [],
+      "team2Affix": [],
+      "winParam": [
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "aiFilename": "team_ai_2",
+      "bornAnim": [],
+      "dungeonID": 3,
+      "failedDesc": [
+        3,
+        43,
+        0,
+        0
+      ],
+      "level": [
+        11,
+        11,
+        11,
+        11,
+        11,
+        11
+      ],
+      "levelUpIndex": [],
+      "monsterId": [
+        1014005,
+        3001001,
+        3003001,
+        4004098,
+        2009098,
+        2105098
+      ],
+      "musicID": "Stage_04",
+      "recommendID": [],
+      "showDesc": [],
+      "showType": [],
+      "stageID": "Stage_04",
+      "team1Affix": [],
+      "team2Affix": [],
+      "winParam": [
+        1
+      ]
+    },
+    {
+      "aiFilename": "Main_1_4_0004",
+      "bornAnim": [],
+      "dungeonID": 4,
+      "failedDesc": [
+        4,
+        14,
+        0,
+        0
+      ],
+      "hintShow": 1,
+      "level": [
+        15,
+        15,
+        15,
+        15,
+        15,
+        15
+      ],
+      "levelUpIndex": [],
+      "monsterId": [
+        1007010,
+        1006005,
+        0,
+        2001098,
+        2118098,
+        0
+      ],
+      "musicID": "Stage_04",
+      "recommendID": [],
+      "showDesc": [],
+      "showType": [
+        0,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "stageID": "Stage_04",
+      "stageIcon": 200061,
+      "team1Affix": [],
+      "team2Affix": [],
+      "winParam": [
+        3,
+        3,
+        7
+      ]
+    }
+  ]
+}

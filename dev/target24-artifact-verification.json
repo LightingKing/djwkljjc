@@ -1,0 +1,54 @@
+{
+  "apk": "I:\\workspace\\mobilegame\\local-server\\ljjc\\client-patch\\output\\target24\\ljjc-offline-target24-2.0.4-universal.apk",
+  "coldStart": {
+    "package": "com.tencent.tmgp.fcicv",
+    "passed": null,
+    "records": [],
+    "requestedRuns": 0,
+    "serial": null
+  },
+  "metadata": {
+    "command": [
+      "C:\\Users\\Administrator\\AppData\\Local\\Android\\Sdk\\build-tools\\37.0.0\\aapt2.exe",
+      "dump",
+      "badging",
+      "I:\\workspace\\mobilegame\\local-server\\ljjc\\client-patch\\output\\target24\\ljjc-offline-target24-2.0.4-universal.apk"
+    ],
+    "exitCode": 0,
+    "outputSha256": "9897223f6e6ad38d52c76130a027f03973c0d975979b1a3da31cb9488492de83",
+    "package": "com.tencent.tmgp.fcicv",
+    "returncode": 0,
+    "targetSdk": "24",
+    "tool": "C:\\Users\\Administrator\\AppData\\Local\\Android\\Sdk\\build-tools\\37.0.0\\aapt2.exe",
+    "versionCode": "59162",
+    "versionName": "2.0.4"
+  },
+  "passed": true,
+  "schemaVersion": 1,
+  "sha256": {
+    "actual": "8e63b130cb925adb2c690f64b6a2802d4c4e223f1bf9db843ca4635bf6d2639d",
+    "expected": "8e63b130cb925adb2c690f64b6a2802d4c4e223f1bf9db843ca4635bf6d2639d",
+    "matches": true
+  },
+  "signature": {
+    "command": [
+      "C:\\Users\\Administrator\\AppData\\Local\\Android\\Sdk\\build-tools\\37.0.0\\apksigner.bat",
+      "verify",
+      "--verbose",
+      "I:\\workspace\\mobilegame\\local-server\\ljjc\\client-patch\\output\\target24\\ljjc-offline-target24-2.0.4-universal.apk"
+    ],
+    "exitCode": 0,
+    "outputSha256": "ba69c4fcb7da8726cf4807ad67511bbfa99034016c90330535de1d1743555df9",
+    "returncode": 0,
+    "schemes": {
+      "v1": true,
+      "v2": true,
+      "v3": true,
+      "v3.1": false,
+      "v3.2": false
+    },
+    "signerCount": 1,
+    "tool": "C:\\Users\\Administrator\\AppData\\Local\\Android\\Sdk\\build-tools\\37.0.0\\apksigner.bat",
+    "verified": true
+  }
+}

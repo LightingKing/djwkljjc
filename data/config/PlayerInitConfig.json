@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "table": "PlayerInitConfig",
+  "observedCount": 0,
+  "rowCount": 0,
+  "completeness": "error",
+  "sourceFiles": [
+    "starter-config-live.jsonl"
+  ],
+  "sourceRecords": [
+    {
+      "name": "starter-config-live.jsonl",
+      "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\starter-config-live.jsonl",
+      "sha256": "bb3dd78b742365ede9dd45f359be5d9df7786d7307e6082e4e92deb9cb3acfd9"
+    }
+  ],
+  "rowsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+  "schema": {
+    "types": [
+      "unknown"
+    ]
+  },
+  "rows": [],
+  "selectedError": "attempt to get length of a nil value"
+}

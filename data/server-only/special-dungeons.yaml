@@ -1,0 +1,36 @@
+# Local sandbox values for M5.5.  The original service is retired and the
+# checked-in APK extraction does not contain complete server tables.  These
+# values are D-level local fixtures used only to keep the client loop
+# playable; they are not claims about the historical economy.
+provenance: local-sandbox
+confidence: D
+generated: 2026-10-28
+resource_types:
+  power: 6
+  gold: 7
+stages:
+  gold:
+    id: 900001
+    energy_cost: 1
+    reward:
+      - {type: 7, id: 0, param: 0, count: 5000}
+  tower:
+    id: 900101
+    floors: 10
+    energy_cost: 0
+    reward_per_floor:
+      - {type: 7, id: 0, param: 0, count: 1000}
+  maze:
+    id: 900201
+    layers: 10
+    energy_cost: 1
+    reward:
+      - {type: 7, id: 0, param: 0, count: 1000}
+      - {type: 11, id: 910001, param: 0, count: 1}
+  tournament:
+    id: 900301
+    stages: 10
+    energy_cost: 0
+    reward:
+      - {type: 7, id: 0, param: 0, count: 1500}
+      - {type: 11, id: 920001, param: 0, count: 1}

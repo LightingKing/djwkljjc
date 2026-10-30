@@ -1,0 +1,14 @@
+# Runtime dependencies (Python 3.12)
+protobuf==6.33.5
+lz4==4.4.5
+cryptography==46.0.7
+
+# Tooling used by the planned client-patch/data-extraction pipeline.
+# These are kept here so a clean development environment is reproducible;
+# the running local server does not import UnityPy or requests today.
+UnityPy==1.25.4
+requests==2.32.5
+PyYAML==6.0.2
+
+# Optional development capture tooling. Install only when collecting traces.
+# frida-tools>=12,<17

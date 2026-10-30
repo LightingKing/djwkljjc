@@ -1,0 +1,305 @@
+{
+  "schemaVersion": 1,
+  "table": "CollectionsScenes",
+  "observedCount": 19,
+  "rowCount": 19,
+  "completeness": "complete_observed",
+  "sourceFiles": [
+    "starter-config-live.jsonl"
+  ],
+  "sourceRecords": [
+    {
+      "name": "starter-config-live.jsonl",
+      "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\starter-config-live.jsonl",
+      "sha256": "bb3dd78b742365ede9dd45f359be5d9df7786d7307e6082e4e92deb9cb3acfd9"
+    }
+  ],
+  "rowsSha256": "d9125c0baab861fbf2575fabcb3e0e80e6b1aa976bb738b7f86f7d0f71a89d03",
+  "schema": {
+    "types": [
+      "object"
+    ],
+    "fields": {
+      "bgmName": {
+        "types": [
+          "string"
+        ]
+      },
+      "bgmRes": {
+        "types": [
+          "string"
+        ]
+      },
+      "effectRes": {
+        "types": [
+          "string"
+        ]
+      },
+      "hide": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "id": {
+        "types": [
+          "integer"
+        ]
+      },
+      "isDayType": {
+        "types": [
+          "boolean"
+        ]
+      },
+      "openTime": {
+        "types": [
+          "string"
+        ]
+      },
+      "taskId": {
+        "types": [
+          "integer"
+        ]
+      },
+      "textureRes": {
+        "types": [
+          "string"
+        ]
+      },
+      "unlockType": {
+        "types": [
+          "integer"
+        ]
+      }
+    }
+  },
+  "rows": [
+    {
+      "bgmName": "Cheerful",
+      "bgmRes": "Cheerful",
+      "effectRes": "lobby_bg",
+      "hide": false,
+      "id": 0,
+      "isDayType": true,
+      "openTime": "2018-10-23 00:00:00",
+      "taskId": 0,
+      "textureRes": "lobby_bg",
+      "unlockType": 0
+    },
+    {
+      "bgmName": "Some Beautiful Day",
+      "bgmRes": "Some_Beautiful_Day",
+      "effectRes": "lobby_bg1",
+      "hide": false,
+      "id": 1,
+      "isDayType": true,
+      "openTime": "2018-10-23 00:00:00",
+      "taskId": 0,
+      "textureRes": "lobby_bg1",
+      "unlockType": 0
+    },
+    {
+      "bgmName": "Solo Grand Piano Love",
+      "bgmRes": "Solo_Grand_Piano_Love",
+      "effectRes": "stage_bg_8",
+      "hide": false,
+      "id": 3,
+      "isDayType": false,
+      "openTime": "2018-10-23 00:00:00",
+      "taskId": 0,
+      "textureRes": "stage_bg_8",
+      "unlockType": 0
+    },
+    {
+      "bgmName": "Long Nights",
+      "bgmRes": "Long_Nights",
+      "effectRes": "stage_bg_1",
+      "hide": false,
+      "id": 31001,
+      "isDayType": false,
+      "openTime": "2018-10-23 00:00:00",
+      "taskId": 31001,
+      "textureRes": "stage_bg_1",
+      "unlockType": 1
+    },
+    {
+      "bgmName": "Quest For Glory",
+      "bgmRes": "Quest_For_Glory",
+      "effectRes": "social_wide_bg",
+      "hide": false,
+      "id": 31002,
+      "isDayType": true,
+      "openTime": "2018-11-05 06:00:00",
+      "taskId": 0,
+      "textureRes": "social_wide_bg",
+      "unlockType": 2
+    },
+    {
+      "bgmName": "Tease",
+      "bgmRes": "Tease",
+      "effectRes": "stage_bg_3",
+      "hide": false,
+      "id": 31003,
+      "isDayType": false,
+      "openTime": "2028-10-23 00:00:00",
+      "taskId": 0,
+      "textureRes": "stage_bg_3",
+      "unlockType": 2
+    },
+    {
+      "bgmName": "Wake Up Call",
+      "bgmRes": "Wake_Up_Call",
+      "effectRes": "stage_bg_5",
+      "hide": false,
+      "id": 31004,
+      "isDayType": true,
+      "openTime": "2028-10-23 00:00:00",
+      "taskId": 0,
+      "textureRes": "stage_bg_5",
+      "unlockType": 2
+    },
+    {
+      "bgmName": "Funky Soul",
+      "bgmRes": "Funky_Soul",
+      "effectRes": "stage_bg_6",
+      "hide": false,
+      "id": 31005,
+      "isDayType": false,
+      "openTime": "2018-10-23 00:00:00",
+      "taskId": 31005,
+      "textureRes": "stage_bg_6",
+      "unlockType": 1
+    },
+    {
+      "bgmName": "In The Arms Of Home",
+      "bgmRes": "In_The_Arms_Of_Home",
+      "effectRes": "stage_bg_7",
+      "hide": false,
+      "id": 31006,
+      "isDayType": true,
+      "openTime": "2028-10-23 00:00:00",
+      "taskId": 0,
+      "textureRes": "stage_bg_7",
+      "unlockType": 2
+    },
+    {
+      "bgmName": "Rivers Of Sadness",
+      "bgmRes": "Rivers_Of_Sadness",
+      "effectRes": "stage_bg_9",
+      "hide": false,
+      "id": 31007,
+      "isDayType": true,
+      "openTime": "2018-10-23 00:00:00",
+      "taskId": 31007,
+      "textureRes": "stage_bg_9",
+      "unlockType": 1
+    },
+    {
+      "bgmName": "Restful Full",
+      "bgmRes": "Restful_Full",
+      "effectRes": "stage_bg_10",
+      "hide": false,
+      "id": 31008,
+      "isDayType": false,
+      "openTime": "2018-10-23 00:00:00",
+      "taskId": 31008,
+      "textureRes": "stage_bg_10",
+      "unlockType": 1
+    },
+    {
+      "bgmName": "Epic Performance",
+      "bgmRes": "Epic_Performance",
+      "effectRes": "stage_bg_11",
+      "hide": false,
+      "id": 31009,
+      "isDayType": false,
+      "openTime": "2018-10-23 00:00:00",
+      "taskId": 31009,
+      "textureRes": "stage_bg_11",
+      "unlockType": 1
+    },
+    {
+      "bgmName": "One Groove For The Hip-hop",
+      "bgmRes": "One_Groove_For_The_Hip-hop",
+      "effectRes": "stage_bg_12",
+      "hide": false,
+      "id": 31010,
+      "isDayType": true,
+      "openTime": "2028-10-23 00:00:00",
+      "taskId": 0,
+      "textureRes": "stage_bg_12",
+      "unlockType": 2
+    },
+    {
+      "bgmName": "Sleeping Peacefully",
+      "bgmRes": "Sleeping_Peacefully",
+      "effectRes": "stage_bg_13",
+      "hide": false,
+      "id": 31011,
+      "isDayType": true,
+      "openTime": "2028-10-23 00:00:00",
+      "taskId": 0,
+      "textureRes": "stage_bg_13",
+      "unlockType": 2
+    },
+    {
+      "bgmName": "Pleasant Afternoon",
+      "bgmRes": "Pleasant_Afternoon",
+      "effectRes": "stage_bg_14",
+      "hide": false,
+      "id": 31012,
+      "isDayType": true,
+      "openTime": "2028-10-23 00:00:00",
+      "taskId": 0,
+      "textureRes": "stage_bg_14",
+      "unlockType": 2
+    },
+    {
+      "bgmName": "Momentum",
+      "bgmRes": "Momentum",
+      "effectRes": "stage_bg_15",
+      "hide": false,
+      "id": 31013,
+      "isDayType": true,
+      "openTime": "2018-10-23 00:00:00",
+      "taskId": 0,
+      "textureRes": "stage_bg_15",
+      "unlockType": 0
+    },
+    {
+      "bgmName": "Halloween",
+      "bgmRes": "Halloween",
+      "effectRes": "stage_bg_16",
+      "hide": false,
+      "id": 31014,
+      "isDayType": false,
+      "openTime": "2018-10-25 06:00:00",
+      "taskId": 0,
+      "textureRes": "stage_bg_16",
+      "unlockType": 2
+    },
+    {
+      "bgmName": "I Play For Love",
+      "bgmRes": "I_Play_For_Love",
+      "effectRes": "GachaAD22_BG_Ani",
+      "hide": true,
+      "id": 31015,
+      "isDayType": true,
+      "openTime": "2018-11-25 00:00:00",
+      "taskId": 0,
+      "textureRes": "stage_bg_17",
+      "unlockType": 2
+    },
+    {
+      "bgmName": "A Waltz For Christmas",
+      "bgmRes": "a_waltz_for_christmas",
+      "effectRes": "stage_bg_18",
+      "hide": false,
+      "id": 31016,
+      "isDayType": false,
+      "openTime": "2018-12-12 06:00:00",
+      "taskId": 0,
+      "textureRes": "stage_bg_18",
+      "unlockType": 2
+    }
+  ]
+}

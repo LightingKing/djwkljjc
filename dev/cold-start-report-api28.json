@@ -1,0 +1,38 @@
+{
+  "serial": "emulator-5562",
+  "package": "com.tencent.tmgp.fcicv",
+  "runs": 5,
+  "passed": false,
+  "records": [
+    {
+      "run": 1,
+      "startedAt": "2026-10-27T20:21:06.3668414Z",
+      "focusedPackage": false,
+      "fatalLogLines": 1
+    },
+    {
+      "run": 2,
+      "startedAt": "2026-10-27T20:21:09.6719299Z",
+      "focusedPackage": false,
+      "fatalLogLines": 2
+    },
+    {
+      "run": 3,
+      "startedAt": "2026-10-27T20:21:13.0014293Z",
+      "focusedPackage": false,
+      "fatalLogLines": 2
+    },
+    {
+      "run": 4,
+      "startedAt": "2026-10-27T20:21:16.2780904Z",
+      "focusedPackage": false,
+      "fatalLogLines": 2
+    },
+    {
+      "run": 5,
+      "startedAt": "2026-10-27T20:21:19.5637387Z",
+      "focusedPackage": false,
+      "fatalLogLines": 2
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "table": "ActorLevel",
+  "observedCount": 0,
+  "rowCount": 0,
+  "completeness": "error",
+  "sourceFiles": [
+    "combat-config-live.jsonl"
+  ],
+  "sourceRecords": [
+    {
+      "name": "combat-config-live.jsonl",
+      "path": "I:\\workspace\\mobilegame\\analysis\\ljjc-local\\combat-config-live.jsonl",
+      "sha256": "dbf87819c02e022903c42ddfe6db813c7496a08dacca5f48e45d2fa060ba2abc"
+    }
+  ],
+  "rowsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+  "schema": {
+    "types": [
+      "unknown"
+    ]
+  },
+  "rows": [],
+  "selectedError": "attempt to get length of a nil value"
+}

@@ -1,0 +1,1 @@
+{"table":"TowerGroupUnlockLv","source":"analysis/lua-decompiled/xlsx__towergroupunlocklv.lua","sourceSha256":"e3d3b9fe3efcc1a63333a00ecafa7cd2468e16ed832af4716a61c5b35e7e6210","provenance":"original APK 2.0.4 config module (FCI-decoded, unluac-decompiled), evaluated as data","rowCount":3,"rows":[{"level":11,"groupId":1},{"level":25,"groupId":2},{"level":35,"groupId":3}]}

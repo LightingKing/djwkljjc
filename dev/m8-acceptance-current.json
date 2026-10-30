@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "root": "I:\\workspace\\mobilegame\\local-server\\ljjc",
+  "archive": {
+    "path": "I:\\workspace\\mobilegame\\local-server\\ljjc\\delivery\\ljjc-offline-server.zip",
+    "sha256": "8618c8d4cc1983ade4be82f1b96de9ecd87ce413405f31e66e5cd66e5d7c098e",
+    "entries": 205,
+    "sensitiveEntries": [],
+    "manifestValid": true,
+    "manifestError": null,
+    "passed": true
+  },
+  "regression": null,
+  "deliveryHealth": {
+    "status": "ok",
+    "coverageInterfaces": 84,
+    "passed": true
+  },
+  "passed": true
+}

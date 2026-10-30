@@ -1,0 +1,967 @@
+{
+  "schemaVersion": 1,
+  "table": "ChapterInfo",
+  "observedCount": 35,
+  "rowCount": 35,
+  "completeness": "complete_observed",
+  "sourceFiles": [
+    "xlsx__chapterinfo.lua"
+  ],
+  "sourceRecords": [
+    {
+      "name": "xlsx__chapterinfo.lua",
+      "path": "analysis/lua-decompiled/xlsx__chapterinfo.lua",
+      "sha256": "a6f148474e9b4e7ab26d9becb0c8c13d0e76df14952d799d4703fc3465fc1970"
+    }
+  ],
+  "generatedFrom": "data/client-tables/ChapterInfo.json",
+  "provenance": "original APK 2.0.4 config module (FCI-decoded, unluac-decompiled), evaluated as data",
+  "rowsSha256": "fd25468938e96560bda875fa789aa67c82c2b2c03fda1406387129c8671fd829",
+  "schema": {
+    "types": [
+      "object"
+    ],
+    "fields": {
+      "chapterId": {
+        "types": [
+          "integer"
+        ]
+      },
+      "chapterIndex": {
+        "types": [
+          "integer"
+        ]
+      },
+      "dungeonId": {
+        "types": [
+          "array"
+        ],
+        "items": {
+          "types": [
+            "integer"
+          ]
+        }
+      },
+      "dungeonTypeStar": {
+        "types": [
+          "integer"
+        ]
+      },
+      "keyDungeonId": {
+        "types": [
+          "array"
+        ],
+        "items": {
+          "types": [
+            "integer"
+          ]
+        }
+      },
+      "maxRandomDungeon": {
+        "types": [
+          "integer"
+        ]
+      },
+      "preChapterId": {
+        "types": [
+          "integer"
+        ]
+      },
+      "randomDungeonInfo": {
+        "types": [
+          "array"
+        ]
+      },
+      "storyChapterId": {
+        "types": [
+          "integer"
+        ]
+      },
+      "trainingId": {
+        "types": [
+          "integer"
+        ]
+      },
+      "type": {
+        "types": [
+          "integer"
+        ]
+      }
+    }
+  },
+  "rows": [
+    {
+      "keyDungeonId": [
+        8
+      ],
+      "maxRandomDungeon": 3,
+      "chapterId": 1,
+      "storyChapterId": 1001,
+      "dungeonId": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "type": 2,
+      "chapterIndex": 1,
+      "randomDungeonInfo": [],
+      "trainingId": 2001
+    },
+    {
+      "keyDungeonId": [
+        17
+      ],
+      "maxRandomDungeon": 3,
+      "chapterId": 2,
+      "storyChapterId": 1002,
+      "dungeonId": [
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "type": 2,
+      "preChapterId": 1,
+      "chapterIndex": 2,
+      "randomDungeonInfo": [],
+      "trainingId": 2002
+    },
+    {
+      "keyDungeonId": [
+        29
+      ],
+      "maxRandomDungeon": 3,
+      "chapterId": 3,
+      "storyChapterId": 1003,
+      "dungeonId": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29
+      ],
+      "type": 2,
+      "preChapterId": 2,
+      "chapterIndex": 3,
+      "randomDungeonInfo": [],
+      "trainingId": 2003
+    },
+    {
+      "keyDungeonId": [
+        43
+      ],
+      "maxRandomDungeon": 3,
+      "chapterId": 4,
+      "storyChapterId": 1004,
+      "dungeonId": [
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        5102
+      ],
+      "type": 2,
+      "preChapterId": 3,
+      "chapterIndex": 4,
+      "randomDungeonInfo": []
+    },
+    {
+      "keyDungeonId": [
+        60
+      ],
+      "maxRandomDungeon": 3,
+      "chapterId": 5,
+      "storyChapterId": 1005,
+      "dungeonId": [
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        5103,
+        5903
+      ],
+      "type": 2,
+      "preChapterId": 4,
+      "chapterIndex": 5,
+      "randomDungeonInfo": []
+    },
+    {
+      "keyDungeonId": [
+        81
+      ],
+      "maxRandomDungeon": 3,
+      "chapterId": 6,
+      "storyChapterId": 1006,
+      "dungeonId": [
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        5104,
+        5105,
+        5904
+      ],
+      "type": 2,
+      "preChapterId": 5,
+      "chapterIndex": 6,
+      "randomDungeonInfo": []
+    },
+    {
+      "keyDungeonId": [
+        105
+      ],
+      "maxRandomDungeon": 3,
+      "chapterId": 7,
+      "storyChapterId": 1007,
+      "dungeonId": [
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        99,
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        5106,
+        5107,
+        5906
+      ],
+      "type": 2,
+      "preChapterId": 6,
+      "chapterIndex": 7,
+      "randomDungeonInfo": []
+    },
+    {
+      "keyDungeonId": [
+        132
+      ],
+      "maxRandomDungeon": 3,
+      "chapterId": 8,
+      "storyChapterId": 1008,
+      "dungeonId": [
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119,
+        120,
+        121,
+        122,
+        123,
+        124,
+        125,
+        126,
+        127,
+        128,
+        129,
+        130,
+        131,
+        132,
+        5108,
+        5109,
+        5908
+      ],
+      "type": 2,
+      "preChapterId": 7,
+      "chapterIndex": 8,
+      "randomDungeonInfo": []
+    },
+    {
+      "keyDungeonId": [
+        162
+      ],
+      "maxRandomDungeon": 3,
+      "chapterId": 9,
+      "storyChapterId": 1009,
+      "dungeonId": [
+        133,
+        134,
+        135,
+        136,
+        137,
+        138,
+        139,
+        140,
+        141,
+        142,
+        143,
+        144,
+        145,
+        146,
+        147,
+        148,
+        149,
+        150,
+        151,
+        152,
+        153,
+        154,
+        155,
+        156,
+        157,
+        158,
+        159,
+        160,
+        161,
+        162,
+        5110,
+        5111,
+        5911,
+        5910
+      ],
+      "type": 2,
+      "preChapterId": 8,
+      "chapterIndex": 9,
+      "randomDungeonInfo": []
+    },
+    {
+      "keyDungeonId": [
+        195
+      ],
+      "maxRandomDungeon": 3,
+      "chapterId": 10,
+      "storyChapterId": 1010,
+      "dungeonId": [
+        163,
+        164,
+        165,
+        166,
+        167,
+        168,
+        169,
+        170,
+        171,
+        172,
+        173,
+        174,
+        175,
+        176,
+        177,
+        178,
+        179,
+        180,
+        181,
+        182,
+        183,
+        184,
+        185,
+        186,
+        187,
+        188,
+        189,
+        190,
+        191,
+        192,
+        193,
+        194,
+        195,
+        5112,
+        5113,
+        5114,
+        5912
+      ],
+      "type": 2,
+      "preChapterId": 9,
+      "chapterIndex": 10,
+      "randomDungeonInfo": []
+    },
+    {
+      "keyDungeonId": [
+        228
+      ],
+      "maxRandomDungeon": 3,
+      "chapterId": 11,
+      "storyChapterId": 1011,
+      "dungeonId": [
+        196,
+        197,
+        198,
+        199,
+        200,
+        201,
+        202,
+        203,
+        204,
+        205,
+        206,
+        207,
+        208,
+        209,
+        210,
+        211,
+        212,
+        213,
+        214,
+        215,
+        216,
+        217,
+        218,
+        219,
+        220,
+        221,
+        222,
+        223,
+        224,
+        225,
+        226,
+        227,
+        228,
+        5115,
+        5116,
+        5117
+      ],
+      "type": 2,
+      "preChapterId": 10,
+      "chapterIndex": 11,
+      "randomDungeonInfo": []
+    },
+    {
+      "keyDungeonId": [
+        261
+      ],
+      "maxRandomDungeon": 3,
+      "chapterId": 12,
+      "storyChapterId": 1012,
+      "dungeonId": [
+        229,
+        230,
+        231,
+        232,
+        233,
+        234,
+        235,
+        236,
+        237,
+        238,
+        239,
+        240,
+        241,
+        242,
+        243,
+        244,
+        245,
+        246,
+        247,
+        248,
+        249,
+        250,
+        251,
+        252,
+        253,
+        254,
+        255,
+        256,
+        257,
+        258,
+        259,
+        260,
+        261,
+        5118,
+        5119,
+        5120
+      ],
+      "type": 2,
+      "preChapterId": 11,
+      "chapterIndex": 12,
+      "randomDungeonInfo": []
+    },
+    {
+      "type": 1,
+      "chapterIndex": 1,
+      "chapterId": 1001,
+      "randomDungeonInfo": [],
+      "dungeonId": [
+        2011,
+        2012,
+        2013
+      ],
+      "keyDungeonId": [
+        2011,
+        2012,
+        2013
+      ]
+    },
+    {
+      "type": 1,
+      "preChapterId": 1,
+      "chapterIndex": 2,
+      "chapterId": 1002,
+      "randomDungeonInfo": [],
+      "dungeonId": [
+        2021,
+        2022,
+        2023
+      ],
+      "keyDungeonId": [
+        2021,
+        2022,
+        2023
+      ]
+    },
+    {
+      "type": 1,
+      "preChapterId": 2,
+      "chapterIndex": 3,
+      "chapterId": 1003,
+      "randomDungeonInfo": [],
+      "dungeonId": [
+        2031,
+        2032,
+        2033,
+        5201
+      ],
+      "keyDungeonId": [
+        2031,
+        2032,
+        2033
+      ]
+    },
+    {
+      "type": 1,
+      "preChapterId": 3,
+      "chapterIndex": 4,
+      "chapterId": 1004,
+      "randomDungeonInfo": [],
+      "dungeonId": [
+        2041,
+        2042,
+        2043,
+        5202,
+        5301
+      ],
+      "keyDungeonId": [
+        2041,
+        2042,
+        2043
+      ]
+    },
+    {
+      "type": 1,
+      "preChapterId": 4,
+      "chapterIndex": 5,
+      "chapterId": 1005,
+      "randomDungeonInfo": [],
+      "dungeonId": [
+        2051,
+        2052,
+        2053,
+        5203
+      ],
+      "keyDungeonId": [
+        2051,
+        2052,
+        2053
+      ]
+    },
+    {
+      "type": 1,
+      "preChapterId": 5,
+      "chapterIndex": 6,
+      "chapterId": 1006,
+      "randomDungeonInfo": [],
+      "dungeonId": [
+        2061,
+        2062,
+        2063,
+        5204,
+        5205
+      ],
+      "keyDungeonId": [
+        2061,
+        2062,
+        2063
+      ]
+    },
+    {
+      "type": 1,
+      "preChapterId": 6,
+      "chapterIndex": 7,
+      "chapterId": 1007,
+      "randomDungeonInfo": [],
+      "dungeonId": [
+        2071,
+        2072,
+        2073,
+        5206,
+        5207,
+        5302
+      ],
+      "keyDungeonId": [
+        2071,
+        2072,
+        2073
+      ]
+    },
+    {
+      "type": 1,
+      "preChapterId": 7,
+      "chapterIndex": 8,
+      "chapterId": 1008,
+      "randomDungeonInfo": [],
+      "dungeonId": [
+        2081,
+        2082,
+        2083,
+        5208,
+        5209
+      ],
+      "keyDungeonId": [
+        2081,
+        2082,
+        2083
+      ]
+    },
+    {
+      "type": 1,
+      "preChapterId": 8,
+      "chapterIndex": 9,
+      "chapterId": 1009,
+      "randomDungeonInfo": [],
+      "dungeonId": [
+        2091,
+        2092,
+        2093,
+        5210,
+        5211
+      ],
+      "keyDungeonId": [
+        2091,
+        2092,
+        2093
+      ]
+    },
+    {
+      "type": 1,
+      "preChapterId": 9,
+      "chapterIndex": 10,
+      "chapterId": 1010,
+      "randomDungeonInfo": [],
+      "dungeonId": [
+        2101,
+        2102,
+        2103,
+        5212,
+        5213,
+        5303
+      ],
+      "keyDungeonId": [
+        2101,
+        2102,
+        2103
+      ]
+    },
+    {
+      "type": 1,
+      "preChapterId": 10,
+      "chapterIndex": 11,
+      "chapterId": 1011,
+      "randomDungeonInfo": [],
+      "dungeonId": [
+        2111,
+        2112,
+        2113,
+        5214,
+        5215
+      ],
+      "keyDungeonId": [
+        2111,
+        2112,
+        2113
+      ]
+    },
+    {
+      "type": 1,
+      "preChapterId": 11,
+      "chapterIndex": 12,
+      "chapterId": 1012,
+      "randomDungeonInfo": [],
+      "dungeonId": [
+        2121,
+        2122,
+        2123,
+        5216,
+        5217
+      ],
+      "keyDungeonId": [
+        2121,
+        2122,
+        2123
+      ]
+    },
+    {
+      "type": 6,
+      "chapterIndex": 1,
+      "chapterId": 2001,
+      "randomDungeonInfo": [],
+      "dungeonId": [
+        5001,
+        5002
+      ],
+      "keyDungeonId": [
+        5001,
+        5002
+      ]
+    },
+    {
+      "type": 6,
+      "preChapterId": 1,
+      "chapterIndex": 2,
+      "chapterId": 2002,
+      "randomDungeonInfo": [],
+      "dungeonId": [
+        5003,
+        5004
+      ],
+      "keyDungeonId": [
+        5003,
+        5004
+      ]
+    },
+    {
+      "type": 6,
+      "preChapterId": 2,
+      "chapterIndex": 3,
+      "chapterId": 2003,
+      "randomDungeonInfo": [],
+      "dungeonId": [
+        5005,
+        5006
+      ],
+      "keyDungeonId": [
+        5005,
+        5006
+      ]
+    },
+    {
+      "type": 11,
+      "preChapterId": 1,
+      "chapterIndex": 1,
+      "chapterId": 3001,
+      "randomDungeonInfo": [],
+      "dungeonId": [
+        11011,
+        11012,
+        11013,
+        11014
+      ],
+      "keyDungeonId": [
+        11011,
+        11012,
+        11013,
+        11014
+      ]
+    },
+    {
+      "type": 11,
+      "preChapterId": 4,
+      "chapterIndex": 2,
+      "keyDungeonId": [
+        11021,
+        11022,
+        11023
+      ],
+      "chapterId": 3002,
+      "randomDungeonInfo": [],
+      "dungeonId": [
+        11021,
+        11022,
+        11023
+      ],
+      "dungeonTypeStar": 4
+    },
+    {
+      "type": 11,
+      "preChapterId": 5,
+      "chapterIndex": 3,
+      "keyDungeonId": [
+        11031,
+        11032,
+        11033,
+        11034
+      ],
+      "chapterId": 3003,
+      "randomDungeonInfo": [],
+      "dungeonId": [
+        11031,
+        11032,
+        11033,
+        11034
+      ],
+      "dungeonTypeStar": 7
+    },
+    {
+      "type": 11,
+      "preChapterId": 6,
+      "chapterIndex": 4,
+      "keyDungeonId": [
+        11041,
+        11042,
+        11043
+      ],
+      "chapterId": 3004,
+      "randomDungeonInfo": [],
+      "dungeonId": [
+        11041,
+        11042,
+        11043
+      ],
+      "dungeonTypeStar": 11
+    },
+    {
+      "type": 11,
+      "preChapterId": 7,
+      "chapterIndex": 5,
+      "keyDungeonId": [
+        11051,
+        11052,
+        11053
+      ],
+      "chapterId": 3005,
+      "randomDungeonInfo": [],
+      "dungeonId": [
+        11051,
+        11052,
+        11053
+      ],
+      "dungeonTypeStar": 14
+    },
+    {
+      "type": 11,
+      "preChapterId": 8,
+      "chapterIndex": 6,
+      "keyDungeonId": [
+        11061,
+        11062,
+        11063
+      ],
+      "chapterId": 3006,
+      "randomDungeonInfo": [],
+      "dungeonId": [
+        11061,
+        11062,
+        11063
+      ],
+      "dungeonTypeStar": 17
+    },
+    {
+      "type": 11,
+      "preChapterId": 9,
+      "chapterIndex": 7,
+      "keyDungeonId": [
+        11071,
+        11072,
+        11073,
+        11074
+      ],
+      "chapterId": 3007,
+      "randomDungeonInfo": [],
+      "dungeonId": [
+        11071,
+        11072,
+        11073,
+        11074
+      ],
+      "dungeonTypeStar": 20
+    },
+    {
+      "type": 11,
+      "preChapterId": 10,
+      "chapterIndex": 8,
+      "keyDungeonId": [
+        11081,
+        11082,
+        11083
+      ],
+      "chapterId": 3008,
+      "randomDungeonInfo": [],
+      "dungeonId": [
+        11081,
+        11082,
+        11083
+      ],
+      "dungeonTypeStar": 24
+    }
+  ]
+}
