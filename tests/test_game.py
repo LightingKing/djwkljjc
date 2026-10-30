@@ -147,8 +147,17 @@ class GameTests(unittest.TestCase):
             auth = "AccountToken " + token
             self.assertIsNone(game.handle_http("GET", "/unknown", authorization=auth))
             self.assertEqual(game.handle_http("POST", "/fci/login/", authorization=auth), (200, {}))
-            self.assertEqual(game.handle_http("GET", "/fci/applylist/", authorization=auth), (200, []))
-            self.assertEqual(game.handle_http("GET", "/fci/applylist/", authorization=auth.replace("AccountToken", "Token")), (200, []))
+            status, applications = game.handle_http("GET", "/fci/applylist/", authorization=auth)
+            self.assertEqual(status, 200)
+            application_ids = [row["playerId"] for row in applications]
+            self.assertEqual(len(application_ids), 2)
+            self.assertEqual(len(set(application_ids)), len(application_ids))
+            self.assertTrue(all(pid.startswith("local-bot-") for pid in application_ids))
+            self.assertTrue(all(row["name"] and row["level"] >= 1 for row in applications))
+            self.assertEqual(game.handle_http("GET", "/fci/applylist/", authorization=auth.replace("AccountToken", "Token")),
+                             (200, applications))
+            self.assertEqual(game.handle_http("POST", "/fci/login/", authorization=auth), (200, {}))
+            self.assertEqual(game.handle_http("GET", "/fci/applylist/", authorization=auth), (200, applications))
             self.assertEqual(
                 game.handle_http("GET", "/fci/Signboard/", authorization=auth),
                 (200, {"signboard": 101, "unlockedSignboardId": [101], "checkSignboardTime": 0}),

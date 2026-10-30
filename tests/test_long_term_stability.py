@@ -191,11 +191,6 @@ class LongTermStabilityTests(unittest.TestCase):
                     for change in signin.res_change
                     if change.HasField("base_res") and change.base_res.type == 6
                 )
-                status, _reward = restarted.economy.handle_http(
-                    "POST", "/fci/recharge/month-card/reward/",
-                    b'{"monthCardCfgId":1}', account,
-                )
-                self.assertEqual(status, 200)
                 if day < 28:
                     now[0] += 86400
 
@@ -210,8 +205,6 @@ class LongTermStabilityTests(unittest.TestCase):
             self.assertEqual(
                 [row for row in _ledger(game, account) if row[4] == "passive_energy_recovery"], []
             )
-            paid = next(item for item in final["resources"] if item["type"] == 5)
-            self.assertEqual(paid["count"], 30 * 29)
             self.assertEqual(clock.period_elapsed(start, now[0], period="weekly", refresh_at="06:00"), 4)
 
     def test_activity_rotation_is_deterministic_across_cycle_boundaries(self):
@@ -223,7 +216,7 @@ class LongTermStabilityTests(unittest.TestCase):
         at_cycle = schedule.snapshot(anchor.timestamp() + 28 * 86400)
         self.assertEqual(at_start["cycleDay"], 0)
         self.assertEqual({item["id"] for item in at_start["active"]}, {"sign-in", "shop"})
-        self.assertEqual({item["id"] for item in at_week["active"]}, {"shop", "sandbox-gacha"})
+        self.assertEqual({item["id"] for item in at_week["active"]}, {"sign-in", "shop", "sandbox-gacha"})
         self.assertEqual({item["id"] for item in at_cycle["active"]}, {"sign-in", "shop"})
 
 

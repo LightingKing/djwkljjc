@@ -63,7 +63,8 @@ _SAFE_DEFAULTS: Dict[str, Any] = {
     "/fci/recentcontact/": [],
     # ApiTempEntranceSwitch.get.switchInfo is repeated; an empty list is
     # explicitly safe because OnTempEntranceSwitch loops over it.
-    "/fci/temp-entrance-switch/": {"switchInfo": []},
+    "/fci/temp-entrance-switch/": {"switchInfo": [{"type": 107, "switch": 1,
+        "isWindowEntrance": False, "startTime": "", "stopTime": "", "tips": ""}]},
     # ApiEquipCustomMatch.result.equipCustomMatch is a repeated map.
     "/fci/equip/custom-match/": {"equipCustomMatch": {}},
     # ApiAsyncPvpRecordInfo.result fields and their proto3 defaults.

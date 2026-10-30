@@ -7,6 +7,8 @@ the real response message types used by the client.
 
 from __future__ import annotations
 
+from server.core.reset import policy_for, period_due
+
 import json
 import random
 import re
@@ -36,7 +38,7 @@ ACTIVITY_TYPE_TEN_CHECKIN = 32  # ActivityType_TenCheckin
 ACTIVITY_TYPE_EVERYDAY_CHECKIN = 46  # ActivityType_EveryDayCheckin
 # Welfare2 shows a tab only for an open activity; these local login rewards
 # stay open even when the activity schedule has no phase for them.
-ALWAYS_ON_ACTIVITY_TYPES = (ACTIVITY_TYPE_CONTINUOUS_LOGIN, ACTIVITY_TYPE_EVERYDAY_CHECKIN)
+ALWAYS_ON_ACTIVITY_TYPES = (ACTIVITY_TYPE_CONTINUOUS_LOGIN, ACTIVITY_TYPE_EVERYDAY_CHECKIN, ACTIVITY_TYPE_TEN_CHECKIN)
 # Activity ids the client keys on: WlfEveryDayCheckin only renders 46001/46003
 # and ActivitySigninGift has rows for 32001/46001/46003.
 DEFAULT_ACTIVITY_IDS = {
@@ -44,7 +46,6 @@ DEFAULT_ACTIVITY_IDS = {
     ACTIVITY_TYPE_TEN_CHECKIN: 32001,
     ACTIVITY_TYPE_EVERYDAY_CHECKIN: 46001,
 }
-LOCAL_DAY_ANCHOR = 6 * 3600  # 06:00 UTC daily reset when no schedule anchor exists
 
 # Permanent challenge-menu modes (gold/material dungeon, tower, deploy, ...).
 # Window_Activity lists only ActivityCategory_WeeklyActivity (1) / Tournament
@@ -197,17 +198,11 @@ class LocalEvents:
     def _now(self) -> int:
         return int(self._clock())
 
-    def _date(self) -> str:
-        return self._date_at(self._now())
+    def _date(self, *, signin: bool = False) -> str:
+        return self._date_at(self._now(), signin=signin)
 
-    def _date_at(self, timestamp: int) -> str:
-        daily_key = getattr(self.game, "daily_key", None)
-        if callable(daily_key):
-            try:
-                return str(daily_key(int(timestamp)))
-            except (TypeError, ValueError):
-                pass
-        return datetime.fromtimestamp(int(timestamp), timezone.utc).date().isoformat()
+    def _date_at(self, timestamp: int, *, signin: bool = False) -> str:
+        return policy_for(self.game).day_key(timestamp, signin=signin)
 
     def _state(self, profile: Mapping[str, Any]) -> dict[str, Any]:
         account_id = int(profile["account_id"])
@@ -421,7 +416,7 @@ class LocalEvents:
     def _signin_message(self, state: Mapping[str, Any], today: str) -> Message:
         cls = message_factory.GetMessageClass(self.game._pool.FindMessageTypeByName("ApiSignin.result"))
         result = cls()
-        result.signed = bool(state.get("signin_date") == today)
+        result.signed = not period_due(state.get("signin_date"), today)
         result.days = int(state.get("signin_days", 0))
         result.gift_got.extend(int(x) for x in state.get("signin_gifts", []))
         return result
@@ -431,9 +426,9 @@ class LocalEvents:
         if method not in {"GET", "POST"}:
             return 405, {"error": "method_not_allowed", "message": "GET or POST required"}
         state = self._state(profile)
-        today = self._date()
+        today = self._date(signin=True)
         changes: list[Message] = []
-        if method == "POST" and state.get("signin_date") != today:
+        if method == "POST" and period_due(state.get("signin_date"), today):
             state["signin_days"] = max(0, int(state.get("signin_days", 0))) + 1
             state["signin_date"] = today
             changes = self._pay(profile, self._daily_signin_drop(profile, today))
@@ -472,6 +467,10 @@ class LocalEvents:
         return 200, result
 
     def _activity_signin(self, method: str, path: str, profile: Mapping[str, Any]):
+        with self.game.atomic_mutation():
+            return self._activity_signin_atomic(method, path, profile)
+
+    def _activity_signin_atomic(self, method: str, path: str, profile: Mapping[str, Any]):
         """``fci/activity-signin[/<id>]`` (WlfTenCheckin): ActivitySigninGift by day.
 
         ``day`` is the row the client may claim today (``index == day and not
@@ -482,13 +481,15 @@ class LocalEvents:
         parts = path.rstrip("/").split("/")
         activity_id = int(parts[-1]) if parts and parts[-1].isdigit() else DEFAULT_ACTIVITY_IDS[ACTIVITY_TYPE_TEN_CHECKIN]
         rows = ACTIVITY_SIGNIN_GIFTS.get(activity_id, {})
+        if activity_id != 32001 or not rows:
+            return 404, {"error": "activity_signin_not_open"}
         last_day = max(rows) if rows else 0
         state = self._state(profile)
         records = dict(state.get("activity_signins", {}))
         record = dict(records.get(str(activity_id), {"day": 0, "date": ""}))
-        today = self._date()
+        today = self._date(signin=True)
         claimed = int(record.get("day", 0))
-        signed_today = record.get("date") == today
+        signed_today = not period_due(record.get("date"), today)
         changes: list[Message] = []
         if method == "POST" and not signed_today and (not last_day or claimed < last_day):
             claimed += 1
@@ -535,22 +536,35 @@ class LocalEvents:
             return 409, {"error": "activity_not_open", "activityId": int(suffix)}
         start = int(activity.timestamp_start)
         now = self._now()
-        now_day = (now - start) // 86400 + 1 if now >= start else 0
+        policy = policy_for(self.game)
+        now_day = policy.day_index(now, signin=True) - policy.day_index(start, signin=True) + 1 if now >= start else 0
         state = self._state(profile)
         dirty = False
         window = "%d:%d" % (activity_id, start)
-        if state.get("everyday_window") != window:
+        if "everyday_migrated_dates" in state:
+            mapped = []
+            for value in state.pop("everyday_migrated_dates"):
+                stamp = policy.parse_config_datetime(value)
+                number = policy.day_index(stamp, signin=True) - policy.day_index(start, signin=True) + 1
+                if 1 <= number <= len(ACTIVITY_SIGNIN_GIFTS.get(activity_id, {})):
+                    mapped.append(number)
+            state["everyday_window"] = window
+            state["everyday_signins"] = sorted(set(mapped))
+            dirty = True
+        old_start = _int_or(str(state.get("everyday_window") or "").rsplit(":", 1)[-1], 0)
+        rollback = old_start > start
+        if not rollback and state.get("everyday_window") != window:
             state["everyday_window"] = window
             state["everyday_signins"] = []
             dirty = True
         days = sorted({int(x) for x in state.get("everyday_signins", [])})
         rows = ACTIVITY_SIGNIN_GIFTS.get(activity_id, {})
         changes: list[Message] = []
-        if method == "POST" and now_day in rows and now_day not in days:
+        if method == "POST" and not rollback and now_day in rows and now_day not in days:
             changes = self._pay(profile, rows[now_day])
             days = sorted(set(days) | {now_day})
             state["everyday_signins"] = days
-            state["everyday_date"] = self._date()
+            state["everyday_date"] = self._date(signin=True)
             dirty = True
         if dirty:
             self._save(profile, state)
@@ -573,7 +587,7 @@ class LocalEvents:
         """
         today = self._date()
         last = str(state.get("continuous_date") or "")
-        if last == today:
+        if not period_due(last, today):
             return False
         streak = max(0, int(state.get("continuous_days", 0) or 0))
         best = max(int(state.get("continuous_max", 0) or 0), streak)
@@ -649,7 +663,7 @@ class LocalEvents:
                 self._save(profile, state)
             return {
                 "continuousLoginResult": _message_to_dict(self._continuous_message(state)),
-                "signinResult": _message_to_dict(self._signin_message(state, self._date())),
+                "signinResult": _message_to_dict(self._signin_message(state, self._date(signin=True))),
             }
 
     def _web_signin(self, method: str, body: Any, profile: Mapping[str, Any]):
@@ -667,7 +681,7 @@ class LocalEvents:
         state = self._state(profile)
         today = self._date()
         rewards: list[dict[str, int]] = []
-        signed = state.get("web_signin_date") == today
+        signed = not period_due(state.get("web_signin_date"), today)
         days = max(0, int(state.get("web_signin_days", 0)))
         if method == "POST" and not signed:
             days += 1
@@ -970,26 +984,18 @@ class LocalEvents:
                     setattr(result, field, True)
             return 200, result
 
-        # Condition reward / achievement boxes.
+        # Qualification for the retired return-player campaign is server-only.
+        # Until a dated eligibility/reward source exists, never grant a placeholder.
         if "conditionreward" in action:
             if method == "GET":
                 result = self._message("ApiConditionReward.get")
                 if result is None:
                     return None
-                result.has_reward_qualification = True
+                result.has_reward_qualification = False
                 result.is_reward_got = bool(state.get("condition_reward_got", False))
-                result.manual_box_reward.type = 7; result.manual_box_reward.count = 100
                 return 200, result
             if method == "POST":
-                result = self._message("ApiConditionReward.post")
-                if result is None:
-                    return None
-                reward = self._claim_activity_reward(profile, state, "condition-reward",
-                                                      {"type": 7, "id": 0, "count": 100, "param": 0})
-                state["condition_reward_got"] = True; self._save(profile, state)
-                if reward is not None:
-                    result.manual_box_res_change.add().CopyFrom(reward)
-                return 200, result
+                return 409, {"error": "condition_reward_not_eligible"}
             return 405, {"error": "method_not_allowed", "message": "GET or POST required"}
         if "achievementsummary" in action:
             if method != "GET":
@@ -1043,13 +1049,7 @@ class LocalEvents:
             kind = next((token for token in optional_activity if token in action), "activity")
             ident = str(request.get("id", request.get("activityId", request.get("subActivityId", 1))) or 1)
             if method == "POST":
-                reward = self._claim_activity_reward(profile, state, f"optional:{kind}:{ident}",
-                                                      {"type": 7, "id": 0, "count": 50, "param": 0})
-                self._save(profile, state)
-                changes = []
-                if reward is not None:
-                    changes.append({"type": 7, "id": 0, "count": 50, "countDelta": 50, "param": 0})
-                return 200, {"ok": True, "claimed": reward is not None, "reward": changes, "resChange": changes}
+                return 409, {"error": "activity_not_open"}
             if "task" in action:
                 return 200, {"tasks": [{"id": int(ident), "progress": 1, "maxProgress": 1, "rewardGot": f"optional:task:{ident}" in state.get("activity_claims", [])}], "reward": [], "received": []}
             if "dispatch" in action:
@@ -1156,19 +1156,17 @@ class LocalEvents:
             rows.append(_message_to_dict(activity))
         return rows
 
-    @staticmethod
-    def _anchor_timestamp(snapshot: Optional[Mapping[str, Any]]) -> int:
+    def _anchor_timestamp(self, snapshot: Optional[Mapping[str, Any]]) -> int:
         """Schedule anchor (daily-reset aligned) as a Unix timestamp."""
         anchor = snapshot.get("anchor") if isinstance(snapshot, Mapping) else None
         if anchor:
             try:
-                value = datetime.fromisoformat(str(anchor).replace("Z", "+00:00"))
-                if value.tzinfo is None:
-                    value = value.replace(tzinfo=timezone.utc)
-                return int(value.timestamp())
+                return policy_for(self.game).parse_config_datetime(str(anchor))
             except (TypeError, ValueError):
                 pass
-        return LOCAL_DAY_ANCHOR
+        # Protobuf activity timestamps are unsigned; Jan 2 is the first
+        # positive 06:00 Beijing anchor after the Unix epoch.
+        return policy_for(self.game).day_start_from_index(1)
 
     def _cycle_start(self, snapshot: Optional[Mapping[str, Any]], now: int) -> int:
         """Start of the current schedule cycle, aligned to the anchor's time of day."""
@@ -1200,18 +1198,13 @@ class LocalEvents:
         cycle_start = self._cycle_start(snapshot, now)
         if activity_type == ACTIVITY_TYPE_EVERYDAY_CHECKIN:
             window = len(ACTIVITY_SIGNIN_GIFTS.get(activity.activity_id, {})) or 10
-            try:
-                period = int((snapshot or {}).get("periodDays", 0) or 0)
-            except (TypeError, ValueError):
-                period = 0
-            if period <= 0:
-                # No schedule cycle: fixed windows from the daily-reset anchor.
-                cycle_start = self._anchor_timestamp(snapshot)
+            # Independent ten-day windows: a 28-day event rotation must not
+            # truncate days 9/10, and the client changes sign-in days at midnight.
+            policy = policy_for(self.game)
+            cycle_start = policy.period_start(self._anchor_timestamp(snapshot), signin=True)
             cycle_day = (now - cycle_start) // 86400
             start = cycle_start + (cycle_day // window) * window * 86400
             end = start + window * 86400
-            if period > 0:
-                end = min(end, cycle_start + period * 86400)
             activity.timestamp_preheat = start; activity.timestamp_start = start
             activity.timestamp_end = end - 1
             activity.forever = False
@@ -1262,6 +1255,8 @@ class LocalEvents:
         if explicit:
             activity_type = int(requested[0])
         always_on = response_type == "ApiActivity.result" and activity_type in ALWAYS_ON_ACTIVITY_TYPES
+        if always_on and activity_type == ACTIVITY_TYPE_EVERYDAY_CHECKIN:
+            return self._always_on_activity(cls, activity_type, now, schedule_snapshot)
         if schedule_snapshot is not None:
             active = schedule_snapshot.get("active", [])
             if explicit:
@@ -1310,8 +1305,10 @@ class LocalEvents:
         raw = (path or "").split("?", 1)[0].rstrip("/") or "/"
         route = raw[4:] if raw.startswith("/fci") else raw
         lower = route.lower(); method = method.upper()
-        if lower == "/activity" and method == "GET" and not urlsplit(path or "").query:
-            return self._activity_list(method)
+        if lower == "/activity" and method == "GET":
+            query = parse_qs(urlsplit(path or "").query, keep_blank_values=True)
+            if not {"type", "activityType"}.intersection(query):
+                return self._activity_list(method)
         if lower in {"/activity", "/activity-preopen", "/activity-open"} or lower.startswith("/activity/"):
             return self._activity(method, path)
         activity_api = self._activity_claim_api(method, path, body, profile)

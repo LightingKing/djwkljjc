@@ -28,24 +28,14 @@ class PushServiceTests(unittest.TestCase):
         self.assertEqual(service.register(second, account), "local-open-id")
         self.assertEqual(service.connection_count(account), 2)
 
-        delivered = service.red_point(account, {"mail": 1})
+        delivered = service.publish(account, "BasePushMessage", b"\x08\x01")
         self.assertEqual(delivered, 2)
-        self.assertEqual(first.messages, [(7, "ScRedPointData", b'{"mail":1}')])
-        self.assertEqual(second.messages, [(11, "ScRedPointData", b'{"mail":1}')])
+        self.assertEqual(first.messages, [(7, "BasePushMessage", b"\x08\x01")])
+        self.assertEqual(second.messages, [(11, "BasePushMessage", b"\x08\x01")])
 
         self.assertTrue(service.unregister(first))
         self.assertEqual(service.connection_count("local-open-id"), 1)
         self.assertFalse(service.unregister(first))
-
-    def test_event_helpers_use_local_json_payloads(self):
-        connection = _FakeConnection(4)
-        service = PushService()
-        service.register(connection, "player-1")
-        self.assertEqual(service.mail("player-1", {"id": 3}), 1)
-        self.assertEqual(service.payment("player-1", {"goods": "sandbox"}), 1)
-        self.assertEqual(service.chat("player-1", {"text": "hello"}), 1)
-        self.assertEqual([entry[1] for entry in connection.messages], ["ScMail", "ScPurchaseDelevery", "ScChat"])
-        self.assertEqual(json.loads(connection.messages[0][2]), {"id": 3})
 
     def test_failed_session_is_removed_and_unknown_account_is_noop(self):
         class Broken(_FakeConnection):

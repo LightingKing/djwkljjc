@@ -1,0 +1,11 @@
+{
+  "appVersion": "2.0.4.59162.0",
+  "patchVersion": 5,
+  "modules": [
+    {"source": "sources/login.lua", "target": "assetbundle/data/lua/window/login/login", "originalSha256": "7bb80bcd7dbede6d4be6027ea9936f165a62715ab1e7db4127d8406383a1d6c4"},
+    {"source": "sources/auth.lua", "target": "assetbundle/data/lua/window/auth/auth", "originalSha256": "08ee811367d6ca80896da4c11ec753f1908a7584043b32730c9c492bcfde911b"},
+    {"source": "sources/iaphandler.lua", "target": "assetbundle/data/lua/manager/iaphandler", "originalSha256": "0e84d01f67546752cb1f01e476f946bdc59c2851b8afb65b14ff72b35426e021"},
+    {"source": "sources/actorutil.lua", "target": "assetbundle/data/lua/common/actorutil", "originalSha256": "e8040bfde750f4ac7b03fee3e6f931ee21e5837dfa9badb1ae166d7fcb8840f8"},
+    {"source": "sources/resourceexchange.lua", "target": "assetbundle/data/lua/window/resourceexchange/resourceexchange", "originalSha256": "f79f11ee0dc50c63b7fe6193e20e63a06e4b58e6d02b188b88a2015c284e41fe"}
+  ]
+}

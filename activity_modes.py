@@ -26,6 +26,9 @@ Client evidence (analysis/lua-decompiled):
 """
 from __future__ import annotations
 
+from server.core.reset import policy_for, period_due
+from storage.compat import shared_process_lock
+
 import json
 import random
 import sys
@@ -107,16 +110,19 @@ DAILY_REFRESH = {_int((r.get("refreshRes") or {}).get("id")): (_int((r.get("refr
                                                                 _int(r.get("refreshLimit")))
                  for r in _rows("DailyRefresh")
                  if _int(r.get("type")) == 1 and _int((r.get("refreshRes") or {}).get("type")) == 11}
+WEEKLY_REFRESH = {_int((r.get("refreshRes") or {}).get("id")): (_int((r.get("refreshRes") or {}).get("count")),
+                                                                 _int(r.get("refreshLimit")))
+                  for r in _rows("DailyRefresh")
+                  if _int(r.get("type")) == 2 and _int((r.get("refreshRes") or {}).get("type")) == 11}
 
 DAY = 86400
-RESET_HOUR_UTC = 6  # Misc.dailyRefreshTime 06:00; serverNow is UTC (login utc_offset_seconds=0)
 UID_BASE = 9_000_000_000_000  # disjoint from dungeon.py's millisecond uids
 RES_PLAYER_EXP, RES_POWER, RES_GOLD, RES_ITEM, RES_EQUIP = 1, 6, 7, 11, 12
 ATTR_HP = 1
 DUNGEON_TYPE = {"material": 5, "gold": 9, "tower": 4, "triggered": 13}
 ACTIVITY_TYPE = {"material": 2, "gold": 17, "tower": 3, "triggered": 31}
 MAX_ACTOR_LEVEL = _int(MISC.get("maxActorLevel"), 60) or 60
-WEEKDAY_GRACE = 300  # a request sent just before UTC midnight still counts for that day
+WEEKDAY_GRACE = 300  # a request sent just before local midnight still counts for that day
 # Local policy when the schedule document is unavailable (events.py/YAML).
 DEFAULT_WEEKDAYS = {2001: [1, 4, 7], 2002: [2, 5, 7], 2003: [3, 6, 7]}
 
@@ -131,7 +137,7 @@ def _first_cost_id(dungeon_ids: list[int], default: int) -> int:
 
 GOLD_TICKET = _first_cost_id(sorted({_int(r.get("dungeonId")) for r in GOLD_LEVELS.values() if r.get("dungeonId")}), 80002)
 TRIGGERED_FIGHT_TICKET = _first_cost_id([8001], 80006)
-REFRESHED_ITEMS = tuple(item for item in (GOLD_TICKET, TRIGGERED_FIGHT_TICKET) if item in DAILY_REFRESH)
+REFRESHED_ITEMS = tuple(sorted(DAILY_REFRESH))
 
 
 def _costs(row: Optional[Mapping[str, Any]], key: str, multi: int = 1) -> list[dict[str, int]]:
@@ -262,12 +268,13 @@ class LocalActivityModes:
         return int(self._clock())
 
     def _day(self, now: Optional[int] = None) -> int:
-        return (int(self._now() if now is None else now) - RESET_HOUR_UTC * 3600) // DAY
+        return policy_for(self.game).day_index(self._now() if now is None else now)
 
     @staticmethod
     def _default_state() -> dict[str, Any]:
         return {
             "dailyRefresh": {},
+            "weeklyRefresh": {},
             "material": {"day": None, "records": {}},
             "gold": {"lastLevel": 0},
             "tower": {"day": None, "locked": False, "towerFloor": 0, "towerFloorRecord": 0,
@@ -640,47 +647,54 @@ class LocalActivityModes:
         return changes
 
     def refresh_daily_items(self, profile: Mapping[str, Any]) -> list[dict[str, Any]]:
-        """DailyRefresh type 1 for this module's tickets (80002 gold +2 cap 4,
-        80006 triggered fights +5 cap 5) once per 06:00 UTC day.  Never lowers
-        a balance.  Call before the login ItemPackage is built so the client's
-        fci/item/<id> cache (which gates the gold/triggered buttons) sees it."""
+        """Settle table-backed daily/weekly tickets with their markers atomically.
 
-        if not REFRESHED_ITEMS:
-            return []
-        today = self._day()
-        state = self._state(profile)
-        marks = state["dailyRefresh"]
-        due = {}
-        for item_id in REFRESHED_ITEMS:
-            last = marks.get(str(item_id))
-            days = 1 if last is None else today - _int(last)
-            if days > 0:
-                due[item_id] = min(days, 30)
-                marks[str(item_id)] = today
-        if not due:
-            return []
-        systems = self.game.systems
-        sys_state = systems._state(profile)
-        items = sys_state.setdefault("items", {})
-        changes = []
-        for item_id, days in due.items():
-            inc, limit = DAILY_REFRESH[item_id]
-            entry = dict(items.get(str(item_id)) or {})
-            current = new = _int(entry.get("count"))
-            for _ in range(days):
-                if new >= limit:
-                    break
-                new = min(limit, new + inc)
-            if new != current:
-                entry.update(count=new, gotTime=self._now())
-                entry.setdefault("isNew", False)
-                items[str(item_id)] = entry
-                changes.append({"baseRes": {"type": RES_ITEM, "id": item_id, "param": 0, "count": new,
-                                            "countDelta": new - current}})
-        if changes:
-            systems._save(profile, sys_state)
-        self._save(profile, state)
-        return changes
+        Missing/zero counts (80009 in the recovered table) grant nothing.
+        Offline accrual stops at the configured cap; rollback never replays a
+        previously settled period.  The scheduler can safely call this again.
+        """
+        with self._lock, shared_process_lock(self.game.db_path):
+            policy, now = policy_for(self.game), self._now()
+            state = self._state(profile)
+            sys_state = self.game.systems._state(profile)
+            items = sys_state.setdefault("items", {})
+            changes, dirty = [], False
+            for key, rules, current in (("dailyRefresh", DAILY_REFRESH, policy.day_index(now)),
+                                        ("weeklyRefresh", WEEKLY_REFRESH, policy.week_index(now))):
+                marks = state.setdefault(key, {})
+                for item_id, (increment, limit) in rules.items():
+                    if increment <= 0 or limit <= 0:
+                        continue
+                    previous = marks.get(str(item_id))
+                    periods = 1 if previous is None else current - _int(previous)
+                    if periods <= 0:
+                        continue
+                    marks[str(item_id)] = current
+                    dirty = True
+                    entry = dict(items.get(str(item_id)) or {})
+                    owned = _int(entry.get("count"))
+                    total = max(owned, min(limit, owned + periods * increment))
+                    if total == owned:
+                        continue
+                    entry.update(count=total, gotTime=now)
+                    entry.setdefault("isNew", False)
+                    items[str(item_id)] = entry
+                    changes.append({"baseRes": {"type": RES_ITEM, "id": item_id, "param": 0,
+                                                "count": total, "countDelta": total - owned}})
+            if not dirty:
+                return []
+            # Both inventories and period markers live in the game's database,
+            # including legacy split-store mode.  A crash cannot commit one
+            # without the other; do not call two independent module _save's.
+            with closing(self.game._connect()) as connection, connection:
+                connection.execute("BEGIN IMMEDIATE")
+                if changes:
+                    connection.execute("UPDATE local_system_state SET state_json = ?, updated_at = ? WHERE account_id = ?",
+                                       (json.dumps(sys_state, separators=(",", ":")), now, int(profile["account_id"])))
+                connection.execute("INSERT INTO activity_mode_state(account_id, state_json, updated_at) VALUES (?, ?, ?) "
+                                   "ON CONFLICT(account_id) DO UPDATE SET state_json = excluded.state_json, updated_at = excluded.updated_at",
+                                   (int(profile["account_id"]), json.dumps(state, separators=(",", ":")), now))
+            return changes
 
     # ------------------------------------------------------------ EXP
     @staticmethod
@@ -871,7 +885,7 @@ class LocalActivityModes:
     def _material_state(self, state: dict[str, Any]) -> dict[str, Any]:
         material = state["material"]
         today = self._day()
-        if material.get("day") != today:
+        if period_due(material.get("day"), today):
             material["day"] = today
             for record in (material.get("records") or {}).values():
                 record["doneTimes"] = 0
@@ -927,8 +941,8 @@ class LocalActivityModes:
         if not weekdays:
             return True
         now = self._now()
-        days = {datetime.fromtimestamp(now, timezone.utc).isoweekday(),
-                datetime.fromtimestamp(now - WEEKDAY_GRACE, timezone.utc).isoweekday()}
+        days = {policy_for(self.game).local_datetime(now).isoweekday(),
+                policy_for(self.game).local_datetime(now - WEEKDAY_GRACE).isoweekday()}
         return bool(days & set(weekdays))
 
     def _material_create(self, profile: Mapping[str, Any], body: Any) -> Response:
@@ -1004,7 +1018,9 @@ class LocalActivityModes:
         reward_changes = self._grant(profile, drops)
         tasks = getattr(self.game, "tasks", None)
         if tasks is not None:
-            tasks.on_battle_win(profile, dungeon_id, energy, mode="activity", stats=self._battle_stats(active))
+            tasks.on_battle_win(profile, dungeon_id, energy, mode="activity", stats=self._battle_stats(active),
+                                actor_uids=run.get("actor_uids") or (), dungeon_type=DUNGEON_TYPE["material"],
+                                activity_type=ACTIVITY_TYPE["material"], activity_id=int(run.get("activity_id") or 0))
         trigger = getattr(self, "trigger_passive_event", None)
         event = trigger(profile, dungeon_id) if trigger is not None else None
         return self._result(profile, won=True, res_change=[exp_entry] + energy_changes + reward_changes,
@@ -1078,10 +1094,17 @@ class LocalActivityModes:
         self._save(profile, state)
         tasks = getattr(self.game, "tasks", None)
         if tasks is not None:
-            tasks.on_battle_win(profile, dungeon_id, 0, mode="gold", stats=self._battle_stats(active))
+            tasks.on_battle_win(profile, dungeon_id, 0, mode="gold", stats=self._battle_stats(active),
+                                actor_uids=(run.get("actor_uids") or ()) if won else (), dungeon_type=DUNGEON_TYPE["gold"],
+                                activity_type=ACTIVITY_TYPE["gold"], activity_id=int(run.get("activity_id") or 0))
             if base_gold + kill_gold:
                 tasks.record(profile, "GoldGetM", base_gold + kill_gold)
-        return self._result(profile, won=won, res_change=gold[:2] + ticket, killCount=kills)
+        current_gold = self._resource_count(profile, RES_GOLD)
+        gold = [{"baseRes": {"type": RES_GOLD, "id": 0, "param": 0,
+                              "count": current_gold, "countDelta": base_gold}},
+                {"baseRes": {"type": RES_GOLD, "id": 0, "param": 0,
+                              "count": current_gold, "countDelta": kill_gold}}]
+        return self._result(profile, won=won, res_change=gold + ticket, killCount=kills)
 
     # ================================================== tower (type 3)
     # Window_Tower: GET fci/tower/summary/ {locked, towerFloor (next floor,
@@ -1093,7 +1116,7 @@ class LocalActivityModes:
     # actor; GU.GroupIsOK reads members[1..6]).  POST fci/tower-dungeon/
     # {dungeonId, selectActorGroupId, towerFloor} -> {dungeonUid, baseInfo,
     # resChange, enemyRecord{hp[], card[]}} (enemyRecord.hp is indexed).
-    # The cycle resets daily at 06:00 UTC (local policy); wipe targets are
+    # The cycle resets daily at 06:00 Beijing (local policy); wipe targets are
     # the TowerFloor.record checkpoints at/below the best floor.
     @staticmethod
     def _tower_group_count() -> int:
@@ -1135,7 +1158,7 @@ class LocalActivityModes:
     def _tower_state(self, profile: Mapping[str, Any], state: dict[str, Any]) -> dict[str, Any]:
         tower = state["tower"]
         today = self._day()
-        if tower.get("day") != today:
+        if period_due(tower.get("day"), today):
             tower.update(day=today, locked=False, towerFloor=0, confirmed={}, enemyRecord=None)
         if not isinstance(tower.get("actorGroups"), dict) or not tower["actorGroups"]:
             tower["actorGroups"] = self._tower_default_groups(profile)
@@ -1326,7 +1349,9 @@ class LocalActivityModes:
             res_change = self._grant(profile, (DUNGEON_REWARD.get(dungeon_id) or {}).get("dropDisplay") or [])
             tasks = getattr(self.game, "tasks", None)
             if tasks is not None:
-                tasks.on_battle_win(profile, dungeon_id, 0, mode="tower", floor=floor, stats=self._battle_stats(active))
+                tasks.on_battle_win(profile, dungeon_id, 0, mode="tower", floor=floor, stats=self._battle_stats(active),
+                                    actor_uids=run.get("actor_uids") or (), dungeon_type=DUNGEON_TYPE["tower"],
+                                    activity_type=ACTIVITY_TYPE["tower"], activity_id=int(run.get("activity_id") or 0))
         return self._result(profile, won=won, res_change=res_change, first=first,
                             towerFloor=_int(tower.get("towerFloor")))
 
@@ -1430,19 +1455,19 @@ class LocalActivityModes:
                 for mission_id in pool[:max(0, count)]]
 
     def _deploy_state(self, profile: Mapping[str, Any], state: dict[str, Any], *, reroll: bool = False) -> dict[str, Any]:
-        """Daily refresh (06:00 UTC): started missions stay, the rest are
+        """Daily refresh (06:00 Beijing): started missions stay, the rest are
         re-offered and accomplishNum restarts."""
 
         deploy = state["deploy"]
         today = self._day()
-        if deploy.get("day") != today or reroll:
+        if period_due(deploy.get("day"), today) or reroll:
             kept = [m for m in deploy.get("missions") or [] if _int(m.get("startTimestamp"))]
             fresh = self._offer_missions(profile, {_int(m.get("id")) for m in kept},
                                          self.DEPLOY_OFFER_COUNT - len(kept))
             deploy["missions"] = kept + fresh
-            if deploy.get("day") != today:
+            if period_due(deploy.get("day"), today):
                 deploy["accomplishNum"] = 0
-            deploy["day"] = today
+            deploy["day"] = max(_int(deploy.get("day")), today)
         return deploy
 
     def _deploy_payload(self, deploy: Mapping[str, Any]) -> dict[str, Any]:
@@ -1598,7 +1623,7 @@ class LocalActivityModes:
     def _triggered_state(self, state: dict[str, Any]) -> dict[str, Any]:
         trig = state["triggered"]
         today, now = self._day(), self._now()
-        if trig.get("day") != today:
+        if period_due(trig.get("day"), today):
             trig.update(day=today, finish=0, passiveCount=0)
         trig["events"] = [event for event in trig.get("events") or []
                           if _int(event.get("createTime")) + _int(event.get("lastTime")) > now]
@@ -1761,6 +1786,8 @@ class LocalActivityModes:
         grants = self._grant(profile, drops or [])
         tasks = getattr(self.game, "tasks", None)
         if tasks is not None:
-            tasks.on_battle_win(profile, dungeon_id, 0, mode="triggered", stats=self._battle_stats(active))
+            tasks.on_battle_win(profile, dungeon_id, 0, mode="triggered", stats=self._battle_stats(active),
+                                actor_uids=run.get("actor_uids") or (), dungeon_type=DUNGEON_TYPE["triggered"],
+                                activity_type=ACTIVITY_TYPE["triggered"], activity_id=int(run.get("activity_id") or 0))
         return self._result(profile, won=True, res_change=[exp_entry] + ticket + grants, exp_changes=exp_changes,
                             first=first, level_before=level_before)

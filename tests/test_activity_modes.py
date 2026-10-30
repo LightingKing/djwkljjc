@@ -6,6 +6,7 @@ import json
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 from contextlib import closing
 from datetime import datetime, timezone
 from pathlib import Path
@@ -125,7 +126,10 @@ class MaterialDungeonTests(ModeTestBase):
         self.assertEqual(self.resource(6), energy - 1)  # DungeonReward.cost
         # WeekActivity PATCHes fci/dungeon/{uid}/active/ (scene__scenefight).
         self.fight("/fci/dungeon/", uid, win=True)
-        result = self.ok("POST", f"/fci/activity-dungeon/{uid}/balance/", {})
+        # This assertion exercises the no-event branch.  Passive event success
+        # has its own seeded test; an unseeded roll made this test flaky.
+        with patch.object(self.modes, "_roll_pool", return_value=0):
+            result = self.ok("POST", f"/fci/activity-dungeon/{uid}/balance/", {})
         self.assertTrue(result["win"] and result["balanced"] and result["firstFinish"])
         self.assertEqual(self.resource(6), energy - 12)  # + costWin 11
         self.assertEqual(result["profits"], [])

@@ -15,9 +15,9 @@ plain-JSON shape that function reads and the claim endpoints of
 Only TaskInfo categories 1 (Routine, daily) and 2 (Main, chained through
 ``preTaskId``) are offered; every other category is listed in
 ``disableCategory`` so the client hides its tab.  Daily tasks, the daily
-active points and the milestone claims reset at 06:00 UTC (the bucket the
+active points and the milestone claims reset at 06:00 Beijing (the bucket the
 rest of the local server uses); the weekly active points reset on Monday
-06:00 UTC.  Rewards are paid from the client's own TaskInfo /
+06:00 Beijing.  Rewards are paid from the client's own TaskInfo /
 TaskActivePointReward / WeekActivePointReward tables through
 :func:`grants.grant_rewards`.
 
@@ -35,6 +35,8 @@ it as protobuf ``ScTasksChange``.  ``notifier`` is None by default (no-op).
 """
 
 from __future__ import annotations
+
+from server.core.reset import policy_for, period_due
 
 import json
 import logging
@@ -62,8 +64,6 @@ _ROOT = Path(__file__).resolve().parent
 _TABLE_DIR = _ROOT / "data" / "client-tables"
 _DESCRIPTOR = _ROOT / "data" / "descriptor_set.pb"
 
-RESET_HOUR_UTC = 6
-_DAY = 86400
 
 # TaskCategory enum (descriptor_set.pb).
 CATEGORY_ROUTINE = 1
@@ -234,18 +234,14 @@ class LocalTasks:
     def _now(self) -> int:
         return int(self._clock())
 
-    @staticmethod
-    def _day(now: int) -> int:
-        return (int(now) - RESET_HOUR_UTC * 3600) // _DAY
+    def _day(self, now: int) -> int:
+        return policy_for(self.game).day_index(now)
 
-    @classmethod
-    def _week(cls, now: int) -> int:
-        # Day 0 (1970-01-01) was a Thursday; +3 makes weeks start on Monday.
-        return (cls._day(now) + 3) // 7
+    def _week(self, now: int) -> int:
+        return policy_for(self.game).week_index(now)
 
-    @staticmethod
-    def _hour(now: int) -> int:
-        hour = (int(now) % _DAY) // 3600
+    def _hour(self, now: int) -> int:
+        hour = policy_for(self.game).local_datetime(now).hour
         return 24 if hour == 0 else hour  # TaskUtil.CheckTaskTime maps 0h to 24
 
     # ----------------------------------------------------------------- state
@@ -363,11 +359,11 @@ class LocalTasks:
         now = self._now()
         day, week = self._day(now), self._week(now)
         tasks = state["tasks"]
-        if state.get("day") != day:
+        if period_due(state.get("day"), day):
             for tid in ROUTINE_IDS:
                 tasks.pop(str(tid), None)
             state["day"], state["activePoint"], state["activePointRewardGot"] = day, 0, []
-        if state.get("week") != week:
+        if period_due(state.get("week"), week):
             state["week"], state["weekActivePoint"], state["weekRewardGot"] = week, 0, []
         changed: list[int] = []
         # Rewarding a task can unlock a successor whose state goal is already
@@ -425,7 +421,7 @@ class LocalTasks:
 
     def _mark_login(self, state: dict[str, Any]) -> list[int]:
         today = self._day(self._now())
-        if state.get("loginDay") == today:
+        if not period_due(state.get("loginDay"), today):
             return []
         state["loginDay"] = today
         # GameCenterLoginMTimes asks for a launch through the publisher's
@@ -471,7 +467,8 @@ class LocalTasks:
 
     def on_battle_win(self, profile: Mapping[str, Any], dungeon_id: int, energy_spent: int = 0, *,
                       mode: Optional[str] = None, floor: Optional[int] = None,
-                      stats: Optional[Mapping[str, Any]] = None) -> list[int]:
+                      stats: Optional[Mapping[str, Any]] = None, actor_uids=None,
+                      dungeon_type=0, activity_type=0, activity_id=0) -> list[int]:
         """Call once per won battle.
 
         ``mode`` is the local special mode ("gold", "tower", "maze",
@@ -514,6 +511,15 @@ class LocalTasks:
             changed += self._advance(state, KILL_ACTOR_ID_P0_M_TIMES, _int(stats.get("kills")), match=any_actor)
             return changed
 
+        cultivation = getattr(self.game, 'cultivation', None)
+        if cultivation is not None and actor_uids:
+            import actors
+            system = self.game.systems._state(profile)
+            actor_ids = [record['id'] for uid in actor_uids
+                         if (record := actors.get(profile, system, uid)) is not None]
+            cultivation.on_battle_win(profile, dungeon_id, actor_ids=actor_ids,
+                                      dungeon_type=dungeon_type, activity_type=activity_type,
+                                      activity_id=activity_id)
         return self._run(profile, mutate)
 
     def record(self, profile: Mapping[str, Any], goal: int | str, amount: int = 1, *,
@@ -558,10 +564,12 @@ class LocalTasks:
             rows.append({"id": task["id"], "progress": _int(entry.get("progress")),
                          "isDone": bool(entry.get("isDone")), "rewardGot": bool(entry.get("rewardGot")),
                          "endTime": 0})
+        cultivation = getattr(self.game, 'cultivation', None)
+        extra = cultivation.task_snapshot(profile) if cultivation is not None else {}
         return {
-            "tasks": rows,
+            "tasks": rows + extra.get('tasks', []),
             # Make the owned categories authoritative when the client merges.
-            "delTasks": [tid for tid in ROUTINE_IDS + MAIN_IDS if tid not in shown],
+            "delTasks": [tid for tid in ROUTINE_IDS + MAIN_IDS if tid not in shown] + extra.get('delTasks', []),
             "disableCategory": list(DISABLED_CATEGORIES),
             "activePoint": _int(state["activePoint"]),
             "activePointRewardGot": [_int(v) for v in state["activePointRewardGot"]],

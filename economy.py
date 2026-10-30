@@ -13,6 +13,8 @@ State that belongs to the economy is kept in a separate SQLite file so older
 
 from __future__ import annotations
 
+from server.core.reset import DEFAULT_RESET_POLICY, ResetPolicy, policy_for, period_due
+
 import json
 import random
 import re
@@ -518,7 +520,7 @@ def _parse_refresh_time(value: Any) -> tuple[int, int, int]:
     return hour, minute, second
 
 
-def next_shop_refresh(base_info: Mapping[str, Any], now: int) -> int:
+def next_shop_refresh(base_info: Mapping[str, Any], now: int, policy: ResetPolicy = DEFAULT_RESET_POLICY) -> int:
     """Next automatic refresh (UTC) from ShopType's refresh fields.
 
     ``refreshDayOfMonth`` (1-31) makes it monthly, otherwise
@@ -527,7 +529,7 @@ def next_shop_refresh(base_info: Mapping[str, Any], now: int) -> int:
     """
 
     hour, minute, second = _parse_refresh_time(base_info.get("refreshTimeInDay"))
-    current = datetime.fromtimestamp(int(now), timezone.utc)
+    current = policy.local_datetime(now)
     candidate = current.replace(hour=hour, minute=minute, second=second, microsecond=0)
     day_of_month = _int(base_info.get("refreshDayOfMonth"))
     day_of_week = _int(base_info.get("refreshDayOfWeek"))
@@ -624,6 +626,8 @@ class LocalEconomy:
         self._initialize()
 
     def _connect(self) -> sqlite3.Connection:
+        if (connection := self.game.transaction_connection()) is not None:
+            return connection
         connection = sqlite3.connect(str(self.db_path), timeout=10)
         connection.row_factory = sqlite3.Row
         configure_legacy_connection(connection)
@@ -647,16 +651,8 @@ class LocalEconomy:
         return int(self._clock())
 
     def _daily_key(self, value: int | None = None) -> str:
-        """Return the server's configured daily bucket for resettable rewards.
-
-        ``server.py`` injects a 06:00 local bucket on ``LocalGame``.  Direct
-        unit callers that construct the game without a server clock retain the
-        historical UTC-midnight fallback.
-        """
-        source = getattr(self.game, "daily_key", None)
-        if callable(source):
-            return str(source(self._now() if value is None else value))
-        return str((self._now() if value is None else int(value)) // 86400)
+        """The same local daily bucket for direct callers and HTTP service."""
+        return policy_for(self.game).day_key(self._now() if value is None else int(value))
 
     @staticmethod
     def _account_id(account: Mapping[str, Any]) -> int:
@@ -751,7 +747,7 @@ class LocalEconomy:
             "catalogVersion": version,
             "newShop": True,
             "refreshCount": 0,
-            "nextRefreshTime": next_shop_refresh(base, now),
+            "nextRefreshTime": next_shop_refresh(base, now, policy_for(self.game)),
             # refreshFree > 0: the first free refresh is available at once;
             # afterwards it is lastFreeRefreshTime + refreshFree, which is
             # exactly what OnRefresh computes from refreshTimeFree.
@@ -788,7 +784,7 @@ class LocalEconomy:
                 # refresh counter reset (UpdateWindow resets refreshCount too).
                 self._regenerate_shop(account_id, spec, shop, now=now, level=level)
                 shop["refreshCount"] = 0
-                shop["nextRefreshTime"] = next_shop_refresh(spec["baseInfo"], now)
+                shop["nextRefreshTime"] = next_shop_refresh(spec["baseInfo"], now, policy_for(self.game))
                 changed = True
             shops.append(shop)
         if [_int(shop.get("shopId")) for shop in state.get("shop", []) if isinstance(shop, dict)] != [
@@ -1080,7 +1076,7 @@ class LocalEconomy:
         key = f"{int(price_type)}:{int(params)}"
         record = records.get(key)
         today = self._daily_key()
-        if not isinstance(record, dict) or record.get("dayKey") != today:
+        if not isinstance(record, dict) or period_due(record.get("dayKey"), today):
             record = {"type": int(price_type), "params": int(params), "attendTimes": 0,
                       "startTime": 0, "dayKey": today}
             records[key] = record
@@ -1356,70 +1352,63 @@ class LocalEconomy:
         return result
 
     def _change_resources(self, profile: Mapping[str, Any], changes: list[Mapping[str, Any]]) -> tuple[bool, list[dict[str, int]], str | None]:
-        """Apply a resource batch atomically to the local profile.
+        """Apply one batch, including the total/paid currency relationship.
 
-        Requests frequently contain more than one delta for the same resource
-        (for example, a shop cost plus a refund).  Validating each negative
-        delta against the original balance independently allowed a batch such
-        as ``[-80, -80]`` to pass with a balance of 100 and then be clamped to
-        zero.  Aggregate the request by key before validation so the mutation
-        either applies in full or has no effect.
+        A type-27 delta is an independent paid-currency change and also
+        changes type 5. A negative type-5 delta spends free currency first.
+        Callers must not supply a second delta for the automatic counterpart.
         """
-        raw_resources = self._resources(profile)
-        # Collapse duplicate historical rows while preserving their first
-        # appearance.  This keeps all later reads and writes canonical.
-        resources: list[dict[str, int]] = []
-        index: dict[tuple[int, int, int], int] = {}
-        for item in raw_resources:
-            key = (item["type"], item["id"], item["param"])
-            existing = index.get(key)
-            if existing is None:
-                index[key] = len(resources)
-                resources.append(dict(item))
-            else:
-                resources[existing]["count"] += item["count"]
-
-        normalised: list[dict[str, int]] = []
-        aggregate: dict[tuple[int, int, int], int] = {}
-        for raw in changes:
-            rtype, rid, param, count = _int(raw.get("type")), _int(raw.get("id")), _int(raw.get("param")), _int(raw.get("count"))
-            value = {"type": rtype, "id": rid, "param": param, "count": count}
-            normalised.append(value)
-            key = (rtype, rid, param)
-            aggregate[key] = aggregate.get(key, 0) + count
-        deltas: list[dict[str, int]] = []
-        for key, total in aggregate.items():
-            current = resources[index[key]]["count"] if key in index else 0
-            if current + total < 0:
-                return False, [], "insufficient_resource"
-        for raw in normalised:
-            rtype, rid, param, count = raw["type"], raw["id"], raw["param"], raw["count"]
-            key = (rtype, rid, param)
-            if key not in index:
-                index[key] = len(resources)
-                resources.append({"type": rtype, "id": rid, "count": 0, "param": param})
-            resources[index[key]]["count"] += count
-            deltas.append({"type": rtype, "id": rid, "count": resources[index[key]]["count"], "param": param, "countDelta": count})
-        # Empty balances are kept at zero so the client can continue to bind
-        # the resource key; negative values are never persisted.
-        for item in resources:
-            if item["count"] < 0:
-                item["count"] = 0
-        account_id = int(profile["account_id"])
-        with self.game._lock, closing(self.game._connect()) as connection, connection:
-            updated = connection.execute(
-                "UPDATE game_profiles SET resources_json = ?, updated_at = ? WHERE account_id = ?",
-                (json.dumps(resources, separators=(",", ":")), self._now(), account_id),
-            )
-            if updated.rowcount != 1:
+        with self.game.atomic_mutation():
+            with closing(self.game._connect()) as connection:
+                row = connection.execute("SELECT resources_json FROM game_profiles WHERE account_id = ?",
+                                         (int(profile["account_id"]),)).fetchone()
+            if row is None:
                 return False, [], "profile_not_found"
-        # Keep the caller's authenticated snapshot in sync with the durable
-        # row.  Event and system handlers often perform several mutations in
-        # one request; leaving this mapping stale would make the next change
-        # rebuild from the original balance and overwrite prior rewards.
-        if isinstance(profile, dict):
-            profile["resources"] = resources
-        return True, deltas, None
+            current_profile = dict(profile)
+            current_profile["resources"] = json.loads(row["resources_json"] or "[]")
+            resources = self._resources(current_profile)
+            balances: dict[tuple[int, int, int], int] = {}
+            for item in resources:
+                key = (item["type"], item["id"], item["param"])
+                balances[key] = balances.get(key, 0) + item["count"]
+            before = dict(balances)
+            total_key, paid_key = (5, 0, 0), (27, 0, 0)
+            # Old saves could have a paid balance above the total. Preserve
+            # spendable money, and cap only the impossible paid portion.
+            balances[total_key] = max(0, balances.get(total_key, 0))
+            balances[paid_key] = min(balances[total_key], max(0, balances.get(paid_key, 0)))
+            aggregate: dict[tuple[int, int, int], int] = {}
+            for raw in changes:
+                key = (_int(raw.get("type")), _int(raw.get("id")), _int(raw.get("param")))
+                aggregate[key] = aggregate.get(key, 0) + _int(raw.get("count"))
+            # Apply direct paid additions/charges first, then normal spending.
+            paid_delta = aggregate.pop(paid_key, 0)
+            if balances[paid_key] + paid_delta < 0:
+                return False, [], "insufficient_resource"
+            balances[paid_key] += paid_delta
+            balances[total_key] += paid_delta
+            normal_delta = aggregate.pop(total_key, 0)
+            if balances[total_key] + normal_delta < 0:
+                return False, [], "insufficient_resource"
+            if normal_delta < 0:
+                free = balances[total_key] - balances[paid_key]
+                balances[paid_key] -= max(0, -normal_delta - free)
+            balances[total_key] += normal_delta
+            for key, delta in aggregate.items():
+                if balances.get(key, 0) + delta < 0:
+                    return False, [], "insufficient_resource"
+                balances[key] = balances.get(key, 0) + delta
+            result = [{"type": key[0], "id": key[1], "param": key[2], "count": count}
+                      for key, count in balances.items()]
+            deltas = [{**item, "countDelta": item["count"] - before.get((item["type"], item["id"], item["param"]), 0)}
+                      for item in result
+                      if item["count"] != before.get((item["type"], item["id"], item["param"]), 0)]
+            with closing(self.game._connect()) as connection, connection:
+                connection.execute("UPDATE game_profiles SET resources_json = ?, updated_at = ? WHERE account_id = ?",
+                                   (json.dumps(result, separators=(",", ":")), self._now(), int(profile["account_id"])))
+            if isinstance(profile, dict):
+                profile["resources"] = result
+            return True, deltas, None
 
     @staticmethod
     def _mall_record_key(mall_id: int) -> str:
@@ -1521,6 +1510,11 @@ class LocalEconomy:
         return self._change_resources(profile, [{"type": 5, "id": 0, "param": 0, "count": int(count)}])
 
     def _recharge_info(self, account: Mapping[str, Any], state: Dict[str, Any], recharge_type: Any = None) -> Response:
+        """Deprecated local-tool compatibility API; the 2.0.4 client uses LocalMall.
+
+        These synthetic recharge rewards do not represent the real month card
+        or first-purchase offer. New code must use mall.py's sandbox orders.
+        """
         info = self._recharge_state(state)
         fixed = []
         gifts = []

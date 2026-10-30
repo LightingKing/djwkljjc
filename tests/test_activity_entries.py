@@ -16,7 +16,7 @@ import re
 import sys
 import tempfile
 import unittest
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -31,7 +31,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import test_systems as _systems  # noqa: E402  (module import: its tests are not re-collected)
 
 DAY = 86400
-ANCHOR = int(datetime(2026, 10, 26, 6, tzinfo=timezone.utc).timestamp())  # a Monday
+ANCHOR = int(datetime(2026, 10, 26, 6, tzinfo=timezone(timedelta(hours=8))).timestamp())  # a Monday
 SHIPPED_SCHEDULE = ROOT / "data" / "server-only" / "activity-schedule.yaml"
 LUA_DIR = ROOT.parents[1] / "analysis" / "lua-decompiled"
 
@@ -41,7 +41,7 @@ ACTIVITY_SORT_ROW1 = [39, 40, 31, 27, 2, 3, 17, 30, 10, 5, 20, 42, 18, 23]
 UNLOCK_LEVEL = {2: 10, 3: 16, 17: 18, 30: 18, 10: 20, 31: 32, 5: 23, 18: 28, 20: 26, 23: 30}
 # xlsx ActivityDungeon: base material activities and their multipleActivityId.
 COLLECTION_IDS = {2001: 2101, 2002: 2102, 2003: 2103}
-PERMANENT_TYPES = {2, 3, 10, 17, 30, 31}
+PERMANENT_TYPES = {2, 3, 10, 17, 20, 30, 31}
 
 
 def is_activity_on(activity: dict, now: int) -> bool:
@@ -77,7 +77,7 @@ class PermanentActivityEntryTests(unittest.TestCase):
     def setUp(self) -> None:
         self._temp = tempfile.TemporaryDirectory()
         self.root = Path(self._temp.name)
-        self.now = [ANCHOR + 3 * DAY + 3600]  # Thursday 2026-10-29 07:00 UTC
+        self.now = [ANCHOR + 3 * DAY + 3600]  # Thursday 2026-10-29 07:00 Beijing
         clock = lambda: self.now[0]  # noqa: E731
         self.accounts = LocalAccounts(self.root / "accounts", clock=clock)
         self.game = LocalGame(self.root / "game", self.accounts, clock=clock)
@@ -104,8 +104,9 @@ class PermanentActivityEntryTests(unittest.TestCase):
         self.assertEqual({row["type"] for row in permanent}, PERMANENT_TYPES)
         by_id = {row["activityId"]: row for row in permanent}
         self.assertEqual(
-            sorted(by_id), [2001, 2002, 2003, 3001, 10001, 17001, 30001, 31001],
+            sorted(by_id), [2001, 2002, 2003, 3001, 10001, 17001, 20001, 30001, 31001],
         )
+        self.assertEqual({row["activityId"] for row in rows if row["type"] == 53}, {53001, 53002})
         for row in permanent:
             self.assertEqual(row["category"], 1)  # ActivityCategory_WeeklyActivity
             self.assertEqual(row["timeType"], 1)  # ActivityTimeType_Forever
@@ -151,7 +152,7 @@ class PermanentActivityEntryTests(unittest.TestCase):
         # IsOpenForDoing entry unconditionally: one must be open every day.
         for offset in range(7):
             moment = self.now[0] + offset * DAY
-            weekday = datetime.fromtimestamp(moment, timezone.utc).isoweekday()
+            weekday = datetime.fromtimestamp(moment, timezone(timedelta(hours=8))).isoweekday()
             self.assertTrue(any(is_open_for_doing(row, moment, weekday) for row in collection), weekday)
         self.assertTrue(all(is_open_for_doing(row, self.now[0], 7) for row in collection))
 
@@ -159,8 +160,8 @@ class PermanentActivityEntryTests(unittest.TestCase):
         rows = self.rows()
         # Forced tutorial 14 (Lv10, UnlockWindow ActivityStageChoose2) clicks
         # the first Activity slot: CollectionDungeon is the only unlocked group.
-        self.assertEqual(menu_types(rows, self.now[0], 10), [2, 31, 3, 17, 30, 10])
-        self.assertEqual(menu_types(rows, self.now[0], 32), [31, 2, 3, 17, 30, 10])
+        self.assertEqual(menu_types(rows, self.now[0], 10), [2, 31, 3, 17, 30, 10, 20])
+        self.assertEqual(menu_types(rows, self.now[0], 32), [31, 2, 3, 17, 30, 10, 20])
         # Before this change the menu was empty: 12/15/25/46 are not sorted.
         legacy = [row for row in rows if row["type"] not in PERMANENT_TYPES]
         self.assertEqual(menu_types(legacy, self.now[0], 60), [])
@@ -168,7 +169,7 @@ class PermanentActivityEntryTests(unittest.TestCase):
     def test_entries_stay_open_across_days(self):
         for _ in range(9):
             self.now[0] += DAY
-            self.assertEqual(menu_types(self.rows(), self.now[0], 60), [31, 2, 3, 17, 30, 10])
+            self.assertEqual(menu_types(self.rows(), self.now[0], 60), [31, 2, 3, 17, 30, 10, 20])
 
     # -- attached schedule document ----------------------------------------
     def test_shipped_schedule_document_lists_the_permanent_modes(self):
@@ -186,7 +187,7 @@ class PermanentActivityEntryTests(unittest.TestCase):
             "periodDays": 28, "anchor": "2026-10-26T06:00:00Z",
             "phases": [{"id": "shop", "dayStart": 0, "dayEnd": 28, "activityType": 12}],
         }})
-        self.assertEqual({row["type"] for row in self.rows()}, {12, 25, 46})
+        self.assertEqual({row["type"] for row in self.rows()}, {12, 25, 32, 46})
 
     def test_schedule_document_entries_are_validated(self):
         self.attach_schedule({
@@ -210,7 +211,7 @@ class PermanentActivityEntryTests(unittest.TestCase):
         self.assertNotIn(3, by_type)
         self.assertEqual([row["activityId"] for row in by_type[17]], [17009])
         self.assertEqual(by_type[10][0]["activityId"], 10001)  # type * 1000 + 1
-        self.assertEqual(set(by_type), {2, 10, 17, 25, 46})
+        self.assertEqual(set(by_type), {2, 10, 17, 25, 32, 46})
 
     def test_schedule_document_changes_are_picked_up(self):
         self.attach_schedule({"cycle": {"periodDays": 28, "anchor": "2026-10-26T06:00:00Z", "phases": []},

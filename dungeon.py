@@ -2957,6 +2957,8 @@ class LocalDungeons:
                         STAGE_ENERGY_COST.get(dungeon_id, 0) * multi_power,
                         mode=self._task_mode(dungeon_id, difficulty),
                         stats=self._battle_stats(active),
+                        actor_uids=team_uids or (),
+                        dungeon_type=_dungeon_type(dungeon_id),
                     )
                     if multi_power > 1 and hasattr(tasks, "record"):
                         # TaskType_MultiPowerMTimes (main task 1113).

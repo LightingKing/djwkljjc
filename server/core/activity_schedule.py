@@ -10,17 +10,22 @@ from typing import Any
 
 import yaml
 
+from .reset import DEFAULT_RESET_POLICY, ResetPolicy
+
 
 class ActivitySchedule:
     """Read the checked-in local schedule and expose an admin-adjustable view."""
 
-    def __init__(self, source: str | Path, *, state_path: str | Path | None = None, clock=None) -> None:
+    def __init__(self, source: str | Path, *, state_path: str | Path | None = None, clock=None,
+                 reset_policy: ResetPolicy = DEFAULT_RESET_POLICY) -> None:
         self.source = Path(source).resolve()
         self.state_path = Path(state_path).resolve() if state_path is not None else None
         self.clock = clock or (lambda: datetime.now(timezone.utc).timestamp())
         self._lock = threading.RLock()
         document = yaml.safe_load(self.source.read_text(encoding="utf-8")) if self.source.is_file() else {}
         document = document if isinstance(document, dict) else {}
+        self.reset_policy = reset_policy
+        self.reset_policy_version = int(document.get("resetPolicyVersion", 0))
         cycle = document.get("cycle") if isinstance(document.get("cycle"), dict) else {}
         self.period_days = max(1, int(cycle.get("periodDays", 28)))
         anchor_text = str(cycle.get("anchor", "1970-01-01T00:00:00Z"))
@@ -57,6 +62,14 @@ class ActivitySchedule:
             activities = payload.get("activities")
             if isinstance(activities, list):
                 self.phases = [dict(item) for item in activities if isinstance(item, dict)]
+            if int(payload.get("resetPolicyVersion", 0)) < self.reset_policy_version:
+                # Legacy anchors were UTC wall-clock values.  Preserve their
+                # calendar label and intended refresh hour in the new zone.
+                self._anchor = self._anchor.replace(tzinfo=self.reset_policy.timezone).astimezone(timezone.utc)
+                for phase in self.phases:
+                    if int(phase.get("activityType", phase.get("type", 0))) == 46:
+                        phase.update(dayStart=0, dayEnd=self.period_days)
+                self._save_state()
         except (OSError, TypeError, ValueError, json.JSONDecodeError):
             return
 
@@ -104,7 +117,8 @@ class ActivitySchedule:
         self.state_path.parent.mkdir(parents=True, exist_ok=True)
         temporary = self.state_path.with_suffix(self.state_path.suffix + ".tmp")
         temporary.write_text(
-            json.dumps({"anchor": self._anchor.isoformat(), "activities": self.phases}, ensure_ascii=False, separators=(",", ":")),
+            json.dumps({"anchor": self._anchor.isoformat(), "activities": self.phases,
+                        "resetPolicyVersion": self.reset_policy_version}, ensure_ascii=False, separators=(",", ":")),
             encoding="utf-8",
         )
         temporary.replace(self.state_path)

@@ -53,7 +53,6 @@ class LocalSystemsTests(unittest.TestCase):
                 ("POST", "/fci/mail/read/", "ApiMail.result"),
                 ("POST", "/fci/relation/applyfriend/", "ApiRelationApplyFriend.result"),
                 ("GET", "/fci/asyncpvprecord/", "ApiAsyncPvpRecordInfo.result"),
-                ("POST", "/fci/asyncpvpmatch/", "ApiAsyncPvpMatch.result"),
             ]
             # Pools are a plain JSON list (Window_GachaNormal finds id == 1).
             status, pools = game.handle_http("GET", "/fci/gachainfo/", None, "application/json", auth)
@@ -75,6 +74,20 @@ class LocalSystemsTests(unittest.TestCase):
                 if path == "/fci/relation/applyfriend/":
                     self.assertEqual(result.result.player_id, "local-bot-001")
                     self.assertTrue(result.result.name)
+            # Native async matching stays closed until a verified arena
+            # dungeon is configured. A rejected request must not touch assets.
+            resources_before = game._profile(account)["resources"]
+            assets_before = game.systems._state(profile)
+            status, unavailable = game.handle_http(
+                "POST", "/fci/asyncpvpmatch/", b'{"index":1}', "application/json", auth
+            )
+            self.assertEqual(status, 501)
+            self.assertEqual(unavailable["error"], "tournament_asyncpvp_not_configured")
+            self.assertFalse(unavailable["dungeonConfigured"])
+            self.assertEqual(game._profile(account)["resources"], resources_before)
+            assets_after = game.systems._state(profile)
+            for field in ("actorInstances", "equips", "items"):
+                self.assertEqual(assets_after.get(field), assets_before.get(field), field)
             # The enhance consumed its food and fed EXP into the real item.
             state = game.systems._state(profile)
             self.assertEqual(state["items"]["40001"]["count"], 0)

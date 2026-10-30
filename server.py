@@ -34,11 +34,15 @@ from push import handle_upgrade
 from game import LocalGame
 from google.protobuf.message import Message as ProtobufMessage
 from server.core.clock import ServerClock
+from server.core.reset import ResetPolicy
 from server.core.routes import RouteRegistry
 from server.core.backup import DailyBackupScheduler, backup_state, list_backups, prune_backups, restore_sqlite
 from server.core.crash_logs import CrashLogStore
 from server.core.activity_schedule import ActivitySchedule
 from server.core.push_service import PushService
+from server.core.notifications import wire_game_notifications
+from server.core.reset_scheduler import ResetScheduler
+from server.core.patch_versions import select_patch_manifest, PatchVersionError, PatchVersionMismatch
 from storage.compat import ensure_unified_store, resolve_unified_store_path
 
 
@@ -221,7 +225,7 @@ class FixtureServer(ThreadingHTTPServer):
         self.activity_schedule = activity_schedule
         self.push_service = PushService(self.audit_log)
         self._wire_task_push()
-        self._wire_base_push()
+        wire_game_notifications(self.game, self.push_service)
         self.tls_context = tls_context
         contracts_path = Path(__file__).resolve().parent / "contracts" / "api.yaml"
         try:
@@ -258,33 +262,11 @@ class FixtureServer(ThreadingHTTPServer):
                 account_id = profile.get("account_id") if isinstance(profile, Mapping) else None
                 if account_id is None:
                     return 0
-                return sum(service.tasks_change_for_account_id(account_id, payload)
-                           for service in list(services))
+                return self.game.after_commit(lambda: sum(
+                    service.tasks_change_for_account_id(account_id, payload) for service in list(services)))
 
             notify.push_services = services  # type: ignore[attr-defined]
             tasks.notifier = notify
-        services.add(self.push_service)
-
-    def _wire_base_push(self) -> None:
-        """Deliver ``BasePushMessage`` (e.g. BaseInfoChange after a level-up)
-        from LocalGame to the account's live push socket on any server."""
-
-        game = self.game
-        if game is None or not hasattr(game, "base_push_notifier"):
-            return
-        services = getattr(game.base_push_notifier, "push_services", None)
-        if services is None:
-            services = weakref.WeakSet()
-
-            def notify(profile: Mapping[str, Any], push_type: int) -> int:
-                account_id = profile.get("account_id") if isinstance(profile, Mapping) else None
-                if account_id is None:
-                    return 0
-                return sum(service.base_push_for_account_id(account_id, push_type)
-                           for service in list(services))
-
-            notify.push_services = services  # type: ignore[attr-defined]
-            game.base_push_notifier = notify
         services.add(self.push_service)
 
     def _local_directory_contract(self, route: str, request: Mapping[str, Any]) -> tuple[int, dict[str, Any]]:
@@ -403,7 +385,8 @@ class FixtureServer(ThreadingHTTPServer):
         if normalised == "/db-access":
             return 200, {"result": [], "sandbox": True}
         if normalised == "/temp-entrance-switch":
-            return 200, {"switchInfo": [], "sandbox": True}
+            return 200, {"switchInfo": [{"type": 107, "switch": 1, "isWindowEntrance": False,
+                                         "startTime": "", "stopTime": "", "tips": ""}]}
         if normalised == "/syncmidas":
             # This acknowledgement is local bookkeeping only; remote Midas
             # receipts are still rejected by the economy module.
@@ -917,27 +900,27 @@ class FixtureHandler(BaseHTTPRequestHandler):
             "/app_version", "/app_version/", "/app_version/index.json",
         }
         if path in version_check_paths:
-            # Preserve an explicitly supplied fixture (the test harness and
-            # captured deployments may contain a real patch manifest).  The
-            # compatibility response is only the fallback for a fresh local
-            # runtime whose stale client URL has no matching file.
-            if path.startswith("/patch-version.json/"):
-                fixture = self._fixture_path(parsed.path)
-                if fixture is not None and fixture.is_file():
-                    return None
             # Optional hot-update override: when the server was started with
             # --force-patch, serve that file as the clientupdate PatchVersionInfo.
-            # Used to drive the game's own patch channel for local Lua delivery.
-            if path in {"/clientupdate", "/clientupdate/"}:
-                override = getattr(self.server, "force_patch_path", None)
+            # Apply it before captured fixtures so cached legacy update URLs
+            # receive the same version filtering as /clientupdate/.
+            override = getattr(self.server, "force_patch_path", None)
+            if path in {"/clientupdate", "/patch-version.json/clientupdate"}:
                 try:
                     if override is not None and override.is_file():
                         # Serve as PLAIN JSON (like pr2new): ScenePatch.ProcessPatchInfo's
                         # deserializer parses protobuf-JSON directly, so the raw_json
                         # envelope (0x88 0x01 framing) would break it with U+0001.
-                        return (override.read_bytes(), "application/json")
+                        manifest = json.loads(override.read_text(encoding="utf-8"))
+                        selected = select_patch_manifest(manifest, dict(parse_qsl(parsed.query)).get("version"))
+                        return (json.dumps(selected, separators=(",", ":")).encode("utf-8"), "application/json")
                 except OSError:
                     pass
+            # Without an explicit override, preserve captured legacy fixtures.
+            if override is None and path.startswith("/patch-version.json/"):
+                fixture = self._fixture_path(parsed.path)
+                if fixture is not None and fixture.is_file():
+                    return None
             return encode_raw_json({}), "application/wireformat"
         if path in {"/ClickGame", "/ClickGame/"}:
             return encode_raw_json({"result": 0}), "application/wireformat"
@@ -1396,37 +1379,6 @@ document.querySelector('#refresh').addEventListener('click',load);load();
         self._admin_response(404, {"error": "admin_route_not_found"}, send_body)
         return True
 
-    def _publish_game_event(self, path: str, authorization: str | None, payload: object) -> None:
-        """Notify an online local client after a successful mutating request."""
-
-        if self.server.accounts is None or not authorization:
-            return
-        parts = authorization.strip().split(None, 1)
-        if len(parts) != 2:
-            return
-        account = self.server.accounts.verify_access_token(parts[1].strip())
-        if account is None:
-            return
-        route = urlsplit(path).path.rstrip("/").casefold()
-        summary = {"route": route, "ok": True}
-        if isinstance(payload, dict):
-            # Keep push payloads bounded and JSON-safe.  The normal HTTP
-            # response remains authoritative for the full typed result.
-            for key in ("resourceChanges", "rewardTbl", "transactionId", "sandbox", "result"):
-                if key in payload and isinstance(payload[key], (str, int, float, bool, list, dict, type(None))):
-                    summary[key] = payload[key]
-        try:
-            if "purchasedelevery" in route:
-                self.server.push_service.payment(account, summary)
-            elif "/mail" in route or "/notice" in route:
-                self.server.push_service.mail(account, summary)
-            elif self.command in {"POST", "PATCH", "PUT", "DELETE"}:
-                self.server.push_service.red_point(account, summary)
-        except Exception:
-            # A disconnected optional push client must not turn a successful
-            # local HTTP mutation into a failed request.
-            logging.debug("local push notification failed", exc_info=True)
-
     def _send_bytes(self, status: int, body: bytes, content_type: str, send_body: bool) -> None:
         self.send_response(status)
         self.send_header("Content-Type", content_type)
@@ -1495,6 +1447,9 @@ document.querySelector('#refresh').addEventListener('click',load);load();
 
     def _handle_impl(self, send_body: bool) -> None:
         method = self.command
+        if self.path.startswith('/'):
+            route_path, separator, query = self.path.partition('?')
+            self.path = re.sub(r"/{2,}", "/", route_path) + separator + query
         parsed = urlsplit(self.path)
         request_body = b""
         body_error: str | None = None
@@ -1620,6 +1575,21 @@ document.querySelector('#refresh').addEventListener('click',load);load();
                 if self.server.game is not None:
                     for name, data in self.server.game.login_messages(account):
                         connection.send_sc(connection.last_client_sequence, name, data)
+                    with self.server.game._lock:
+                        tick = getattr(self.server.game.social, 'tick', None)
+                        if tick is not None:
+                            tick(self.server.game._profile(account), connected=True)
+
+            def on_business_message(account, message_type, data, connection):
+                if message_type != 'CsWorldChatSubChannel' or self.server.game is None:
+                    return False
+                from google.protobuf import message_factory
+                game = self.server.game
+                cls = message_factory.GetMessageClass(game._pool.FindMessageTypeByName(message_type))
+                request = cls.FromString(data)
+                with game._lock:
+                    game.social.set_world_subchannel(game._profile(account), request.target_channel)
+                return True
             # RFC 6455 requires client frames to be masked, but the original
             # FCICV client's push transport sends UNMASKED binary frames (its
             # CsLogin was observed rejected with "client frame is not masked",
@@ -1630,6 +1600,7 @@ document.querySelector('#refresh').addEventListener('click',load);load();
             # frames still work); it never faces untrusted proxies.
             handle_upgrade(self, self.server.accounts, self.server.audit_log,
                            initializer=initialize_game, timeout=90,
+                           on_business_message=on_business_message,
                            push_service=self.server.push_service,
                            clock=self.server.clock.now,
                            allow_unmasked_local=True)
@@ -1648,8 +1619,6 @@ document.querySelector('#refresh').addEventListener('click',load);load();
                 self._send_bytes(status, encode_response(payload), "application/wireformat", send_body)
             else:
                 self._json_response(status, payload if isinstance(payload, dict) else {"result": payload}, send_body)
-            if status == 200:
-                self._publish_game_event(parsed.path, self.headers.get("Authorization"), payload)
             self.server.audit_log.write(**base_record, status=status, handler="contract_registry")
             return
 
@@ -1665,7 +1634,8 @@ document.querySelector('#refresh').addEventListener('click',load);load();
                 return
 
         if self.server.game is not None and parsed.path.startswith('/fci/'):
-            result = self.server.game.handle_http(method, parsed.path, payload_body,
+            game_path = parsed.path + ('?' + parsed.query if parsed.query else '')
+            result = self.server.game.handle_http(method, game_path, payload_body,
                 self.headers.get('Content-Type'), self.headers.get('Authorization'))
             if result is not None:
                 status, payload = result
@@ -1675,12 +1645,16 @@ document.querySelector('#refresh').addEventListener('click',load);load();
                     self._send_bytes(status, encode_response(payload), 'application/wireformat', send_body)
                 else:
                     self._json_response(status, payload, send_body)
-                if status == 200:
-                    self._publish_game_event(parsed.path, self.headers.get('Authorization'), payload)
                 self.server.audit_log.write(**base_record, status=status, handler='local_game')
                 return
 
-        dynamic = self._dynamic_fixture(parsed)
+        try:
+            dynamic = self._dynamic_fixture(parsed)
+        except PatchVersionError as exc:
+            status = 409 if isinstance(exc, PatchVersionMismatch) else 400
+            self._send_bytes(status, json.dumps({"error": str(exc)}).encode("utf-8"), "application/json", send_body)
+            self.server.audit_log.write(**base_record, status=status, handler="patch_version")
+            return
         if dynamic is not None:
             content, content_type = dynamic
             self._send_bytes(200, content, content_type, send_body)
@@ -1853,17 +1827,17 @@ def serve(args: argparse.Namespace) -> None:
     unified_store_path = resolve_unified_store_path(state_dir, requested_store_path or (Path("local.sqlite3")))
     ensure_unified_store(unified_store_path)
     time_offset_seconds = int(_config_value(config, "time_offset_seconds", 0))
-    server_clock = ServerClock(offset_seconds=time_offset_seconds)
+    reset_policy = ResetPolicy(utc_offset_seconds=int(_config_value(config, "utc_offset_seconds", 28800)))
+    server_clock = ServerClock(offset_seconds=time_offset_seconds, timezone_=reset_policy.timezone)
     accounts = LocalAccounts(state_dir, clock=server_clock.now, unified_store_path=unified_store_path)
-    game = LocalGame(state_dir, accounts, clock=server_clock.now, unified_store_path=unified_store_path)
-    # Event claims use the extracted local daily reset (06:00 UTC) while
-    # direct LocalGame tests retain their historical midnight fallback.
-    game.daily_key = lambda value=None: server_clock.daily_key(value, refresh_at="06:00:00")
+    game = LocalGame(state_dir, accounts, clock=server_clock.now, unified_store_path=unified_store_path,
+                     reset_policy=reset_policy)
     schedule_source = Path(__file__).resolve().parent / "data" / "server-only" / "activity-schedule.yaml"
     activity_schedule = ActivitySchedule(
         schedule_source,
         state_path=state_dir / "activity-schedule.json",
         clock=server_clock.now,
+        reset_policy=reset_policy,
     ) if schedule_source.is_file() else None
     if activity_schedule is not None:
         # LocalEvents reads this optional service when constructing the city
@@ -1915,6 +1889,10 @@ def serve(args: argparse.Namespace) -> None:
         if listener is not None:
             listener.force_patch_path = args.force_patch.resolve() if args.force_patch else None
 
+    reset_scheduler = ResetScheduler(game, [listener.push_service for listener in
+                                           (http_server, tls_server) if listener is not None])
+    reset_scheduler.start()
+
     daily_backup: DailyBackupScheduler | None = None
     if auto_backup:
         daily_backup = DailyBackupScheduler(
@@ -1950,6 +1928,7 @@ def serve(args: argparse.Namespace) -> None:
     except KeyboardInterrupt:
         logging.info("stopping")
     finally:
+        reset_scheduler.stop()
         if daily_backup is not None:
             daily_backup.stop()
         if http_server is not None:

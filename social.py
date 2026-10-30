@@ -7,6 +7,8 @@ existing game SQLite database.
 
 from __future__ import annotations
 
+from server.core.reset import policy_for, period_due
+
 import json
 import random
 import threading
@@ -14,6 +16,8 @@ from contextlib import closing, contextmanager
 from datetime import datetime, timezone
 from typing import Any, Iterator, Mapping, Optional
 from urllib.parse import unquote, urlsplit
+
+from google.protobuf import json_format, message_factory
 
 try:  # Package import when local-server is installed as a package.
     from .storage.compat import shared_process_lock
@@ -195,6 +199,127 @@ class LocalSocial:
                 (json.dumps(dict(state), ensure_ascii=False, separators=(",", ":")), self._now(), int(profile["account_id"])),
             )
 
+    def _request(self, body: Body, type_name: str) -> dict[str, Any]:
+        """Accept the client's protobuf requests and the local JSON seam."""
+        payload = _json(body)
+        if payload or not body or isinstance(body, str):
+            return payload
+        try:
+            request = message_factory.GetMessageClass(self.game._pool.FindMessageTypeByName(type_name))()
+            request.ParseFromString(bytes(body))
+            return json_format.MessageToDict(request)
+        except (ValueError, KeyError, TypeError):
+            return {}
+        except Exception:  # Malformed protobuf is rejected by ordinary field validation.
+            return {}
+
+    def _base_push(self, profile, push_type, *params):
+        notifier = getattr(self.game, "base_push_notifier", None)
+        if notifier is not None:
+            notifier(profile, push_type, tuple(str(value) for value in params))
+
+    def _message_push(self, profile, name, payload):
+        notifier = getattr(self.game, "social_message_notifier", None)
+        if notifier is not None:
+            notifier(profile, name, payload)
+
+    def _applications(self, profile, state):
+        """Generate a bounded daily batch; rejection/restart cannot reroll it."""
+        unavailable = set(state.get("friends", [])) | set(state.get("blocked", []))
+        pending = list(dict.fromkeys(str(pid) for pid in state.get("applications", [])
+                                    if pid not in unavailable and self.bots.get(str(pid))))
+        old_pending = list(state.get("applications", []))
+        day = self._day(self._now())
+        due = period_due(state.get("applicationDay"), day)
+        added = []
+        if due:
+            bots = self.bots.all()
+            offset = (int(profile["account_id"]) + day * 2) % len(bots)
+            candidates = bots[offset:] + bots[:offset]
+            limit = max(0, _int(state.get("friendApplyLevelLimit")))
+            available = [bot["playerId"] for bot in candidates
+                         if bot["playerId"] not in unavailable and bot["playerId"] not in pending
+                         and _int(bot.get("level")) >= limit]
+            added = available[:max(0, min(2, misc_value("maxFriendApplyListNum", 50) - len(pending)))]
+            pending.extend(added)
+            state["applicationDay"] = day
+        state["applications"] = pending
+        if due or pending != old_pending:
+            self._save(profile, state)
+        if added:
+            self._base_push(profile, 33)
+        return pending
+
+    def friend_apply_level_limit(self, profile):
+        with self._lock, self._process_lock():
+            return _int(self._state(profile).get("friendApplyLevelLimit"))
+
+    WORLD_SUBCHANNELS = 10
+    WORLD_BOT_INTERVAL = 60
+
+    def _channel_info(self, state):
+        return {"channel": max(1, min(self.WORLD_SUBCHANNELS, _int(state.get("worldSubChannel"), 1))),
+                "totalChannel": self.WORLD_SUBCHANNELS}
+
+    def _append_chat(self, state, sender, content, channel, *, target="", guild_id=0):
+        messages = state.setdefault("channelMessages", [])
+        next_id = max(_int(state.get("nextChannelMessageId"), 1),
+                      max((_int(item.get("id")) for item in messages), default=0) + 1)
+        entry = {"id": next_id, "content": content, "time": self._now(),
+                 "senderId": str(sender.get("player_id", sender.get("playerId", ""))),
+                 "sender": str(sender.get("name", "")), "channel": channel,
+                 "subChannelId": self._channel_info(state)["channel"] if channel == 1 else 0}
+        if target:
+            entry["targetId"] = target
+        if guild_id:
+            entry["guildId"] = guild_id
+        messages.append(entry)
+        del messages[:-100]
+        state["nextChannelMessageId"] = next_id + 1
+        return entry
+
+    def _world_bot(self, profile, state, *, force=False):
+        now = self._now()
+        previous = state.get("worldBotAt")
+        if not force and previous is not None and now - _int(previous) < self.WORLD_BOT_INTERVAL:
+            return None
+        available = [bot for bot in self.bots.all() if bot["playerId"] not in state.get("blocked", [])]
+        if not available:
+            return None
+        bot = available[(now // self.WORLD_BOT_INTERVAL + int(profile["account_id"])) % len(available)]
+        lines = ("今天也一起挑战关卡吧！", "需要助战的话，可以在好友列表找到我。", "准备好队伍，出发吧！")
+        message = self._append_chat(state, bot, lines[(now // 60) % len(lines)], 1)
+        state["worldBotAt"] = max(now, _int(previous, now))
+        return message
+
+    def tick(self, profile, *, connected=False):
+        """Call on login with connected=True, then normally for online players."""
+        with self._lock, self._process_lock():
+            state = self._state(profile)
+            self._applications(profile, state)
+            message = self._world_bot(profile, state, force=connected)
+            if message:
+                self._save(profile, state)
+            if connected:
+                self._message_push(profile, "ScWorldChatSubChannel", self._channel_info(state))
+            if message:
+                self._message_push(profile, "WorldMessage", message)
+
+    def set_world_subchannel(self, profile, target_channel):
+        channel = _int(target_channel)
+        if not 1 <= channel <= self.WORLD_SUBCHANNELS:
+            return 400, {"error": "invalid_world_subchannel"}
+        with self._lock, self._process_lock():
+            state = self._state(profile)
+            state["worldSubChannel"] = channel
+            message = self._world_bot(profile, state, force=True)
+            self._save(profile, state)
+            info = self._channel_info(state)
+            self._message_push(profile, "ScWorldChatSubChannel", info)
+            if message:
+                self._message_push(profile, "WorldMessage", message)
+            return 200, info
+
     @staticmethod
     def _route(path: str) -> str:
         return urlsplit(path or "").path.rstrip("/").casefold() or "/"
@@ -237,9 +362,8 @@ class LocalSocial:
                 held[key] = 0
 
     # ------------------------------------------------------ relation points
-    @staticmethod
-    def _day(now: int) -> int:
-        return (int(now) - RESET_HOUR_UTC * 3600) // _DAY
+    def _day(self, now: int) -> int:
+        return policy_for(self.game).day_index(now)
 
     # Supports borrowed by bots per day (deterministic per account and day).
     BOT_AURA_USES_PER_DAY = (0, 1, 1, 2, 2, 3)
@@ -256,7 +380,7 @@ class LocalSocial:
         if not isinstance(relation.get("lastUse"), dict):
             relation["lastUse"] = {}
         today = self._day(self._now())
-        if relation["day"] != today:
+        if period_due(relation["day"], today):
             relation["day"] = today
             relation["todayTotalGet"] = 0
         return relation
@@ -307,7 +431,7 @@ class LocalSocial:
         account = int(profile["account_id"])
         for day in range(self._day(since), self._day(now) + 1):
             rng = random.Random(f"aura:{account}:{day}")
-            start = day * _DAY + RESET_HOUR_UTC * 3600
+            start = policy_for(self.game).day_start_from_index(day)
             for _ in range(rng.choice(self.BOT_AURA_USES_PER_DAY)):
                 moment = start + rng.randrange(_DAY)
                 bot = candidates[rng.randrange(len(candidates))] if candidates else None
@@ -428,7 +552,11 @@ class LocalSocial:
                 blocked.append(target)
             state["blocked"] = blocked
             state["friends"] = [item for item in state.get("friends", []) if str(item) != target]
+            pending = target in state.get("applications", [])
+            state["applications"] = [item for item in state.get("applications", []) if item != target]
             self._save(profile, state)
+            if pending:
+                self._base_push(profile, 34, target)
             return 200, self._summary(bot, False)
         if method == "DELETE" and tail:
             state["blocked"] = [item for item in blocked if item != tail]
@@ -449,7 +577,7 @@ class LocalSocial:
 
         friends = [str(item) for item in state.setdefault("friends", [])]
         blocked = {str(item) for item in state.setdefault("blocked", [])}
-        payload = _json(body)
+        payload = self._request(body, "ApiRelationApplyList" if route.startswith("/fci/applylist") else "ApiRelationApplyFriend")
         if route == "/fci/friendlist":
             if method != "GET":
                 return 405, {"error": "method_not_allowed", "message": "GET required"}
@@ -488,26 +616,50 @@ class LocalSocial:
             if target in blocked:
                 return 409, {"error": "local_bot_blocked", "playerId": target}
             if target not in friends:
+                if len(friends) >= misc_value("maxFriendNum", 200):
+                    return 409, {"error": "friend_list_full", "errorCode": 346}
                 friends.append(target)
                 state["friends"] = friends
+                pending = target in state.get("applications", [])
+                state["applications"] = [item for item in state.get("applications", []) if item != target]
                 self._save(profile, state)
+                if pending:
+                    self._base_push(profile, 34, target)
+                self._base_push(profile, 35, target)
             return 200, self._summary(bot, True)
-        if route == "/fci/applylist" and method in {"POST", "PATCH", "PUT"}:
-            if "friendApplyLevelLimit" in payload:
-                state["friendApplyLevelLimit"] = max(0, int(payload.get("friendApplyLevelLimit") or 0))
+        if route == "/fci/applylist" or route.startswith("/fci/applylist/"):
+            if method in {"POST", "PATCH", "PUT"} and "friendApplyLevelLimit" in payload:
+                state["friendApplyLevelLimit"] = max(0, min(99, _int(payload.get("friendApplyLevelLimit"))))
                 self._save(profile, state)
                 return 200, {}
+            pending = self._applications(profile, state)
+            if method == "GET":
+                return 200, [self._summary(self.bots.get(target), False) for target in pending]
+            if method not in {"POST", "PATCH", "PUT", "DELETE"}:
+                return 405, {"error": "method_not_allowed"}
             targets = payload.get("targetList")
             if not isinstance(targets, list):
-                targets = [payload.get("targetId", "")]
-            targets = [str(item) for item in targets if str(item or "").strip()]
+                tail = unquote(urlsplit(path).path.rstrip("/").rsplit("/", 1)[-1])
+                targets = [payload.get("targetId", tail if tail != "applylist" else "")]
+            targets = list(dict.fromkeys(str(item) for item in targets if str(item or "").strip()))
+            removed = [target for target in targets if target in pending]
+            added = []
             if payload.get("isAgree"):
-                for target in targets:
-                    if self.bots.get(target) is not None and target not in friends and target not in blocked:
+                if len(friends) + len(removed) > misc_value("maxFriendNum", 200):
+                    return 409, {"error": "friend_list_full", "errorCode": 346}
+                for target in removed:
+                    if target not in friends and target not in blocked:
                         friends.append(target)
-                state["friends"] = friends
-                self._save(profile, state)
-            return 200, {"playerId": targets[0] if targets else ""}
+                        added.append(target)
+            state["friends"] = friends
+            state["applications"] = [target for target in pending if target not in removed]
+            self._save(profile, state)
+            for target in removed:
+                self._base_push(profile, 34, target)
+            for target in added:
+                self._base_push(profile, 35, target)
+            bot = self.bots.get(targets[0]) if targets else None
+            return 200, self._summary(bot, targets[0] in friends) if bot else {"playerId": ""}
         if route.startswith("/fci/playersummary"):
             key = unquote(urlsplit(path or "").path.rstrip("/").rsplit("/", 1)[-1])
             if key.casefold() == str(profile.get("player_id", "")).casefold():
@@ -636,29 +788,137 @@ class LocalSocial:
         # the support column would stay empty.
         return 200, rows
 
-    def _chat(self, method: str, route: str, body: Body, profile: Mapping[str, Any], state: dict[str, Any]) -> Optional[Response]:
+    def _player_name(self, player_id, profile):
+        if player_id == str(profile.get("player_id", "")):
+            return str(profile.get("name", ""))
+        bot = self.bots.get(player_id)
+        if bot:
+            return str(bot["name"])
+        with closing(self.game._connect()) as connection:
+            row = connection.execute("SELECT name FROM game_profiles WHERE player_id=?", (player_id,)).fetchone()
+        return str(row["name"]) if row else ""
+
+    def _board(self, method, path, body, profile, state):
+        parts = [unquote(part) for part in urlsplit(path).path.strip("/").split("/")]
+        if len(parts) not in (3, 4) or not parts[2]:
+            return 400, {"error": "invalid_message_path"}
+        target = parts[2]
+        boards = state.setdefault("boards", {})
+        board = boards.setdefault(target, boards.pop(target.casefold(), []) if target != target.casefold() else [])
+        # Old rows used playerId/name/time and recycled IDs after retention.
+        # Repair duplicates once, retain content and persist the high-water mark.
+        counters = state.setdefault("nextBoardMessageId", {})
+        next_id = max(_int(counters.get(target), 1), max((_int(row.get("id")) for row in board), default=0) + 1)
+        seen = set()
+        for row in board:
+            message_id = _int(row.get("id"))
+            if message_id <= 0 or message_id in seen:
+                message_id = next_id
+                next_id += 1
+            seen.add(message_id)
+            row.update(id=message_id, sender=str(row.get("sender", row.get("playerId", ""))),
+                       senderName=str(row.get("senderName", row.get("name", ""))),
+                       to=str(row.get("to", "")), toName=str(row.get("toName", "")),
+                       createTime=_int(row.get("createTime", row.get("time", row.get("createdAt", 0)))),
+                       content=str(row.get("content", row.get("text", ""))))
+        counters[target] = next_id
+        if method == "GET" and len(parts) == 3:
+            self._save(profile, state)
+            return 200, list(board)
+        if method == "DELETE" and len(parts) == 4:
+            message_id = _int(parts[3], -1)
+            row = next((row for row in board if row["id"] == message_id), None)
+            if row is None:
+                return 404, {"error": "message_not_found"}
+            me = str(profile.get("player_id", ""))
+            if target != me and row["sender"] != me:
+                return 403, {"error": "message_delete_forbidden"}
+            board.remove(row)
+            self._save(profile, state)
+            return 200, {}
+        if method != "POST" or len(parts) != 3:
+            return 405, {"error": "method_not_allowed"}
+        payload = self._request(body, "ApiPlayerMessage")
+        content = str(payload.get("content", payload.get("message", payload.get("text", "")))).strip()
+        if not content:
+            return 400, {"error": "empty_message"}
+        if len(content) > 128:
+            return 400, {"error": "message_too_long"}
+        recipient = str(payload.get("to") or "")
+        entry = {"id": next_id, "sender": str(profile.get("player_id", "")),
+                 "senderName": str(profile.get("name", "")), "content": content,
+                 "to": recipient, "toName": self._player_name(recipient, profile) if recipient else "",
+                 "createTime": self._now()}
+        counters[target] = next_id + 1
+        board.insert(0, entry)
+        del board[50:]
+        self._save(profile, state)
+        return 200, entry
+
+    def _channel_chat(self, payload, profile, state):
+        channel = _int(payload.get("channel"))
+        if channel not in (1, 3, 5):
+            return 400, {"error": "invalid_chat_channel", "errorCode": 65}
+        if _int(profile.get("level"), 1) < 12:
+            return 403, {"error": "chat_level_required", "requiredLevel": 12, "errorCode": 21}
+        content = str(payload.get("content", "")).strip()
+        if not content:
+            return 400, {"error": "empty_message", "errorCode": 71}
+        if len(content) > 128:
+            return 400, {"error": "message_too_long", "errorCode": 340}
+        target = str(payload.get("targetId", ""))
+        guild_id = 0
+        bot = None
+        if channel == 1:
+            selected = self._channel_info(state)["channel"]
+            if _int(payload.get("worldSubChannel"), selected) != selected:
+                return 409, {"error": "world_subchannel_mismatch", "channel": selected}
+        elif channel == 3:
+            if target == str(profile.get("player_id", "")):
+                return 400, {"error": "private_chat_to_self", "errorCode": 66}
+            bot = self.bots.get(target)
+            if bot is None:
+                return 404, {"error": "local_bot_not_found", "errorCode": 16}
+            if target in state.get("blocked", []):
+                return 409, {"error": "local_bot_blocked"}
+        elif channel == 5:
+            guild = getattr(self.game, "guild", None)
+            if guild is not None:
+                guild_id, bot_ids = guild._run(profile, lambda conn, shared, player, now, notices:
+                    (_int(player.get("guildId")), list(shared["guilds"].get(str(player.get("guildId")), {}).get("botIds", []))))
+                bot = next((self.bots.get(pid) for pid in bot_ids if pid not in state.get("blocked", [])), None)
+            if not guild_id:
+                return 409, {"error": "guild_required", "errorCode": 68}
+        last_sent = state.setdefault("chatLastSent", {})
+        now = self._now()
+        interval = 10 if channel == 1 else 1
+        previous = last_sent.get(str(channel))
+        if previous is not None and now - _int(previous) < interval:
+            return 429, {"error": "chat_cooldown", "retryAfter": interval - (now - _int(previous)), "errorCode": 64}
+        last_sent[str(channel)] = now
+        entry = self._append_chat(state, profile, content, channel, target=target, guild_id=guild_id)
+        response = None
+        if channel == 1:
+            response = self._world_bot(profile, state, force=True)
+        elif bot:
+            response = self._append_chat(state, bot, "收到，一起加油！", channel,
+                                         target=str(profile.get("player_id", "")), guild_id=guild_id)
+        self._save(profile, state)
+        if channel == 1:
+            self._message_push(profile, "WorldMessage", entry)
+            if response:
+                self._message_push(profile, "WorldMessage", response)
+        elif response:
+            self._base_push(profile, 24 if channel == 3 else 30,
+                            response["senderId"], response["sender"], response["content"], response["time"])
+        return 200, {}
+
+    def _chat(self, method: str, route: str, path: str, body: Body, profile: Mapping[str, Any], state: dict[str, Any]) -> Optional[Response]:
         if not any(token in route for token in ("/chat", "/danmu", "/player-message", "/recent-contact")):
             return None
         messages = state.setdefault("messages", [])
         if "/player-message" in route:
-            # WidgetMySpaceReal pages the message board and reads ``#result``,
-            # so the board is a list of messages for that player.
-            target = route.rstrip("/").rsplit("/", 1)[-1]
-            board = state.setdefault("boards", {}).setdefault(target, [])
-            if method == "GET":
-                return 200, list(board)
-            if method != "POST":
-                return 405, {"error": "method_not_allowed", "message": "GET or POST required"}
-            payload = _json(body)
-            text = str(payload.get("content", payload.get("message", payload.get("text", "")))).strip()[:128]
-            if not text:
-                return 400, {"error": "empty_message"}
-            entry = {"id": len(board) + 1, "playerId": str(profile.get("player_id", "")),
-                     "name": str(profile.get("name", "")), "content": text, "time": int(self._clock())}
-            board.insert(0, entry)
-            del board[50:]
-            self._save(profile, state)
-            return 200, entry
+            return self._board(method, path, body, profile, state)
         if "/danmu" in route and method == "POST":
             # Danmu_CartoonController posts a wireformat ApiDanmu every few
             # seconds (empty content = poll) and expects a list of comments.
@@ -671,7 +931,9 @@ class LocalSocial:
             return 200, {"messages": messages[-50:], "danmu": messages[-50:]}
         if method != "POST":
             return 405, {"error": "method_not_allowed", "message": "POST required"}
-        payload = _json(body)
+        payload = self._request(body, "ApiChat")
+        if "channel" in payload or "content" in payload:
+            return self._channel_chat(payload, profile, state)
         text = str(payload.get("message", payload.get("text", payload.get("content", "")))).strip()
         if not text:
             return 400, {"error": "empty_message"}
@@ -803,7 +1065,7 @@ class LocalSocial:
                 lambda: self._client_relations(method, route, path, body, profile, state),
                 lambda: self._friend(method, route, body, profile, state),
                 lambda: self._assist(method, route, body, profile),
-                lambda: self._chat(method, route, body, profile, state),
+                lambda: self._chat(method, route, path, body, profile, state),
                 lambda: self._pvp(method, route, body, profile, state),
                 lambda: self._rank(method, route, profile, state),
             ):

@@ -386,6 +386,7 @@ class _Connection:
     audit_log: Any
     on_login: Optional[Callable[..., Any]]
     initializer: Optional[Callable[..., Any]]
+    on_business_message: Optional[Callable[..., Any]] = None
     server_sequence: int = DEFAULT_SERVER_SEQUENCE
     heartbeat_interval_ms: int = DEFAULT_HEARTBEAT_INTERVAL_MS
     allow_unmasked_local: bool = False
@@ -513,6 +514,10 @@ class _Connection:
             # Deliberately do not send ScLoginBegin/ScLoginEnd here.
             return True
 
+        if self.authenticated and self.account is not None and self.on_business_message is not None:
+            if self.on_business_message(self.account, message_type, data, self):
+                return True
+
         # The retired client still sends a large number of namespace RPCs
         # after login (recharge, task, activity and growth modules).  The
         # local server does not have their original protobuf descriptors, so
@@ -616,6 +621,7 @@ def handle_upgrade(
     *,
     on_login: Optional[Callable[..., Any]] = None,
     initializer: Optional[Callable[..., Any]] = None,
+    on_business_message: Optional[Callable[..., Any]] = None,
     timeout: float = 20.0,
     server_sequence: int = DEFAULT_SERVER_SEQUENCE,
     heartbeat_interval_ms: int = DEFAULT_HEARTBEAT_INTERVAL_MS,
@@ -674,6 +680,7 @@ def handle_upgrade(
             audit_log=audit_log,
             on_login=on_login,
             initializer=initializer,
+            on_business_message=on_business_message,
             server_sequence=server_sequence,
             heartbeat_interval_ms=heartbeat_interval_ms,
             allow_unmasked_local=allow_unmasked_local,

@@ -57,7 +57,7 @@ def grant_rewards(game: Any, profile: Mapping[str, Any], rewards: Iterable[Mappi
                                         "count": entry["count"], "countDelta": count}})
         elif rtype == RES_ACTOR and state is not None:
             for _ in range(count):
-                new_instances.append(actor_store.add(profile, state, rid))
+                new_instances.append(systems.new_actor(profile, state, rid, _int(reward.get("param"))))
         else:
             ledger.append({"type": rtype, "id": rid, "param": _int(reward.get("param")), "count": count})
     if state is not None:
@@ -68,19 +68,9 @@ def grant_rewards(game: Any, profile: Mapping[str, Any], rewards: Iterable[Mappi
             for delta in deltas:
                 changes.append({"baseRes": {"type": delta["type"], "id": delta["id"], "param": delta["param"],
                                             "count": delta["count"], "countDelta": delta["countDelta"]}})
-    if new_instances and hasattr(game, "_append_local_actor"):
-        from google.protobuf import json_format
-
-        container = game._types["DBGamePlayer.Actors"]()
+    if new_instances:
         for record in new_instances:
-            uid = int(record["uid"])
-            game._append_local_actor(container, int(record["id"]), uid, uid - 1)
-            container.player_actors[-1].count_delta = 1  # DBH.UpdateActors adds only countDelta > 0
-            try:
-                actor = json_format.MessageToDict(container.player_actors[-1], always_print_fields_with_no_presence=True)
-            except TypeError:  # older protobuf
-                actor = json_format.MessageToDict(container.player_actors[-1], including_default_value_fields=True)
-            changes.append({"actor": actor})
+            changes.append({"actor": systems._st_actor_json(record, profile, state, 1)})
     return changes
 
 

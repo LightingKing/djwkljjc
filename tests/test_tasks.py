@@ -4,7 +4,7 @@ import json
 import sys
 import tempfile
 import unittest
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -29,7 +29,7 @@ def _guest(accounts: LocalAccounts):
 
 
 def _ts(*args: int) -> int:
-    return int(datetime(*args, tzinfo=timezone.utc).timestamp())
+    return int(datetime(*args, tzinfo=timezone(timedelta(hours=8))).timestamp())
 
 
 class LocalTasksTests(unittest.TestCase):
@@ -41,7 +41,7 @@ class LocalTasksTests(unittest.TestCase):
         self.account, _ = _guest(accounts)
         self.profile = dict(self.game._profile(self.account))
         self.profile["level"] = 1
-        # 08:00 UTC: inside the 06:00 daily bucket, outside both online windows.
+        # 08:00 Beijing: inside the 06:00 daily bucket, outside both online windows.
         self.now = [_ts(2026, 10, 29, 8, 0)]
         self.tasks = LocalTasks(self.game, clock=lambda: self.now[0])
 
@@ -142,7 +142,7 @@ class LocalTasksTests(unittest.TestCase):
         status, week = self.tasks.handle_http("GET", "/fci/week-activepoint/", None, self.profile)
         self.assertEqual((status, week), (200, {"weekActivePoint": 20, "rewardGot": []}))
 
-    def test_daily_rollover_at_0600_utc(self) -> None:
+    def test_daily_rollover_at_0600_beijing(self) -> None:
         self._get()
         for _ in range(5):
             self.tasks.on_battle_win(self.profile, 1, 6)

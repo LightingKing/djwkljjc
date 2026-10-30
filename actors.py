@@ -145,7 +145,8 @@ def instances(profile: Mapping[str, Any], state: MutableMapping[str, Any]) -> di
         record = new_record(actor_id, position)
         old = legacy.get(str(actor_id))
         if isinstance(old, Mapping):
-            for key in ("level", "star", "exp", "quality", "locked", "skin", "skills", "favourLevel", "favourExp"):
+            for key in ("level", "star", "exp", "quality", "locked", "skin", "skills", "favourLevel", "favourExp",
+                        "talents", "talentResetInfo", "talentResetPos", "isNew", "isNewCard"):
                 if key in old:
                     record[key] = old[key]
         store[str(position)] = record
@@ -168,9 +169,12 @@ def first_uid(profile: Mapping[str, Any], state: MutableMapping[str, Any], actor
 
 
 def resolve(profile: Mapping[str, Any], state: MutableMapping[str, Any], ref: Any) -> Optional[dict[str, Any]]:
-    """A client reference -> instance: a uid (< 1000) or a legacy actor id."""
+    """Prefer the exact uid, retaining actor-id lookup for old local saves."""
 
     ref = _int(ref)
+    exact = get(profile, state, ref)
+    if exact is not None:
+        return exact
     if ref >= MIN_ACTOR_ID:
         uid = first_uid(profile, state, ref)
         return get(profile, state, uid) if uid else None

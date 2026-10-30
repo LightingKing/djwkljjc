@@ -1,0 +1,1 @@
+{"table":"ActorCultivationEmote","source":"analysis/lua-decompiled/xlsx__actorcultivationemote.lua","sourceSha256":"ecea422b5be7e5ffa8b61e5677cc5855728ae859426dd40ad51b5ab0b7643862","provenance":"original APK 2.0.4 config module (FCI-decoded, unluac-decompiled), evaluated as data","rowCount":2,"rows":[{"actorId":1502,"scale":0.8},{"actorId":1514,"scale":0.8}]}

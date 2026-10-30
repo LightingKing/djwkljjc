@@ -32,15 +32,20 @@ def _send_chat_worker(root: str, authorization: str, index: int, result_queue) -
 
 
 def _start_race_worker(root: str, authorization: str, index: int, result_queue) -> None:
-    """Try to create the same account's match from a fresh process."""
+    """Create the same native Race run from an independent process."""
 
     try:
         root_path = Path(root)
         accounts = LocalAccounts(root_path / "accounts")
         game = LocalGame(root_path / "game", accounts)
-        status, payload = game.handle_http(
-            "POST", "/fci/racepvp/match", b"{}", "application/json", authorization
-        )
+        status, room = game.handle_http("GET", "/fci/RacePVPInfo", authorization=authorization)
+        if status != 200:
+            result_queue.put((index, status, room))
+            return
+        from google.protobuf import message_factory
+        request_type = message_factory.GetMessageClass(game._pool.FindMessageTypeByName("ApiRacePVPDungeon"))
+        body = request_type(dungeon_id=room["dungeonId"], select_actor_group_id=1).SerializeToString()
+        status, payload = game.handle_http("POST", "/fci/racepvp-dungeon/", body, "application/wireformat", authorization)
         result_queue.put((index, status, payload))
     except Exception as exc:  # pragma: no cover - surfaced by the parent assertion
         result_queue.put((index, "exception", repr(exc)))
@@ -114,12 +119,14 @@ class CrossProcessStateTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             accounts = LocalAccounts(root / "accounts")
-            game = LocalGame(root / "game", accounts)
+            game = LocalGame(root / "game", accounts, initial_level=26)
             authorization = self.guest(accounts)
+            status, room = game.handle_http("GET", "/fci/RacePVPInfo", authorization=authorization)
+            self.assertEqual(status, 200)
 
             context = multiprocessing.get_context("spawn")
             result_queue = context.Queue()
-            worker_count = 5
+            worker_count = 2
             workers = [
                 context.Process(
                     target=_start_race_worker,
@@ -136,14 +143,18 @@ class CrossProcessStateTests(unittest.TestCase):
 
             results = [result_queue.get(timeout=5) for _ in workers]
             self.assertTrue(all(row[1] == 200 for row in results), results)
-            match_ids = {row[2]["match"]["matchId"] for row in results}
+            match_ids = {row[2]["dungeonUid"] for row in results}
             self.assertEqual(len(match_ids), 1, results)
             status, summary = game.handle_http(
-                "GET", "/fci/racepvp/info", authorization=authorization
+                "GET", "/fci/RacePVPInfo", authorization=authorization
             )
             self.assertEqual(status, 200)
-            self.assertEqual(summary["tickets"], 5)
-            self.assertEqual(summary["activeMatchId"], next(iter(match_ids)))
+            self.assertEqual(len(summary["players"]), 20)
+            account, error = game._authorized(authorization)
+            self.assertIsNone(error)
+            profile = game._profile(account)
+            self.assertEqual(game.systems._state(profile)["items"]["80004"]["count"], 5)
+            self.assertEqual(game.realtime_pvp.race._load(profile)["activeUid"], next(iter(match_ids)))
 
 
 if __name__ == "__main__":

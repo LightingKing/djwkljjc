@@ -8,7 +8,7 @@ import json
 import sys
 import tempfile
 import unittest
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -25,7 +25,7 @@ import test_systems as _systems  # noqa: E402  (module import: its tests are not
 
 DAY = 86400
 GOLD = 7  # ResPlayerGold
-ANCHOR = int(datetime(2026, 10, 26, 6, tzinfo=timezone.utc).timestamp())
+ANCHOR = int(datetime(2026, 10, 26, 6, tzinfo=timezone(timedelta(hours=8))).timestamp())
 
 
 def _changes(message) -> list[dict]:
@@ -190,17 +190,17 @@ class LoginRewardTests(unittest.TestCase):
     def test_schedule_without_login_phases_still_lists_them_and_pays_calendar(self):
         source = self.root / "schedule.yaml"
         source.write_text(json.dumps({"cycle": {
-            "periodDays": 28, "anchor": "2026-10-26T06:00:00Z",
+            "periodDays": 28, "anchor": "2026-10-26T06:00:00+08:00",
             "phases": [{"id": "shop", "dayStart": 0, "dayEnd": 28, "activityType": 12}],
         }}), encoding="utf-8")
         self.game.activity_schedule = ActivitySchedule(source, clock=lambda: self.now[0])
-        self.now[0] = ANCHOR + 22 * DAY + 3600  # cycle day 22 -> calendar window [20, 28)
+        self.now[0] = ANCHOR + 22 * DAY + 3600  # cycle day 22 -> calendar window [20, 30)
         status, rows = self.call("GET", "/fci/activity/")
         self.assertEqual(status, 200)
         by_type = {row["type"]: row for row in rows}
-        self.assertEqual(set(by_type), {12, 25, 46})
-        self.assertEqual(by_type[46]["timestampStart"], ANCHOR + 20 * DAY)
-        self.assertEqual(by_type[46]["timestampEnd"], ANCHOR + 28 * DAY - 1)
+        self.assertEqual(set(by_type), {12, 25, 32, 46})
+        self.assertEqual(by_type[46]["timestampStart"], ANCHOR - 6 * 3600 + 20 * DAY)
+        self.assertEqual(by_type[46]["timestampEnd"], ANCHOR - 6 * 3600 + 30 * DAY - 1)
 
         # Day 3 of the window pays ActivitySigninGift 46001 day 3 (5x item 10003).
         status, claim = self.call("POST", "/fci/everyday-signin/46001/", b"{}")

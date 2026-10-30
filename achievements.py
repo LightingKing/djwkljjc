@@ -61,6 +61,8 @@ push; the client then shows Window_AchievementUnlock and the red mark).
 
 from __future__ import annotations
 
+from server.core.reset import DEFAULT_RESET_POLICY, policy_for
+
 import json
 import logging
 import re
@@ -109,7 +111,6 @@ ACTOR_PN_QUALITY_P1_M = 66
 BALANCE_P0_DUNGEON_M_TIMES_ACTOR_PN = 71
 
 # Actor openTime strings are server (Beijing) wall-clock times.
-_SERVER_TZ = timezone(timedelta(hours=8))
 
 
 def _int(value: Any, default: int = 0) -> int:
@@ -250,14 +251,10 @@ def _stage_energy_cost() -> Mapping[int, int]:
     return STAGE_ENERGY_COST
 
 
-def _parse_open_time(text: str) -> Optional[int]:
-    match = re.match(r"\s*(\d+)-(\d+)-(\d+)(?:\s+(\d+):(\d+)(?::(\d+))?)?", text or "")
-    if not match:
-        return None
-    y, mo, d, h, mi, s = (int(g) if g else 0 for g in match.groups())
+def _parse_open_time(text: str, policy=DEFAULT_RESET_POLICY) -> Optional[int]:
     try:
-        return int(datetime(y, mo, d, h, mi, s, tzinfo=_SERVER_TZ).timestamp())
-    except ValueError:
+        return policy.parse_config_datetime(text)
+    except (ValueError, TypeError):
         return None
 
 
@@ -357,7 +354,7 @@ class LocalAchievements:
 
     # ------------------------------------------------------------ snapshot
     def _actor_open(self, actor_id: int, now: int) -> bool:
-        opened = _parse_open_time(ACTOR_OPEN_TIME.get(int(actor_id), ""))
+        opened = _parse_open_time(ACTOR_OPEN_TIME.get(int(actor_id), ""), policy_for(self.game))
         return opened is None or opened <= now
 
     def _sync_collections(self, profile: Mapping[str, Any], state: dict[str, Any],
@@ -595,6 +592,11 @@ class LocalAchievements:
                 changes.append({"baseRes": {"type": reward["type"], "id": reward["id"], "param": 0,
                                             "count": 1, "countDelta": 1}})
             self.game.systems._save(profile, systems_state)
+            notify = getattr(self.game, "base_push_notifier", None)
+            if notify is not None:
+                for reward in special:
+                    if reward["type"] == RES_MEDAL:
+                        self.game.after_commit(lambda medal_id=reward["id"]: notify(profile, 49, (medal_id,)))
         return changes
 
     # ----------------------------------------------------------- novels

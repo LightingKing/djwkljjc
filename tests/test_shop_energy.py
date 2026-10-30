@@ -15,7 +15,7 @@ import sys
 import tempfile
 import unittest
 from contextlib import closing
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -33,7 +33,7 @@ from economy import (  # noqa: E402
 from game import LocalGame  # noqa: E402
 from server.core.clock import ServerClock  # noqa: E402
 
-START = int(datetime(2026, 10, 26, 7, 0, tzinfo=timezone.utc).timestamp())  # Monday 07:00 UTC
+START = int(datetime(2026, 10, 26, 7, 0, tzinfo=timezone(timedelta(hours=8))).timestamp())  # Monday 07:00 Beijing
 
 
 def _guest(accounts: LocalAccounts) -> tuple[dict, str]:
@@ -156,7 +156,7 @@ class ShopCatalogTests(unittest.TestCase):
         monthly = {"refreshTimeInDay": "06:00:00", "refreshDayOfMonth": 1}
         self.assertEqual(
             next_shop_refresh(monthly, START),
-            int(datetime(2026, 11, 1, 6, tzinfo=timezone.utc).timestamp()),
+            int(datetime(2026, 11, 1, 6, tzinfo=timezone(timedelta(hours=8))).timestamp()),
         )
 
 

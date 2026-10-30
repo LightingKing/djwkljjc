@@ -19,6 +19,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from accounts import LocalAccounts
+import actors as actor_store
 from dungeon import ACTOR_LEVELS
 from game import LocalGame
 import test_systems
@@ -95,8 +96,8 @@ class ActorUpgradeTests(unittest.TestCase):
 
     # -- uid routing -------------------------------------------------------
     def test_path_number_is_the_bootstrap_uid(self):
-        self._edit_state(lambda state: state["actors"].setdefault(
-            "1002", {"id": 1002, "level": 3, "star": 1, "exp": 0}))
+        profile = self._profile()
+        self._edit_state(lambda state: self.game.systems.new_actor(profile, state, 1002).update(level=3))
         bootstrap = self._bootstrap_actors()
         self.assertEqual(dict(bootstrap.actor_id_map), {1001: 1, 1002: 2})
 
@@ -111,6 +112,26 @@ class ActorUpgradeTests(unittest.TestCase):
         self.assertEqual(status, 200)
         self.assertEqual((legacy.result.id, legacy.result.uid), (1002, 2))
 
+    def test_legacy_save_migrates_actor_ids_to_stable_instance_uids(self):
+        # A genuine pre-instance save has no actorInstances or nextActorUid;
+        # modifying its obsolete actor map after migration is not a save migration.
+        def seed_legacy(state):
+            state.pop("actorInstances", None)
+            state.pop("nextActorUid", None)
+            state["actors"] = {
+                "1001": {"id": 1001, "level": 5, "star": 2, "exp": 31},
+                "1002": {"id": 1002, "level": 3, "star": 1, "exp": 7},
+            }
+        self._edit_state(seed_legacy)
+        bootstrap = self._bootstrap_actors()
+        self.assertEqual(dict(bootstrap.actor_id_map), {1001: 1, 1002: 2})
+        first = self._stored_actor(1001)
+        second = self._stored_actor(1002)
+        self.assertEqual((first["uid"], first["level"], first["star"], first["exp"]), (1, 5, 2, 31))
+        self.assertEqual((second["uid"], second["level"], second["exp"]), (2, 3, 7))
+        self.assertEqual(dict(self._bootstrap_actors().actor_id_map), dict(bootstrap.actor_id_map))
+        self.assertEqual(self._state()["nextActorUid"], 3)
+
     def test_unknown_uid_is_404_and_never_persists_a_fake_actor(self):
         for method, path, payload in (
             ("GET", "/fci/actor/7/", None),
@@ -124,7 +145,7 @@ class ActorUpgradeTests(unittest.TestCase):
         # Equip-on with an unknown actorUid must not create actor id "7".
         self._call("POST", "/fci/equip/20001/equipon/", {"actorUid": 7})
         self.assertEqual(self.game.local_actor_ids(self._profile()), [1001])
-        self.assertEqual(list(self._state()["actors"]), ["1001"])
+        self.assertEqual([(r["uid"], r["id"]) for r in self._state()["actorInstances"].values()], [(1, 1001)])
 
     def test_equip_on_reply_uses_bootstrap_uid(self):
         status, result = self._call("POST", "/fci/equip/20001/equipon/", {"actorUid": 1})
@@ -215,7 +236,7 @@ class ActorUpgradeTests(unittest.TestCase):
         status, payload = self._call("POST", "/fci/actor/1/starupgrade/", {})
         self.assertEqual((status, payload["error"], payload["requiredLevel"]), (409, "actor_level_too_low", 5))
 
-        self._edit_state(lambda state: state["actors"]["1001"].update(level=5))
+        self._edit_state(lambda state: actor_store.get(self._profile(), state, 1).update(level=5))
         self._grant(30001, 4)
         status, payload = self._call("POST", "/fci/actor/1/starupgrade/", {})
         self.assertEqual((status, payload["error"], payload["required"]), (409, "insufficient_item", 5))
@@ -238,7 +259,7 @@ class ActorUpgradeTests(unittest.TestCase):
         self.assertEqual((status, payload["requiredLevel"]), (409, 20))
 
     def test_starupgrade_stops_at_max_star(self):
-        self._edit_state(lambda state: state["actors"]["1001"].update(level=60, star=6))
+        self._edit_state(lambda state: actor_store.get(self._profile(), state, 1).update(level=60, star=6))
         status, payload = self._call("POST", "/fci/actor/1/starupgrade/", {})
         self.assertEqual((status, payload["error"]), (409, "actor_star_max"))
 

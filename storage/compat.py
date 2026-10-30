@@ -30,6 +30,7 @@ except ImportError:  # Direct ``python server.py`` / PYTHONPATH execution.
 
 _LOCKS: dict[str, threading.RLock] = {}
 _LOCKS_GUARD = threading.Lock()
+_PROCESS_LOCK_DEPTH = threading.local()
 
 
 def resolve_unified_store_path(
@@ -97,32 +98,39 @@ def shared_process_lock(path: str | Path):
     machine; it never creates a network or external-account dependency.
     """
 
-    lock_path = Path(path).expanduser().resolve().with_name(
-        Path(path).name + ".process.lock"
-    )
+    target = Path(path).expanduser().resolve()
+    key = os.path.normcase(str(target))
+    held = getattr(_PROCESS_LOCK_DEPTH, 'held', None)
+    if held is None:
+        held = _PROCESS_LOCK_DEPTH.held = set()
+    # The OS file lock is not recursively acquirable on Windows. Nested
+    # mutations in this same thread already own it, across module boundaries.
+    if key in held:
+        yield
+        return
+    lock_path = target.with_name(target.name + ".process.lock")
     lock_path.parent.mkdir(parents=True, exist_ok=True)
-    with lock_path.open("a+b") as stream:
+    with shared_store_lock(target), lock_path.open("a+b") as stream:
         if stream.seek(0, 2) == 0:
             stream.write(b"\0")
             stream.flush()
         stream.seek(0)
         if os.name == "nt":
             import msvcrt
-
             msvcrt.locking(stream.fileno(), msvcrt.LK_LOCK, 1)
-            try:
-                yield
-            finally:
-                stream.seek(0)
-                msvcrt.locking(stream.fileno(), msvcrt.LK_UNLCK, 1)
+            unlock = lambda: msvcrt.locking(stream.fileno(), msvcrt.LK_UNLCK, 1)
         else:
             import fcntl
-
             fcntl.flock(stream.fileno(), fcntl.LOCK_EX)
-            try:
-                yield
-            finally:
-                fcntl.flock(stream.fileno(), fcntl.LOCK_UN)
+            unlock = lambda: fcntl.flock(stream.fileno(), fcntl.LOCK_UN)
+        held.add(key)
+        try:
+            yield
+        finally:
+            held.remove(key)
+            stream.seek(0)
+            unlock()
+
 
 
 __all__ = [

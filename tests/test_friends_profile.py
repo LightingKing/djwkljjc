@@ -218,6 +218,40 @@ class FriendsProfileTests(unittest.TestCase):
         features._save(profile, state)
         self.assertNotIn(1001, [row["roleId"] for row in self.call("GET", "/fci/RoleNotePad/", game=self._game())[1]])
 
+    def test_notepad_batch_matches_native_request_positions(self):
+        self.grant((15, 1002, 1), (15, 1007, 1))
+        # DataBindingManager pairs response[index] with requestList[index - 1].
+        # A subset must not include the other owned roles, and duplicates keep
+        # their positions even when the request order differs from role order.
+        for method, query, expected in (
+            ("GET", "perPage=20&uids=7", [7]),
+            ("GET", "perPage=20&uids=7%2C1", [7, 1]),
+            ("GET", "uids=7,1,7", [7, 1, 7]),
+            ("GET", "uids=7&uids=1,2", [7, 1, 2]),
+            ("HEAD", "uids=2,1", [2, 1]),
+        ):
+            with self.subTest(method=method, query=query):
+                status, records = self.call(method, "/fci/RoleNotePad/?" + query)
+                self.assertEqual(status, 200)
+                self.assertEqual([row["roleId"] for row in records], expected)
+                for role_id, record in zip(expected, records):
+                    self.assertEqual(record, self.call("GET", f"/fci/RoleNotePad/{role_id}")[1])
+        status, summary = self.call("GET", "/fci/RoleNotePad?perPage=20&fields=roleId,favourLevel")
+        self.assertEqual((status, [row["roleId"] for row in summary]), (200, [1, 2, 7]))
+
+    def test_notepad_batch_rejects_missing_or_invalid_ids_without_shifting_slots(self):
+        self.grant((15, 1007, 1))
+        for uids in ("3,1", "7,3,1", "1,1001"):
+            with self.subTest(uids=uids):
+                status, error = self.call("GET", "/fci/RoleNotePad/?uids=" + uids)
+                self.assertEqual(status, 404)
+                self.assertEqual(error["error"], "role_notepad_not_found")
+                self.assertEqual(error["roleId"], 1001 if "1001" in uids else 3)
+        for uids in ("", "1,,7", "1,", "nope", "0", "-1", "1.0"):
+            with self.subTest(uids=uids):
+                status, error = self.call("GET", "/fci/RoleNotePad/?uids=" + uids)
+                self.assertEqual((status, error), (400, {"error": "invalid_role_notepad_uids"}))
+
     def test_favour_levels_follow_the_favour_level_table(self):
         features = self.game.profile_features
         record = features.add_role_favour(self.profile(), 1, 60)  # 15 to reach 1, 50 more for 2

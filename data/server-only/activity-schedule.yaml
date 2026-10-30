@@ -3,14 +3,15 @@ provenance:
   source: local compatibility policy; historical production schedule is unavailable
   confidence: D
   note: "The scheduler is a deterministic local loop. Replace entries with dated archives when recovered."
-timezone: UTC
+timezone: Asia/Shanghai
+resetPolicyVersion: 1
 cycle:
   periodDays: 28
-  anchor: "2026-10-26T06:00:00Z"
+  anchor: "2026-10-26T06:00:00+08:00"
   phases:
     - id: sign-in
       dayStart: 0
-      dayEnd: 7
+      dayEnd: 28
       activityType: 46
     - id: shop
       dayStart: 0
@@ -74,11 +75,19 @@ permanentActivities:
     - id: triggered-event
       type: 31           # TriggeredEvent -> window TriggeredEvent (UnlockWindow 32, Lv32)
       activityId: 31001
+    - id: race-pvp
+      type: 20
+      activityId: 20001
+    - id: actor-cultivation-1502
+      type: 53
+      activityId: 53001
+    - id: actor-cultivation-1514
+      type: 53
+      activityId: 53002
     # Not listed:
     # - Maze (34): in no ActivitySort row and no other UI entry, so the 2.0.4
     #   client can never show it.
-    # - RacePVP (20, Lv26) / DungeonTeam (23, Lv30): WeeklyActivity entries of
-    #   realtime/multiplayer modes; add them once their routes are compatible.
+    # - DungeonTeam (23, Lv30): multiplayer routes remain unimplemented.
     # - Tournament_AsyncPvp (5, Lv23) / BurstLinkPvp (18, Lv28): category 3
     #   (Tournament) entries additionally need a matching
     #   fci/tournament/summary/ activityInfo[] record and fci/tournament/info.

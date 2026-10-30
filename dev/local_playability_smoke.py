@@ -19,6 +19,8 @@ from contextlib import closing
 from pathlib import Path
 from typing import Any, Callable
 
+from google.protobuf import message_factory
+
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
@@ -71,10 +73,12 @@ def run_smoke() -> dict[str, Any]:
         accounts = LocalAccounts(root / "accounts")
         game = LocalGame(root / "game", accounts)
         account, auth = _guest(accounts)
+        race_evidence: dict[str, Any] = {}
 
         def call(method: str, path: str, payload: Any = None):
-            body = None if payload is None else json.dumps(payload, separators=(",", ":")).encode()
-            return game.handle_http(method, path, body, "application/json", auth)
+            body = payload if isinstance(payload, bytes) else None if payload is None else json.dumps(payload, separators=(",", ":")).encode()
+            content_type = "application/wireformat" if isinstance(payload, bytes) else "application/json"
+            return game.handle_http(method, path, body, content_type, auth)
 
         def step(name: str, action: Callable[[], Any]) -> None:
             began = time.monotonic()
@@ -226,20 +230,41 @@ def run_smoke() -> dict[str, Any]:
             return {"joined": joined, "donated": donated, "summary": summary}
 
         def realtime():
-            status, info = call("GET", "/fci/racepvp/info")
+            # This disposable smoke account must satisfy the real Lv26 gate.
+            with closing(game._connect()) as connection, connection:
+                connection.execute("UPDATE game_profiles SET level=MAX(level,26) WHERE account_id=?", (account["accountId"],))
+            status, info = call("GET", "/fci/RacePVPInfo")
             require(status, path="race info")
-            status, created = call("POST", "/fci/racepvp/match", {})
-            require(status, path="race match")
-            match_id = created["match"]["matchId"]
-            for round_no in range(1, 9):
-                status, result = call("POST", f"/fci/racepvp/match/{match_id}/round", {"round": round_no, "action": "skill"})
-                require(status, path=f"race round {round_no}")
-            status, settled = call("POST", f"/fci/racepvp/match/{match_id}/balance", {})
+            profile = game._profile(account)
+            if len(info["players"]) != 20 or sum(p["playerId"] == profile["player_id"] for p in info["players"]) != 1:
+                raise AssertionError("race room must contain self plus 19 robots")
+            request_type = message_factory.GetMessageClass(game._pool.FindMessageTypeByName("ApiRacePVPDungeon"))
+            request = request_type(dungeon_id=info["dungeonId"], select_actor_group_id=1).SerializeToString()
+            tickets_before = game.systems._state(profile)["items"]["80004"]["count"]
+            status, created = call("POST", "/fci/racepvp-dungeon/", request)
+            require(status, path="race enter")
+            uid = created["dungeonUid"]
+            status, retried = call("POST", "/fci/racepvp-dungeon/", request)
+            require(status, path="race enter retry")
+            tickets_after = game.systems._state(profile)["items"]["80004"]["count"]
+            if retried["dungeonUid"] != uid or tickets_after != tickets_before - 1:
+                raise AssertionError("race enter retry changed run or spent another ticket")
+            active = game._types["FightActiveData"](dungeonType=7, stageID=info["dungeonId"], gameRound=8, winTeam=1)
+            active.teamList.add(team=1).statistic.totalDamage = 1000
+            active.teamList.add(team=2).statistic.totalDamage = 25000
+            status, _ = call("PATCH", f"/fci/dungeon/{uid}/active/", active.SerializeToString())
+            require(status, path="race active snapshot")
+            status, settled = call("POST", f"/fci/racepvp-dungeon/{uid}/balance/", {})
             require(status, path="race balance")
-            status, repeat = call("POST", f"/fci/racepvp/match/{match_id}/balance", {})
+            if settled != {"curBattleScore": 2500, "highBattleScore": 2500}:
+                raise AssertionError("race score did not use enemy received damage / 10")
+            status, repeat = call("POST", f"/fci/racepvp-dungeon/{uid}/balance/", {})
             require(status, path="race balance retry")
-            if not repeat.get("duplicate"):
-                raise AssertionError("race settlement retry was not marked duplicate")
+            if repeat != settled:
+                raise AssertionError("race settlement retry changed persisted result")
+            status, _ = call("DELETE", f"/fci/racepvp-dungeon/{uid}")
+            require(status, path="race leave")
+            race_evidence.update(uid=uid, balance=settled, tickets=tickets_after, playerId=profile["player_id"])
             return settled
 
         step("auth_and_profile", auth_and_profile)
@@ -259,14 +284,23 @@ def run_smoke() -> dict[str, Any]:
             require(status, path="restart chat")
             status, guild_summary = restarted.handle_http("GET", "/fci/guild/summary", authorization=auth)
             require(status, path="restart guild")
-            status, race = restarted.handle_http("GET", "/fci/racepvp/info", authorization=auth)
+            status, race = restarted.handle_http("GET", "/fci/RacePVPInfo", authorization=auth)
             require(status, path="restart race")
             if not chat["messages"] or chat["messages"][-1]["text"] != "local smoke":
                 raise AssertionError("chat state did not survive restart")
             if not guild_summary.get("guild"):
                 raise AssertionError("guild state did not survive restart")
-            if len(race.get("matches", [])) != 1:
-                raise AssertionError("race match state did not survive restart")
+            own = next((p for p in race["players"] if p["playerId"] == race_evidence.get("playerId")), None)
+            if len(race["players"]) != 20 or own is None or own["battleScore"] != 2500:
+                raise AssertionError("race room score did not survive restart")
+            status, repeated = restarted.handle_http("POST", f"/fci/racepvp-dungeon/{race_evidence['uid']}/balance/",
+                                                       b"{}", "application/json", auth)
+            require(status, path="restart race balance retry")
+            if repeated != race_evidence["balance"]:
+                raise AssertionError("race balance did not survive restart")
+            profile = restarted._profile(account)
+            if restarted.systems._state(profile)["items"]["80004"]["count"] != race_evidence["tickets"]:
+                raise AssertionError("race ticket spend did not survive restart")
             return {"base": base, "chat": chat, "guild": guild_summary, "race": race}
 
         step("restart_persistence", persistence)

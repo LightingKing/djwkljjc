@@ -380,11 +380,10 @@ class EconomyRoutesTests(unittest.TestCase):
     def test_month_card_uses_configured_six_am_reset_bucket(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
-            now = [1767247140]  # 2026-01-01 05:59 UTC
+            now = [1767247140 - 28800]  # 2026-01-01 05:59 Beijing
             clock = ServerClock(source=lambda: now[0])
             accounts = LocalAccounts(root / "accounts", clock=clock.now)
             game = LocalGame(root / "game", accounts, clock=clock.now)
-            game.daily_key = lambda value=None: clock.daily_key(value, refresh_at="06:00:00")
             account, auth = self._guest(accounts)
 
             status, _first = game.handle_http(

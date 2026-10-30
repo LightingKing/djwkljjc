@@ -1,0 +1,4 @@
+# Offline builder only; the local game server does not import these modules.
+lupa==2.8
+UnityPy==1.25.4
+lz4==4.4.5

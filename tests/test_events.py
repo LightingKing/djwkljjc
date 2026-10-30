@@ -70,7 +70,7 @@ class LocalEventsTests(unittest.TestCase):
             _, repeated = events.handle_http("POST", "/fci/signin", None, profile)
             self.assertEqual(repeated.days, 1)
             events.handle_http("POST", "/fci/signin/gift", b'{"days":1}', profile)
-            events.handle_http("POST", "/fci/activity-signin/4", None, profile)
+            events.handle_http("POST", "/fci/activity-signin/32001", None, profile)
             events.handle_http("POST", "/fci/everyday-signin", None, profile)
             resources = game._profile(account)["resources"]
             gold = next(item["count"] for item in resources if item["type"] == 7)
@@ -81,7 +81,7 @@ class LocalEventsTests(unittest.TestCase):
             game2 = LocalGame(root / "game", accounts, clock=lambda: now[0])
             events2 = LocalEvents(game2, clock=lambda: now[0])
             profile2 = game2._profile(account)
-            _, state = events2.handle_http("GET", "/fci/activity-signin/4", None, profile2)
+            _, state = events2.handle_http("GET", "/fci/activity-signin/32001", None, profile2)
             self.assertTrue(state.signed)
             self.assertEqual(state.day, 1)
             events2.handle_http("POST", "/fci/signin", None, profile2)
@@ -111,21 +111,20 @@ class LocalEventsTests(unittest.TestCase):
             self.assertEqual(status, 200)
             self.assertEqual(signin_activity.result.type, 46)
 
-    def test_fourteen_day_reset_simulation_uses_six_am_boundary(self):
+    def test_fourteen_day_signin_simulation_uses_beijing_midnight(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
-            # 2026-01-01 05:59 UTC; the local server resets at 06:00.
-            now = [1767247140]
+            # 2026-01-01 23:59 Beijing; sign-in changes at local midnight.
+            now = [1767283140]
             clock = ServerClock(source=lambda: now[0])
             accounts = LocalAccounts(root / "accounts", clock=clock.now)
             game = LocalGame(root / "game", accounts, clock=clock.now)
-            game.daily_key = lambda value=None: clock.daily_key(value, refresh_at="06:00:00")
             account = guest_account(accounts)
             profile = game._profile(account)
             events = LocalEvents(game, clock=clock.now)
             _, first = events.handle_http("POST", "/fci/signin", None, profile)
             self.assertEqual(first.days, 1)
-            now[0] += 60 * 60  # cross the 06:00 reset
+            now[0] += 60 * 60  # cross the local midnight reset
             _, second = events.handle_http("POST", "/fci/signin", None, profile)
             self.assertEqual(second.days, 2)
             # Advance fourteen local days, claiming once per bucket; the
@@ -150,7 +149,6 @@ class LocalEventsTests(unittest.TestCase):
                 ("GET", "/fci/deploymission/", "ApiDeployMission.get"),
                 ("POST", "/fci/deploymissionreward/", "ApiDeployMissionReward.result"),
                 ("GET", "/fci/conditionreward/", "ApiConditionReward.get"),
-                ("POST", "/fci/conditionreward/", "ApiConditionReward.post"),
                 ("GET", "/fci/achievementsummary/", "ApiAchievementSummary.get"),
                 ("POST", "/fci/achievementreward/", "ApiAchievementReward.result"),
             ]

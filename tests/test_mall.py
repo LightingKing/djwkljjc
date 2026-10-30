@@ -52,11 +52,11 @@ class MallCatalogTests(unittest.TestCase):
         self.assertTrue(all(r["activityId"] in page2 for r in deduped))
 
     def test_purchase_windows(self):
-        now = 1767247140  # 2026-01-01 05:59 UTC (before the 06:00 reset)
-        self.assertEqual(window_start(1, now), 1767160800)  # 2025-12-31 06:00
-        self.assertEqual(window_start(1, now + 120), 1767247200)
-        self.assertEqual(window_start(2, now + 120), 1766988000)  # Monday 2025-12-29 06:00
-        self.assertEqual(window_start(3, now + 120), 1767247200)  # 2026-01-01 06:00
+        now = 1767247140 - 28800  # 2026-01-01 05:59 Beijing (before the 06:00 reset)
+        self.assertEqual(window_start(1, now), 1767160800 - 28800)  # 2025-12-31 06:00
+        self.assertEqual(window_start(1, now + 120), 1767247200 - 28800)
+        self.assertEqual(window_start(2, now + 120), 1766988000 - 28800)  # Monday 2025-12-29 06:00
+        self.assertEqual(window_start(3, now + 120), 1767247200 - 28800)  # 2026-01-01 06:00
         self.assertEqual(window_start(4, now), 0)
 
 
@@ -120,15 +120,15 @@ class LocalMallTests(unittest.TestCase):
     def test_recharge_credits_paid_mizi_once(self):
         touch, delivered = self.recharge(GEM60, wire=True)
         self.assertTrue(touch["isSandbox"])
-        self.assertEqual((self.balance(5), self.balance(27)), (60, 60))
+        self.assertEqual((self.balance(5), self.balance(27)), (120, 60))
         self.assertEqual(delivered["productId"], GEM60)
         self.assertEqual(delivered["buyCount"], 1)
-        self.assertEqual({c["baseRes"]["type"]: c["baseRes"]["countDelta"] for c in delivered["resChange"]}, {5: 60, 27: 60})
+        self.assertEqual({c["baseRes"]["type"]: c["baseRes"]["countDelta"] for c in delivered["resChange"]}, {5: 120, 27: 60})
         self.assertTrue(all(c["inBox"] == [] for c in delivered["resChange"]))
         # A retried delivery returns the same transaction without a second credit.
         status, again = self.call("POST", "/fci/purchasedelevery/", {"tradeData": touch["tradeData"]})
         self.assertEqual((status, again["transactionId"]), (200, delivered["transactionId"]))
-        self.assertEqual(self.balance(5), 60)
+        self.assertEqual(self.balance(5), 120)
         info = self.call("GET", "/fci/mall-info/")[1]
         self.assertEqual(info["purchaseRecord"]["buyRecord"][GEM60]["buyCount"], 1)
         orders = self.mall.orders(self.profile())
@@ -136,7 +136,9 @@ class LocalMallTests(unittest.TestCase):
 
     def test_recharge_bonus_is_bound_mizi(self):
         self.recharge(GEM1280)
-        self.assertEqual((self.balance(5), self.balance(27)), (1280 + 120, 1280))
+        self.assertEqual((self.balance(5), self.balance(27)), (2560, 1280))
+        self.recharge(GEM1280)
+        self.assertEqual((self.balance(5), self.balance(27)), (2560 + 1280 + 120, 2560))
 
     def test_goods_product_delivers_its_contents(self):
         _, delivered = self.recharge("com.tencent.fcicv.re10.android")  # 1 RMB pack, limit 1 forever
@@ -203,7 +205,6 @@ class LocalMallTests(unittest.TestCase):
         status, refused = self.call("POST", "/fci/mall-trade", {"id": daily["id"]})
         self.assertEqual((status, refused["error"]), (409, "insufficient_resource"))
         self.add(27, price * (limit + 1))
-        self.add(5, price * (limit + 1))
         for count in range(1, limit + 1):
             status, result = self.call("POST", "/fci/mall-trade", {"id": daily["id"]})
             self.assertEqual((status, result.get("buyCount")), (200, count))
@@ -217,7 +218,7 @@ class LocalMallTests(unittest.TestCase):
 
     def test_bound_mizi_is_spent_before_paid_mizi(self):
         gift = next(r for r in self.mall.activity_gifts if r.get("resourceType") == 5)
-        self.add(5, gift["price"] + 10)
+        self.add(5, gift["price"])
         self.add(27, 10)  # total = price + 10, paid = 10, bound = price
         status, _ = self.call("POST", "/fci/mall-trade", {"id": gift["id"]})
         self.assertEqual(status, 200)
@@ -232,9 +233,9 @@ class LocalMallTests(unittest.TestCase):
 
     def test_activity_rows_open_every_event_gift(self):
         rows = self.mall.activity_rows()
-        self.assertEqual({r["activityId"] for r in rows}, {r["activityId"] for r in self.mall.activity_gifts})
+        self.assertEqual({r["activityId"] for r in rows}, {r["activityId"] for r in self.mall.activity_gifts} | {37001})
         for row in rows:
-            self.assertEqual(row["type"], ACTIVITY_TYPE_MALL)
+            self.assertEqual(row["type"], 37 if row["activityId"] == 37001 else ACTIVITY_TYPE_MALL)
             self.assertEqual((row["timestampPreheat"], row["timestampEnd"], row["weekdays"]), (0, 0, []))
             self.assertLessEqual(row["timestampStart"], self.now[0])
         merged = self.mall.merge_activity_list("GET", "/fci/activity/", (200, [{"type": 12, "activityId": 1}]))
@@ -269,7 +270,8 @@ class IAPHandlerPatchTests(unittest.TestCase):
         self.assertNotIn("m_iap", purchase_impl)
         self.assertIn('"fci/purchasedelevery/"', purchase_impl)
         get_info = patched.split("function GetActivityInfo(", 1)[1].split("\nend\n", 1)[0]
-        self.assertIn('BroadcastGameEvent("OnGetPurchaseActivityInfo")', get_info)
+        self.assertIn('"fci/purchase-activity-info/"', get_info)
+        self.assertIn('OnGetActivityInfo("{}")', get_info)
         self.assertNotIn("m_midasInfoCache.accessToken", patched)
         midas_proxy = patched.split("function MidasProxy(", 1)[1].split("\nend\n", 1)[0]
         self.assertNotIn("UpdateMidasUserInfo", midas_proxy)

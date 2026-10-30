@@ -46,6 +46,32 @@ class FixtureServerTests(unittest.TestCase):
         self.thread.join(timeout=2)
         self.temp.cleanup()
 
+    def test_patch_manifest_filters_versions_and_rejects_incompatible_apk(self):
+        manifest = {"version": "2.0.4.59162.0", "history": [
+            {"version": 5, "length": 100, "checksum": 123, "urls": ["http://127.0.0.1/p.zip"]}]}
+        path = self.root / "candidate.json"
+        path.write_text(json.dumps(manifest), encoding="utf-8")
+        self.server.force_patch_path = path
+        # setUp leaves a captured fixture at the legacy URL. An explicit
+        # override must win there as well as at the current update URL.
+        for route in ("/clientupdate", "/clientupdate/", "/patch-version.json/clientupdate", "/patch-version.json/clientupdate/"):
+            for version in range(7):
+                with self.subTest(route=route, version=version):
+                    status, body = self.request("GET", f"{route}?version=2.0.4.59162.{version}")
+                    self.assertEqual(status, 200)
+                    self.assertEqual(json.loads(body)["history"], manifest["history"] if version < 5 else [])
+            status, body = self.request("GET", f"{route}?version=2.0.3.59162.0")
+            self.assertEqual(status, 409)
+            self.assertIn("error", json.loads(body))
+            status, body = self.request("GET", f"{route}?version=broken")
+            self.assertEqual(status, 400)
+
+    def test_legacy_patch_fixture_is_preserved_without_override(self):
+        self.assertIsNone(getattr(self.server, "force_patch_path", None))
+        status, body = self.request("GET", "/patch-version.json/clientupdate/?version=2.0.4.59162.4")
+        self.assertEqual(status, 200)
+        self.assertEqual(json.loads(body), {"patch": "test"})
+
     def test_tls_only_is_an_explicit_listener_mode(self) -> None:
         args = build_parser().parse_args([
             "--fixture-root", str(self.root),
@@ -388,6 +414,66 @@ class FixtureServerTests(unittest.TestCase):
         self.assertTrue(json.loads(body[2:])['accountToken'].startswith('local_session_'))
         status, _ = self.request('POST', '/AccountSession', b'not-lz4', {'Content-Encoding':'lz4'})
         self.assertEqual(status, 400)
+
+    def test_role_notepad_query_survives_real_http_dispatch(self) -> None:
+        from game import LocalGame
+        from grants import grant_rewards
+        from test_systems import LocalSystemsTests
+
+        accounts = LocalAccounts(self.root / "state")
+        game = LocalGame(self.root / "game", accounts)
+        account, auth = LocalSystemsTests._guest(accounts)
+        grant_rewards(game, game._profile(account), [
+            {"type": 15, "id": 1002, "count": 1},
+            {"type": 15, "id": 1007, "count": 1},
+        ])
+        self.server.accounts, self.server.game = accounts, game
+        headers = {"Authorization": auth, "Accept": "application/wireformat"}
+        for path, expected in (
+            ("/fci/RoleNotePad/?perPage=20&uids=7", [7]),
+            ("/fci//RoleNotePad/?uids=7%2C1%2C7", [7, 1, 7]),
+            ("http://127.0.0.1/fci/RoleNotePad/?uids=7&uids=2,1", [7, 2, 1]),
+        ):
+            with self.subTest(path=path):
+                status, body = self.request("GET", path, headers=headers)
+                self.assertEqual(status, 200)
+                records = FixtureHandler._wire_json_payload(body)
+                self.assertIsInstance(records, list)
+                self.assertEqual([record["roleId"] for record in records], expected)
+        status, body = self.request("GET", "/fci/RoleNotePad/?uids=7,3,1", headers=headers)
+        self.assertEqual(status, 404)
+        self.assertEqual(json.loads(body), {"error": "role_notepad_not_found", "roleId": 3})
+        status, body = self.request("GET", "/fci/RoleNotePad/?uids=", headers=headers)
+        self.assertEqual(status, 400)
+        self.assertEqual(json.loads(body), {"error": "invalid_role_notepad_uids"})
+        status, body = self.request("HEAD", "/fci/RoleNotePad/?uids=7", headers=headers)
+        self.assertEqual((status, body), (200, b""))
+
+    def test_game_http_query_preserves_routes_and_selects_activity(self) -> None:
+        from google.protobuf import message_factory
+        from game import LocalGame
+        from test_systems import LocalSystemsTests
+
+        accounts = LocalAccounts(self.root / "state")
+        game = LocalGame(self.root / "game", accounts, clock=lambda: 1_700_000_000)
+        _account, auth = LocalSystemsTests._guest(accounts)
+        self.server.accounts, self.server.game = accounts, game
+        headers = {"Authorization": auth, "Accept": "application/wireformat"}
+        for path in ("/fci/Signboard", "/fci/task", "/fci/actor-cultivation", "/fci/auto-fight-conf",
+                     "/fci/activity"):
+            with self.subTest(path=path):
+                expected = self.request("GET", path, headers=headers)
+                self.assertEqual(expected[0], 200)
+                self.assertEqual(self.request("GET", path + "?perPage=20", headers=headers), expected)
+        response_type = message_factory.GetMessageClass(game._pool.FindMessageTypeByName("RestfulResponse"))
+        activity_type = message_factory.GetMessageClass(game._pool.FindMessageTypeByName("ApiActivity.result"))
+        for query, expected_type in (("type=46", 46), ("activityType=25", 25)):
+            with self.subTest(query=query):
+                status, body = self.request("GET", "/fci/activity?" + query, headers=headers)
+                self.assertEqual(status, 200)
+                response = response_type.FromString(body)
+                self.assertEqual(response.message.type, "ApiActivity.result")
+                self.assertEqual(activity_type.FromString(response.message.data).result.type, expected_type)
 
     def test_directory_route_uses_index_and_redacts_query_values(self) -> None:
         status, body = self.request(

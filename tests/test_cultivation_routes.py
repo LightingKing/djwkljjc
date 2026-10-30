@@ -305,7 +305,8 @@ class CultivationRouteTests(unittest.TestCase):
         record = actor_store.ordered(self.profile, state)[0]
         container = self.game._types["DBGamePlayer.Actors"]()
         message = container.player_actors.add()
-        self.assertTrue(self.game.systems.login_actor_extras(self.profile, state, record, message))
+        # State migration already seeds talents; projecting login must not reroll.
+        self.assertFalse(self.game.systems.login_actor_extras(self.profile, state, record, message))
         self.assertTrue(message.is_new_card)
         self.assertEqual(len(message.talent_info), len(record["talents"]))
         equipment.set_new_flags(self.profile, state, [{"idOrUid": record["uid"], "type": 15}])

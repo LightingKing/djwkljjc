@@ -120,6 +120,11 @@ def encode_task_result(task: Mapping[str, Any]) -> bytes:
     if not isinstance(task, Mapping):
         raise PushServiceError("task entry must be an object")
     fields: list[tuple[int, bytes]] = []
+    if task.get('res'):
+        from google.protobuf import descriptor_pool, json_format, message_factory
+        cls = message_factory.GetMessageClass(descriptor_pool.Default().FindMessageTypeByName('TaskInfo'))
+        resource = json_format.ParseDict(dict(task['res']), cls())
+        fields.append((5, _field_bytes(5, resource.SerializeToString())))
     for name, number in _TASK_RESULT_UINT.items():
         if name in task or name in _TASK_RESULT_ALWAYS:
             fields.append((number, _field_varint(number, _uint32(task.get(name, 0), name))))
@@ -245,6 +250,12 @@ class PushService:
         with self._lock:
             return tuple(sorted(self._sessions))
 
+    def account_ids(self) -> tuple[int, ...]:
+        """Authenticated local accounts with at least one live connection."""
+        with self._lock:
+            return tuple(sorted(account_id for account_id, key in self._account_ids.items()
+                                if self._sessions.get(key)))
+
     def publish(
         self,
         account: Mapping[str, Any] | str | int,
@@ -286,18 +297,6 @@ class PushService:
 
         data = json.dumps(payload, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
         return self.publish(account, message_type, data, seq_cs_received=seq_cs_received)
-
-    def red_point(self, account: Mapping[str, Any] | str | int, payload: Any) -> int:
-        return self.publish_json(account, "ScRedPointData", payload)
-
-    def mail(self, account: Mapping[str, Any] | str | int, payload: Any) -> int:
-        return self.publish_json(account, "ScMail", payload)
-
-    def payment(self, account: Mapping[str, Any] | str | int, payload: Any) -> int:
-        return self.publish_json(account, "ScPurchaseDelevery", payload)
-
-    def chat(self, account: Mapping[str, Any] | str | int, payload: Any) -> int:
-        return self.publish_json(account, "ScChat", payload)
 
     def tasks_change(self, account: Mapping[str, Any] | str | int, payload: Mapping[str, Any]) -> int:
         """Push a ``/fci/task/``-shaped payload as protobuf ``ScTasksChange``."""

@@ -29,11 +29,14 @@ product immediately.  No real payment provider is contacted.
 """
 from __future__ import annotations
 
+from server.core.reset import DEFAULT_RESET_POLICY, ResetPolicy, policy_for
+
 import json
+import copy
 import re
 import secrets
 import time
-from contextlib import closing
+from contextlib import closing, contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Iterable, Mapping, Optional
@@ -44,9 +47,11 @@ from google.protobuf import json_format, message_factory
 try:
     from .grants import grant_rewards
     from . import equipment
+    from . import local_mailbox
 except ImportError:  # pragma: no cover - direct PYTHONPATH execution
     from grants import grant_rewards
     import equipment
+    import local_mailbox
 
 
 Body = bytes | bytearray | str | None
@@ -58,7 +63,10 @@ RES_PLAYER_MONEY = 5        # 迷子 total (bound + paid), fci/resource/ResPlaye
 RES_PLAYER_PAY_MONEY = 27   # paid part of the total, fci/resource/ResPlayerPayMoney_0
 RES_EQUIP = 12
 RES_ACTOR_SKIN = 29
+RES_MONTH_CARD_DAYS = 24
 ACTIVITY_TYPE_MALL = 15
+ACTIVITY_TYPE_DIRECT_PURCHASE = 37
+DIRECT_PURCHASE_ACTIVITY_ID = 37001
 
 GIFT_PAGE_LEVEL = 1
 GIFT_PAGE_ACTIVITY = 2
@@ -99,20 +107,15 @@ def _resource(value: Mapping[str, Any]) -> dict[str, int]:
             "count": _int(value.get("count")), "param": _int(value.get("param"))}
 
 
-def window_start(interval: int, now: int) -> int:
+def window_start(interval: int, now: int, policy: ResetPolicy = DEFAULT_RESET_POLICY) -> int:
     """Start of the purchase-limit window containing ``now`` (0 = never resets)."""
 
-    day = (int(now) - RESET_HOUR_UTC * 3600) // _DAY
-    offset = RESET_HOUR_UTC * 3600
     if interval == INTERVAL_DAY:
-        return day * _DAY + offset
+        return policy.period_start(now)
     if interval == INTERVAL_WEEK:
-        monday = day - ((day + 3) % 7)  # 1970-01-01 was a Thursday
-        return monday * _DAY + offset
+        return policy.period_start(now, "week")
     if interval == INTERVAL_MONTH:
-        moment = datetime.fromtimestamp(int(now) - offset, tz=timezone.utc)
-        first = moment.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        return int(first.timestamp()) + offset
+        return policy.period_start(now, "month")
     return 0
 
 
@@ -215,12 +218,13 @@ class LocalMall:
         clock: Optional[Callable[[], int]] = None,
         mall_catalog: Optional[MallCatalog] = None,
         dedupe_activity_gifts: bool = True,
-        include_direct_purchase: bool = False,
+        include_direct_purchase: bool = True,
     ) -> None:
         self.game = game
         self._lock = game._lock
         self._clock = clock or getattr(game, "_now", None) or (lambda: int(time.time()))
         self.catalog = mall_catalog or catalog()
+        self.include_direct_purchase = include_direct_purchase
         self.activity_gifts = self.catalog.activity_gift_rows(
             dedupe=dedupe_activity_gifts, include_direct=include_direct_purchase)
         self.open_activity_ids = {_int(row["activityId"]) for row in self.activity_gifts}
@@ -267,10 +271,29 @@ class LocalMall:
             state = {}
         if not isinstance(state, dict):
             state = {}
-        for key in ("mall", "purchase", "pending"):
+        for key in ("mall", "purchase", "pending", "firstDouble", "monthCard"):
             if not isinstance(state.get(key), dict):
                 state[key] = {}
         return state
+
+    @contextmanager
+    def _atomic(self, profile: Mapping[str, Any]):
+        """Rollback both durable state and the request's in-memory snapshot."""
+        saved = copy.deepcopy(dict(profile))
+        try:
+            with self.game.atomic_mutation():
+                # A request may have waited behind another transaction.
+                with closing(self.game._connect()) as connection:
+                    row = connection.execute("SELECT resources_json FROM game_profiles WHERE account_id = ?",
+                                             (int(profile["account_id"]),)).fetchone()
+                if row is not None and isinstance(profile, dict):
+                    profile["resources"] = json.loads(row["resources_json"] or "[]")
+                yield
+        except Exception:
+            if isinstance(profile, dict):
+                profile.clear()
+                profile.update(saved)
+            raise
 
     def _save(self, profile: Mapping[str, Any], state: Mapping[str, Any]) -> None:
         with self._lock, closing(self.game._connect()) as connection, connection:
@@ -322,13 +345,12 @@ class LocalMall:
         except Exception:
             return {}
 
-    @staticmethod
-    def _effective(record: Any, interval: int, now: int) -> int:
+    def _effective(self, record: Any, interval: int, now: int) -> int:
         if not isinstance(record, Mapping):
             return 0
         count = _int(record.get("buyCount"))
         if interval in (INTERVAL_DAY, INTERVAL_WEEK, INTERVAL_MONTH) and \
-                _int(record.get("lastBuyStartTime")) < window_start(interval, now):
+                _int(record.get("lastBuyStartTime")) < window_start(interval, now, policy_for(self.game)):
             return 0
         return count
 
@@ -358,23 +380,7 @@ class LocalMall:
 
         if price <= 0 or resource_type <= 0:
             return []
-        if resource_type == RES_PLAYER_MONEY:
-            total, paid = self._balance(profile, RES_PLAYER_MONEY), self._balance(profile, RES_PLAYER_PAY_MONEY)
-            if total < price:
-                raise MallError(409, "insufficient_resource", "not enough 迷子")
-            paid_used = min(paid, max(0, price - max(0, total - paid)))
-            changes = [{"type": RES_PLAYER_MONEY, "id": 0, "param": 0, "count": -price}]
-            if paid_used:
-                changes.append({"type": RES_PLAYER_PAY_MONEY, "id": 0, "param": 0, "count": -paid_used})
-        elif resource_type == RES_PLAYER_PAY_MONEY:
-            paid, total = self._balance(profile, RES_PLAYER_PAY_MONEY), self._balance(profile, RES_PLAYER_MONEY)
-            if paid < price:
-                raise MallError(409, "insufficient_resource", "not enough paid 迷子")
-            changes = [{"type": RES_PLAYER_PAY_MONEY, "id": 0, "param": 0, "count": -price}]
-            if min(price, total):
-                changes.append({"type": RES_PLAYER_MONEY, "id": 0, "param": 0, "count": -min(price, total)})
-        else:
-            changes = [{"type": resource_type, "id": 0, "param": 0, "count": -price}]
+        changes = [{"type": resource_type, "id": 0, "param": 0, "count": -price}]
         ok, deltas, error = self.game.economy._change_resources(profile, changes)
         if not ok:
             raise MallError(409, error or "insufficient_resource")
@@ -394,12 +400,18 @@ class LocalMall:
                 equips.extend([value["id"]] * value["count"])
                 continue
             plain.append(value)
-            if value["type"] == RES_PLAYER_PAY_MONEY:
-                plain.append({"type": RES_PLAYER_MONEY, "id": 0, "count": value["count"], "param": 0})
-            elif value["type"] == RES_ACTOR_SKIN:
+            if value["type"] == RES_ACTOR_SKIN:
                 skins.append(value["id"])
         changes: list[dict[str, Any]] = []
-        for change in grant_rewards(self.game, profile, plain):
+        # Propagate ledger failures instead of accepting a partially delivered
+        # product (grant_rewards deliberately tolerates absent stores elsewhere).
+        ledger = [r for r in plain if r["type"] not in (11, 15)]
+        if ledger:
+            ok, deltas, error = self.game.economy._change_resources(profile, ledger)
+            if not ok:
+                raise MallError(409, error or "resource_update_failed")
+            changes.extend(self._base_res(delta) for delta in deltas)
+        for change in grant_rewards(self.game, profile, [r for r in plain if r["type"] in (11, 15)]):
             if "baseRes" in change:
                 change.setdefault("inBox", [])
             if isinstance(change.get("actor"), dict) and not _int(change["actor"].get("countDelta")):
@@ -460,7 +472,118 @@ class LocalMall:
                 "dropFloorChannel": 0, "levelLimit": 0, "dayOpenTime": [], "season": 0,
                 "weekdayPreheart": 0, "timeType": 0, "versionLimit": "", "preOpenTime": 0,
             })
+        if self.include_direct_purchase:
+            # The tab has its own activity type, while individual goods still
+            # refer to their original per-product Mall activity IDs.
+            trigger = dict(rows[0]) if rows else {
+                "timestampPreheat": 0, "timestampStart": MALL_ACTIVITY_START,
+                "timestampEnd": 0, "forever": True, "weekdays": [], "dayOpenTime": [],
+            }
+            trigger.update(type=ACTIVITY_TYPE_DIRECT_PURCHASE, activityId=DIRECT_PURCHASE_ACTIVITY_ID)
+            rows.append(trigger)
         return rows
+
+    @staticmethod
+    def _tier_key(product: Mapping[str, Any]) -> str | None:
+        if (product.get("showInShop") and _int(product.get("count")) > 0
+                and not any(_int(r.get("type")) for r in product.get("purchaseRes") or [])):
+            return str(_int(product["count"]))
+        return None
+
+    def purchase_activity_info(self, profile: Mapping[str, Any]) -> dict[str, Any]:
+        """Midas' activity callback shape, keyed by purchased currency amount."""
+        state = self._state(profile)
+        tiers = {}
+        for product in self.catalog.products.values():
+            key = self._tier_key(product)
+            if key is not None:
+                tiers.setdefault(key, product)
+        ranks, ranges = [], []
+        for key in sorted(tiers, key=int):
+            first = not bool(state["firstDouble"].get(key))
+            bonus = int(key) if first else _int(tiers[key].get("promotionCnt"))
+            ranks.append({"num": key, "send_ext": "1" if first else ""})
+            ranges.append({"num": key, "coin": [{"send_num": str(bonus)}]})
+        return {"mp_info": {"utp_mpinfo_detail": {"rank_info": ranks, "range_info": ranges}}}
+
+    def _month_mail(self, profile: Mapping[str, Any], day: int) -> int:
+        """Persist the daily mail inside the purchase/settlement transaction."""
+        state = self.game.mailbox._load(profile)
+        mail_id = _int(state.get("mail_last_id")) + 1
+        now = self._now()
+        record = {"id": mail_id, "title": "月卡每日奖励", "content": "今日月卡奖励已送达。",
+                  "senderName": "月卡福利", "attachments": [
+                      {"type": 5, "id": 0, "param": 0, "count": 50},
+                      {"type": 7, "id": 0, "param": 0, "count": 20000}],
+                  "read": False, "attachmentsGot": False, "createTime": now,
+                  "startTime": now, "expireTime": now + 30 * _DAY, "important": True,
+                  "monthCardDay": day}
+        state["mail_last_id"] = mail_id
+        state["mails"].append(record)
+        trimmed = []
+        if len(state["mails"]) > local_mailbox.MAX_MAILS:
+            state["mails"].sort(key=lambda mail: _int(mail.get("id")))
+            excess = len(state["mails"]) - local_mailbox.MAX_MAILS
+            trimmed = [_int(mail["id"]) for mail in state["mails"][:excess]]
+            del state["mails"][:excess]
+        self.game.mailbox._save(profile, state)
+        payload = {"mails": [local_mailbox.mail_view(record)], "clearAll": False, "delMails": trimmed}
+        def notify():
+            notifier = getattr(self.game.mailbox, "notifier", None)
+            if notifier is not None:
+                notifier(profile, payload)
+        self.game.after_commit(notify)
+        return mail_id
+
+    def _settle_month_card(self, profile: Mapping[str, Any], state: dict[str, Any], *, purchase: bool = False) -> list[dict[str, Any]]:
+        """Expire missed days and issue at most today's single mail.
+
+        Type 24 is the number of unconsumed days after today's settlement.
+        The separate reward marker prevents same-day renewals from consuming
+        another day or sending another mail, even after a restart.
+        """
+        remaining = self._balance(profile, RES_MONTH_CARD_DAYS)
+        record = state["monthCard"]
+        if not remaining and not record:
+            return []
+        today = policy_for(self.game).day_index(self._now())
+        last_day = _int(record.get("lastDay"), today - 1 if remaining else today)
+        if today < last_day:
+            return []  # never replay days after a clock rollback
+        elapsed = max(0, today - last_day)
+        reward_due = remaining > 0 and elapsed > 0 and remaining >= elapsed
+        consumed = min(remaining, elapsed)
+        if purchase and remaining > consumed and record.get("lastRewardDay") != today and elapsed == 0:
+            consumed += 1
+            reward_due = True
+        changes = []
+        if consumed:
+            ok, deltas, error = self.game.economy._change_resources(profile, [
+                {"type": RES_MONTH_CARD_DAYS, "id": 0, "count": -consumed}])
+            if not ok:
+                raise MallError(409, error or "month_card_settlement_failed")
+            changes = [self._base_res(delta) for delta in deltas]
+        if reward_due and record.get("lastRewardDay") != today:
+            record["lastMailId"] = self._month_mail(profile, today)
+            record["lastRewardDay"] = today
+        record["lastDay"] = today
+        return changes
+
+    def settle_month_card(self, profile: Mapping[str, Any]) -> list[dict[str, Any]]:
+        """Call on authenticated requests/login and from the daily scheduler."""
+        with self._atomic(profile):
+            state = self._state(profile)
+            old = copy.deepcopy(state["monthCard"])
+            changes = self._settle_month_card(profile, state)
+            if state["monthCard"] != old:
+                self._save(profile, state)
+            if changes:
+                def notify():
+                    notifier = getattr(self.game, "base_push_notifier", None)
+                    if notifier is not None:
+                        notifier(profile, 1)
+                self.game.after_commit(notify)
+            return changes
 
     def merge_activity_list(self, method: str, path: str, result: Optional[Response]) -> Optional[Response]:
         """Append :meth:`activity_rows` to a ``GET fci/activity/`` list reply."""
@@ -541,6 +664,8 @@ class LocalMall:
         if product is None:
             return None
         row = self.catalog.mall_row_for_product(product_id)
+        if row is not None and _int(row.get('activityId')) and _int(row['activityId']) not in self.open_activity_ids:
+            raise MallError(409, 'mall_activity_closed')
         if row is not None and _int(profile.get("level"), 1) < _int(row.get("limitLv")):
             raise MallError(409, "player_level_too_low")
         state = self._state(profile)
@@ -559,11 +684,13 @@ class LocalMall:
                     price=float(product.get("price") or 0), currency="CNY_SANDBOX")
         return 200, {"tradeData": token, "isSandbox": True, "productId": product_id, "orderId": order_id}
 
-    def _delivery_contents(self, product: Mapping[str, Any]) -> list[dict[str, Any]]:
+    def _delivery_contents(self, product: Mapping[str, Any], *, first_double: bool = False) -> list[dict[str, Any]]:
         goods = [r for r in product.get("purchaseRes") or [] if isinstance(r, Mapping) and _int(r.get("type"))]
         if goods:
             return goods
         count, bonus = _int(product.get("count")), _int(product.get("promotionCnt"))
+        if first_double:
+            bonus = count
         contents = [{"type": RES_PLAYER_PAY_MONEY, "id": 0, "count": count}]  # also raises the total
         if bonus:
             contents.append({"type": RES_PLAYER_MONEY, "id": 0, "count": bonus})  # bound bonus 迷子
@@ -587,7 +714,11 @@ class LocalMall:
         if token and token not in state["pending"]:
             done = state.get("delivered", {}).get(token)
             if isinstance(done, Mapping):  # retried delivery: no second credit
-                return 200, dict(done)
+                reply = dict(done)
+                reply['resChange'] = []
+                reply['buyCount'] = self._effective(state['purchase'].get(str(done.get('productId'))),
+                                                    self._product_interval(str(done.get('productId'))), self._now())
+                return 200, reply
             return None
         if not token:
             return None
@@ -596,7 +727,26 @@ class LocalMall:
         product = self.catalog.products.get(product_id)
         if product is None:
             raise MallError(409, "pending_product_unavailable")
-        res_change = self._grant(profile, self._delivery_contents(product))
+        requested_product = str(request.get("productId") or "")
+        if requested_product and requested_product != product_id:
+            raise MallError(409, "purchase_product_mismatch")
+        limit = self._product_limit(product_id)
+        if limit and self._effective(state["purchase"].get(product_id), self._product_interval(product_id), self._now()) >= limit:
+            raise MallError(409, "purchase_limit_reached")
+        row = self.catalog.mall_row_for_product(product_id)
+        if row is not None and _int(row.get('activityId')) and _int(row['activityId']) not in self.open_activity_ids:
+            raise MallError(409, 'mall_activity_closed')
+        if row is not None and _int(profile.get("level"), 1) < _int(row.get("limitLv")):
+            raise MallError(409, "player_level_too_low")
+        tier = self._tier_key(product)
+        first_double = tier is not None and not state["firstDouble"].get(tier)
+        # Older successful orders deliberately do not consume the new offer.
+        res_change = self._settle_month_card(profile, state)
+        res_change += self._grant(profile, self._delivery_contents(product, first_double=first_double))
+        if any(_int(r.get("type")) == RES_MONTH_CARD_DAYS for r in product.get("purchaseRes") or []):
+            res_change += self._settle_month_card(profile, state, purchase=True)
+        if first_double:
+            state["firstDouble"][tier] = str(pending.get("orderId") or token)
         buy_count = self._bump(state["purchase"], product_id, self._product_interval(product_id))
         reply = {
             "transactionId": str(pending.get("orderId") or token.removeprefix("local-sandbox:")),
@@ -606,12 +756,16 @@ class LocalMall:
         }
         delivered = state.setdefault("delivered", {})
         delivered[token] = reply
-        for old in list(delivered)[:-20]:  # keep the last few for retries only
-            delivered.pop(old, None)
         self._save(profile, state)
         self._order(str(pending.get("orderId") or token), profile, kind="iap", status="delivered",
                     product_id=product_id, price=float(product.get("price") or 0), currency="CNY_SANDBOX",
                     res_change=res_change)
+        def notify_purchase():
+            notifier = getattr(self.game, 'base_push_notifier', None)
+            if notifier is not None:
+                notifier(profile, 61, (product_id, buy_count))
+                notifier(profile, 1)
+        self.game.after_commit(notify_purchase)
         return 200, reply
 
     # ------------------------------------------------------------- dispatch
@@ -619,6 +773,7 @@ class LocalMall:
         route, method = _route(path), method.upper()
         handlers = {
             ("GET", "/fci/mall-info"): lambda: (200, self.mall_info(profile)),
+            ("GET", "/fci/purchase-activity-info"): lambda: (200, self.purchase_activity_info(profile)),
             ("POST", "/fci/mall-trade"): lambda: self.mall_trade(profile, body),
             ("POST", "/fci/purchasetouch"): lambda: self.purchase_touch(profile, body),
             ("POST", "/fci/purchasedelevery"): lambda: self.purchase_delivery(profile, body),
@@ -631,11 +786,11 @@ class LocalMall:
             if route in {path for _, path in handlers}:
                 return 405, {"error": "method_not_allowed"}
             return None
-        with self._lock:
-            try:
+        try:
+            with self._atomic(profile):
                 return handler()
-            except MallError as error:
-                return error.reply()
+        except MallError as error:
+            return error.reply()
 
 
 # ---------------------------------------------------------------------------
@@ -670,9 +825,12 @@ end
     # before Start(), which resets the list to 0 rows, so an immediate
     # broadcast would be wiped.
     "GetActivityInfo": """function GetActivityInfo()
-  m_activityInfo = {}
   this:DelayInvokeInSeconds(0.1, function()
-    this:BroadcastGameEvent("OnGetPurchaseActivityInfo")
+    this:GameRequest("fci/purchase-activity-info/"):Get(function(result)
+      OnGetActivityInfo(JsonE(result or {}))
+    end, function()
+      OnGetActivityInfo("{}")
+    end)
   end)
 end
 """,
@@ -744,6 +902,7 @@ function OnLocalDelivered(product, result)
     require("Manager/DataBindingHandler").ResChange(result.resChange)
   end
   DB:HandleRemoteChanged("fci/baseresource/")
+  GetActivityInfo()
   if result ~= nil and result.buyCount ~= nil then
     this:BroadcastGameEvent("PushTypePurchaseBuyRecord", {
       product.productId,

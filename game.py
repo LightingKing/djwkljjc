@@ -18,7 +18,11 @@ investigating a different profile.
 
 from __future__ import annotations
 
+from server.core.reset import ResetPolicy
+from server.core.atomic import AtomicMutations
+
 import json
+import re
 import shutil
 import sqlite3
 import threading
@@ -461,6 +465,7 @@ class LocalGame:
         scene_id: int = int(_LOCAL_DEFAULTS.get("scene_id", 0)),
         scene_random: bool = False,
         unified_store_path: str | Path | None = None,
+        reset_policy: ResetPolicy | None = None,
     ) -> None:
         self.state_dir = Path(state_dir)
         self.state_dir.mkdir(parents=True, exist_ok=True)
@@ -472,7 +477,10 @@ class LocalGame:
             self.db_path = self.state_dir / "game.sqlite3"
         self.accounts = accounts
         self._clock = clock or (lambda: int(time.time()))
+        self.reset_policy = reset_policy or ResetPolicy()
+        self.daily_key = lambda value=None: self.reset_policy.day_key(self._now() if value is None else int(value))
         self.energy_policy = _load_energy_policy()
+        self._atomic = AtomicMutations(self)
         # Serialize all profile mutations for a database path, including when
         # two local game objects are opened by a test or a hot-reload tool.
         # SQLite's busy timeout handles external processes; this shared lock
@@ -549,6 +557,8 @@ class LocalGame:
         # intentionally separate from the retired service's unavailable data.
         self.systems = LocalSystems(self, clock=self._clock)
         self.social = LocalSocial(self, clock=self._clock)
+        from guild import LocalGuild
+        self.guild = LocalGuild(self, clock=self._clock)
         # Mall: level/event gift packs and sandbox recharge (mall.py).
         self.mall = LocalMall(self, clock=self._clock)
         self.mailbox = LocalMailbox(self, clock=self._clock)
@@ -565,16 +575,36 @@ class LocalGame:
         self.achievements = LocalAchievements(self, clock=self._clock)
         # Material/gold dungeon, tower, deploy, triggered events.
         self.activity_modes = LocalActivityModes(self, clock=self._clock)
+        from server.core.redpoints import LocalRedpoints
+        self.redpoints = LocalRedpoints(self)
+        from cultivation import LocalCultivation
+        self.cultivation = LocalCultivation(self, clock=self._clock)
+        from tournament import LocalTournament
+        self.tournament = LocalTournament(self)
         # ``notifier(profile, push_type)`` -> BasePushMessage; wired by the
         # server.  BaseInfoChange makes the client re-read fci/baseinfo/.
         self.base_push_notifier: Optional[Callable[[Mapping[str, Any], int], Any]] = None
         self._migrate_profiles()
+        from server.core.reset_migration import migrate_reset_policy
+        migrate_reset_policy(self)
 
     def _connect(self) -> sqlite3.Connection:
+        borrowed = self.transaction_connection()
+        if borrowed is not None:
+            return borrowed
         connection = sqlite3.connect(str(self.db_path), timeout=10)
         connection.row_factory = sqlite3.Row
         configure_legacy_connection(connection)
         return connection
+
+    def atomic_mutation(self):
+        return self._atomic.transaction()
+
+    def transaction_connection(self):
+        return self._atomic.borrowed()
+
+    def after_commit(self, callback):
+        return self._atomic.after_commit(callback)
 
     def _initialize(self) -> None:
         with self._lock, closing(self._connect()) as connection, connection:
@@ -1172,8 +1202,10 @@ class LocalGame:
             for skill_id in skills:
                 skill = actor.skills.add()
                 skill.id = int(skill_id)
-                skill.level = max(1, int(levels.get(str(skill_id), 1) or 1))
-                skill.is_read = False
+                saved_skill = levels.get(str(skill_id), 1)
+                skill.level = max(1, int((saved_skill.get('level', 1) if isinstance(saved_skill, Mapping)
+                                          else saved_skill) or 1))
+                skill.is_read = bool(saved_skill.get('read', False)) if isinstance(saved_skill, Mapping) else False
         attrs: Any = table_attrs or observed.get("attrs")
         if not isinstance(attrs, list) or not attrs:
             attrs = _LOCAL_DEFAULT_ACTOR_TEMPLATE.get("local_test_attributes", {})
@@ -1196,12 +1228,16 @@ class LocalGame:
 
         profile = self._profile(account)
         now_ms = self._now() * 1000
+        self.mall.settle_month_card(profile)
+        profile = self._profile(account)
+        self.guild.player_data(profile)
+        self.cultivation.sync(profile)
         messages: list[Message] = []
 
         begin = self._types["ScLoginBegin"](
             player_id=str(profile["player_id"]),
             social_picture="",
-            utc_offset_seconds=0,
+            utc_offset_seconds=self.reset_policy.utc_offset_seconds,
             time_ms_server=now_ms,
         )
         messages.append(("ScLoginBegin", begin.SerializeToString()))
@@ -1261,6 +1297,7 @@ class LocalGame:
         try:
             # Daily ticket top-ups (80002/80006) must land before the item list.
             self.activity_modes.refresh_daily_items(profile)
+            self.realtime_pvp.race.refresh_daily_items(profile)
         except Exception:
             pass
         items = self._types["DBGamePlayer.ItemPackage"]()
@@ -1297,6 +1334,7 @@ class LocalGame:
         end = self._types["ScLoginEnd"]()
         end.base_info.level = int(profile["level"])
         end.base_info.name = str(profile["name"])
+        end.base_info.friend_apply_level_limit = self.social.friend_apply_level_limit(profile)
         if "head_photo" in end.base_info.DESCRIPTOR.fields_by_name:
             try:
                 head_photo = int(self.profile_features._state(profile).get("headPhoto", 0) or 0)
@@ -1374,8 +1412,25 @@ class LocalGame:
                 return error
             assert account is not None
             profile = self._profile(account)
+            self.mall.settle_month_card(profile)
+            profile = self._profile(account)
             economy_profile = dict(profile)
             economy_profile["account"] = account
+            cultivation_result = self.cultivation.handle_http(method.upper(), path, body, profile)
+            if cultivation_result is not None:
+                return cultivation_result
+            tournament_result = self.tournament.handle_http(method, path, body, profile)
+            if tournament_result is not None:
+                return tournament_result
+            if route.lower().startswith('/fci/rolepresent/'):
+                if method.upper() == 'GET' and route.lower() == '/fci/rolepresent/':
+                    return 200, []
+                # The APK defines presentation and timing but supplies no
+                # returned-gift reward pool. A fabricated id cannot pay out.
+                return 404, {'error': 'role_present_not_found'}
+            guild_result = self.guild.handle_http(method, path, body, profile)
+            if guild_result is not None:
+                return guild_result
             modes_result = self.activity_modes.handle_http(method, path, body, profile)
             if modes_result is not None:
                 return modes_result
@@ -1388,7 +1443,7 @@ class LocalGame:
             if route.rstrip("/").lower() == "/fci/tournament/summary" and method.upper() == "GET":
                 return 200, {"activityInfo": []}
             if route.rstrip("/").lower() == "/fci/redpoint/data" and method.upper() in {"POST", "PATCH", "PUT"}:
-                return 200, {}
+                return self.redpoints.mark(profile, body)
             mall_result = self.mall.handle_http(method, path, body, profile)
             if mall_result is not None:
                 return mall_result
@@ -1438,7 +1493,8 @@ class LocalGame:
                 result = (200, {**result[1], **self.events.redpoint_fields(profile), **self.mall.redpoint_fields(profile),
                                 **self.achievements.redpoint_fields(profile),
                                 **self.activity_modes.redpoint_fields(profile),
-                                **(self.social.redpoint_fields(profile) if hasattr(self.social, "redpoint_fields") else {})})
+                                **(self.social.redpoint_fields(profile) if hasattr(self.social, "redpoint_fields") else {}),
+                                **self.redpoints.fields(profile)})
             return result
 
         account, error = self._authorized(authorization)
@@ -1446,8 +1502,13 @@ class LocalGame:
             return error
         assert account is not None
         profile = self._profile(account)
+        self.mall.settle_month_card(profile)
+        profile = self._profile(account)
         economy_profile = dict(profile)
         economy_profile["account"] = account
+        guild_result = self.guild.handle_http(method, path, body, profile)
+        if guild_result is not None:
+            return guild_result
         modes_result = self.activity_modes.handle_http(method, path, body, profile)
         if modes_result is not None:
             return modes_result
@@ -1511,16 +1572,7 @@ class LocalGame:
         if method != "GET":
             return 405, {"error": "method_not_allowed", "message": "GET required"}
         if action == "guild":
-            return 200, {
-                "guildId": 0,
-                "type": 0,
-                "rentActor": 0,
-                "rentedActors": {},
-                "limitEndTime": 0,
-                "donateLimitEndTime": 0,
-                "guildDungeonLimitEndTime": 0,
-                "guildScoreRecord": 0,
-            }
+            return 200, self.guild.player_data(profile)
         return 200, []
 
     def handle_http(
@@ -1541,10 +1593,16 @@ class LocalGame:
         """
 
         with self._lock:
+            route_path, separator, query = path.partition('?')
+            path = re.sub(r"/{2,}", "/", route_path) + separator + query
             before = self._base_info_marker(method, authorization)
             result = unwrap_client_reply(
                 method, path, self._handle_http_unlocked(method, path, body, content_type, authorization)
             )
+            if result is not None and result[0] == 200 and method.upper() != 'GET' and authorization:
+                account, error = self._authorized(authorization)
+                if account is not None and error is None:
+                    self.cultivation.sync(self._profile(account))
             if before is not None:
                 self._push_base_info_if_changed(before)
             return result

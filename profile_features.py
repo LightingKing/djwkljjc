@@ -9,13 +9,15 @@ not leave the machine and no remote web activity is contacted.
 
 from __future__ import annotations
 
+from server.core.reset import policy_for, period_due
+
 import json
 import time
 from contextlib import closing
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Optional
-from urllib.parse import urlsplit
+from urllib.parse import parse_qs, urlsplit
 
 from google.protobuf import message_factory
 
@@ -284,7 +286,7 @@ class LocalProfileFeatures:
                 "socialPicture": str(state.get("socialPicture", "")), "headPhoto": self._head_photo_value(state),
                 "fightMedal": _int(state.get("fightMedal")), "sex": _int(state.get("sex")),
                 "homeBackGround": {"current": _int(background.get("current")), "isRandom": bool(background.get("isRandom", False))},
-                "friendApplyLevelLimit": _int(state.get("friendApplyLevelLimit")), "sandbox": True,
+                "friendApplyLevelLimit": self.game.social.friend_apply_level_limit(profile), "sandbox": True,
             }
         result.level = _int(profile.get("level"), 1)
         result.name = str(profile.get("name", ""))
@@ -296,7 +298,7 @@ class LocalProfileFeatures:
         background = state.get("homeBackground") if isinstance(state.get("homeBackground"), Mapping) else {}
         result.home_back_ground.current = _int(background.get("current"))
         result.home_back_ground.is_random = bool(background.get("isRandom", False))
-        result.friend_apply_level_limit = _int(state.get("friendApplyLevelLimit"))
+        result.friend_apply_level_limit = self.game.social.friend_apply_level_limit(profile)
         return result
 
     def _social_picture(self, method: str, body: Body, profile: Mapping[str, Any], state: dict[str, Any]) -> Response:
@@ -459,7 +461,7 @@ class LocalProfileFeatures:
             self._sync_signboard(profile, state, notepads)
             return self._notepad_json(entry)
 
-    def _role_notepad(self, method: str, route: str, body: Body, profile: Mapping[str, Any], state: dict[str, Any]) -> Response:
+    def _role_notepad(self, method: str, path: str, body: Body, profile: Mapping[str, Any], state: dict[str, Any]) -> Response:
         """``fci/RoleNotePad/[<roleId>]`` (and the legacy ``role-notepad`` seam).
 
         Manager_RestifizerManager syncs ``fci/RoleNotePad/`` as a list and
@@ -469,7 +471,7 @@ class LocalProfileFeatures:
         never character ids.  Plain camelCase JSON is returned.
         """
 
-        lower = route.lower().rstrip("/")
+        lower = _route(path).lower()
         legacy = "role-notepad" in lower
         payload = _json(body)
         tail = lower.rsplit("/", 1)[-1]
@@ -481,7 +483,20 @@ class LocalProfileFeatures:
         notepads = self._sync_notepads(profile, state)
         self._sync_signboard(profile, state, notepads)
         if not key and method in {"GET", "HEAD"}:
-            return 200, [self._notepad_json(notepads[item]) for item in sorted(notepads, key=int)]
+            query = parse_qs(urlsplit(path).query, keep_blank_values=True)
+            keys = sorted(notepads, key=int)
+            if "uids" in query:
+                uids = [value.strip() for group in query["uids"] for value in group.split(",")]
+                if any(not value.isdecimal() or _int(value) <= 0 for value in uids):
+                    return 400, {"error": "invalid_role_notepad_uids"}
+                keys = [str(_int(value)) for value in uids]
+                # Native DataBindingManager uses requestList[index - 1], so
+                # every response must keep its request's slot, including repeats.
+                # Reject a missing record instead of shifting subsequent slots.
+                for item in keys:
+                    if item not in notepads:
+                        return 404, {"error": "role_notepad_not_found", "roleId": int(item)}
+            return 200, [self._notepad_json(notepads[item]) for item in keys]
         entry = notepads.get(str(key))
         if entry is None:
             return 404, {"error": "role_notepad_not_found", "roleId": key}
@@ -602,6 +617,12 @@ class LocalProfileFeatures:
             signboard["checkSignboardTime"] = self._now()
             self._set_signboard_profile(profile, signboard)
             self._save(profile, state)
+            cultivation = getattr(self.game, "cultivation", None)
+            if cultivation is not None:
+                board_row = next((row for row in table_rows("Signboard")
+                                  if _int(row.get("signboardId")) == current), None)
+                if board_row is not None:
+                    cultivation.record(profile, 76, param=_int(board_row.get("roleId")))
         unlocked = signboard.get("unlockedSignboardId", [])
         result = self._message("ApiSignboard.result")
         if result is None:
@@ -747,10 +768,10 @@ class LocalProfileFeatures:
             return 200, {"timeInfo": {}}
         return 200, []
 
-    def _collections_notepad(self, method: str, route: str, body: Body, profile: Mapping[str, Any], state: dict[str, Any]) -> Optional[Response]:
-        lower = route.lower(); payload = _json(body)
+    def _collections_notepad(self, method: str, path: str, body: Body, profile: Mapping[str, Any], state: dict[str, Any]) -> Optional[Response]:
+        lower = _route(path).lower(); payload = _json(body)
         if lower.startswith(("/fci/rolenotepad", "/fci/role-notepad")):
-            return self._role_notepad(method, route, body, profile, state)
+            return self._role_notepad(method, path, body, profile, state)
         if lower.startswith("/fci/signboard"):
             return self._signboard(method, body, profile, state)
         if lower.rstrip("/") == "/fci/headphoto":
@@ -882,13 +903,13 @@ class LocalProfileFeatures:
             # The client treats this as a weekly share reward.  Keep the
             # reset tied to the server clock so tests and long-running local
             # sessions behave consistently after a 7-day clock advance.
-            current_week = self._now() // (7 * 86400)
+            current_week = policy_for(self.game).week_index(self._now())
             stored_week = share.get("weekKey")
             try:
                 stored_week_int = int(stored_week) if stored_week is not None else None
             except (TypeError, ValueError):
                 stored_week_int = None
-            if stored_week_int != current_week:
+            if period_due(stored_week_int, current_week):
                 share["weekKey"] = current_week
                 share["weeklyRewarded"] = False
                 share["actorRewardGot"] = 0
@@ -964,7 +985,7 @@ class LocalProfileFeatures:
             "fightMedal": int(state.get("fightMedal", 0) or 0),
             "showMedals": [int(v) for v in state.get("showMedals", []) or []],
             "auraActorQuality": 1 if aura_id else 0,
-            "guildId": 0,
+            "guildId": int(self.game.guild.player_data(profile).get('guildId', 0)),
             "gamecenterLoginTime": 0,
             "qqvip": 0,
             "likeNums": int(state.get("likeNums", 0) or 0),
@@ -1081,7 +1102,7 @@ class LocalProfileFeatures:
             if lower in {"/fci/home-back-ground", "/fci/home-back-ground/", "/fci/homebackground", "/fci/homebackground/"}: return self._home_background(method, body, profile, state)
             result = self._notices(method, route, body, profile, state)
             if result is not None: return result
-            result = self._collections_notepad(method, route, body, profile, state)
+            result = self._collections_notepad(method, path, body, profile, state)
             if result is not None: return result
             result = self._mini_games(method, route, body, profile, state)
             if result is not None: return result

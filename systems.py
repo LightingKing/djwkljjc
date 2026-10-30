@@ -8,6 +8,8 @@ small, deterministic and stored in the existing game SQLite database.
 
 from __future__ import annotations
 
+from server.core.reset import policy_for, period_due
+
 import json
 import random
 import time
@@ -162,6 +164,7 @@ SPECIAL_ATTR: dict[int, dict[str, Any]] = {
 ACTOR_TALENTS: dict[int, dict[str, Any]] = {int(row["id"]): row for row in _client_table_rows("ActorTalent") if row.get("id")}
 ORDINARY_TALENTS: list[int] = sorted(tid for tid, row in ACTOR_TALENTS.items() if not row.get("spectial"))
 ACTOR_CONFIG: dict[int, dict[str, Any]] = {int(row["id"]): row for row in _client_table_rows("ActorConfig") if row.get("id")}
+DIFF_ACTOR_INHERIT = _client_table_rows("DiffActorInherit")
 ACTOR_QUALITY_INFO: dict[tuple[int, int], dict[str, Any]] = {
     (int(row["actorId"]), int(row.get("quality", 0) or 0)): row
     for row in _client_table_rows("ActorQualityInfo") if row.get("actorId")
@@ -258,7 +261,7 @@ def ensure_talents(record: dict[str, Any], rng: Any = None) -> bool:
     value 1).  Returns True when the record changed (caller saves).
     """
 
-    if isinstance(record.get("talents"), list):
+    if isinstance(record.get("talents"), list) and actor_talents(record):
         return False
     rng = rng or random
     actor_id = _int(record.get("id"))
@@ -537,6 +540,8 @@ class LocalSystems:
             if row is None:
                 state = self._default_state(profile)
                 self._normalise_tasks(state)
+                for record in actor_store.ordered(profile, state):
+                    ensure_talents(record, self._rng_for())
                 connection.execute(
                     "INSERT OR IGNORE INTO local_system_state(account_id,state_json,updated_at) VALUES(?,?,?)",
                     (account_id, json.dumps(state, separators=(",", ":")), self._now()),
@@ -552,6 +557,10 @@ class LocalSystems:
             for key, value in defaults.items():
                 state.setdefault(key, value)
             changed = self._normalise_tasks(state)
+            migrated = not state.get("actorInstances")
+            for record in actor_store.ordered(profile, state):
+                changed = ensure_talents(record, self._rng_for()) or changed
+            changed = migrated or changed
             if changed:
                 connection.execute(
                     "UPDATE local_system_state SET state_json = ?, updated_at = ? WHERE account_id = ?",
@@ -1057,78 +1066,6 @@ class LocalSystems:
             return 404, {"error": "actor_not_found", "uid": path_ref}
         actor = self._actor_for(state, (instance or {}).get("uid") or actor_ref, profile)
         actor_id = _int(actor.get("id"), actor_ref)
-
-        # Actor inheritance has two observed request shapes.  The ordinary
-        # form uses the actor in the URL as the source and only carries
-        # ``targetActorUid``; the cross-actor form sends both ``actorUid`` and
-        # ``targetActorUid``.  The retired service is unavailable, so keep a
-        # deterministic local transaction: copy level/star/skills to the
-        # target, move equipment ownership, charge a small sandbox gold fee,
-        # and return the recovered protobuf response when available.
-        inherit_tokens = ("actorinheriting", "actor-inheriting", "actorinherit", "actor-inherit", "diffactorinherit", "diff-actor-inherit")
-        if any(token in lower for token in inherit_tokens):
-            if method != "POST":
-                return 405, {"error": "method_not_allowed", "message": "POST required"}
-            is_diff = "diffactorinherit" in lower or "diff-actor-inherit" in lower
-            request_name = "ApiDiffActorInherit" if is_diff else "ApiActorInheriting"
-            request = self._request(body, request_name)
-            source_id = self._first_int(payload, "actorUid", "actor_uid", "sourceActorUid", "source_actor_uid", default=actor_id)
-            target_id = self._first_int(payload, "targetActorUid", "target_actor_uid", "targetId", "target_id", default=0)
-            if request is not None:
-                source_id = _int(getattr(request, "actor_uid", source_id), source_id)
-                target_id = _int(getattr(request, "target_actor_uid", target_id), target_id)
-            source_ref = source_id or actor_id or 1001
-            target_ref = target_id or (1002 if source_ref != 1002 else 1001)
-            # Both are client uids (bootstrap positions); >= 1000 = legacy ids.
-            source_id = self._resolve_actor_ref(profile, state, source_ref)
-            target_id = self._resolve_actor_ref(profile, state, target_ref)
-            if source_id is None or target_id is None:
-                return 404, {"error": "actor_not_found", "uid": target_ref if source_id is not None else source_ref}
-            if source_id == target_id:
-                return 409, {"error": "actor_inherit_same_target"}
-            source = self._actor_for(state, source_ref, profile)
-            target = self._actor_for(state, target_ref, profile)
-            if _int(source.get("uid")) and _int(source.get("uid")) == _int(target.get("uid")):
-                return 409, {"error": "actor_inherit_same_target"}
-            source_owners = {source_ref, source_id, _int(source.get("uid")) or self._actor_uid(profile, state, source_id)}
-            # Keep the cost explicit and local.  This avoids silently creating
-            # progression while remaining affordable for a fresh sandbox
-            # account.  All changes go through the canonical economy ledger.
-            ok, changes, error = self._change_resources(profile, [{"type": 7, "id": 0, "param": 0, "count": -500}])
-            if not ok:
-                return 409, {"error": error or "insufficient_resource", "required": 500}
-            target["level"] = max(1, _int(source.get("level"), 1))
-            target["star"] = max(1, _int(source.get("star"), 1))
-            target["exp"] = max(0, _int(source.get("exp")))
-            target["quality"] = max(1, _int(source.get("quality"), 1))
-            target["skills"] = json.loads(json.dumps(source.get("skills", {}))) if isinstance(source.get("skills"), Mapping) else {}
-            target["favourLevel"] = max(1, _int(source.get("favourLevel"), 1))
-            target["favourExp"] = max(0, _int(source.get("favourExp")))
-            equipment_changes: list[tuple[int, int]] = []
-            for equip in state.setdefault("equips", {}).values():
-                if not isinstance(equip, dict) or _int(equip.get("actorUid")) not in source_owners:
-                    continue
-                # Equipment ownership is stored in the form the client sent.
-                equip["actorUid"] = target_ref
-                equipment_changes.append((_int(equip.get("uid", equip.get("id"))), target_ref))
-            self._save(profile, state)
-            try:
-                result = self._message(f"{request_name}.post")
-                for change in self._dynamic(changes):
-                    item = result.res_change.add()
-                    item.base_res.type = change["type"]; item.base_res.id = change["id"]; item.base_res.param = change["param"]
-                    item.base_res.count = change["count"]; item.base_res.count_delta = change["countDelta"]
-                for key, value in equipment_changes:
-                    # The generated descriptor represents EquipChangeEntry as
-                    # a uint32->uint32 map, even though the source metadata
-                    # lists it as a repeated entry message.
-                    try:
-                        result.equip_change[key] = value
-                    except (TypeError, AttributeError):
-                        item = result.equip_change.add(); item.key = key; item.value = value
-                return 200, result
-            except Exception:
-                return 200, {"sourceActorUid": source_ref, "targetActorUid": target_ref, "equipChange": [{"key": key, "value": value} for key, value in equipment_changes], "resChange": self._dynamic(changes), "sandbox": True}
 
         # ``ActorLike`` was a small player-action endpoint in the retired
         # service, but its descriptor was not recovered with the rest of
@@ -2028,8 +1965,7 @@ class LocalSystems:
             except Exception:
                 return 200, {"resources": list(profile.get("resources", [])), "sandbox": True}
         if lower in {"/fci/baseresource", "/fci/baseresource/", "/fci/base-resource", "/fci/base-resource/", "/fci/resource", "/fci/resource/"} and method == "GET":
-            resources = [dict(item) for item in profile.get("resources", []) if isinstance(item, Mapping)]
-            return 200, {"resources": resources}
+            return 200, self.game._resource_message(profile)
         if "newflag" in lower or "new-flag" in lower:
             if method == "GET": return 200, {"isNew": bool(state.get("resourceNewFlag", False)), "resInfo": []}
             if method not in {"POST", "PATCH"}: return 405, {"error": "method_not_allowed", "message": "PATCH required"}
@@ -2164,8 +2100,8 @@ class LocalSystems:
 
         pools = state.setdefault("gachaPools", {})
         pool = pools.setdefault(str(pool_id), {"total": 0, "today": 0, "day": 0, "nextFree": 0, "firstTenDone": False})
-        day = (int(now) - 6 * 3600) // 86400
-        if int(pool.get("day", 0)) != day:
+        day = policy_for(self.game).day_index(now)
+        if period_due(pool.get("day"), day):
             pool["day"], pool["today"] = day, 0
         config = GACHA_TYPES.get(pool_id, {})
         if config.get("gachaFreeInterval") and not int(pool.get("nextFree", 0) or 0):
@@ -2342,7 +2278,7 @@ class LocalSystems:
 
         # Every draw is a separate character instance (copies are allowed;
         # the client keys characters by uid and offers decomposition).
-        new_instances = [actor_store.add(profile, state, actor_id) for actor_id in drawn]
+        new_instances = [self.new_actor(profile, state, actor_id) for actor_id in drawn]
         first_order = int(pool.get("total", 0)) + 1
         records = state.setdefault("gacha_records", [])
         for order, actor_id in enumerate(drawn, start=first_order):
@@ -2352,7 +2288,7 @@ class LocalSystems:
         if first_ten:
             pool["firstTenDone"] = True
         elif free:
-            pool["nextFree"] = now + int(config.get("gachaFreeInterval") or 86400)
+            pool["nextFree"] = policy_for(self.game).next_boundary(now)
         self._save(profile, state)
         self._record_task(profile, "TaskType_GachaP0MTimes", len(drawn), param=pool_id)
 
@@ -2369,14 +2305,12 @@ class LocalSystems:
             entry.base_res.count = _int(change.get("count"))
             entry.base_res.count_delta = _int(change.get("countDelta"))
         if new_instances:
-            container = self.game._types["DBGamePlayer.Actors"]()
             for record in new_instances:
-                uid = int(record["uid"])
-                self.game._append_local_actor(container, int(record["id"]), uid, uid - 1)
                 entry = result.info.res_change.add().actor
-                entry.CopyFrom(container.player_actors[-1])
+                entry.CopyFrom(self._st_actor(record, profile, state))
                 # DBH.UpdateActors adds a character only for countDelta > 0.
                 entry.count_delta = 1
+                entry.is_new = entry.is_new_card = True
         for order, actor_id in enumerate(drawn, start=first_order):
             record = result.actor_record.add()
             record.id = actor_id
@@ -3175,20 +3109,21 @@ class LocalSystems:
                 "taskTargetDone": list(state.get("taskTargetDone", [])),
                 "clearAll": True,
             }
-        if method != "POST":
-            return 405, {"error": "method_not_allowed", "message": "POST required"}
-        request = _json(body)
-        task_id = str(_int(request.get("taskId", request.get("id", 1)), 1))
-        value = tasks.setdefault(task_id, self._normalise_task(task_id, {}, self._now()))
-        value.update(self._normalise_task(task_id, value, self._now()))
-        changes = []
-        if not value.get("rewardGot"):
-            value["progress"] = max(_int(value.get("progress")), _int(value.get("maxProgress"), 1)); value["rewardGot"] = True; value["isDone"] = True; value["status"] = 1
-            ok, changes, _ = self.game.economy._change_resources(profile, [{"type": 7, "id": 0, "count": 100, "param": 0}])
-            if not ok:
-                return 409, {"error": "resource_update_failed"}
-        self._save(profile, state)
-        return 200, {"tasks": [], "resChange": [{"type": item.get("type", 0), "id": item.get("id", 0), "count": item.get("count", 0), "countDelta": item.get("countDelta", 0), "param": item.get("param", 0)} for item in changes]}
+        parts = [part for part in lower.split("/") if part]
+        if len(parts) == 4 and parts[:3] == ["fci", "task", "extra-activepoint"] and parts[3].isdigit():
+            if method != "GET":
+                return 405, {"error": "method_not_allowed", "message": "GET required"}
+            rows = [row for row in _client_table_rows("TaskExtraActivePointReward")
+                    if _int(row.get("activePointType")) == _int(parts[3])]
+            if not rows:
+                return 404, {"error": "unknown_active_point_type"}
+            return 200, {"extraActivePoint": 0, "progress": [
+                {"targetActivePoint": _int(row.get("activePoint")), "rewardGot": False,
+                 "reward": list(row.get("reward") or [])}
+                for row in sorted(rows, key=lambda row: _int(row.get("activePoint")))]}
+        # Concrete task claims are handled by LocalTasks. Unknown paths must
+        # never synthesize a task or a reward.
+        return 404, {"error": "unknown_task_route"}
 
     # xlsx/Misc.maxActorGroup: number of dungeon team presets.  The client
     # treats the number of groups returned as the number of unlocked tabs.
@@ -3244,6 +3179,13 @@ class LocalSystems:
             groups = self._normalise_actor_groups(state.get("actorGroups")) or self._default_actor_groups()
             if method in {"PUT", "POST", "PATCH"}:
                 payload = self._request_values(body)
+                raw = body.encode("utf-8") if isinstance(body, str) else bytes(body or b"")
+                if not payload and raw and not raw.lstrip().startswith((b"{", b"[")):
+                    from google.protobuf import json_format
+                    request = self._request(raw, "ApiActorGroup")
+                    if request is None:
+                        return 400, {"error": "invalid_actor_group_request"}
+                    payload = json_format.MessageToDict(request)
                 incoming = self._normalise_actor_groups(payload.get("actorGroups", payload))
                 groups.update(incoming)
                 state["actorGroups"] = groups
@@ -3284,6 +3226,13 @@ class LocalSystems:
         parts = [part for part in route.lower().split("/") if part]
         if parts[:1] != ["fci"] or len(parts) < 2:
             return None
+        ordinary_inherit = (len(parts) == 4 and parts[1] == "actor" and parts[2].isdigit()
+                            and parts[3] in {"inheriting", "actorinheriting", "actor-inheriting"})
+        diff_inherit = parts[1:] == ["diffactorinherit"]
+        if ordinary_inherit or diff_inherit:
+            if method != "POST":
+                return 405, {"error": "method_not_allowed", "message": "POST required"}
+            return self._actor_inherit(body, profile, _int(parts[2]) if ordinary_inherit else None)
         if parts[1:] == ["actor", "decompose"]:
             if method != "POST":
                 return 405, {"error": "method_not_allowed", "message": "POST required"}
@@ -3307,6 +3256,160 @@ class LocalSystems:
                 return self._talent_select(body, profile, state)
         return None
 
+    def _actor_consumption_error(self, profile: Mapping[str, Any], state: dict[str, Any],
+                                 record: Mapping[str, Any]) -> Optional[str]:
+        uid, actor_id = _int(record.get("uid")), _int(record.get("id"))
+        if record.get("locked", record.get("isLock", False)):
+            return "actor_locked"
+        groups = self._normalise_actor_groups(state.get("actorGroups")) or self._default_actor_groups()
+        for group in groups.values():
+            if any(_int(member.get("actorUid")) == uid for member in group.get("members", [])):
+                return "actor_in_use"
+        features = getattr(self.game, "profile_features", None)
+        if features is not None and _int(features._state(profile).get("auraActorUid")) == uid:
+            return "actor_in_use"
+        modes = getattr(self.game, "activity_modes", None)
+        if modes is not None:
+            with closing(self.game._connect()) as connection:
+                runs = connection.execute(
+                    "SELECT actor_uids_json FROM activity_mode_runs WHERE account_id = ? AND status = 'active'",
+                    (int(profile["account_id"]),)).fetchall()
+            if any(uid in [_int(value) for value in json.loads(row["actor_uids_json"])] for row in runs):
+                return "actor_in_use"
+            role = _int(ACTOR_CONFIG.get(actor_id, {}).get("role"))
+            missions = modes._state(profile).get("deploy", {}).get("missions", [])
+            if any(_int(m.get("startTimestamp")) and role in [_int(v) for v in m.get("roleid", [])]
+                   for m in missions):
+                return "actor_in_use"
+        if sum(_int(actor.get("id")) == actor_id for actor in actor_store.ordered(profile, state)) == 1:
+            if any(info.get("joined") and _int(info.get("actorId")) == actor_id
+                   for info in (state.get("cultivation") or {}).values() if isinstance(info, Mapping)):
+                return "actor_in_use"
+        return None
+
+    def _diff_inherit_allowed(self, source: Mapping[str, Any], target: Mapping[str, Any]) -> bool:
+        schedule = getattr(self.game, "activity_schedule", None)
+        if not DIFF_ACTOR_INHERIT or schedule is None:
+            return False
+        active = {_int(row.get("activityId")) for row in schedule.snapshot(self._now()).get("active", [])}
+        return any(_int(row.get("actorId")) == _int(source.get("id"))
+                   and _int(target.get("id")) in [_int(value) for value in row.get("targetId", [])]
+                   and _int(row.get("activityId")) in active for row in DIFF_ACTOR_INHERIT)
+
+    @staticmethod
+    def _inherit_talents(left: Mapping[str, Any], right: Mapping[str, Any], use_new: bool,
+                         survivor_id: int) -> list[dict[str, int]]:
+        chosen, other = (right, left) if use_new else (left, right)
+        talents = actor_talents(chosen)
+        if _int(chosen.get("quality")) < _int(other.get("quality")):
+            wanted = len(actor_talents(other))
+            for talent in actor_talents(other):
+                if len(talents) >= wanted:
+                    break
+                info = ACTOR_TALENTS.get(talent["talentId"], {})
+                groups = {ACTOR_TALENTS.get(t["talentId"], {}).get("groupType", t["talentId"]) for t in talents}
+                has_special = any(ACTOR_TALENTS.get(t["talentId"], {}).get("spectial") for t in talents)
+                if info.get("groupType", talent["talentId"]) not in groups and not (has_special and info.get("spectial")):
+                    talents.append(talent)
+        exclusive = ACTOR_CONFIG.get(survivor_id, {}).get("exclusiveTalentId", [])
+        for talent in talents:
+            info = ACTOR_TALENTS.get(talent["talentId"], {})
+            if info.get("spectial") and talent["talentId"] not in exclusive and exclusive:
+                talent["talentId"] = _int(exclusive[0])
+        return talents
+
+    @staticmethod
+    def _inherit_skills(left: Mapping[str, Any], right: Mapping[str, Any], survivor_id: int) -> dict[str, Any]:
+        slots: dict[int, int] = {}
+        rows = _client_table_rows("ActorSkill")
+        for actor in (left, right):
+            for row in rows:
+                slot = _int(row.get("displayIndex"))
+                if _int(row.get("actorId")) != _int(actor.get("id")) or not slot:
+                    continue
+                value = (actor.get("skills") or {}).get(str(_int(row.get("skillId"))), 1)
+                level = _int(value.get("level"), 1) if isinstance(value, Mapping) else _int(value, 1)
+                slots[slot] = max(slots.get(slot, 1), level)
+        return {str(_int(row.get("skillId"))): slots[_int(row.get("displayIndex"))]
+                for row in rows if _int(row.get("actorId")) == survivor_id and _int(row.get("displayIndex")) in slots}
+
+    def _actor_inherit(self, body: Body, profile: Mapping[str, Any], source_uid: Optional[int]) -> Response:
+        is_diff = source_uid is None
+        request_name = "ApiDiffActorInherit" if is_diff else "ApiActorInheriting"
+        payload = self._request_values(body)
+        request = self._request(body, request_name)
+        if request is not None:
+            target_uid = _int(request.target_actor_uid)
+            use_new = bool(request.use_new_talent)
+            if is_diff:
+                source_uid = _int(request.actor_uid)
+        else:
+            target_uid = self._first_int(payload, "targetActorUid", "target_actor_uid", default=0)
+            use_new = payload.get("useNewTalent", payload.get("use_new_talent", False))
+            if not isinstance(use_new, bool):
+                return 400, {"error": "invalid_use_new_talent"}
+            if is_diff:
+                source_uid = self._first_int(payload, "actorUid", "actor_uid", default=0)
+        if not source_uid or not target_uid:
+            return 400, {"error": "actor_uid_required"}
+        if source_uid == target_uid:
+            return 409, {"error": "actor_inherit_same_target"}
+        with self.game.atomic_mutation():
+            state = self._state(profile)
+            source = actor_store.get(profile, state, source_uid)
+            target = actor_store.get(profile, state, target_uid)
+            if source is None or target is None:
+                return 404, {"error": "actor_not_found", "uid": source_uid if source is None else target_uid}
+            if is_diff:
+                if not self._diff_inherit_allowed(source, target):
+                    return 409, {"error": "actor_inherit_activity_unavailable"}
+            elif _int(source.get("id")) != _int(target.get("id")):
+                return 409, {"error": "actor_inherit_different_actor"}
+            survivor, material = (target, source) if is_diff else (source, target)
+            error = self._actor_consumption_error(profile, state, material)
+            if error:
+                return 409, {"error": error, "uid": _int(material.get("uid"))}
+            survivor_id, survivor_uid = _int(survivor.get("id")), _int(survivor.get("uid"))
+            removed_uid = _int(material.get("uid"))
+            quality = min(_int(source.get("quality")), _int(target.get("quality")))
+            rows = ACTOR_DECOMPOSE.get((_int(material.get("id")), quality))
+            if rows is None:
+                return 409, {"error": "actor_decompose_config_missing"}
+            score = min(talent_score(actor_talents(source)), talent_score(actor_talents(target)))
+            rewards = [dict(row, count=int((_int(row.get("count")) + score * ACTOR_DECOMPOSE_TALENT_COEF) // 1)
+                            if row.get("isChips") else _int(row.get("count"))) for row in rows]
+            talents = self._inherit_talents(source, target, use_new, survivor_id)
+            skills = self._inherit_skills(source, target, survivor_id)
+            worn_left = equip_store.worn_equips(profile, state, source_uid)
+            worn_right = equip_store.worn_equips(profile, state, target_uid)
+            score_left = sum(int(equip_store.equip_score(row)) for row in worn_left.values())
+            score_right = sum(int(equip_store.equip_score(row)) for row in worn_right.values())
+            kept = {_int(row.get("uid")) for row in (worn_left if score_left >= score_right else worn_right).values()}
+            equipment_changes = {}
+            for equip in (state.get("equips") or {}).values():
+                if equip_store.owner_uid(profile, state, equip.get("actorUid")) in {source_uid, target_uid}:
+                    uid = _int(equip.get("uid"))
+                    equip["actorUid"] = survivor_uid if uid in kept else 0
+                    equipment_changes[uid] = equip["actorUid"]
+            best_exp = max(((_int(actor.get("level"), 1), _int(actor.get("exp"))) for actor in (source, target)))
+            for key in ("level", "star", "quality", "cultivationTotal"):
+                survivor[key] = max(_int(source.get(key)), _int(target.get(key)))
+            survivor["exp"] = best_exp[1]
+            survivor["talents"], survivor["skills"] = talents, skills
+            survivor.pop("talentResetInfo", None)
+            survivor.pop("talentResetPos", None)
+            actor_store.remove(profile, state, removed_uid)
+            result = self._message(f"{request_name}.post")
+            error = self._grant_contents(profile, state, rewards, result)
+            if error:
+                raise RuntimeError(f"inheritance reward failed: {error}")
+            result.res_change.add().actor.CopyFrom(self._st_actor(survivor, profile, state))
+            deleted = result.res_change.add().actor
+            deleted.uid, deleted.id, deleted.count_delta = removed_uid, _int(material.get("id")), -1
+            result.equip_change.update(equipment_changes)
+            self._save(profile, state)
+            return 200, result
+
     def _rng_for(self) -> Any:
         return getattr(self, "_rng", None) or random
 
@@ -3328,23 +3431,8 @@ class LocalSystems:
         return _int(value.get("count")) if isinstance(value, Mapping) else 0
 
     def _money_changes(self, profile: Mapping[str, Any], price: int) -> list[dict[str, int]]:
-        """迷子 spend as WU.IsEnoughMoney counts it: the type-5 total drops by
-        ``price`` and the paid part (type 27) by what bound 迷子 cannot cover."""
-
-        resources = {(_int(r.get("type")), _int(r.get("id"))): _int(r.get("count"))
-                     for r in profile.get("resources") or [] if isinstance(r, Mapping)}
-        try:
-            fresh = self.game.economy._resources(profile)
-            resources = {(_int(r.get("type")), _int(r.get("id"))): _int(r.get("count")) for r in fresh}
-        except Exception:
-            pass
-        total = resources.get((_RES_PLAYER_MONEY, 0), 0)
-        paid = resources.get((_RES_PLAYER_PAY_MONEY, 0), 0)
-        changes = [{"type": _RES_PLAYER_MONEY, "id": 0, "param": 0, "count": -price}]
-        paid_used = min(paid, max(0, price - max(0, total - paid)))
-        if paid_used:
-            changes.append({"type": _RES_PLAYER_PAY_MONEY, "id": 0, "param": 0, "count": -paid_used})
-        return changes
+        """The economy ledger spends free currency first and adjusts paid balance."""
+        return [{"type": _RES_PLAYER_MONEY, "id": 0, "param": 0, "count": -price}]
 
     def _dynamic_entries(self, changes: list[Mapping[str, Any]]) -> list[dict[str, Any]]:
         return [{"baseRes": change} for change in self._dynamic(changes)]
@@ -3355,6 +3443,8 @@ class LocalSystems:
 
         message = self._st_actor(record, profile, state)
         message.count_delta = int(count_delta)
+        if count_delta > 0:
+            message.is_new = message.is_new_card = True
         try:
             return json_format.MessageToDict(message, always_print_fields_with_no_presence=True)
         except TypeError:  # older protobuf
@@ -3383,8 +3473,7 @@ class LocalSystems:
                 items[rid] = items.get(rid, 0) + count
             elif rtype == _RES_ACTOR:
                 for _ in range(count):
-                    record = actor_store.add(profile, state, rid)
-                    self._apply_star_random(record, _int(reward.get("param")), rng)
+                    record = self.new_actor(profile, state, rid, _int(reward.get("param")))
                     new_actors.append(record)
             elif rtype == _RES_EQUIP:
                 for _ in range(count):
@@ -3417,6 +3506,15 @@ class LocalSystems:
             dynamic.actor.count_delta = 1
             dynamic.actor.is_new = dynamic.actor.is_new_card = True
         return None
+
+    def new_actor(self, profile: Mapping[str, Any], state: dict[str, Any], actor_id: int,
+                  way: int = 0) -> dict[str, Any]:
+        """Finalize quality before seeding the persisted, immediately visible talents."""
+        record = actor_store.add(profile, state, actor_id)
+        self._apply_star_random(record, way, self._rng_for())
+        ensure_talents(record, self._rng_for())
+        record["isNew"] = record["isNewCard"] = True
+        return record
 
     @staticmethod
     def _apply_star_random(record: dict[str, Any], way: int, rng: Any) -> None:
@@ -3558,9 +3656,9 @@ class LocalSystems:
             if owned < count:
                 return 409, {"error": "insufficient_item", "id": item_id, "required": count, "owned": owned}
         amount = sum(_int((ITEM_INFO[item_id].get("param") or [0])[0]) * count for item_id, count in wanted.items())
-        day = (self._now() - 6 * 3600) // 86400
+        day = policy_for(self.game).day_index(self._now())
         daily = state.get("favourGiftDaily") if isinstance(state.get("favourGiftDaily"), dict) else {}
-        if _int(daily.get("day")) != day:
+        if period_due(daily.get("day"), day):
             daily = {"day": day, "roles": {}}
         gained = _int(daily["roles"].get(str(role_id)))
         if FAVOUR_GIFT_DAILY_LIMIT and gained + amount > FAVOUR_GIFT_DAILY_LIMIT:
@@ -3625,6 +3723,9 @@ class LocalSystems:
         record["talentResetPos"], record["talentResetInfo"] = pos, session
         record["talentResetTimes"] = _int(record.get("talentResetTimes")) + 1
         self._save(profile, state)
+        cultivation = getattr(self.game, "cultivation", None)
+        if cultivation is not None:
+            cultivation.record(profile, 78, param=_int(record.get("id")))
         reply = self._talent_session_json(record)
         reply["resChange"] = self._dynamic_entries(changes)
         return 200, reply

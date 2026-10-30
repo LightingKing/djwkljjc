@@ -18,7 +18,8 @@ class EnteringRoutesTests(unittest.TestCase):
             "/fci/mail/": [],
             "/fci/recentcontact/": [],
             "/fci/auto-fight-conf/": {"banedSkills": {}},
-            "/fci/temp-entrance-switch/": {"switchInfo": []},
+            "/fci/temp-entrance-switch/": {"switchInfo": [{"type": 107, "switch": 1,
+                "isWindowEntrance": False, "startTime": "", "stopTime": "", "tips": ""}]},
             "/fci/equip/custom-match/": {"equipCustomMatch": {}},
             "/fci/asyncpvprecord/": {
                 "todayMaxWinNum": 0,

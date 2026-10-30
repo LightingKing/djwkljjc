@@ -9,6 +9,7 @@ tls_port = 19102
 enable_tls = true
 legacy_tls = true
 time_offset_seconds = 0
+utc_offset_seconds = 28800
 unified_store_path = "local.sqlite3"
 backup_dir = "runtime/backups"
 auto_backup = true

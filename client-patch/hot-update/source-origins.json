@@ -1,0 +1,42 @@
+[
+  {
+    "source": "I:/workspace/mobilegame/runtime/auth_m18.lua",
+    "destination": "sources/auth.lua",
+    "sha256": "cd3eaa9bfe9ff54a0be320f607557ed7a9dec365705dd6eb95c735ad9887b335"
+  },
+  {
+    "source": "I:/workspace/mobilegame/runtime/login_m18.lua",
+    "destination": "sources/login.lua",
+    "sha256": "2ee5a5f059c60c2da79ec4b706da14cfde929be1450264177634138f0e43379b"
+  },
+  {
+    "source": "I:/workspace/mobilegame/runtime/iaphandler_m18.lua",
+    "destination": "sources/iaphandler.lua",
+    "sha256": "42a35babdcd8fa06bc8d758e606b2b568160134a5f722c807af4e10ff9c698b9"
+  },
+  {
+    "source": "I:/workspace/mobilegame/analysis/lua-decompiled/common__actorutil.lua",
+    "destination": "sources/actorutil.lua",
+    "sha256": "7a0aa3811944ff807e77381ef6534b1feddbfd78e71627f4b826d749c6e6c248"
+  },
+  {
+    "source": "I:/workspace/mobilegame/analysis/lua-decompiled/window__resourceexchange__resourceexchange.lua",
+    "destination": "sources/resourceexchange.lua",
+    "sha256": "df2976bb35f0dfdabe6939daba7427484bffbb0e60177041fe40890a5bcda29e"
+  },
+  {
+    "source": "I:/workspace/mobilegame/runtime/fci_lua_codec.py",
+    "destination": "fci_lua_codec.py",
+    "sha256": "27574f5a23a181a4a3deb91efd222333313821d43b24d1664eb70ff6e549ab02"
+  },
+  {
+    "source": "I:/workspace/mobilegame/runtime/patch_login_bundle.py",
+    "destination": "unityfs_bundle.py",
+    "sha256": "71876c61671ccc5dc5487f1c5d35cbbc82de0bdb2d433864161315566345c95b"
+  },
+  {
+    "source": "I:/workspace/mobilegame/runtime/ljjc-lua/fci-lua53.opmap",
+    "destination": "fci-lua53.opmap",
+    "sha256": "b63eb2c982e1b6337ec0ccb5e96ae0b35490ca58f70d0cbf72855340d6df3425"
+  }
+]

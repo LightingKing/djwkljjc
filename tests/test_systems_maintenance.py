@@ -153,44 +153,30 @@ class LocalSystemsMaintenanceTests(unittest.TestCase):
             self.assertEqual(status, 200)
             self.assertEqual((unliked.like_num, unliked.is_like), (0, False))
 
-    def test_actor_inheritance_copies_progress_and_moves_equipment(self):
+    def test_actor_inheritance_keeps_source_and_consumes_same_actor_material(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             accounts = LocalAccounts(root / "accounts")
             game = LocalGame(root / "game", accounts)
-            _account, token = self._guest(accounts)
-
-            # The target must be an owned character: give the account a 1002.
+            account, token = self._guest(accounts)
             import actors as actor_store
-            profile = game._profile(_account)
+            profile = game._profile(account)
             state = game.systems._state(profile)
-            actor_store.add(profile, state, 1002)
+            material = game.systems.new_actor(profile, state, 1001)
+            material["level"] = 2
+            material_uid = material["uid"]
             game.systems._save(profile, state)
-            # Seed meaningful source progress and one equipped item.
-            status, _ = self._call(game, token, "POST", "/fci/actor/1001/levelup/", {"levels": 1})
-            self.assertEqual(status, 200)
-            status, _ = self._call(game, token, "POST", "/fci/equip/20001/equipon/", {"actorUid": 1001})
-            self.assertEqual(status, 200)
-
-            status, inherited = self._call(
-                game, token, "POST", "/fci/ActorInheriting/",
-                {"targetActorUid": 1002},
-            )
-            self.assertEqual(status, 200)
+            status, inherited = self._call(game, token, "POST", "/fci/actor/1/inheriting/",
+                                           {"targetActorUid": material_uid})
+            self.assertEqual(status, 200, inherited)
             self.assertEqual(inherited.DESCRIPTOR.full_name, "ApiActorInheriting.post")
-            self.assertTrue(inherited.res_change)
-
-            status, target = self._call(game, token, "GET", "/fci/actor/1002/")
-            self.assertEqual(status, 200)
-            self.assertEqual(target.result.level, 2)
-            status, equipment = self._call(game, token, "GET", "/fci/equip/20001/")
-            self.assertEqual(status, 200)
-            self.assertEqual(equipment.result.actor_uid, 1002)
-
+            actors = {c.actor.uid: c.actor for c in inherited.res_change if c.HasField("actor")}
+            self.assertEqual((actors[1].level, actors[1].count_delta), (2, 0))
+            self.assertEqual(actors[material_uid].count_delta, -1)
             restarted = LocalGame(root / "game", accounts)
-            status, target_after_restart = self._call(restarted, token, "GET", "/fci/actor/1002/")
-            self.assertEqual(status, 200)
-            self.assertEqual(target_after_restart.result.level, 2)
+            saved = restarted.systems._state(profile)
+            self.assertEqual(actor_store.get(profile, saved, 1)["level"], 2)
+            self.assertIsNone(actor_store.get(profile, saved, material_uid))
 
     def test_m4_typed_skin_equipment_resource_and_seal_routes_persist(self):
         with tempfile.TemporaryDirectory() as temp:
