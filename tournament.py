@@ -19,18 +19,21 @@ from grants import grant_rewards
 from server.core.reset import policy_for
 
 ASYNC_PVP_ACTIVITY_TYPE = 5
-TOURNAMENT_ID = 50001
+TOURNAMENT_ID = 5001
 TOURNAMENT_DUNGEON_ID = 4001
 TOURNAMENT_LEVEL_LIMIT = 23
 TARGET_COUNT = 5
 REFRESH_ITEM_ID = 80001
+# Local lineups use distinct main characters with their real client-table
+# attributes and skills.  Refresh rotates the lineup as well as its uid.
+BOT_ACTOR_POOL = (1001, 1002, 1003, 1004, 1005, 1006)
 _REQUEST_SCHEMAS = {
     "match": "ApiAsyncPvpMatch",
     "enter": "ApiTournamentEnter", "balance": "ApiTournamentBalance",
     "quit": "ApiTournamentQuit", "winreward": "ApiTournamentWinReward",
     "dungeonenter": "ApiTournamentDungeonEnter",
     "dungeonbalance": "ApiTournamentDungeonBalance",
-    "dungeonquit": "ApiTournamentDungeonQuit", "active": "ApiTournamentDungeonActive",
+    "dungeonquit": "ApiTournamentDungeonQuit", "active": "FightActiveData",
 }
 
 
@@ -100,15 +103,22 @@ class LocalTournament:
             return str(activity_type) == str(ASYNC_PVP_ACTIVITY_TYPE)
         return match[1] in {"dungeonenter", "dungeonbalance", "dungeonquit", "winreward"} or "tournamentId" in payload
 
-    def _targets(self):
-        return [{
-            "uid": f"local-async-bot-{i + 1:03d}", "name": f"异步对手{i + 1}",
+    def _target(self, index, generation=0):
+        uid = f"local-async-bot-{index + 1:03d}" + (f"-r{generation}" if generation else "")
+        actors = self.game._types["DBGamePlayer.Actors"]()
+        for slot in range(3):
+            actor_id = BOT_ACTOR_POOL[(index + generation + slot) % len(BOT_ACTOR_POOL)]
+            self.game._append_local_actor(actors, actor_id, 100000 + generation * 100 + index * 10 + slot,
+                                          slot, level=TOURNAMENT_LEVEL_LIMIT)
+        return {
+            "uid": uid, "name": f"异步对手{index + 1}",
             "level": TOURNAMENT_LEVEL_LIMIT, "headPhoto": 1, "socialPicture": "",
-            "playerId": f"local-async-bot-{i + 1:03d}", "isWin": False,
-            "targetBattleActors": [{"id": 1001 + i, "uid": 100000 + i * 10 + slot,
-                                     "level": TOURNAMENT_LEVEL_LIMIT, "quality": 1, "star": 1}
-                                    for slot in range(3)]
-        } for i in range(TARGET_COUNT)]
+            "playerId": uid, "isWin": False,
+            "targetBattleActors": [json_format.MessageToDict(actor) for actor in actors.player_actors],
+        }
+
+    def _targets(self):
+        return [self._target(index) for index in range(TARGET_COUNT)]
 
     def _default_state(self, now):
         return {"day": policy_for(self.game).day_index(now), "week": policy_for(self.game).week_index(now),
@@ -122,6 +132,12 @@ class LocalTournament:
         day, week = policy_for(self.game).day_index(now), policy_for(self.game).week_index(now)
         if _int(state.get("day")) != day:
             state.update(day=day, wins=0, losses=0, refreshCount=0, claimed=[], run=None, targets=self._targets())
+        # Repair already persisted placeholder teams without resetting wins,
+        # claims, target identities, or an in-progress native battle.
+        for index, target in enumerate(state["targets"]):
+            if not target.get("targetBattleActors") or any(not actor.get("attrs") or not actor.get("skills")
+                                                           for actor in target["targetBattleActors"]):
+                target["targetBattleActors"] = self._target(index)["targetBattleActors"]
         state["week"] = week
         return state
 
@@ -140,7 +156,7 @@ class LocalTournament:
     def _record(self, state, now=None):
         wins, claimed = _int(state.get("wins")), {_int(v) for v in state.get("claimed", [])}
         now = int(self.game._now()) if now is None else int(now)
-        return {"todayMaxWinNum": wins, "leftRewardsWinNum": [n for n in (1, 3, 5) if n > wins or n not in claimed],
+        return {"todayMaxWinNum": wins, "leftRewardsWinNum": [n for n in (1, 3, 5) if n <= wins and n not in claimed],
                 "nextRefreshSyncpvpRecordTime": policy_for(self.game).next_boundary(now, "day"),
                 "canRefresh": _int(state.get("refreshCount")) < 3}
 
@@ -215,6 +231,8 @@ class LocalTournament:
             if route == "/fci/tournament/dungeonenter":
                 if method != "POST": return 405, {"error": "method_not_allowed"}
                 payload = self._request("dungeonenter", body)
+                self._validate_tournament(payload)
+                if _int(profile.get("level")) < TOURNAMENT_LEVEL_LIMIT: raise TournamentError("tournament_level_locked", 403)
                 return 200, self._run(profile, lambda c, s, n: self._dungeon_enter(s, payload, n))
             if route == "/fci/tournament/dungeonbalance":
                 if method != "POST": return 405, {"error": "method_not_allowed"}
@@ -225,6 +243,7 @@ class LocalTournament:
             if route == "/fci/tournament/winreward":
                 if method != "POST": return 405, {"error": "method_not_allowed"}
                 payload = self._request("winreward", body); response = {"resChange": [], "asyncPvpRecord": {}}
+                self._validate_tournament(payload)
                 def claim(c, s, n):
                     target = _int(payload.get("winNum")); claimed = {_int(v) for v in s.get("claimed", [])}
                     if target not in (1, 3, 5) or _int(s.get("wins")) < target: raise TournamentError("win_reward_locked")
@@ -248,8 +267,14 @@ class LocalTournament:
             return exc.status, {"error": exc.code}
         return None
 
-    def _enter(self, profile, state, payload):
+    @staticmethod
+    def _validate_tournament(payload):
         if _int(payload.get("activityType", payload.get("activity_type")), 5) != 5: raise TournamentError("activity_type_mismatch", 400)
+        if _int(payload.get("tournamentId", payload.get("tournament_id"))) != TOURNAMENT_ID:
+            raise TournamentError("tournament_not_found", 404)
+
+    def _enter(self, profile, state, payload):
+        self._validate_tournament(payload)
         if _int(profile.get("level")) < TOURNAMENT_LEVEL_LIMIT: raise TournamentError("tournament_level_locked", 403)
         state["status"] = 1; return {"enterResult": True, "resChange": []}
 
@@ -263,32 +288,48 @@ class LocalTournament:
         # wire body is the native request for slot 0.
         index = _int(payload.get("index"), 0)
         if not 0 <= index < len(state["targets"]): raise TournamentError("invalid_target_index", 400)
+        target = state["targets"][index]
+        if target.get("isWin"): raise TournamentError("tournament_target_defeated")
+        if (state.get("run") or {}).get("active") and state["run"].get("target_uid") == target["uid"]:
+            raise TournamentError("tournament_run_active")
         if _int(state.get("refreshCount")) >= 3: raise TournamentError("refresh_limit")
         changes = self._consume_refresh_item(profile); state["refreshCount"] = _int(state.get("refreshCount")) + 1
-        replacement = self._targets()[index]
-        replacement["uid"] = f"{replacement['uid']}-r{state['refreshCount']}"
-        replacement["playerId"] = replacement["uid"]
+        replacement = self._target(index, state["refreshCount"])
         state["targets"][index] = replacement
         return {"index": index, "targetActor": replacement, "resChange": changes}
 
     def _dungeon_enter(self, state, payload, now):
         target = self._target_detail(state, str(payload.get("target_uid", payload.get("targetUid", ""))))
-        if state.get("run") and state["run"].get("active"): raise TournamentError("tournament_run_active")
-        uid = 1000000000000 + _int(state.get("wins")) * 10 + _int(state.get("losses")) + 1
+        if target.get("isWin"): raise TournamentError("tournament_target_defeated")
+        run = state.get("run") or {}
+        if run.get("active"):
+            # Native clients can retry/re-enter after a lost response or a
+            # disconnect, including an old run with an empty parsed snapshot.
+            if run.get("target_uid") == target["uid"]:
+                return {"dungeonUid": run["uid"], "dungeonId": TOURNAMENT_DUNGEON_ID}
+            raise TournamentError("tournament_run_active")
+        uid = max(1000000000001, _int(run.get("uid")) + 1, now * 1000)
         state["run"] = {"uid": uid, "target_uid": target["uid"], "dungeon_id": TOURNAMENT_DUNGEON_ID, "active": True, "snapshot": None, "balanced": False, "win": False}
         return {"dungeonUid": uid, "dungeonId": TOURNAMENT_DUNGEON_ID}
 
     def _save_active(self, state, uid, payload):
         run = state.get("run")
         if not run or _int(run.get("uid")) != uid: raise TournamentError("tournament_run_not_found", 404)
-        if run.get("balanced"): raise TournamentError("tournament_run_closed")
-        run["snapshot"] = dict(payload.get("request")) if isinstance(payload.get("request"), Mapping) else dict(payload)
+        if run.get("balanced") or not run.get("active"): raise TournamentError("tournament_run_closed")
+        if _int(payload.get("winTeam", payload.get("win_team"))) not in (1, 2):
+            raise TournamentError("tournament_result_required", 400)
+        if _int(payload.get("dungeonType"), 3) != 3 or _int(payload.get("stageID"), TOURNAMENT_DUNGEON_ID) != TOURNAMENT_DUNGEON_ID:
+            raise TournamentError("tournament_snapshot_mismatch", 400)
+        if run.get("snapshot") and run["snapshot"] != payload:
+            raise TournamentError("tournament_result_already_saved")
+        run["snapshot"] = dict(payload)
         return {}
 
     def _dungeon_balance(self, profile, state, now):
         run = state.get("run")
         if not run: raise TournamentError("tournament_run_not_found", 404)
         if run.get("balanced"): return run["response"]
+        if not run.get("active"): raise TournamentError("tournament_run_closed")
         if not run.get("snapshot"):
             raise TournamentError("tournament_snapshot_required")
         win = _int((run.get("snapshot") or {}).get("winTeam", (run.get("snapshot") or {}).get("win_team"))) == 1
@@ -306,7 +347,8 @@ class LocalTournament:
 
     @staticmethod
     def _dungeon_quit(state):
-        if state.get("run"): state["run"]["active"] = False
+        if not state.get("run"): raise TournamentError("tournament_run_not_found", 404)
+        state["run"]["active"] = False
         return {"result": True}
 
 

@@ -419,6 +419,38 @@ class LocalProfileFeatures:
             self._sync_signboard(profile, state, notepads)
             return [self._notepad_json(notepads[key]) for key in sorted(notepads, key=int)]
 
+    def pending_role_presents(self, profile: Mapping[str, Any]) -> list[dict[str, Any]]:
+        """One list for welfare and red points; Beijing 06:00 daily boundary.
+
+        The 70% offer roll is local policy. Shard IDs come from Role.decomposeRes,
+        never arithmetic on role IDs. Existing claim timestamps also protect
+        saves made by the former UTC-day implementation from a second claim.
+        """
+        with self._lock:
+            pads = self.role_notepads(profile)
+            claims = self._state(profile).get('rolePresents', {})
+            day = policy_for(self.game).day_index(self._now())
+            start = policy_for(self.game).day_start_from_index(day)
+            roles = {_int(row.get('id')): row for row in table_rows('Role')}
+            items = {_int(row.get('id')) for row in table_rows('ItemInfo')}
+            pending = []
+            for pad in pads:
+                role_id = _int(pad.get('roleId'))
+                if _int(pad.get('favourLevel')) < 9 or f'{day}:{role_id}' in claims:
+                    continue
+                if any(str(key).endswith(f':{role_id}') and _int(stamp) >= start
+                       for key, stamp in claims.items()):
+                    continue
+                if (int(profile['account_id']) * 31 + day * 17 + role_id * 13) % 100 >= 70:
+                    continue
+                resource = roles.get(role_id, {}).get('decomposeRes', {})
+                item_id = _int(resource.get('id'))
+                if _int(resource.get('type')) != 11 or item_id not in items:
+                    continue
+                pending.append({'presentId': role_id, 'roleId': role_id, 'presentType': 1,
+                                'rewards': [{'type': 11, 'id': item_id, 'count': 5}]})
+            return pending
+
     def role_notepad(self, profile: Mapping[str, Any], role_id: Any) -> Optional[dict[str, Any]]:
         """One RoleNotePadInfo (camelCase) or ``None`` when the role is not owned."""
 

@@ -1237,6 +1237,10 @@ class LocalGame:
     def login_messages(self, account: Mapping[str, Any]) -> List[Message]:
         """Return the exact bootstrap push message names and protobuf bytes."""
 
+        with self._lock:
+            return self._login_messages_locked(account)
+
+    def _login_messages_locked(self, account: Mapping[str, Any]) -> List[Message]:
         profile = self._profile(account)
         now_ms = self._now() * 1000
         self.mall.settle_month_card(profile)
@@ -1460,96 +1464,29 @@ class LocalGame:
             if tournament_result is not None:
                 status, result = tournament_result
                 return status, self._legacy_tournament_message(route, result) if status == 200 else result
-            if route.lower().startswith('/fci/rolepresent'):
-                # RolePresent is a daily, account-persistent gift.  Public
-                # evidence only fixes the level-9 threshold and five-shard
-                # reward; the exact probability/pool is local policy (70%,
-                # role shard id = 20000 + role id).  The roll is deterministic
-                # for the Beijing day so re-login cannot reroll it.
-                feature_state = self.profile_features._state(profile)
-                presents = feature_state.setdefault('rolePresents', {})
-                day = int(self._now() // 86400)
-                notepads = self.profile_features.role_notepads(profile)
-                eligible = []
-                for pad in notepads:
-                    role_id = int(pad.get('roleId', 0) or 0)
-                    if int(pad.get('favourLevel', 0) or 0) < 9:
-                        continue
-                    key = f'{day}:{role_id}'
-                    if key not in presents:
-                        roll = (int(profile['account_id']) * 31 + day * 17 + role_id * 13) % 100
-                        if roll < 70:
-                            # ApiRolePresent/DBNotePadInfo.Present.presentId
-                            # is uint32.  Keep the day-scoped key only in the
-                            # local ledger; the wire id is the role id and is
-                            # therefore stable and directly selectable.
-                            eligible.append({'presentId': role_id, 'roleId': role_id,
-                                             'presentType': 1,
-                                             'rewards': [{'type': 11, 'id': 20000 + role_id, 'count': 5}]})
-                # The redpoint payload is a repeated Present list, while the
-                # claim response carries one Present plus dynamic deltas.
-                def present_message(name):
-                    try:
-                        return message_factory.GetMessageClass(self._pool.FindMessageTypeByName(name))()
-                    except Exception:
-                        return None
-
+            if route.rstrip('/').lower() == '/fci/rolepresent' or route.lower().startswith('/fci/rolepresent/'):
+                # Welfare2/WlfRolePresent: GET is an array. POST selects by
+                # URL and sends JSON null (there is no body selection field).
                 if method.upper() == 'GET':
-                    result = present_message('ApiRolePresent.result')
-                    if result is None:
-                        return 200, eligible
-                    if eligible:
-                        json_format.ParseDict(eligible[0], result.presents)
-                    return 200, result
-                if method.upper() not in {'POST', 'PUT'}:
+                    return 200, self.profile_features.pending_role_presents(profile)
+                if method.upper() != 'POST':
                     return 405, {'error': 'method_not_allowed'}
-                raw = body.decode('utf-8') if isinstance(body, (bytes, bytearray)) else (body or '{}')
-                try:
-                    request = json.loads(raw) if isinstance(raw, str) else dict(raw)
-                except (TypeError, ValueError):
-                    request = {}
-                wire_request = None
-                try:
-                    wire_request = message_factory.GetMessageClass(
-                        self._pool.FindMessageTypeByName('ApiPresentTargetActor'))()
-                    wire_request.ParseFromString(body or b'')
-                except Exception:
-                    wire_request = None
-                role_id = int(request.get('roleId', request.get('role_id', 0)) or 0)
-                if not role_id and wire_request is not None:
-                    role_id = int(getattr(wire_request, 'present_target_actor', 0) or 0)
-                # Native callers may submit the present id rather than role id.
-                if not role_id:
-                    role_id = int(request.get('presentId', request.get('present_id', 0)) or 0)
-                if not role_id:
-                    role_id = int(feature_state.get('rolePresentTargetActor', 0) or 0)
-                if not role_id:
-                    # The native flow stores the selected role through
-                    # /fci/present-target-actor/.  That route is owned by
-                    # LocalSystems, so read its durable player-profile field
-                    # when the claim itself has an empty body.
-                    try:
-                        system_state = self.systems._state(profile)
-                        player_profile = system_state.get('player_profile', {})
-                        role_id = int(player_profile.get('presentTargetActor', 0) or 0)
-                    except Exception:
-                        role_id = 0
-                key = f'{day}:{role_id}'
-                if key in presents or role_id not in {int(row.get('roleId', 0) or 0) for row in eligible}:
-                    return 409, {'error': 'role_present_not_available'}
-                from grants import grant_rewards
-                changes = grant_rewards(self, profile, [{'type': 11, 'id': 20000 + role_id, 'count': 5}])
-                presents[key] = self._now()
-                self.profile_features._save(profile, feature_state)
-                result = present_message('ApiRolePresent.result')
-                if result is None:
-                    return 200, {'presentId': role_id, 'resChange': changes}
-                chosen = next(row for row in eligible if int(row.get('roleId', 0)) == role_id)
-                json_format.ParseDict(chosen, result.presents)
-                for change in changes:
-                    dynamic = result.res_change.add()
-                    json_format.ParseDict(change, dynamic)
-                return 200, result
+                suffix = route.rstrip('/').split('/')[-1]
+                if not suffix.isdigit():
+                    return 400, {'error': 'invalid_role_present_id'}
+                present_id = int(suffix)
+                with self.atomic_mutation():
+                    eligible = self.profile_features.pending_role_presents(profile)
+                    chosen = next((row for row in eligible if row['presentId'] == present_id), None)
+                    if chosen is None:
+                        return 409, {'error': 'role_present_not_available'}
+                    from grants import grant_rewards
+                    changes = grant_rewards(self, profile, chosen['rewards'])
+                    feature_state = self.profile_features._state(profile)
+                    day = self.reset_policy.day_index(self._now())
+                    feature_state.setdefault('rolePresents', {})[f'{day}:{chosen["roleId"]}'] = self._now()
+                    self.profile_features._save(profile, feature_state)
+                    return 200, {'presents': chosen, 'resChange': changes}
             guild_result = self.guild.handle_http(method, path, body, profile)
             if guild_result is not None:
                 return guild_result

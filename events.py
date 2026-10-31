@@ -661,26 +661,7 @@ class LocalEvents:
             state = self._state(profile)
             if self._continuous_tick(state):
                 self._save(profile, state)
-            presents = []
-            # RolePresent is a client-visible redpoint list.  The server side
-            # probability/pool is local policy (70% and five shards); keep the
-            # same deterministic day key as LocalGame's claim route so a
-            # refresh cannot manufacture a second gift.
-            try:
-                day = int(self._now() // 86400)
-                pending = self.game.profile_features.role_notepads(profile)
-                claimed = self.game.profile_features._state(profile).get("rolePresents", {})
-                for pad in pending:
-                    role_id = _int_or(pad.get("roleId"), 0)
-                    if _int_or(pad.get("favourLevel"), 0) < 9:
-                        continue
-                    key = f"{day}:{role_id}"
-                    roll = (int(profile["account_id"]) * 31 + day * 17 + role_id * 13) % 100
-                    if key not in claimed and roll < 70:
-                        presents.append({"presentId": key, "roleId": role_id, "presentType": 1,
-                                         "rewards": [{"type": 11, "id": 20000 + role_id, "count": 5}]})
-            except Exception:
-                presents = []
+            presents = self.game.profile_features.pending_role_presents(profile)
             return {
                 "continuousLoginResult": _message_to_dict(self._continuous_message(state)),
                 "signinResult": _message_to_dict(self._signin_message(state, self._date(signin=True))),
@@ -1113,6 +1094,8 @@ class LocalEvents:
         # allows the client to close those panels cleanly instead of treating
         # the retired server as unreachable, while all real claims above stay
         # typed and persisted.
+        if action.startswith('fcithemeactivitytasks'):
+            return None
         ignored_basic = ("activitysignin", "everydaysignin", "continuouslogin", "signin")
         optional_activity = (
             "activitytask", "activityexplore", "turntable", "digtreasure",

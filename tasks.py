@@ -790,6 +790,9 @@ class LocalTasks:
             if extra_points:
                 extra = self._extra_entry(state, _int(task.get("extraActivePointType"), 1))
                 extra["points"] += extra_points
+            # WlfTheme stores this numeric total before updating its progress
+            # bar. Omitting it makes the next Lua arithmetic use nil.
+            extra_total = self._extra_payload(state, _int(task.get("extraActivePointType"), 1))["extraActivePoint"]
             self._sync(profile, state)  # successors, CompletePnTask, active-point task
             self._save(profile, state)
             changes = grant_rewards(self.game, profile, task["reward"])
@@ -798,7 +801,8 @@ class LocalTasks:
             payload = self._payload(profile, state) if self.notifier is not None else None
         if payload is not None:
             self._notify(profile, payload)
-        return 200, {"resChange": changes, "activePoint": _int(state["activePoint"])}
+        return 200, {"resChange": changes, "activePoint": _int(state["activePoint"]),
+                     "extraActivePoint": extra_total}
 
     def _claim_active_point(self, profile: Mapping[str, Any], target: int) -> Response:
         rewards = ACTIVE_POINT_REWARDS.get(target)

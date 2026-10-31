@@ -9,7 +9,7 @@ from urllib.parse import urlsplit
 
 def is_client_route(path: str) -> bool:
     route = urlsplit(path).path.lower().rstrip("/")
-    return route.startswith(("/fci/", "/auth/", "/accountentry/", "/password/")) or route in {
+    return route.startswith(("/fci/", "/match/", "/auth/", "/accountentry/", "/password/")) or route in {
         "/auth", "/account", "/accountsession", "/entryreg", "/existentry", "/exist-entry",
         "/password", "/passwordreset", "/accountguestbind", "/accountentry", "/newentry",
         "/verifycode", "/passwordverifycode", "/currententrymodifyverifycode", "/newentrymodifyverifycode",

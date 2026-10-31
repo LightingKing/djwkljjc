@@ -93,6 +93,7 @@ class IntegrationTests(unittest.TestCase):
         self.assertGreater(len(claimed.manual_box_res_change), 0)
         status, present = self.call('GET', '/fci/RolePresent/')
         self.assertEqual(status, 200)
-        self.assertEqual(present.DESCRIPTOR.full_name, 'ApiRolePresent.result')
+        # Both Welfare RolePresent panels iterate the GET result as an array.
+        self.assertEqual(present, [])
         self.assertEqual(self.game._profile(self.account)['resources'], before)
 

@@ -53,11 +53,9 @@ class WelfareMazeTests(unittest.TestCase):
             self.assertEqual(int(result.cell_id) if hasattr(result, "cell_id") else int(result["cellId"]), 1)
             chips = [20002, 20116, 20014, 20128, 20107, 20108, 20012, 20006]
             status, changed = welfare.handle_http("POST", "/fci/chipexchange/", json.dumps({"chips": chips}).encode(), profile)
-            changed_info = changed["chipExchangeInfo"]
-            self.assertEqual((status, changed_info["modifyCount"], changed_info["settlePosInfo"]), (200, 1, chips))
+            self.assertEqual((status, changed["modifyCount"], changed["settlePosInfo"]), (200, 1, chips))
             status, saved = welfare.handle_http("GET", "/fci/chipexchange/", None, profile)
-            saved_info = saved["chipExchangeInfo"]
-            self.assertEqual((status, saved_info["modifyCount"], saved_info["exchangePosInfo"]), (200, 1, chips))
+            self.assertEqual((status, saved["modifyCount"], saved["exchangePosInfo"]), (200, 1, chips))
 
     def test_maze_three_floor_loop_and_reward_is_idempotent(self):
         with tempfile.TemporaryDirectory() as temp:

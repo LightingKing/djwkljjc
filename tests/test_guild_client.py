@@ -49,6 +49,20 @@ class GuildClientTests(unittest.TestCase):
         status, result = self.call("PUT", f"/fci/guild/{gid}/pending-members/", {"playerId": target["player_id"]}, profile=target)
         self.assertEqual(status, 200, result)
 
+    def native(self, method, path, body=None, auth=None, message=None):
+        if message:
+            cls = message_factory.GetMessageClass(self.game._pool.FindMessageTypeByName(message))
+            raw = json_format.ParseDict(body or {}, cls()).SerializeToString()
+            content_type = "application/wireformat"
+        else:
+            raw = body if isinstance(body, bytes) else json.dumps(body).encode()
+            content_type = "application/json"
+        return self.game.handle_http(method, path, raw, content_type, auth or self.auth)
+
+    def new_player(self):
+        account, auth = test_systems.LocalSystemsTests._guest(self.accounts)
+        return self.game._profile(account), auth
+
     def balance(self, kind, rid=0):
         if kind == 11:
             return self.game.systems._state(self.profile)["items"].get(str(rid), {}).get("count", 0)
@@ -204,29 +218,147 @@ class GuildClientTests(unittest.TestCase):
         self.assertEqual(self.balance(7), before - 100000)
 
     def test_manager_routes_update_invite_promote_kick_and_social_group(self):
-        status, created = self.call("POST", "/fci/guild/", {"name": "管理测试", "icon": "2"})
+        status, created = self.native("POST", "/fci/guild/", {"name": "管理测试", "icon": "2"})
         self.assertEqual(status, 200)
         gid = created["baseInfo"]["id"]
-        with closing(self.game._connect()) as conn, conn:
-            state = self.guild._load(conn, self.now[0])
-            guild = state["guilds"][str(gid)]
-            bot = self.game.social.bots.get("local-bot-001")
-            guild["members"][bot["playerId"]] = self.guild._member(bot)
-            guild["baseInfo"]["membersCount"] = len(guild["members"])
-            self.guild._save(conn, state, self.now[0])
+        member, auth = self.new_player()
+        pid = member["player_id"]
         status, detail = self.call("PATCH", f"/fci/guild/{gid}/", {"billboard": "欢迎", "icon": "3"})
         self.assertEqual((status, detail["baseInfo"]["billboard"], detail["baseInfo"]["icon"]), (200, "欢迎", "3"))
-        status, invited = self.call("PUT", f"/fci/guild/{gid}/invited-members/", {"playerId": "local-bot-002"})
-        self.assertEqual((status, invited["playerId"]), (200, "local-bot-002"))
-        self.assertEqual(self.call("GET", f"/fci/guild/{gid}/invited-members/")[1][0]["playerId"], "local-bot-002")
-        status, promoted = self.call("PUT", f"/fci/guild/{gid}/vice-president/", {"playerId": "local-bot-001"})
-        self.assertEqual((status, promoted["baseInfo"]["vicePresident"]), (200, ["local-bot-001"]))
-        status, demoted = self.call("DELETE", f"/fci/guild/{gid}/vice-president/local-bot-001/")
-        self.assertEqual((status, demoted["baseInfo"]["vicePresident"]), (200, []))
-        status, kicked = self.call("DELETE", f"/fci/guild/{gid}/members/local-bot-001/")
-        self.assertEqual((status, kicked["baseInfo"]["membersCount"]), (200, 1))
+        status, invited = self.native("PUT", f"/fci/guild/{gid}/invited-members/", {"playerId": pid}, message="ApiGuildMemberInvite")
+        self.assertEqual((status, invited["playerId"]), (200, pid))
+        self.assertEqual(self.native("GET", f"/fci/guild/{gid}/invited-members/")[1][0]["playerId"], pid)
+        self.assertEqual(self.native("PUT", f"/fci/guild/{gid}/members/", {"playerId": pid}, auth=auth)[0], 200)
+        status, promoted = self.native("PUT", f"/fci/guild/{gid}/vice-president/", {"playerId": pid}, message="ApiGuildVicePresident")
+        self.assertEqual((status, promoted["vicePresident"]), (200, [pid]))
+        self.assert_message("DbGuildData.BaseInfo", promoted)
+        self.assertEqual(self.native("GET", "/fci/guild-player/", auth=auth)[1]["type"], 1)
+        status, demoted = self.native("DELETE", f"/fci/guild/{gid}/vice-president/{pid}")
+        self.assertEqual((status, demoted["vicePresident"]), (200, []))
+        self.assert_message("DbGuildData.BaseInfo", demoted)
+        self.assertEqual(self.native("GET", "/fci/guild-player/", auth=auth)[1]["type"], 0)
+        status, kicked = self.native("DELETE", f"/fci/guild/{gid}/members/{pid}")
+        self.assertEqual((status, kicked["membersCount"]), (200, 1))
+        self.assert_message("DbGuildData.BaseInfo", kicked)
+        self.assertEqual(self.native("GET", "/fci/guild-player/", auth=auth)[1]["guildId"], 0)
         status, social = self.call("PATCH", f"/fci/guild/{gid}/socialgroup/", {"qqGroupId": "12345"})
         self.assertEqual((status, social["qqGroupId"]), (200, "12345"))
+
+    def test_native_invitation_acceptance_weekly_settlement_recovers_legacy_account_ids(self):
+        gid = self.native("POST", "/fci/guild/", {"name": "邀请结算", "icon": "1"})[1]["baseInfo"]["id"]
+        recipient, auth = self.new_player()
+        pid = recipient["player_id"]
+        self.assertEqual(self.native("PUT", f"/fci/guild/{gid}/invited-members/", {"playerId": pid})[0], 200)
+        with closing(self.game._connect()) as conn:
+            state = self.guild._load(conn, self.now[0])
+        self.assertEqual(state["players"][pid]["accountId"], recipient["account_id"])
+        self.assertEqual(self.native("GET", "/fci/guild-player/invited/", auth=auth)[1][0]["id"], gid)
+        self.assertEqual(self.native("PUT", f"/fci/guild/{gid}/members/", {"playerId": pid}, auth=auth,
+                                     message="ApiGuildMembers")[0], 200)
+        self.assertEqual(self.native("POST", f"/fci/guild/{gid}/donate/request/", {"res": {"type": 11, "id": 20001}}, auth=auth)[0], 200)
+        grant_rewards(self.game, self.profile, [{"type": 11, "id": 20001, "count": 1}])
+        self.assertEqual(self.native("POST", f"/fci/guild/{gid}/donate/send/",
+                                     {"playerIdRequest": pid, "res": {"type": 11, "id": 20001, "count": 1}},
+                                     message="ApiGuildDonateSend")[0], 200)
+        with closing(self.game._connect()) as conn, conn:
+            state = self.guild._load(conn, self.now[0])
+            # Only the migration fixture edits persisted state: recreate the
+            # released invitation bug, including a bot and an unknown account.
+            state["players"][pid]["accountId"] = 0
+            state["players"]["local-bot-001"] = {"accountId": 0, "data": self.guild._player_default()}
+            state["players"]["missing-player"] = {"accountId": 0, "data": self.guild._player_default()}
+            bot_request = state["guilds"]["1"]["donateInfo"]["donates"]["local-bot-001"]
+            bot_request["donatesCount"][self.profile["player_id"]] = 1
+            self.guild._save(conn, state, self.now[0])
+            boundary = state["guilds"][str(gid)]["donateInfo"]["nextBalanceTime"]
+        self.now[0] = boundary
+        self.assertEqual(self.native("GET", "/fci/guild-player/")[0], 200)
+        self.assertEqual(self.native("GET", f"/fci/guild/{gid}/")[0], 200)
+        saved = self.game.systems._state(recipient)["items"]["20001"]["count"]
+        self.assertEqual(saved, 1)
+        self.assertEqual(self.native("GET", "/fci/guild-player/", auth=auth)[1]["lastGuildDonateBalanceTime"], boundary)
+        self.assertEqual(self.game.systems._state(recipient)["items"]["20001"]["count"], saved)
+        with closing(self.game._connect()) as conn:
+            state = self.guild._load(conn, self.now[0])
+        self.assertEqual(state["players"][pid]["accountId"], recipient["account_id"])
+        self.assertNotIn("local-bot-001", state["players"])
+        self.assertNotIn("missing-player", state["players"])
+
+    def test_native_application_approval_transfer_and_invitation_decline(self):
+        gid = self.native("POST", "/fci/guild/", {"name": "审批转让", "icon": "1"})[1]["baseInfo"]["id"]
+        member, auth = self.new_player()
+        pid = member["player_id"]
+        self.assertEqual(self.native("PUT", f"/fci/guild/{gid}/invited-members/", {"playerId": pid})[0], 200)
+        self.assertEqual(self.native("DELETE", f"/fci/guild-player/invited/{gid}", auth=auth)[0], 200)
+        self.assertEqual(self.native("GET", "/fci/guild-player/invited/", auth=auth)[1], [])
+        self.assertEqual(self.native("GET", f"/fci/guild/{gid}/invited-members/")[1], [])
+        self.assertEqual(self.native("PUT", f"/fci/guild/{gid}/pending-members/", {"playerId": pid}, auth=auth,
+                                     message="ApiGuildMemberPending")[0], 200)
+        self.assertEqual(self.native("GET", "/fci/guild-player/", auth=auth)[1]["guildId"], 0)
+        status, approved = self.native("PUT", f"/fci/guild/{gid}/members/", {"playerId": pid}, message="ApiGuildMembers")
+        self.assertEqual(status, 200)
+        self.assertEqual(approved["membersCount"], 2)
+        self.assert_message("DbGuildData.BaseInfo", approved)
+        status, transferred = self.native("POST", f"/fci/guild/{gid}/president/", {"newPresident": pid}, message="ApiGuildPresident")
+        self.assertEqual(status, 200)
+        self.assertEqual(transferred["president"], pid)
+        self.assert_message("DbGuildData.BaseInfo", transferred)
+        self.assertEqual(self.native("GET", "/fci/guild-player/", auth=auth)[1]["type"], 2)
+        self.assertEqual(self.native("PATCH", f"/fci/guild/{gid}/", {"billboard": "旧会长不能改"})[0], 403)
+
+    def test_foreign_guild_management_rejected_without_state_or_asset_changes(self):
+        self.native("POST", "/fci/guild/", {"name": "本会权限", "icon": "1"})
+        before = self.native("GET", "/fci/guild/1/")[1]
+        gold = self.balance(7)
+        for method, path, body in [
+            ("PATCH", "/fci/guild/1/", {"billboard": "越权"}),
+            ("DELETE", "/fci/guild/1/members/local-bot-002", None),
+            ("PUT", "/fci/guild/1/vice-president/", {"playerId": "local-bot-002"}),
+            ("POST", "/fci/guild/1/president/", {"newPresident": self.profile["player_id"]}),
+            ("PUT", "/fci/guild/1/invited-members/", {"playerId": self.profile["player_id"]}),
+            ("DELETE", "/fci/guild/1/pending-members/", None),
+            ("PATCH", "/fci/guild/1/socialgroup/", {"qqGroupId": "123"}),
+        ]:
+            with self.subTest(path=path):
+                self.assertEqual(self.native(method, path, body)[0], 403)
+        self.assertEqual(self.native("GET", "/fci/guild/1/")[1], before)
+        self.assertEqual(self.balance(7), gold)
+
+    def test_legacy_missing_bot_and_orphaned_donation_do_not_block_weekly_settlement(self):
+        self.join()
+        with closing(self.game._connect()) as conn, conn:
+            state = self.guild._load(conn, self.now[0])
+            guild = state["guilds"]["1"]
+            # Reproduce a previously saved unauthorized kick, which removed
+            # the member but left its ID in the next week's bot generator.
+            del guild["members"]["local-bot-002"]
+            missing = self.guild._donation("deleted-player", (11, 20001), self.now[0])
+            missing["donatesCount"][self.profile["player_id"]] = 1
+            guild["donateInfo"]["donates"]["deleted-player"] = missing
+            state["players"]["deleted-player"] = {"accountId": 0, "data": self.guild._player_default()}
+            boundary = guild["donateInfo"]["nextBalanceTime"]
+            self.guild._save(conn, state, self.now[0])
+        before = self.balance(11, 20001)
+        self.now[0] = boundary
+        self.assertEqual(self.native("GET", "/fci/guild-player/")[0], 200)
+        self.assertEqual(self.native("GET", "/fci/guild/1/donate/")[0], 200)
+        with closing(self.game._connect()) as conn:
+            state = self.guild._load(conn, self.now[0])
+        self.assertNotIn("local-bot-002", state["guilds"]["1"]["botIds"])
+        self.assertNotIn("deleted-player", state["players"])
+        self.assertEqual(state["orphanedDonations"][f"1:{boundary}:deleted-player"]["request"], missing)
+        self.assertEqual(self.balance(11, 20001), before)
+
+    def test_invite_existing_bot_or_unknown_player_does_not_create_phantom_accounts(self):
+        gid = self.native("POST", "/fci/guild/", {"name": "邀请校验", "icon": "1"})[1]["baseInfo"]["id"]
+        gold = self.balance(7)
+        for pid, status in (("local-bot-001", 409), ("nonexistent-player", 404)):
+            self.assertEqual(self.native("PUT", f"/fci/guild/{gid}/invited-members/", {"playerId": pid})[0], status)
+        with closing(self.game._connect()) as conn:
+            state = self.guild._load(conn, self.now[0])
+        self.assertEqual(set(state["players"]), {self.profile["player_id"]})
+        self.assertEqual(state["guilds"][str(gid)]["invitedMembers"], {})
+        self.assertEqual(self.balance(7), gold)
 
     def test_request_rejects_currency_unknown_or_uncollected_shards(self):
         self.join()

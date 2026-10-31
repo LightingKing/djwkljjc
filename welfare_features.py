@@ -4,7 +4,8 @@ The retired service did not leave a complete event database, so this module
 keeps the client visible and uses small, deterministic account-local records.
 All mutations are idempotent and go through the same resource/grant helpers as
 the other local activities.  The public tables (jigsaw/postcard) are copied
-from the extracted client; seal/theme defaults are explicitly local policy.
+from the extracted client; seal defaults are explicitly local policy. Theme
+tasks use the authoritative task definitions and progress in LocalTasks.
 """
 from __future__ import annotations
 
@@ -90,7 +91,6 @@ class LocalWelfareFeatures:
         welfare.setdefault("chips", {"settle": [], "exchange": [], "modifyCount": 0, "season": 1})
         welfare.setdefault("postcard", {"cells": {}, "received": []})
         welfare.setdefault("jigsaw", {"cells": [], "received": []})
-        welfare.setdefault("theme", {"tasks": {}, "points": 0, "rewards": []})
         return state
 
     def _save(self, profile: Mapping[str, Any], state: dict[str, Any]) -> None:
@@ -194,23 +194,21 @@ class LocalWelfareFeatures:
     # --------------------------------- chip exchange (two changes per season)
     def _chips(self, method: str, route: str, body: Body, profile: Mapping[str, Any], state: dict[str, Any]) -> Response:
         data = state["welfare"]["chips"]
-        def result(values: Mapping[str, Any]) -> dict[str, Any]:
-            # ApiChipExchange.result contains one ChipExchangeInfo message.
-            # Keep the historical fields inside that message so protobuf and
-            # JSON clients decode the same shape.
-            return {"chipExchangeInfo": dict(values)}
+        # The Lua UI stores this response directly in fci/chipexchange/.
+        # DungeonStory.ReplaceChip and DungeonUtil read the top-level lists,
+        # including the empty lists before any selection has been made.
         if method == "GET":
-            return 200, result({"lastActivitySeason": _int(data.get("season"), 1), "modifyCount": _int(data.get("modifyCount")), "settlePosInfo": list(data.get("settle", [])), "exchangePosInfo": list(data.get("exchange", []))})
+            return 200, {"lastActivitySeason": _int(data.get("season"), 1), "modifyCount": _int(data.get("modifyCount")), "settlePosInfo": list(data.get("settle", [])), "exchangePosInfo": list(data.get("exchange", []))}
         if method != "POST": return 405, {"error": "method_not_allowed"}
         payload = _request(self.game, body, "ApiChipExchange")
         selected = payload.get("chips", payload.get("settlePosInfo", []))
         if not isinstance(selected, list) or len(selected) != len(CHIP_ORDER): return 400, {"error": "invalid_chip_exchange_list"}
         selected = [_int(v) for v in selected]
         if any(v not in CHIP_ORDER for v in selected) or len(set(selected)) != len(selected): return 400, {"error": "invalid_chip_exchange_list"}
-        if selected == list(data.get("settle", [])): return 200, result({"lastActivitySeason": 1, "modifyCount": _int(data.get("modifyCount")), "settlePosInfo": selected, "exchangePosInfo": list(data.get("exchange", []))})
+        if selected == list(data.get("settle", [])): return 200, {"lastActivitySeason": 1, "modifyCount": _int(data.get("modifyCount")), "settlePosInfo": selected, "exchangePosInfo": list(data.get("exchange", []))}
         if _int(data.get("modifyCount")) >= 2: return 409, {"error": "chip_exchange_limit_reached"}
         data["settle"] = selected; data["exchange"] = selected[:]; data["modifyCount"] = _int(data.get("modifyCount")) + 1; self._save(profile, state)
-        return 200, result({"lastActivitySeason": 1, "modifyCount": _int(data["modifyCount"]), "settlePosInfo": selected, "exchangePosInfo": selected[:]})
+        return 200, {"lastActivitySeason": 1, "modifyCount": _int(data["modifyCount"]), "settlePosInfo": selected, "exchangePosInfo": selected[:]}
 
     # ------------------------------------------ postcard (4*18 cells; 5 prizes)
     def _postcard(self, method: str, route: str, body: Body, profile: Mapping[str, Any], state: dict[str, Any]) -> Response:
@@ -275,23 +273,16 @@ class LocalWelfareFeatures:
         if not ok: return 409, {"error": error or "jigsaw_cost_not_enough"}
         cells.add(cell_id); data["cells"] = sorted(cells); self._save(profile, state); return 200, {"resChange": changes}
 
-    def _theme(self, method: str, route: str, body: Body, profile: Mapping[str, Any], state: dict[str, Any]) -> Response:
-        data = state["welfare"]["theme"]; payload = _json(body)
-        if method == "GET":
-            rows = []
-            for task_id in range(1, 4):
-                done = _int(data["tasks"].get(str(task_id))) > 0
-                rows.append({"id": task_id, "progress": 1 if done else 0, "target": 1, "rewardGot": done, "activePoint": 20, "category": 102})
-            return 200, rows
-        if method != "POST": return 405, {"error": "method_not_allowed"}
-        task_id = _int(route.rsplit("/", 1)[-1], _int(payload.get("taskId", payload.get("task_id"))))
-        if task_id <= 0: return 400, {"error": "invalid_task_id"}
-        if _int(data["tasks"].get(str(task_id))) > 0: return 200, {"rewardGot": True, "resChange": []}
-        data["tasks"][str(task_id)] = self._now(); data["points"] = _int(data.get("points")) + 20; self._save(profile, state)
-        tasks = getattr(self.game, "tasks", None)
-        if tasks is not None and hasattr(tasks, "record_extra_active_point"):
-            tasks.record_extra_active_point(profile, 20, point_type=1)
-        return 200, {"taskId": task_id, "extraActivePoint": _int(data["points"]), "rewardGot": True, "resChange": grant_rewards(self.game, profile, [{"type": 7, "id": 0, "count": 1000}])}
+    def _theme(self, method: str, route: str, profile: Mapping[str, Any]) -> Response:
+        # Native TaskUtil derives this list from GET /fci/task and pushes.
+        # Keep the compatibility read consistent with those real tasks; all
+        # claims must go through LocalTasks' ownership/completion checks.
+        if method != "GET":
+            return 405, {"error": "method_not_allowed"}
+        if route not in {"/fci/themeactivitytasks", "/fci/theme-activity-tasks"}:
+            return 404, {"error": "unknown_task_route"}
+        return 200, [row for row in self.game.tasks.snapshot(profile)["tasks"]
+                     if _int(row.get("category")) == 102]
 
     def handle_http(self, method: str, path: str, body: Body, profile: Mapping[str, Any]) -> Optional[Response]:
         route = _route(path); method = method.upper(); state = self._state(profile)
@@ -304,10 +295,7 @@ class LocalWelfareFeatures:
         if route.startswith("/fci/jigsawpuzzle") or route.startswith("/fci/jigsaw-puzzle"):
             return self._jigsaw(method, route, body, profile, state)
         if route.startswith("/fci/themeactivitytasks") or route.startswith("/fci/theme-activity-tasks"):
-            return self._theme(method, route, body, profile, state)
-        parts = route.split("/")
-        if len(parts) == 5 and parts[:3] == ["", "fci", "task"] and parts[3].isdigit() and parts[4] == "reward":
-            return self._theme(method, route, body, profile, state)
+            return self._theme(method, route, profile)
         return None
 
 
