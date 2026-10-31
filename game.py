@@ -33,6 +33,7 @@ from pathlib import Path
 from typing import Any, Callable, Dict, Iterable, List, Mapping, Optional, Tuple
 
 from google.protobuf import descriptor_pb2, descriptor_pool, empty_pb2, duration_pb2, json_format, message_factory, timestamp_pb2
+from google.protobuf.message import DecodeError
 
 from server.core.clock import recover_resource
 
@@ -958,7 +959,7 @@ class LocalGame:
                         parsed = int(value)
                     except (TypeError, ValueError, OverflowError):
                         continue
-                    if parsed in (0, 1):
+                    if (0 <= parsed <= 0xFFFFFFFF if str(key) in ('1', '2') else parsed in (0, 1)):
                         clean_skills[str(key)] = parsed
             result["auto_fight"]["banedSkills"] = clean_skills
             result["scene_random"] = bool(result["scene_random"])
@@ -1101,11 +1102,15 @@ class LocalGame:
             return None
         result: Dict[str, int] = {}
         for key, raw_value in value.items():
+            if not isinstance(raw_value, (int, str)):
+                return None
             try:
                 skill_state = int(raw_value)
             except (TypeError, ValueError):
                 return None
-            if skill_state not in (0, 1):
+            # ApiAutoFightConf is map<string, uint32>. Keys 1 and 2 are
+            # per-DungeonType bitmasks (auto/speed), not boolean skill flags.
+            if not (0 <= skill_state <= 0xFFFFFFFF if str(key) in ('1', '2') else skill_state in (0, 1)):
                 return None
             result[str(key)] = skill_state
         return result
@@ -1133,10 +1138,10 @@ class LocalGame:
         request = _body_object(body)
         requested: Any = request.get("configureSkills", request.get("banedSkills"))
         skills = self._normalise_baned_skills(requested)
-        if skills is None and body is not None:
+        if skills is None and not request and body is not None:
             # The native Restifizer request is a raw ApiAutoFightConf
             # protobuf whose configureSkills map has string keys and uint32
-            # 0/1 values.  Keep the JSON seam above for local diagnostics.
+            # values. DungeonUtil also sends the plain JSON object above.
             try:
                 message = self._types["ApiAutoFightConf"]()
                 message.ParseFromString(bytes(body) if not isinstance(body, str) else body.encode("utf-8"))
@@ -1144,7 +1149,7 @@ class LocalGame:
                 if skills_field is None:
                     skills_field = getattr(message, "configure_skills", {})
                 skills = self._normalise_baned_skills(dict(skills_field))
-            except (TypeError, ValueError):
+            except (TypeError, ValueError, DecodeError):
                 skills = None
         if skills is None:
             return 400, {"error": "invalid_auto_fight_config"}
