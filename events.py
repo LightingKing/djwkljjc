@@ -1212,6 +1212,16 @@ class LocalEvents:
             activity.category = entry["category"]
             activity.time_type = entry["timeType"]
             activity.level_limit = entry["levelLimit"]
+            welfare = getattr(self.game, "welfare", None)
+            if welfare is not None and entry["type"] in (16, 26, 44, 48):
+                window = welfare.cycle_window(now)
+                activity.timestamp_preheat = window["start"]
+                activity.timestamp_start = window["start"]
+                activity.timestamp_end = window["end"]
+                activity.timestamp_close = window["end"]
+                activity.season = window["season"]
+                activity.forever = False
+                activity.time_type = 3  # ActivityTimeType_Period
             rows.append(_message_to_dict(activity))
         return rows
 

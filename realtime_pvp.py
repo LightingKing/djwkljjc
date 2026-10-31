@@ -5,7 +5,7 @@ Its local policy is explicit: one player plus 19 deterministic robot records
 per cycle, rotating stages 3001-3004, and six non-accumulating cycle tickets.
 The official schedule is Monday/Thursday 06:00 through Wednesday/Saturday
 24:00, with eight cycles per season. The local season starts with the first
-unlocked cycle; no historical official season epoch was recovered. Robot
+settled battle; no historical official season epoch was recovered. Robot
 scores are fixed per cycle. Battle score is enemy TeamStatistic.totalDamage
 // 10, matching Window_FightRound.AddPtVal. Cycle and season rewards use the
 original RacePVPSeg and RacePVPSegReward tables.
@@ -297,7 +297,7 @@ class LocalRacePvp:
             self._save(profile, state)
 
     def _settle_cycle(self, profile, state):
-        if state.get("cycleSettled") or not state.get("enrolled"):
+        if state.get("cycleSettled"):
             return
         run = self._run(profile, state["activeUid"]) if state.get("activeUid") else None
         if run and run["status"] == "active":
@@ -312,6 +312,11 @@ class LocalRacePvp:
                     self._balance(profile, state, run)
             else:
                 self._compensate_run(profile, state, run, self._own(profile, state)["battleScore"])
+        if not state.get("enrolled"):
+            # Ticket initialization/room browsing is not battle participation.
+            # An unfinished charged run above still receives its refund.
+            state.update(cycleSettled=True, activeUid=None, isNew=True)
+            return
         ranked = self._ranked(state["players"])
         own = self._own(profile, state)
         rank = next(i for i, row in enumerate(ranked, 1) if row["playerId"] == profile["player_id"]) if own["battleScore"] else self.PLAYER_COUNT
@@ -348,6 +353,42 @@ class LocalRacePvp:
         state["seasonSettlements"] = state["seasonSettlements"][-16:]
         state.update(seasonPaid=season, score=int(self.SEGMENTS[0]["score"]), isNew=True)
 
+    def _migrate_participation(self, profile, state):
+        """Repair old login-created participation using durable battle evidence.
+
+        Keep past score/mail payouts and their season anchor intact. Only the
+        eligibility flags change; no already granted player asset is removed.
+        """
+        if state.get("participationVersion") == 1:
+            return
+        with closing(self.game._connect()) as conn:
+            rows = conn.execute("SELECT run_json FROM local_race_pvp_runs WHERE account_id=?",
+                                (profile["account_id"],)).fetchall()
+        cycles = []
+        for row in rows:
+            run = json.loads(row["run_json"])
+            if (run.get("balance") is None or run.get("expired") or run.get("compensated")
+                    or not self._has_result(run)):
+                continue
+            if run.get("cycle") is None and run.get("week") is not None:
+                # Older weekly rooms only migrated the current room's runs.
+                # Preserve real battles from previous weeks as well.
+                when = _int(run.get("createdAt")) or _int(run["week"])
+                cycle = self._cycle_at(when)
+                run.update(cycle=cycle["index"], cycleEnd=cycle["end"])
+                self._save_run(profile, run)
+            if run.get("cycle") is not None:
+                cycles.append(run["cycle"])
+        state["enrolled"] = state["cycle"] in cycles
+        state["lastParticipatedCycle"] = max(cycles) if cycles else None
+        if not cycles and not state.get("seasonSettlements"):
+            state["seasonOrigin"] = None
+        elif cycles and state.get("seasonOrigin") is None:
+            state["seasonOrigin"] = min(cycles)
+        elif cycles and not state.get("seasonSettlements"):
+            state["seasonOrigin"] = min(state["seasonOrigin"], min(cycles))
+        state["participationVersion"] = 1
+
     def _refresh(self, profile, state, *, notify=True):
         changes = []
         now = max(self._now(), _int(state.get("lastSeenAt")))
@@ -359,14 +400,11 @@ class LocalRacePvp:
             legacy_week = state.get("week")
             same_week = legacy_week is not None and policy_for(self.game).period_start(now, "week") == legacy_week
             initial = current if legacy_week is None or same_week else self._cycle_at(legacy_week)
-            enrolled = unlocked and (legacy_week is not None or now < initial["end"])
             state.update(cycle=initial["index"], cycleEnd=initial["end"], nextStart=initial["nextStart"],
-                         week=initial["start"], cycleSettled=False, enrolled=enrolled,
-                         seasonOrigin=initial["index"] - max(0, _int(state.get("round"), 1) - 1) if enrolled else None,
+                         week=initial["start"], cycleSettled=False, enrolled=False,
+                         seasonOrigin=initial["index"] - max(0, _int(state.get("round"), 1) - 1) if legacy_week is not None else None,
                          schemaVersion=2)
             state["round"] = max(1, _int(state.get("round")))
-            if enrolled:
-                state["lastParticipatedCycle"] = initial["index"]
             if not state["players"]:
                 state["dungeonId"] = sorted(self.STAGES)[initial["index"] % len(self.STAGES)]
                 state["players"] = self._room(profile, state, initial["start"])
@@ -381,6 +419,7 @@ class LocalRacePvp:
                 # Preserve tickets already spent in the migrated cycle.
                 if unlocked:
                     state["ticketCycle"] = initial["index"]
+        self._migrate_participation(profile, state)
         if now >= state["cycleEnd"]:
             self._settle_cycle(profile, state)
             self._settle_season(profile, state, now)
@@ -394,10 +433,6 @@ class LocalRacePvp:
         tickets_initialized = state.get("ticketCycle") == state["cycle"]
         self._collect_refunds(profile, state, can_use_tickets=is_open and tickets_initialized)
         if is_open:
-            if state.get("seasonOrigin") is None:
-                state["seasonOrigin"] = state["cycle"]
-            state["enrolled"] = True
-            state["lastParticipatedCycle"] = state["cycle"]
             pending = _int(state.get("pendingTicketRefunds"))
             if not tickets_initialized:
                 changes.append(self._ticket(profile, set_count=self.CYCLE_TICKETS + pending, notify=notify))
@@ -468,18 +503,29 @@ class LocalRacePvp:
             raise RaceError("race_cycle_closed")
         ids, uids, actors = self._actors(profile, request.get("selectActorGroupId"))
         active = self._run(profile, state["activeUid"]) if state["activeUid"] else None
+        recovered = False
         if active and active["status"] == "active":
             same_team = (active["baseInfo"]["actorId"] == ids and active["baseInfo"]["actorUid"] == uids
                          and active["baseInfo"]["actors"] == actors)
             if same_team and not active.get("active") and 0 <= self._now() - active["createdAt"] <= self.CREATE_RETRY_SECONDS:
                 return 200, {"dungeonUid": active["dungeonUid"], "baseInfo": active["baseInfo"], "resChange": [self._ticket(profile)]}
-            active.update(status="closed", closedAt=self._now(), closeReason="new_entry")
-            self._save_run(profile, active)
+            if self._has_result(active):
+                # Race only uploads active on finish/surrender. A lost balance
+                # reply must not make the next native create discard its score.
+                self._balance(profile, state, active)
+                recovered = True
+            else:
+                active.update(status="closed", closedAt=self._now(), closeReason="new_entry")
+                self._save_run(profile, active)
         if not any(uids):
             raise RaceError("profile_has_no_actors")
         cost = self.STAGES[stage]["cost"]
         if len(cost) != 1 or (cost[0]["type"], cost[0]["id"], cost[0]["count"]) != (11, self.TICKET_ID, 1):
             raise RaceError("unsupported_race_cost")
+        if recovered and self._ticket(profile)["baseRes"]["count"] < 1:
+            # Commit the old paid-for result even if no ticket remains for a
+            # new battle. Raising here would roll that recovery back as well.
+            return 409, {"error": "race_ticket_exhausted"}
         change = self._ticket(profile, -1)
         now = self._now()
         with closing(self.game._connect()) as conn:
@@ -536,6 +582,19 @@ class LocalRacePvp:
             raise RaceError("invalid_race_damage", 400)
         return damage // 10
 
+    def _has_result(self, run):
+        active = run.get("active") or {}
+        if (_int(active.get("dungeonType")) != 7
+                or _int(active.get("stageID")) != _int(run.get("baseInfo", {}).get("dungeonId"))):
+            return False
+        try:
+            self._battle_score(run)
+        except RaceError:
+            return False
+        # Both normal end and LeaveRacePvp(3) upload a final snapshot. Surrender
+        # can have winTeam=0 and zero damage; neither excludes participation.
+        return True
+
     def _balance(self, profile, state, run):
         if run["balance"] is not None:
             return 200, self._copy(run["balance"])
@@ -549,6 +608,11 @@ class LocalRacePvp:
             self._compensate_run(profile, state, run, _int(run.get("expiredHighScore")))
             high_score = max(score, _int(run.get("expiredHighScore")))
         else:
+            state["enrolled"] = True
+            state["lastParticipatedCycle"] = state["cycle"]
+            if state.get("seasonOrigin") is None:
+                state["seasonOrigin"] = state["cycle"]
+                state["round"] = 1
             own = self._own(profile, state)
             if score > own["battleScore"]:
                 own.update(battleScore=score, timestamp=self._now(), battleActors=run["baseInfo"]["actors"])

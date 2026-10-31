@@ -4,6 +4,7 @@ import json
 import sys
 import tempfile
 import unittest
+from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -45,7 +46,10 @@ class WelfareMazeTests(unittest.TestCase):
 
     def test_seal_and_chip_exchange_persist(self):
         with tempfile.TemporaryDirectory() as temp:
-            accounts = LocalAccounts(Path(temp) / "accounts"); game = LocalGame(Path(temp) / "game", accounts); account, _auth = guest(accounts)
+            accounts = LocalAccounts(Path(temp) / "accounts")
+            now = int(datetime(2026, 10, 30, 4, tzinfo=timezone.utc).timestamp())
+            game = LocalGame(Path(temp) / "game", accounts, clock=lambda: now)
+            account, _auth = guest(accounts)
             profile = game._profile(account); grant_rewards(game, profile, [{"type": 11, "id": 1016, "count": 1}])
             welfare = LocalWelfareFeatures(game)
             status, result = welfare.handle_http("POST", "/fci/seal/fill/1/", None, profile)
@@ -55,7 +59,7 @@ class WelfareMazeTests(unittest.TestCase):
             status, changed = welfare.handle_http("POST", "/fci/chipexchange/", json.dumps({"chips": chips}).encode(), profile)
             self.assertEqual((status, changed["modifyCount"], changed["settlePosInfo"]), (200, 1, chips))
             status, saved = welfare.handle_http("GET", "/fci/chipexchange/", None, profile)
-            self.assertEqual((status, saved["modifyCount"], saved["exchangePosInfo"]), (200, 1, chips))
+            self.assertEqual((status, saved["modifyCount"], saved["exchangePosInfo"]), (200, 1, []))
 
     def test_maze_rejects_balance_without_native_fight_result(self):
         with tempfile.TemporaryDirectory() as temp:

@@ -529,7 +529,9 @@ class LocalAccounts:
                 "SELECT * FROM accounts WHERE username = ? AND login_type = 'password'",
                 (username,),
             ).fetchone()
-            if account is None or not self._verify_password(password, account["password_hash"], account["password_salt"]):
+            if account is None:
+                return 404, self._error("unknown_account", "account is not registered")
+            if not self._verify_password(password, account["password_hash"], account["password_salt"]):
                 return 401, self._error("invalid_credentials", "username or password is incorrect")
             if authorization:
                 session, session_error = self._authorized_session(connection, authorization)
