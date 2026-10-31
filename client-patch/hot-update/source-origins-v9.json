@@ -1,0 +1,26 @@
+[
+  {
+    "source": "I:/workspace/mobilegame/analysis/lua-decompiled/window__mazemain__mazemain.lua",
+    "destination": "sources/mazemain.lua",
+    "sha256": "963d6309c99840eb16348e1d8ce169a635e53ad8ae8059555c83541ab5565cb3",
+    "reason": "D4: group MazeMain prize icons and counts by treasure box quality; one-line change in UpdatePrize"
+  },
+  {
+    "source": "I:/workspace/mobilegame/analysis/lua-decompiled/window__dungeonbalancefailed__dungeonbalancefailed.lua",
+    "destination": "sources/dungeonbalancefailed.lua",
+    "sha256": "b38de73965525188d7fb2ee0a9de57762bbfd09ed947dd6228a088c297cb0a3c",
+    "reason": "AsyncPvp failure title reuses original activity name key WeekActivitiesType_Name_5, instead of missing map name DungeonName_4001"
+  },
+  {
+    "source": "I:/workspace/mobilegame/analysis/lua-decompiled/window__auth__auth.lua",
+    "destination": "sources/auth-v9.lua",
+    "sha256": "88802c921ec1e12133606e8f7f583c83a4f8add2cf0af784bfe757e1b9c144ed",
+    "reason": "v9: display exact password/account error localization keys while preserving CDKEY activation flow"
+  },
+  {
+    "source": "I:/workspace/mobilegame/analysis/lua-decompiled/manager__restifizermanager.lua",
+    "destination": "sources/restifizermanager-v9.lua",
+    "sha256": "16a5211ebdb76fff40bd64a9b9dbc097efeb480b1ac66d87e93eccecc1746ab7",
+    "reason": "v9: route HTTP 401 token expiry back to login without ResetGame and clear cached session"
+  }
+]
