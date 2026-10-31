@@ -26,6 +26,7 @@ local m_endTimeStamp, m_startTime
 local m_guestPanel = false
 local m_currWolrdData
 local m_isSwitchingToCity = false
+local m_cachedAuthFailed = false
 
 function SetupWindow()
   math.randomseed(os.time())
@@ -314,7 +315,7 @@ function OnButtonCustomSrv()
 end
 
 function IsNeedAutoLogin()
-  local accountCache = this:GetData("accountCache")
+  local accountCache = this:GetData("accountCache") or {}
   return CS.ConfigDataManager.Instance.CurrentDynamicConfig.Id == accountCache.localeId
 end
 
@@ -348,11 +349,11 @@ function SetInitUI()
     accountCache = {}
     clearAccountCache()
   end
-  if accountCache.accountEntry ~= nil then
+  if accountCache.accountEntry ~= nil and not m_cachedAuthFailed then
     CS.PlatformManager.IsNeedWXAutoLogin = false
     CS.PlatformManager.IsNeedQQAutoLogin = false
     RequestDir(function(response)
-      if os.time() + 3600 <= accountCache.expireTime then
+      if os.time() + 3600 <= (accountCache.expireTime or 0) then
         local type = WU.GetString("WindowLogin_Player")
         local name = accountCache.accountEntry
         if name ~= "" then
@@ -416,7 +417,8 @@ function SetInitUI()
       CS.PlatformManager.IsNeedQQAutoLogin = false
       OnButtonAuth3()
     else
-      ShowAccountAuthWindow("", "password", "", nil, nil)
+      local entry = accountCache.entryType == "password" and accountCache.accountEntry or ""
+      ShowAccountAuthWindow(entry, "password", "", nil, nil)
     end
     REF.NormalRightButtons.UIGrid:Reposition()
   end
@@ -430,11 +432,52 @@ function SetInitUI()
 end
 
 function ProcessLogin()
-  if IsNeedAutoLogin() then
+  if not IsNeedAutoLogin() then
+    SetInitUI()
+    return
+  end
+  local accountCache = this:GetData("accountCache")
+  if accountCache.entryType == "guest" and accountCache.accountEntry and accountCache.accountEntry ~= "" then
+    RequestCachedAccountAuth(accountCache)
+  elseif accountCache.entryType == "password" then
+    if accountCache.accessToken and accountCache.accessToken ~= "" and os.time() + 60 <= (accountCache.expireTime or 0) then
+      RequestCachedAccountAuth(accountCache)
+    else
+      SetInitUI()
+    end
+  elseif accountCache.socialPlatform == PB.enum.MSDKLoginPlatform.MSDK_QQ or accountCache.socialPlatform == PB.enum.MSDKLoginPlatform.MSDK_Wechat then
     MsdkLogin(Msdk.ePlatform.ePlatform_None, SetInitUI)
   else
     SetInitUI()
   end
+end
+
+function RequestCachedAccountAuth(accountCache)
+  m_cachedAuthFailed = false
+  CS.PlatformManager.IsNeedWXAutoLogin = false
+  CS.PlatformManager.IsNeedQQAutoLogin = false
+  UpdateAccountSession(function()
+    local accountAuth = {entry = accountCache.accountEntry, entryType = accountCache.entryType}
+    this:SetData("accountAuth", accountAuth)
+    local credentials
+    if accountCache.entryType == "guest" then
+      credentials = ProtobufT("ApiAuthInfo", accountAuth)
+    else
+      credentials = {entryType = "password", username = accountCache.accountEntry, accessToken = accountCache.accessToken}
+    end
+    this:AccountRequest("/Auth/"):AddHeader("Authorization", "AccountToken " .. this:GetData("account/loginAccountToken")):Post(credentials, function(response)
+      SaveAccountAuthResponse(response)
+      SetInitUI()
+    end, OnCachedAccountAuthResponseFailed)
+  end, OnCachedAccountAuthResponseFailed)
+end
+
+function OnCachedAccountAuthResponseFailed()
+  -- Keep the account name/token for a later retry, including network failures.
+  m_cachedAuthFailed = true
+  WU.ShowHintText(WU.GetString("WindowLogin_LoginFailed"))
+  SetInitUI()
+  return true
 end
 
 function Shuffle(array)
@@ -716,11 +759,11 @@ function OnDeclineClick()
   REF.LoginBar.gameObject:SetActive(true)
 end
 
-function UpdateAccountSession(callback)
+function UpdateAccountSession(callback, onFailed)
   m_accountSessionUpdatedCallback = callback
   local luaTable = S:Get("ConfigDataManager").ClientBasicInfo()
   local wireFormatTable = ProtobufT("ApiAccountSession", luaTable)
-  this:AccountRequest("/AccountSession/"):Post(wireFormatTable, OnAccountSessionResponse, SetTimeoutCheck)
+  this:AccountRequest("/AccountSession/"):Post(wireFormatTable, OnAccountSessionResponse, onFailed or SetTimeoutCheck)
 end
 
 function OnAccountSessionResponse(response)
@@ -759,7 +802,12 @@ function OnAccountAuthResponse(response)
   if m_guestPanel then
     REF.Agreement.gameObject:SetActive(false)
   end
-  print("Account", response.tokenAccess)
+  SaveAccountAuthResponse(response)
+  this:BroadcastGameEvent("OnAccountAuthSuccess")
+end
+
+function SaveAccountAuthResponse(response)
+  m_cachedAuthFailed = false
   local accountCache = this:GetData("accountCache")
   local accountAuth = this:GetData("accountAuth")
   accountCache.accountEntry = accountAuth.entry
@@ -777,7 +825,6 @@ function OnAccountAuthResponse(response)
     accountCache.guestEntry = accountAuth.entry
   end
   this:SetData("accountCache", accountCache)
-  this:BroadcastGameEvent("OnAccountAuthSuccess")
 end
 
 function ShowAroundWidget()

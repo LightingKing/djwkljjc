@@ -661,9 +661,11 @@ class LocalEvents:
             state = self._state(profile)
             if self._continuous_tick(state):
                 self._save(profile, state)
+            presents = self.game.profile_features.pending_role_presents(profile)
             return {
                 "continuousLoginResult": _message_to_dict(self._continuous_message(state)),
                 "signinResult": _message_to_dict(self._signin_message(state, self._date(signin=True))),
+                "rolePresentRedpoint": {"presents": presents},
             }
 
     def _web_signin(self, method: str, body: Any, profile: Mapping[str, Any]):
@@ -988,14 +990,69 @@ class LocalEvents:
         # Until a dated eligibility/reward source exists, never grant a placeholder.
         if "conditionreward" in action:
             if method == "GET":
+                # 真爱之契 is an account-level one-shot manual box.  The
+                # original server's qualification flag is unavailable, so
+                # local accounts are all eligible and receive the original
+                # ordinary blue actor list from ManualBox 121001.
+                choices = []
+                seen = set()
+                for row in _client_table_rows("ManualBox"):
+                    if int(row.get("id", 0) or 0) != 121001:
+                        continue
+                    box = row.get("inBox") or {}
+                    actor_id = int(box.get("id", 0) or 0)
+                    if int(box.get("type", 0) or 0) != 15 or actor_id in seen:
+                        continue
+                    seen.add(actor_id)
+                    choices.append(actor_id)
                 result = self._message("ApiConditionReward.get")
                 if result is None:
                     return None
-                result.has_reward_qualification = False
+                result.has_reward_qualification = not bool(state.get("condition_reward_got"))
                 result.is_reward_got = bool(state.get("condition_reward_got", False))
+                # The descriptor exposes the manual box as one STResource;
+                # the client expands its choices from ManualBox 121001.
+                result.manual_box_reward.type = 11
+                result.manual_box_reward.id = 121001
+                result.manual_box_reward.count = 1
                 return 200, result
             if method == "POST":
-                return 409, {"error": "condition_reward_not_eligible"}
+                if state.get("condition_reward_got"):
+                    return 409, {"error": "condition_reward_already_claimed"}
+                request = self._body_object(body)
+                index = request.get("manualBoxIndex", request.get("manual_box_index", request.get("index")))
+                wire_request = self._request(body, "ApiConditionReward")
+                if index is None and wire_request is not None:
+                    index = int(getattr(wire_request, "manual_box_index", 0))
+                # Proto3 omits a zero-valued manualBoxIndex, so an empty
+                # wire request is the native selection of the first actor.
+                if index is None and body in (b"", ""):
+                    index = 0
+                try:
+                    index = int(index)
+                except (TypeError, ValueError):
+                    return 400, {"error": "manual_box_index_required"}
+                choices = []
+                seen = set()
+                for row in _client_table_rows("ManualBox"):
+                    if int(row.get("id", 0) or 0) != 121001:
+                        continue
+                    box = row.get("inBox") or {}; actor_id = int(box.get("id", 0) or 0)
+                    if int(box.get("type", 0) or 0) == 15 and actor_id not in seen:
+                        seen.add(actor_id); choices.append(actor_id)
+                if not 0 <= index < min(57, len(choices)):
+                    return 400, {"error": "invalid_manual_box_index"}
+                from grants import grant_rewards
+                changes = grant_rewards(self.game, profile, [{"type": 15, "id": choices[index], "count": 1, "param": 1002}])
+                state["condition_reward_got"] = True
+                self._save(profile, state)
+                result = self._message("ApiConditionReward.post")
+                if result is None:
+                    return None
+                for change in changes:
+                    dynamic = result.manual_box_res_change.add()
+                    json_format.ParseDict(change, dynamic)
+                return 200, result
             return 405, {"error": "method_not_allowed", "message": "GET or POST required"}
         if "achievementsummary" in action:
             if method != "GET":
@@ -1037,6 +1094,8 @@ class LocalEvents:
         # allows the client to close those panels cleanly instead of treating
         # the retired server as unreachable, while all real claims above stay
         # typed and persisted.
+        if action.startswith('fcithemeactivitytasks'):
+            return None
         ignored_basic = ("activitysignin", "everydaysignin", "continuouslogin", "signin")
         optional_activity = (
             "activitytask", "activityexplore", "turntable", "digtreasure",

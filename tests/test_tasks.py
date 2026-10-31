@@ -80,7 +80,10 @@ class LocalTasksTests(unittest.TestCase):
         self.assertNotIn(1102, ids)
         self.assertIn(1102, payload["delTasks"])
         for task in payload["tasks"]:
-            self.assertEqual(set(task), {"id", "progress", "isDone", "rewardGot", "endTime"})
+            if task["id"] >= 60000:
+                self.assertTrue({"category", "activePoint", "extraActivePoint", "extraActivePointType"}.issubset(task))
+            else:
+                self.assertEqual(set(task), {"id", "progress", "isDone", "rewardGot", "endTime"})
             self.assertEqual(task["endTime"], 0)
         # The task list request is the session-start login: task 9 is done.
         self.assertTrue(self._task(payload, 9)["isDone"])
@@ -200,7 +203,7 @@ class LocalTasksTests(unittest.TestCase):
         # Other categories and telemetry stay with their existing handlers.
         self.assertIsNone(self.tasks.handle_http("POST", "/fci/task/target-done-add/", b"{}", self.profile))
         self.assertIsNone(self.tasks.handle_http("POST", "/fci/task/3001/reward/", None, self.profile))
-        self.assertEqual(self.tasks.record(self.profile, "DeployDoneM", 3), [8, 1205])  # daily + main
+        self.assertEqual(self.tasks.record(self.profile, "DeployDoneM", 3), [8, 1205, 60014])  # daily + main + activity
 
 
 if __name__ == "__main__":

@@ -114,6 +114,10 @@ WEEKLY_REFRESH = {_int((r.get("refreshRes") or {}).get("id")): (_int((r.get("ref
                                                                  _int(r.get("refreshLimit")))
                   for r in _rows("DailyRefresh")
                   if _int(r.get("type")) == 2 and _int((r.get("refreshRes") or {}).get("type")) == 11}
+# 80009 is absent from the extracted DailyRefresh rows, but the local
+# remediation policy keeps the event ticket usable: one per Beijing day,
+# capped at three.  A recovered original row can replace this override.
+DAILY_REFRESH.setdefault(80009, (1, 3))
 
 DAY = 86400
 UID_BASE = 9_000_000_000_000  # disjoint from dungeon.py's millisecond uids
@@ -625,14 +629,29 @@ class LocalActivityModes:
         systems._save(profile, state)
         return {"baseRes": {"type": RES_ITEM, "id": int(item_id), "param": 0, "count": new, "countDelta": new - current}}
 
-    def _grant(self, profile: Mapping[str, Any], rewards: list[Mapping[str, Any]]) -> list[dict[str, Any]]:
-        """Grant drops (player EXP excluded); equipment as STEquip instances."""
+    def _grant(self, profile: Mapping[str, Any], rewards: list[Mapping[str, Any]], *, dungeon_type: int = 0) -> list[dict[str, Any]]:
+        """Grant drops (player EXP excluded); apply active guild drop skills."""
 
         merged: dict[tuple[int, int], dict[str, int]] = {}
+        rules = []
+        if dungeon_type:
+            try:
+                rules = list(self.game.guild.active_profit_rules(profile))
+            except Exception:
+                rules = []
+        try:
+            from dungeon import ITEM_FUNC_TYPES, LocalDungeons
+        except Exception:
+            ITEM_FUNC_TYPES, LocalDungeons = {}, None
         for reward in rewards:
             res = _res(reward)
             if res["type"] <= 0 or res["count"] <= 0 or res["type"] == RES_PLAYER_EXP:
                 continue
+            if rules and LocalDungeons is not None and res["type"] in (RES_ITEM, RES_EQUIP):
+                res["count"] = LocalDungeons._profit_scaled(
+                    res["count"], rules, dungeon_type=dungeon_type, profit_type=8,
+                    res_type=res["type"], func_type=ITEM_FUNC_TYPES.get(res["id"], 0), rng=self.rng,
+                )
             merged.setdefault((res["type"], res["id"]), {**res, "count": 0})["count"] += res["count"]
         others = [item for item in merged.values() if item["type"] != RES_EQUIP]
         changes = grant_rewards(self.game, profile, others) if others else []
@@ -1015,7 +1034,7 @@ class LocalActivityModes:
             record["targetsDone"] = targets
         record.update(finished=True, multiPower=multi, doneTimes=_int(record.get("doneTimes")) + 1)
         self._save(profile, state)
-        reward_changes = self._grant(profile, drops)
+        reward_changes = self._grant(profile, drops, dungeon_type=DUNGEON_TYPE["material"])
         tasks = getattr(self.game, "tasks", None)
         if tasks is not None:
             tasks.on_battle_win(profile, dungeon_id, energy, mode="activity", stats=self._battle_stats(active),

@@ -194,6 +194,9 @@ class EconomyRoutesTests(unittest.TestCase):
             root = Path(temp)
             accounts = LocalAccounts(root / "accounts")
             game = LocalGame(root / "game", accounts)
+            # The legacy compatibility routes are an explicit opt-in seam;
+            # production instances leave them disabled to prevent free grants.
+            game.economy.legacy_recharge_enabled = True
             account, auth = self._guest(accounts)
 
             status, info = game.handle_http("GET", "/fci/recharge/info/", authorization=auth)
@@ -247,6 +250,7 @@ class EconomyRoutesTests(unittest.TestCase):
             root = Path(temp)
             accounts = LocalAccounts(root / "accounts")
             game = LocalGame(root / "game", accounts)
+            game.economy.legacy_recharge_enabled = True
             account, auth = self._guest(accounts)
 
             def claim():
@@ -269,6 +273,8 @@ class EconomyRoutesTests(unittest.TestCase):
             account, auth = self._guest(accounts)
             game_a = LocalGame(root / "game", accounts)
             game_b = LocalGame(root / "game", accounts)
+            game_a.economy.legacy_recharge_enabled = True
+            game_b.economy.legacy_recharge_enabled = True
             game_a._profile(account)
 
             def claim(game):
@@ -322,6 +328,29 @@ class EconomyRoutesTests(unittest.TestCase):
             )
             self.assertEqual(status, 402)
             self.assertEqual(duplicate["error"], "payment_verification_required")
+
+    def test_legacy_recharge_routes_are_disabled_without_explicit_switch(self):
+        """Old reward endpoints cannot mint currency in a normal game instance."""
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            accounts = LocalAccounts(root / "accounts")
+            game = LocalGame(root / "game", accounts)
+            account, auth = self._guest(accounts)
+            before = next((item["count"] for item in game._profile(account)["resources"] if item["type"] == 5), 0)
+
+            calls = (
+                ("GET", "/fci/recharge/info/", None),
+                ("POST", "/fci/recharge/free/", b'{"rechargeId":11}'),
+                ("POST", "/fci/recharge/month-card/reward/", b'{"monthCardCfgId":1}'),
+                ("POST", "/fci/recharge/permit/level-reward/", b'{"permitId":1,"level":1}'),
+            )
+            for method, path, body in calls:
+                status, payload = game.handle_http(method, path, body, "application/json", auth)
+                self.assertEqual(status, 410, (method, path, payload))
+                self.assertEqual(payload["error"], "legacy_recharge_disabled")
+
+            after = next((item["count"] for item in game._profile(account)["resources"] if item["type"] == 5), 0)
+            self.assertEqual(after, before)
 
     def test_admin_billing_snapshot_lists_delivery_without_tokens(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -384,6 +413,7 @@ class EconomyRoutesTests(unittest.TestCase):
             clock = ServerClock(source=lambda: now[0])
             accounts = LocalAccounts(root / "accounts", clock=clock.now)
             game = LocalGame(root / "game", accounts, clock=clock.now)
+            game.economy.legacy_recharge_enabled = True
             account, auth = self._guest(accounts)
 
             status, _first = game.handle_http(

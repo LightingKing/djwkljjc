@@ -16,6 +16,7 @@ from __future__ import annotations
 from server.core.reset import DEFAULT_RESET_POLICY, ResetPolicy, policy_for, period_due
 
 import json
+import os
 import random
 import re
 import secrets
@@ -604,6 +605,7 @@ class LocalEconomy:
         *,
         clock: Optional[Callable[[], int]] = None,
         unified_store_path: str | Path | None = None,
+        legacy_recharge_enabled: Optional[bool] = None,
     ) -> None:
         self.state_dir = Path(state_dir)
         self.state_dir.mkdir(parents=True, exist_ok=True)
@@ -615,6 +617,15 @@ class LocalEconomy:
             self.db_path = self.state_dir / "economy.sqlite3"
         self.game = game
         self._clock = clock or (lambda: int(time.time()))
+        # The retired ``/fci/recharge/*`` compatibility endpoints used to
+        # mint currency without a purchase. Keep them disabled by default;
+        # migration tooling can explicitly opt in without affecting the
+        # real ``purchasetouch``/``purchasedelevery`` and Mall flows.
+        if legacy_recharge_enabled is None:
+            legacy_recharge_enabled = os.environ.get("LJJC_ENABLE_LEGACY_RECHARGE", "").strip().lower() in {
+                "1", "true", "yes", "on",
+            }
+        self.legacy_recharge_enabled = bool(legacy_recharge_enabled)
         # A shop/payment state file may be opened by more than one local game
         # object (for example during a development reload).  Share the lock by
         # canonical SQLite path so read/modify/write mutations remain atomic.
@@ -969,6 +980,10 @@ class LocalEconomy:
             return 404, {"error": "shop_not_found"}
         if self._profile_level(record) < spec["baseInfo"]["playerLevel"]:
             return 403, {"error": "shop_locked", "playerLevel": spec["baseInfo"]["playerLevel"]}
+        if spec["baseInfo"].get("guild") and not self._has_guild(record):
+            # The client hides shop 12 for guildless players, but a direct
+            # trade request must enforce the same gate server-side.
+            return 403, {"error": "guild_required"}
         good = self._match_good(shop, good_id, position, index)
         if good is None:
             return 404, {"error": "shop_good_not_found"}
@@ -998,6 +1013,20 @@ class LocalEconomy:
                 pass
         good_json = self._goods_json({"goods": [good]})[0]
         return 200, {"buyCount": _int(good["buyCountRecord"]), "info": good_json, "resChange": changes}
+
+    def _has_guild(self, record: Mapping[str, Any]) -> bool:
+        """Return the durable guild membership used by the guild shop gate."""
+
+        guild = getattr(self.game, "guild", None)
+        if guild is None:
+            return False
+        try:
+            return _int(guild.player_data(record).get("guildId")) > 0
+        except Exception:
+            # A missing/corrupt guild row is treated as guildless.  This keeps
+            # the shop from becoming an accidental privilege escalation while
+            # leaving the guild subsystem to report its own diagnostics.
+            return False
 
     def _shop_http(self, method: str, route: str, body: Body, account: Mapping[str, Any]) -> Optional[Response]:
         lower = route.lower()
@@ -1806,6 +1835,14 @@ class LocalEconomy:
         # of the extracted REST descriptor set.  The websocket layer also
         # returns an explicit unsupported fallback for the corresponding
         # ``base.cs_*`` calls; only these local routes grant test currency.
+        if route.startswith("/fci/recharge") and not self.legacy_recharge_enabled:
+            # Reject before opening or mutating the recharge profile. HTTP
+            # egress maps 410 to the native notify shape, so the client does
+            # not enter its reset-on-error path.
+            return 410, {
+                "error": "legacy_recharge_disabled",
+                "message": "legacy recharge routes are disabled; use local sandbox purchase flow",
+            }
         if route in {"/fci/recharge/", "/fci/recharge/info/", "/fci/recharge/info"}:
             account = profile.get("account", profile); state = self._state(account)
             if method != "GET":

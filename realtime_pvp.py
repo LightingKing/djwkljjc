@@ -1,12 +1,14 @@
-"""Local weekly RacePVP rooms and the legacy BurstLink simulation.
+"""Local RacePVP cycles and the legacy BurstLink simulation.
 
 Race uses the real client HTTP battle lifecycle and extracted config tables.
 Its local policy is explicit: one player plus 19 deterministic robot records
-per weekly room, rotating stages 3001-3004, six daily tickets, and synchronous
-weekly matching/settlement. Robot scores are fixed within a week and seeded
-from the account/week. Battle score is enemy TeamStatistic.totalDamage // 10,
-matching Window_FightRound.AddPtVal. Segment/season reward timing was not
-recovered; those tables are exposed as data, with no invented payouts.
+per cycle, rotating stages 3001-3004, and six non-accumulating cycle tickets.
+The official schedule is Monday/Thursday 06:00 through Wednesday/Saturday
+24:00, with eight cycles per season. The local season starts with the first
+unlocked cycle; no historical official season epoch was recovered. Robot
+scores are fixed per cycle. Battle score is enemy TeamStatistic.totalDamage
+// 10, matching Window_FightRound.AddPtVal. Cycle and season rewards use the
+original RacePVPSeg and RacePVPSegReward tables.
 
 The retired service used a WebSocket/FightService for these modes.  The
 offline build cannot recover that service, so BurstLink still exposes the same
@@ -30,7 +32,7 @@ import json
 import random
 import re
 from contextlib import closing
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from typing import Any, Mapping, Optional
 from urllib.parse import urlsplit
 
@@ -40,10 +42,12 @@ try:  # Package import when local-server is installed as a package.
     from .storage.compat import shared_process_lock
     from .economy import _client_rows
     from .grants import grant_rewards
+    from .local_mailbox import send_mail
 except ImportError:  # pragma: no cover - direct PYTHONPATH execution
     from storage.compat import shared_process_lock
     from economy import _client_rows
     from grants import grant_rewards
+    from local_mailbox import send_mail
 
 
 Body = bytes | bytearray | str | None
@@ -75,8 +79,13 @@ class LocalRacePvp:
     MISC = _client_rows("Misc")[0]
     PLAYER_COUNT = int(MISC["racePVPGroupMaxPlayer"])
     MAX_ROUNDS = int(MISC["racePVPRoundNum"])
-    DAILY_TICKETS = int(MISC["racePVPTicketNum"])
+    CYCLE_TICKETS = int(MISC["racePVPTicketNum"])
+    SEASON_CYCLES = 8
+    # Native create has no nonce. A fresh request with no uploaded battle is
+    # replayable for transport/concurrent retries; a later entry starts anew.
+    CREATE_RETRY_SECONDS = 30
     SEGMENTS = sorted(_client_rows("RacePVPSeg"), key=lambda row: row["score"])
+    SEASON_REWARDS = {int(row["seg"]): row["rewards"] for row in _client_rows("RacePVPSegReward")}
     RANK_SCORES = {int(row["rank"]): int(row.get("score", 0)) for row in _client_rows("RacePVPRankScore")}
     SCORE_REWARDS = {int(row["battleScore"]): row["rewards"] for row in _client_rows("RacePVPBattleScoreReward")}
     HEAD_PHOTOS = frozenset(int(row["id"]) for row in _client_rows("PlayerHeadPhoto"))
@@ -163,11 +172,11 @@ class LocalRacePvp:
                          "ON CONFLICT(dungeon_uid) DO UPDATE SET run_json=excluded.run_json",
                          (run["dungeonUid"], profile["account_id"], json.dumps(run, ensure_ascii=False)))
 
-    def _ticket(self, profile, delta=0, minimum=None, *, notify=True):
+    def _ticket(self, profile, delta=0, minimum=None, *, notify=True, set_count=None):
         bag = self.game.systems._state(profile)
         item = bag.setdefault("items", {}).setdefault(str(self.TICKET_ID), {"count": 0})
         old = _int(item.get("count"))
-        count = max(old, minimum) if minimum is not None else old + delta
+        count = set_count if set_count is not None else (max(old, minimum) if minimum is not None else old + delta)
         if count < 0:
             raise RaceError("race_ticket_exhausted")
         if count != old:
@@ -221,40 +230,191 @@ class LocalRacePvp:
     def _ranked(players):
         return sorted(players, key=lambda row: (-row["battleScore"], row["timestamp"], row["playerId"]))
 
+    def _cycle_at(self, now):
+        local = policy_for(self.game).local_datetime(now)
+        monday = (local - timedelta(days=local.weekday())).replace(hour=6, minute=0, second=0, microsecond=0)
+        if local < monday:
+            monday -= timedelta(days=7)
+        slot = int(local >= monday + timedelta(days=3))
+        index = ((monday.date() - date(1970, 1, 5)).days // 7) * 2 + slot
+        return self._cycle_by_index(index)
+
+    def _cycle_by_index(self, index):
+        monday = datetime.combine(date(1970, 1, 5) + timedelta(weeks=index // 2),
+                                  datetime.min.time(), policy_for(self.game).timezone).replace(hour=6)
+        start = monday + timedelta(days=3 if index % 2 else 0)
+        return {"index": index, "start": int(start.timestamp()),
+                "end": int((start + timedelta(days=2, hours=18)).timestamp()),
+                "nextStart": int((start + timedelta(days=4 if index % 2 else 3)).timestamp())}
+
+    def _segment(self, score):
+        return max((row for row in self.SEGMENTS if row["score"] <= score), key=lambda row: row["score"])
+
+    def _mail(self, profile, title, rewards, *, start_time=None):
+        if not rewards:
+            return None
+        return send_mail(self.game, profile, title, "残梦之境结算奖励，请领取附件。", rewards,
+                         sender_name="残梦之境", start_time=start_time, now=self._now())["id"]
+
+    def _compensate_run(self, profile, state, run, high_score):
+        if not run.get("compensated"):
+            current = self._cycle_at(self._now())
+            start = self._now() if self._now() < current["end"] else current["nextStart"]
+            run["compensationMailId"] = self._mail(profile, "残梦之境跨周期门票补偿",
+                                                   [{"type": 11, "id": self.TICKET_ID, "count": 1}], start_time=start)
+            state.setdefault("refundMails", []).append(run["compensationMailId"])
+            run.update(compensated=True, expired=True, expiredHighScore=high_score)
+            self._save_run(profile, run)
+
+    def _collect_refunds(self, profile, state, *, can_use_tickets):
+        """Keep a claimed refund through a closed-period ticket clear.
+
+        Mail attachments are ordinary items. A separate durable credit is
+        needed when the user claims an older refund during a later closure,
+        or before the new cycle's base tickets have been initialized.
+        """
+        if not state.get("refundMails"):
+            return
+        mails = {mail["id"]: mail for mail in self.game.systems._state(profile).get("mails", [])}
+        claimed = set(state.get("claimedRefundMails", []))
+        remaining = []
+        for mail_id in state["refundMails"]:
+            mail = mails.get(mail_id)
+            if mail_id in claimed or (mail is not None and mail.get("attachmentsGot")):
+                if not can_use_tickets:
+                    state["pendingTicketRefunds"] = _int(state.get("pendingTicketRefunds")) + 1
+            elif mail is not None:
+                remaining.append(mail_id)
+        state["refundMails"] = remaining
+        state["claimedRefundMails"] = []
+
+    def record_mail_claims(self, profile, mail_ids):
+        """Mailbox hook before auto-delete, joined to its grant transaction."""
+        state = self._load(profile)
+        claimed = set(map(int, mail_ids)) & set(state.get("refundMails", []))
+        if claimed:
+            state["claimedRefundMails"] = sorted(set(state.get("claimedRefundMails", [])) | claimed)
+            self._save(profile, state)
+
+    def _settle_cycle(self, profile, state):
+        if state.get("cycleSettled") or not state.get("enrolled"):
+            return
+        run = self._run(profile, state["activeUid"]) if state.get("activeUid") else None
+        if run and run["status"] == "active":
+            # The native client uploads on finish/surrender. A received final
+            # snapshot is scored in its original room before that room closes.
+            if run.get("active"):
+                try:
+                    self._battle_score(run)
+                except RaceError:
+                    self._compensate_run(profile, state, run, self._own(profile, state)["battleScore"])
+                else:
+                    self._balance(profile, state, run)
+            else:
+                self._compensate_run(profile, state, run, self._own(profile, state)["battleScore"])
+        ranked = self._ranked(state["players"])
+        own = self._own(profile, state)
+        rank = next(i for i, row in enumerate(ranked, 1) if row["playerId"] == profile["player_id"]) if own["battleScore"] else self.PLAYER_COUNT
+        old = state["score"]
+        segment = self._segment(old)
+        floor = segment["score"] if segment.get("protect") else self.SEGMENTS[0]["score"]
+        state["score"] = max(floor, old + self.RANK_SCORES[rank])
+        state["oldScore"] = old
+        pending = sorted(threshold for threshold in self.SCORE_REWARDS
+                         if threshold <= own["battleScore"] and threshold not in state["rewardRecved"])
+        rewards = list(self._segment(state["score"])["rewards"])
+        rewards += [reward for threshold in pending for reward in self.SCORE_REWARDS[threshold]]
+        mail_id = self._mail(profile, "残梦之境周期结算", rewards)
+        state["rewardRecved"].extend(pending)
+        state["settlements"].append({"cycle": state["cycle"], "week": state["week"], "rank": rank,
+                                     "before": old, "after": state["score"], "mailId": mail_id,
+                                     "scoreRewardsMailed": pending})
+        state["settlements"] = state["settlements"][-64:]
+        state.update(cycleSettled=True, activeUid=None, isNew=True)
+
+    def _settle_season(self, profile, state, now):
+        origin = state.get("seasonOrigin")
+        participated = state.get("lastParticipatedCycle")
+        if origin is None or participated is None:
+            return
+        season = (participated - origin) // self.SEASON_CYCLES
+        end = self._cycle_by_index(origin + (season + 1) * self.SEASON_CYCLES - 1)["end"]
+        if now < end or state.get("seasonPaid", -1) >= season:
+            return
+        segment = self._segment(state["score"])
+        mail_id = self._mail(profile, "残梦之境赛季结算", self.SEASON_REWARDS[segment["seg"]])
+        state.setdefault("seasonSettlements", []).append({"season": season, "score": state["score"],
+                                                          "segId": segment["id"], "mailId": mail_id})
+        state["seasonSettlements"] = state["seasonSettlements"][-16:]
+        state.update(seasonPaid=season, score=int(self.SEGMENTS[0]["score"]), isNew=True)
+
     def _refresh(self, profile, state, *, notify=True):
         changes = []
-        policy, now = policy_for(self.game), self._now()
-        week, day = policy.period_start(now, "week"), policy.day_key(now)
-        if state["week"] is None or week > state["week"]:
-            if state["week"] is not None:
-                state["status"] = self.SETTLE
-                ranked = self._ranked(state["players"])
-                own = next(row for row in ranked if row["playerId"] == profile["player_id"])
-                rank = next(i for i, row in enumerate(ranked, 1) if row["playerId"] == profile["player_id"]) if own["battleScore"] else self.PLAYER_COUNT
-                old = state["score"]
-                segment = max((row for row in self.SEGMENTS if row["score"] <= old), key=lambda row: row["score"])
-                floor = segment["score"] if segment.get("protect") else self.SEGMENTS[0]["score"]
-                state["score"] = max(floor, old + self.RANK_SCORES[rank])
-                state["oldScore"] = old
-                state["settlements"].append({"week": state["week"], "rank": rank, "before": old, "after": state["score"]})
-                state["settlements"] = state["settlements"][-52:]
-                state["round"] += max(1, (week - state["week"]) // (7 * 86400))
-            else:
-                state["round"] = 1
-            state.update(status=self.MATCH, week=week, rewardRecved=[], activeUid=None, isNew=True,
-                         endTime=policy.next_boundary(now, "week"))
-            stages = sorted(self.STAGES)
-            state["dungeonId"] = stages[policy.week_index(now) % len(stages)]
-            state["players"] = self._room(profile, state, week)
-            state["status"] = self.FIGHT
+        now = max(self._now(), _int(state.get("lastSeenAt")))
+        current = self._cycle_at(now)
+        unlocked = _int(profile.get("level")) >= 26
+        if "cycle" not in state:
+            # A one-time upgrade preserves an existing room, its rewards and
+            # runs. Current legacy weekly rooms become the current cycle.
+            legacy_week = state.get("week")
+            same_week = legacy_week is not None and policy_for(self.game).period_start(now, "week") == legacy_week
+            initial = current if legacy_week is None or same_week else self._cycle_at(legacy_week)
+            enrolled = unlocked and (legacy_week is not None or now < initial["end"])
+            state.update(cycle=initial["index"], cycleEnd=initial["end"], nextStart=initial["nextStart"],
+                         week=initial["start"], cycleSettled=False, enrolled=enrolled,
+                         seasonOrigin=initial["index"] - max(0, _int(state.get("round"), 1) - 1) if enrolled else None,
+                         schemaVersion=2)
+            state["round"] = max(1, _int(state.get("round")))
+            if enrolled:
+                state["lastParticipatedCycle"] = initial["index"]
+            if not state["players"]:
+                state["dungeonId"] = sorted(self.STAGES)[initial["index"] % len(self.STAGES)]
+                state["players"] = self._room(profile, state, initial["start"])
+            if legacy_week is not None:
+                with closing(self.game._connect()) as conn:
+                    rows = conn.execute("SELECT run_json FROM local_race_pvp_runs WHERE account_id=?", (profile["account_id"],)).fetchall()
+                for row in rows:
+                    run = json.loads(row["run_json"])
+                    if "cycle" not in run and run.get("week") == legacy_week:
+                        run.update(cycle=initial["index"], cycleEnd=initial["end"])
+                        self._save_run(profile, run)
+                # Preserve tickets already spent in the migrated cycle.
+                if unlocked:
+                    state["ticketCycle"] = initial["index"]
+        if now >= state["cycleEnd"]:
+            self._settle_cycle(profile, state)
+            self._settle_season(profile, state, now)
+        if current["index"] > state["cycle"]:
+            state.update(cycle=current["index"], cycleEnd=current["end"], nextStart=current["nextStart"],
+                         week=current["start"], cycleSettled=False, enrolled=False,
+                         rewardRecved=[], activeUid=None, isNew=True)
+            state["dungeonId"] = sorted(self.STAGES)[current["index"] % len(self.STAGES)]
+            state["players"] = self._room(profile, state, current["start"])
+        is_open = now < state["cycleEnd"] and unlocked and not state.get("cycleSettled")
+        tickets_initialized = state.get("ticketCycle") == state["cycle"]
+        self._collect_refunds(profile, state, can_use_tickets=is_open and tickets_initialized)
+        if is_open:
+            if state.get("seasonOrigin") is None:
+                state["seasonOrigin"] = state["cycle"]
+            state["enrolled"] = True
+            state["lastParticipatedCycle"] = state["cycle"]
+            pending = _int(state.get("pendingTicketRefunds"))
+            if not tickets_initialized:
+                changes.append(self._ticket(profile, set_count=self.CYCLE_TICKETS + pending, notify=notify))
+                state["ticketCycle"] = state["cycle"]
+                state["pendingTicketRefunds"] = 0
+            elif pending:
+                changes.append(self._ticket(profile, delta=pending, notify=notify))
+                state["pendingTicketRefunds"] = 0
+        else:
+            changes.append(self._ticket(profile, set_count=0, notify=notify))
+        if state.get("seasonOrigin") is not None:
+            state["round"] = (state["cycle"] - state["seasonOrigin"]) % self.SEASON_CYCLES + 1
+        state.update(status=self.FIGHT if is_open else self.MATCH,
+                     endTime=state["cycleEnd"] if is_open else state["nextStart"], lastSeenAt=now)
         self._refresh_appearance(profile, state["players"])
-        if period_due(state.get("day"), day):
-            change = self._ticket(profile, minimum=self.DAILY_TICKETS, notify=notify)
-            if change["baseRes"]["countDelta"]:
-                changes.append(change)
-            state["day"] = day
         self._save(profile, state)
-        return changes
+        return [change for change in changes if change["baseRes"]["countDelta"]]
 
     def refresh_daily_items(self, profile):
         """Return persisted ticket deltas; the scheduler publishes them once.
@@ -281,6 +441,8 @@ class LocalRacePvp:
         return next(row for row in state["players"] if row["playerId"] == profile["player_id"])
 
     def _reward_tag(self, profile, state):
+        if state["status"] != self.FIGHT:
+            return False
         score = self._own(profile, state)["battleScore"]
         return any(threshold <= score and threshold not in state["rewardRecved"] for threshold in self.SCORE_REWARDS)
 
@@ -302,10 +464,17 @@ class LocalRacePvp:
             raise RaceError("race_dungeon_not_current", 400)
         if _int(profile.get("level")) < 26:
             raise RaceError("race_level_locked", 403)
+        if state["status"] != self.FIGHT:
+            raise RaceError("race_cycle_closed")
+        ids, uids, actors = self._actors(profile, request.get("selectActorGroupId"))
         active = self._run(profile, state["activeUid"]) if state["activeUid"] else None
         if active and active["status"] == "active":
-            return 200, {"dungeonUid": active["dungeonUid"], "baseInfo": active["baseInfo"], "resChange": [self._ticket(profile)]}
-        ids, uids, actors = self._actors(profile, request.get("selectActorGroupId"))
+            same_team = (active["baseInfo"]["actorId"] == ids and active["baseInfo"]["actorUid"] == uids
+                         and active["baseInfo"]["actors"] == actors)
+            if same_team and not active.get("active") and 0 <= self._now() - active["createdAt"] <= self.CREATE_RETRY_SECONDS:
+                return 200, {"dungeonUid": active["dungeonUid"], "baseInfo": active["baseInfo"], "resChange": [self._ticket(profile)]}
+            active.update(status="closed", closedAt=self._now(), closeReason="new_entry")
+            self._save_run(profile, active)
         if not any(uids):
             raise RaceError("profile_has_no_actors")
         cost = self.STAGES[stage]["cost"]
@@ -321,7 +490,8 @@ class LocalRacePvp:
                 "auraPlayerId": "", "auraActorId": 0, "auraStranger": False, "auraActorQuality": 0,
                 "towerFloor": 0, "eventKey": "", "medalId": 0, "reduceInfo": {}, "isChallengeMode": False,
                 "fightBuffs": [], "npcCnt": 0}
-        run = {"dungeonUid": uid, "week": state["week"], "status": "active", "baseInfo": base,
+        run = {"dungeonUid": uid, "week": state["week"], "cycle": state["cycle"], "cycleEnd": state["cycleEnd"],
+               "status": "active", "baseInfo": base,
                "active": None, "balance": None, "createdAt": now}
         self._save_run(profile, run)
         state["activeUid"] = uid
@@ -352,13 +522,8 @@ class LocalRacePvp:
         self._save_run(profile, run)
         return 200, {}
 
-    def _balance(self, profile, state, run):
-        if run["balance"] is not None:
-            return 200, self._copy(run["balance"])
-        if run["status"] != "active":
-            raise RaceError("race_dungeon_closed")
-        if run["week"] != state["week"]:
-            raise RaceError("race_round_expired")
+    @staticmethod
+    def _battle_score(run):
         active = run.get("active")
         if not active:
             raise RaceError("race_fight_snapshot_required")
@@ -369,13 +534,28 @@ class LocalRacePvp:
         damage = _int(enemy[0]["statistic"].get("totalDamage"))
         if damage < 0:
             raise RaceError("invalid_race_damage", 400)
-        score = damage // 10
-        own = self._own(profile, state)
-        if score > own["battleScore"]:
-            own.update(battleScore=score, timestamp=self._now(), battleActors=run["baseInfo"]["actors"])
+        return damage // 10
+
+    def _balance(self, profile, state, run):
+        if run["balance"] is not None:
+            return 200, self._copy(run["balance"])
+        if run["status"] != "active":
+            raise RaceError("race_dungeon_closed")
+        score = self._battle_score(run)
+        if run.get("expired") or run.get("cycle") != state["cycle"] or state.get("cycleSettled"):
+            # A delayed finish cannot rewrite a published old ranking or
+            # contaminate the next room. Refund the charged ticket once and
+            # still satisfy the client's normal balance/DELETE flow.
+            self._compensate_run(profile, state, run, _int(run.get("expiredHighScore")))
+            high_score = max(score, _int(run.get("expiredHighScore")))
+        else:
+            own = self._own(profile, state)
+            if score > own["battleScore"]:
+                own.update(battleScore=score, timestamp=self._now(), battleActors=run["baseInfo"]["actors"])
+            high_score = own["battleScore"]
         # Common/DungeonUtil also balances a player's early surrender; the
         # persisted real damage is valid then even when winTeam is still 0.
-        result = {"curBattleScore": score, "highBattleScore": own["battleScore"]}
+        result = {"curBattleScore": score, "highBattleScore": high_score}
         run.update(status="balanced", balance=result, balancedAt=self._now())
         self._save_run(profile, run)
         self._save(profile, state)
@@ -471,6 +651,16 @@ class LocalRealtimePvp:
     BURST_ROUNDS = 5
     BURST_PLAYERS = 3
     BURST_TICKETS = 1
+    # Client 2.0.4's native BurstLink constants.  The original matcher and
+    # FightService are unavailable in the local build, so the HTTP seam below
+    # publishes a deterministic robot room and accepts the normal balance
+    # callback.  80003 is the extracted RefreshPrice type-18 ticket.
+    BURST_ACTIVITY_TYPE = 18
+    BURST_ACTIVITY_ID = 18001
+    BURST_DUNGEON_ID = 18001
+    BURST_TICKET_ID = 80003
+    BURST_MAX_WINS = 5
+    BURST_MAX_LOSSES = 3
 
     def __init__(self, game: Any, *, clock=None) -> None:
         self.game = game
@@ -587,6 +777,251 @@ class LocalRealtimePvp:
             "isRobot": False,
             "score": 0,
         }
+
+    # ----------------------------------------------------------- native BurstLink
+    # The following helpers mirror the names and JSON fields of the recovered
+    # ApiBurstLink* messages.  They intentionally share the existing
+    # local_realtime_pvp_state row with the compact compatibility state machine
+    # above, keeping retries/restarts idempotent without a second ledger.
+    @staticmethod
+    def _native_default() -> dict[str, Any]:
+        return {"main": [], "assistant": [], "groups": {"1": {"members": []}},
+                "active": None, "lastWin": False, "lastBalanced": False,
+                "received": False}
+
+    def _native(self, state: dict[str, Any]) -> dict[str, Any]:
+        value = state["burst"].get("native")
+        if not isinstance(value, dict):
+            value = self._native_default()
+            state["burst"]["native"] = value
+        defaults = self._native_default()
+        for key, fallback in defaults.items():
+            # ``active`` intentionally defaults to ``None`` and becomes a
+            # dictionary after matching.  ``isinstance(active, type(None))``
+            # would erase that persisted run every time the state was read.
+            # For nullable fields, validate only that the key exists; all
+            # non-null values are consumed through the guarded checks below.
+            if key not in value or (fallback is not None and not isinstance(value[key], type(fallback))):
+                value[key] = fallback.copy() if isinstance(fallback, (dict, list)) else fallback
+        return value
+
+    def _native_actors(self, profile: Mapping[str, Any]) -> list[dict[str, Any]]:
+        ids, uids = self.game.dungeons._fight_team(profile)
+        actors = []
+        for actor_id, uid in zip(ids, uids):
+            if int(uid or 0):
+                actor = self.game.dungeons._fight_actor(profile, actor_id, uid)
+                if actor:
+                    actors.append(actor)
+        # A local profile can be created with only one actor; the client still
+        # requires three slots per side, so deterministic copies fill previews
+        # while the selected group retains real UIDs.
+        if not actors:
+            actor = self.game.dungeons._fight_actor(profile, int(profile.get("actor_id") or 1001), 1)
+            if actor:
+                actors.append(actor)
+        return actors
+
+    def _native_request(self, body: Body, message_name: str) -> dict[str, Any]:
+        """Decode JSON or the exact protobuf request emitted by the client."""
+        if isinstance(body, Mapping):
+            return dict(body)
+        raw = body.encode("utf-8") if isinstance(body, str) else bytes(body or b"")
+        if not raw:
+            return {}
+        if raw.lstrip()[:1] in (b"{", b"["):
+            try:
+                value = json.loads(raw.decode("utf-8"))
+                return dict(value) if isinstance(value, Mapping) else {}
+            except (UnicodeDecodeError, ValueError):
+                return {}
+        try:
+            cls = message_factory.GetMessageClass(self.game._pool.FindMessageTypeByName(message_name))
+            message = cls(); message.ParseFromString(raw)
+            return json_format.MessageToDict(message)
+        except Exception:
+            return {}
+
+    @staticmethod
+    def _uid(actor: Mapping[str, Any]) -> int:
+        return _int(actor.get("uid", actor.get("actorUid", 0)))
+
+    def _native_info(self, profile: Mapping[str, Any], state: dict[str, Any]) -> dict[str, Any]:
+        bucket = state["burst"]
+        native = self._native(state)
+        active = native.get("active") if isinstance(native.get("active"), dict) else None
+        return {
+            # Compatibility keys retained for the existing local dashboard;
+            # the native client ignores unknown JSON fields.
+            "mode": "burst",
+            "tickets": int(bucket.get("tickets", 0)),
+            "maxTickets": int(self.BURST_TICKETS),
+            "playerId": str(profile.get("player_id", "local")),
+            "isRobot": False,
+            "expireSeconds": 0,
+            "baseInfo": {
+                "createTime": int(active.get("createdAt", self._now()) if active else self._now()),
+                "quitTime": 0,
+                "level": int(profile.get("level", 1) or 1),
+                "name": str(profile.get("name", "本地玩家")),
+                "winNum": int(bucket.get("wins", 0)),
+                "failNum": int(bucket.get("losses", 0)),
+            },
+            "balanceInfo": {"balanced": bool(native.get("lastBalanced")), "isWin": bool(native.get("lastWin"))},
+            "actorsInfo": {
+                "curMainActor": [_int(v) for v in native.get("main", [])],
+                "curAssistantActor": [_int(v) for v in native.get("assistant", [])],
+                "battleActorGroup": [_int(v) for v in native.get("main", []) + native.get("assistant", [])],
+                "playerActors": [],
+            },
+            "matchInfo": {},
+            "dungeonId": int(self.BURST_DUNGEON_ID),
+            "reward": self._native_rewards(),
+            "resChange": [],
+        }
+
+    @staticmethod
+    def _native_rewards() -> list[dict[str, Any]]:
+        # No BurstLink reward table survived extraction.  Keep a visible,
+        # deterministic cumulative table using the local gold resource; the
+        # policy is recorded as confidence D in docs/本地规则清单.md.
+        return [{"id": i, "reward": [{"type": 7, "id": 0, "count": 100 * i, "param": 0}],
+                 "nextReward": []} for i in range(1, 6)]
+
+    def _native_rand_actor(self, profile: Mapping[str, Any], native: dict[str, Any], actor_type: int = 0) -> dict[str, Any]:
+        pool = self._native_actors(profile)
+        selected = {_int(v) for v in native.get("main", []) + native.get("assistant", [])}
+        choices = [actor for actor in pool if self._uid(actor) not in selected]
+        if not choices:
+            choices = pool
+        return {
+            "randActor": choices[:3],
+            "selectActor": [actor for actor in pool if self._uid(actor) in selected],
+            "curMainActor": [_int(v) for v in native.get("main", [])],
+            "curAssistantActor": [_int(v) for v in native.get("assistant", [])],
+        }
+
+    def _native_group(self, profile: Mapping[str, Any], state: dict[str, Any], payload: Optional[Mapping[str, Any]] = None) -> dict[str, Any]:
+        native = self._native(state)
+        groups = payload.get("actorGroups") if isinstance(payload, Mapping) else None
+        if isinstance(groups, Mapping):
+            clean = {}
+            for key, group in groups.items():
+                if not isinstance(group, Mapping):
+                    continue
+                members = []
+                for member in group.get("members") or []:
+                    if not isinstance(member, Mapping):
+                        continue
+                    members.append({"index": _int(member.get("index")), "actorUid": _int(member.get("actorUid")),
+                                    "actorId": _int(member.get("actorId"))})
+                clean[str(key)] = {"members": members}
+            if clean:
+                native["groups"] = clean
+                members = clean.get("1", next(iter(clean.values()))) .get("members", [])
+                native["main"] = [_int(m.get("actorUid")) for m in members if _int(m.get("index")) < 3 and _int(m.get("actorUid"))]
+                native["assistant"] = [_int(m.get("actorUid")) for m in members if _int(m.get("index")) >= 3 and _int(m.get("actorUid"))]
+        return native["groups"]
+
+    def _publish_native_match(self, profile: Mapping[str, Any], dungeon: Mapping[str, Any]) -> None:
+        """Deliver ScMatchNtf when a WebSocket session is available.
+
+        The local HTTP tests and offline clients can use the REST balance route
+        directly; a connected original client also gets the same typed push
+        message used by the native window.  Missing push descriptors/sessions
+        are intentionally harmless.
+        """
+        services = getattr(getattr(self.game, "base_push_notifier", None), "push_services", ())
+        try:
+            cls = message_factory.GetMessageClass(self.game._pool.FindMessageTypeByName("ScMatchNtf"))
+            payload = json_format.ParseDict({"fightsvrUrl": "", "dungeonInfo": dict(dungeon)}, cls())
+            data = payload.SerializeToString()
+        except Exception:
+            return
+        for service in tuple(services or ()):
+            try:
+                key = service.key_for_account_id(profile.get("account_id"))
+                if key is not None:
+                    service.publish(key, "ScMatchNtf", data)
+            except Exception:
+                continue
+
+    def _native_match(self, profile: Mapping[str, Any], state: dict[str, Any]) -> Response:
+        native = self._native(state)
+        bucket = state["burst"]
+        active = native.get("active")
+        if isinstance(active, dict) and not active.get("balanced"):
+            return 200, {"matchTime": 0, "maxWaitTime": 1}
+        if int(bucket.get("tickets", 0)) <= 0:
+            return 409, {"error": "ticket_exhausted", "mode": "burst", "nextResetAt": self._next_reset()}
+        if not native.get("main"):
+            native["main"] = [self._uid(actor) for actor in self._native_actors(profile)[:3]]
+        if not native.get("assistant"):
+            native["assistant"] = [self._uid(actor) for actor in self._native_actors(profile)[3:6]]
+        match_no = int(bucket.get("nativeMatch", 0)) + 1
+        uid = 7_000_000_000_000 + int(profile["account_id"]) * 1000 + match_no
+        actors = self._native_actors(profile)
+        own = [actor for actor in actors if self._uid(actor) in set(native["main"] + native["assistant"])]
+        if not own:
+            own = actors[:3]
+        bot = self._bot(int(profile["account_id"]), match_no, 1, burst=True)
+        bot_actors = [{"id": int(actor_id), "uid": 0, "level": int(bot["level"]), "quality": 1, "star": 1,
+                       "attrs": []} for actor_id in bot["actorIds"]]
+        dungeon = {"dungeonUid": int(uid), "dungeonId": int(self.BURST_DUNGEON_ID), "dungeonType": 6,
+                   "expireSeconds": 3600, "state": 1,
+                   "teams": [{"members": [{"playerId": str(profile.get("player_id", "local")),
+                                             "name": str(profile.get("name", "本地玩家")),
+                                             "level": int(profile.get("level", 1) or 1), "actors": own}]},
+                              {"members": [{"playerId": bot["playerId"], "name": bot["name"],
+                                             "level": int(bot["level"]), "actors": bot_actors}]}]}
+        native["active"] = {"uid": int(uid), "createdAt": self._now(), "balanced": False,
+                             "dungeon": dungeon, "win": None}
+        native["lastBalanced"] = False
+        bucket["tickets"] = int(bucket.get("tickets", 0)) - 1
+        bucket["nativeMatch"] = match_no
+        self._save(profile, state)
+        self._publish_native_match(profile, dungeon)
+        return 200, {"matchTime": 0, "maxWaitTime": 1}
+
+    def _native_balance(self, profile: Mapping[str, Any], state: dict[str, Any], body: Body) -> Response:
+        native = self._native(state)
+        active = native.get("active")
+        if not isinstance(active, dict):
+            return 409, {"error": "burstlink_dungeon_not_found"}
+        if active.get("balanced"):
+            return 200, {"isWin": bool(active.get("win")), "winNum": int(state["burst"].get("wins", 0)),
+                          "failNum": int(state["burst"].get("losses", 0)), "rewards": []}
+        payload = self._native_request(body, "ApiBurstLinkDunBalance")
+        won = bool(payload.get("win", payload.get("isWin", True)))
+        active["balanced"] = True
+        active["win"] = won
+        native["lastWin"] = won
+        native["lastBalanced"] = True
+        bucket = state["burst"]
+        if won:
+            bucket["wins"] = int(bucket.get("wins", 0)) + 1
+        else:
+            bucket["losses"] = int(bucket.get("losses", 0)) + 1
+        native["active"] = active
+        self._save(profile, state)
+        return 200, {"isWin": won, "winNum": int(bucket["wins"]), "failNum": int(bucket["losses"]), "rewards": []}
+
+    def _native_claim(self, profile: Mapping[str, Any], state: dict[str, Any]) -> Response:
+        native = self._native(state)
+        bucket = state["burst"]
+        if int(bucket.get("wins", 0)) < self.BURST_MAX_WINS and int(bucket.get("losses", 0)) < self.BURST_MAX_LOSSES:
+            return 409, {"error": "burstlink_not_finished"}
+        if native.get("received"):
+            return 200, {"resChange": []}
+        total = max(0, min(self.BURST_MAX_WINS, int(bucket.get("wins", 0)))) * 100
+        changes: list[dict[str, Any]] = []
+        if total:
+            ok, changes, error = self.game.economy._change_resources(profile, [{"type": 7, "id": 0, "count": total}])
+            if not ok:
+                return 409, {"error": error or "resource_update_failed"}
+        native["received"] = True
+        self._save(profile, state)
+        return 200, {"resChange": changes}
 
     def _summary(self, mode: str, bucket: Mapping[str, Any]) -> dict[str, Any]:
         return {
@@ -735,6 +1170,74 @@ class LocalRealtimePvp:
         race_result = self.race.handle_http(method, path, body, profile)
         if race_result is not None:
             return race_result
+        # Native 2.0.4 BurstLink requests.  The client uses the match server
+        # URL for matching and the FCI URL for the player/settlement resources;
+        # both are handled by this deterministic local AI implementation.
+        if route in {"/fci/burstlinkpvpinfo", "/fci/burstlinkpvpinfo/"}:
+            with shared_process_lock(self.game.db_path), self._lock:
+                state = self._state(profile)
+                method_upper = method.upper()
+                if method_upper == "GET":
+                    return 200, self._native_info(profile, state)
+                if method_upper == "POST":
+                    self._native(state)
+                    self._save(profile, state)
+                    return 200, {"resChange": [], **self._native_info(profile, state)}
+                return 405, {"error": "method_not_allowed", "message": "GET or POST required"}
+        if route in {"/fci/burstlinkpvprandactorinfo", "/fci/burstlinkpvprandactorinfo/"} or route.startswith("/fci/burstlinkpvprandactorinfo/"):
+            with shared_process_lock(self.game.db_path), self._lock:
+                state = self._state(profile)
+                native = self._native(state)
+                method_upper = method.upper()
+                if method_upper == "GET":
+                    return 200, self._native_rand_actor(profile, native)
+                if method_upper in {"POST", "PUT"}:
+                    request = self._native_request(body, "ApiBurstLinkPVPRandActor")
+                    actor_uid = _int(request.get("actorUid", request.get("uid")))
+                    actor_type = _int(route.rsplit("/", 1)[-1]) if route.rsplit("/", 1)[-1].isdigit() else 0
+                    target = native["main"] if actor_type in {0, 1} else native["assistant"]
+                    if actor_uid and actor_uid not in target:
+                        target.append(actor_uid)
+                    self._save(profile, state)
+                    return 200, self._native_rand_actor(profile, native, actor_type)
+                return 405, {"error": "method_not_allowed"}
+        if route in {"/fci/burstlinkpvpactor", "/fci/burstlinkpvpactor/"}:
+            if method.upper() == "GET":
+                return 200, {"actor": self._native_actors(profile)}
+            return 405, {"error": "method_not_allowed", "message": "GET required"}
+        if route in {"/fci/burstlinkpvpactorgroup", "/fci/burstlinkpvpactorgroup/"}:
+            with shared_process_lock(self.game.db_path), self._lock:
+                state = self._state(profile)
+                if method.upper() == "GET":
+                    return 200, self._native(state)["groups"]
+                if method.upper() in {"PUT", "POST"}:
+                    groups = self._native_group(profile, state, self._native_request(body, "ApiBurstLinkPvpBattleGroup"))
+                    self._save(profile, state)
+                    return 200, {"result": {"actorGroups": groups}}
+                return 405, {"error": "method_not_allowed"}
+        if route in {"/fci/burstlinkdunbalance", "/fci/burstlinkdunbalance/"}:
+            if method.upper() != "POST":
+                return 405, {"error": "method_not_allowed", "message": "POST required"}
+            with shared_process_lock(self.game.db_path), self._lock:
+                state = self._state(profile)
+                return self._native_balance(profile, state, body)
+        if route in {"/fci/burstlinkpvpbalance", "/fci/burstlinkpvpbalance/"}:
+            if method.upper() != "POST":
+                return 405, {"error": "method_not_allowed", "message": "POST required"}
+            with shared_process_lock(self.game.db_path), self._lock:
+                state = self._state(profile)
+                return self._native_claim(profile, state)
+        if route in {"/match/burstlinkpvpmatch", "/match/burstlinkpvpmatch/"}:
+            with shared_process_lock(self.game.db_path), self._lock:
+                state = self._state(profile)
+                if method.upper() == "POST":
+                    return self._native_match(profile, state)
+                if method.upper() == "PUT":
+                    native = self._native(state)
+                    native["active"] = None
+                    self._save(profile, state)
+                    return 200, {}
+                return 405, {"error": "method_not_allowed", "message": "POST or PUT required"}
         # Preserve BurstLink's old simulation without allowing the obsolete
         # action-string Race routes to create a second reward/ticket economy.
         if any(token in route for token in ("racepvp", "race-pvp")):

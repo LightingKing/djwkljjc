@@ -15,6 +15,8 @@ The returned list is DungeonBalance/Task-style ``resChange`` entries
 from __future__ import annotations
 
 import time
+import json
+from pathlib import Path
 from typing import Any, Iterable, Mapping
 
 try:
@@ -24,6 +26,9 @@ except ImportError:  # pragma: no cover - direct PYTHONPATH execution
 
 RES_ITEM = 11
 RES_ACTOR = 15
+RES_MEDAL = 8
+_MEDALS = {int(row["id"]): row for row in json.loads(
+    (Path(__file__).parent / "data/client-tables/MedalInfo.json").read_text(encoding="utf-8"))["rows"]}
 
 
 def _int(value: Any, default: int = 0) -> int:
@@ -44,8 +49,9 @@ def grant_rewards(game: Any, profile: Mapping[str, Any], rewards: Iterable[Mappi
     changes: list[dict[str, Any]] = []
     ledger: list[dict[str, int]] = []
     new_instances: list[dict[str, Any]] = []
+    medal_ids: list[int] = []
     state = systems._state(profile) if systems is not None else None
-    now = int(time.time())
+    now = int(game._now()) if hasattr(game, "_now") else int(time.time())
     for reward in rewards:
         rtype, rid, count = _int(reward.get("type")), _int(reward.get("id")), _int(reward.get("count"))
         if rtype == RES_ITEM and state is not None:
@@ -60,6 +66,15 @@ def grant_rewards(game: Any, profile: Mapping[str, Any], rewards: Iterable[Mappi
                 new_instances.append(systems.new_actor(profile, state, rid, _int(reward.get("param"))))
         else:
             ledger.append({"type": rtype, "id": rid, "param": _int(reward.get("param")), "count": count})
+            if rtype == RES_MEDAL and state is not None:
+                # ResMedal is a unique cosmetic/buff record, not ResEquip (12).
+                # The original Race medals expire after MedalInfo.expireDay.
+                days = _int(_MEDALS.get(rid, {}).get("expireDay"))
+                state.setdefault("medals", {})[str(rid)] = {
+                    "id": rid, "gotTime": now, "isNew": True,
+                    "expireTime": now + days * 86400 if days else 0,
+                }
+                medal_ids.append(rid)
     if state is not None:
         systems._save(profile, state)
     if ledger and economy is not None:
@@ -71,6 +86,9 @@ def grant_rewards(game: Any, profile: Mapping[str, Any], rewards: Iterable[Mappi
     if new_instances:
         for record in new_instances:
             changes.append({"actor": systems._st_actor_json(record, profile, state, 1)})
+    notifier = getattr(game, "base_push_notifier", None)
+    if medal_ids and notifier is not None:
+        game.after_commit(lambda: notifier(profile, 49, tuple(dict.fromkeys(medal_ids))))
     return changes
 
 

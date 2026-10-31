@@ -15,7 +15,7 @@ import threading
 from contextlib import closing, contextmanager
 from datetime import datetime, timezone
 from typing import Any, Iterator, Mapping, Optional
-from urllib.parse import unquote, urlsplit
+from urllib.parse import parse_qs, unquote, urlsplit
 
 from google.protobuf import json_format, message_factory
 
@@ -824,7 +824,23 @@ class LocalSocial:
         counters[target] = next_id
         if method == "GET" and len(parts) == 3:
             self._save(profile, state)
-            return 200, list(board)
+            query = parse_qs(urlsplit(path).query, keep_blank_values=True)
+            def query_int(*names: str, default: int = 0) -> int:
+                for name in names:
+                    values = query.get(name)
+                    if values:
+                        return _int(values[0], default)
+                return default
+            # The client requests pages with perPage/page (some builds use
+            # pageNo/pageSize).  When no pagination is requested preserve the
+            # historical full-list response used by the profile screen.
+            paged = any(name in query for name in ("page", "pageNo", "pageIndex", "perPage", "pageSize", "limit"))
+            if not paged:
+                return 200, list(board)
+            page = max(1, query_int("page", "pageNo", "pageIndex", default=1))
+            per_page = max(1, query_int("perPage", "pageSize", "limit", default=20))
+            start = (page - 1) * per_page
+            return 200, list(board[start:start + per_page])
         if method == "DELETE" and len(parts) == 4:
             message_id = _int(parts[3], -1)
             row = next((row for row in board if row["id"] == message_id), None)
@@ -908,9 +924,19 @@ class LocalSocial:
             self._message_push(profile, "WorldMessage", entry)
             if response:
                 self._message_push(profile, "WorldMessage", response)
-        elif response:
-            self._base_push(profile, 24 if channel == 3 else 30,
-                            response["senderId"], response["sender"], response["content"], response["time"])
+        else:
+            # The native chat window appends messages from the base push
+            # stream.  The old local path only sent the bot reply for private
+            # and guild channels, leaving the sender's own message invisible
+            # until a reconnect.  Echo both entries in wire order; the bot
+            # reply remains second so existing clients render the conversation
+            # naturally.
+            push_type = 24 if channel == 3 else 30
+            self._base_push(profile, push_type,
+                            entry["senderId"], entry["sender"], entry["content"], entry["time"])
+            if response:
+                self._base_push(profile, push_type,
+                                response["senderId"], response["sender"], response["content"], response["time"])
         return 200, {}
 
     def _chat(self, method: str, route: str, path: str, body: Body, profile: Mapping[str, Any], state: dict[str, Any]) -> Optional[Response]:

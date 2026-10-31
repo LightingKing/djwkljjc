@@ -203,7 +203,7 @@ class LocalAccounts:
         state_dir: Union[str, Path],
         *,
         session_ttl_seconds: int = 900,
-        access_ttl_seconds: int = 86400,
+        access_ttl_seconds: int = 30 * 86400,
         clock: Optional[Callable[[], int]] = None,
         unified_store_path: str | Path | None = None,
     ) -> None:
@@ -435,7 +435,7 @@ class LocalAccounts:
             "openId": account["open_id"],
             "tokenAccess": access_token,
             "createTime": now,
-            "expireSeconds": int(account["expire_seconds"]),
+            "expireSeconds": self.access_ttl_seconds,
             "entry": self._account_entry(account),
             "entryType": "password" if account["login_type"] == "password" else "guest",
             "username": account["username"] or None,
@@ -544,6 +544,46 @@ class LocalAccounts:
             connection.execute(
                 "UPDATE accounts SET access_token = ?, access_expires_at = ? WHERE account_id = ?",
                 (result["tokenAccess"], now + self.access_ttl_seconds, int(account["account_id"])),
+            )
+            return 200, result
+
+    def _handle_cached_password_auth(self, payload: dict, authorization: Optional[str]) -> Response:
+        """Refresh a cached local login without retaining its password on-device."""
+        token = payload.get("accessToken")
+        identity = payload.get("username", payload.get("entry"))
+        if not isinstance(token, str) or not token or not isinstance(identity, str) or not identity:
+            return 401, self._error("invalid_credentials", "cached login is invalid")
+        now = self._now()
+        with self._lock, closing(self._connect()) as connection, connection:
+            session, error = self._authorized_session(connection, authorization)
+            if error is not None:
+                return error
+            account = connection.execute(
+                "SELECT * FROM accounts WHERE access_token = ? AND login_type = 'password'", (token,)
+            ).fetchone()
+            if (account is None or int(account["access_expires_at"] or 0) <= now
+                    or identity.casefold() not in {str(account["username"]).casefold(), str(account["entry"]).casefold()}):
+                return 401, self._error("invalid_credentials", "cached login expired or invalid")
+            if session["account_id"] is not None and int(session["account_id"]) != int(account["account_id"]):
+                # AccountSession seeds a device's old guest binding before it
+                # knows which local account the login window cached. A verified
+                # password token may replace that seed, as password login does.
+                # An explicitly rebound session still cannot switch scope here.
+                binding = connection.execute(
+                    "SELECT account_id, entry FROM device_bindings WHERE device_hash = ?",
+                    (session["device_hash"],),
+                ).fetchone() if session["device_hash"] else None
+                if (binding is None or int(binding["account_id"]) != int(session["account_id"])
+                        or binding["entry"] != session["pending_entry"]):
+                    return 403, self._error("account_scope", "cached login belongs to another account")
+            result = self._auth_result(account, now)
+            connection.execute(
+                "UPDATE sessions SET account_id = ?, pending_entry = ? WHERE session_token = ?",
+                (int(account["account_id"]), account["entry"], session["session_token"]),
+            )
+            connection.execute(
+                "UPDATE accounts SET access_token = ?, access_expires_at = ?, expire_seconds = ? WHERE account_id = ?",
+                (result["tokenAccess"], now + self.access_ttl_seconds, self.access_ttl_seconds, int(account["account_id"])),
             )
             return 200, result
 
@@ -948,6 +988,8 @@ class LocalAccounts:
             if parse_error is not None:
                 return parse_error
             assert payload is not None
+            if "accessToken" in payload:
+                return self._handle_cached_password_auth(payload, authorization)
             requested_type = str(payload.get("entryType", payload.get("loginType", "password"))).casefold()
             if requested_type in {"password", "account", "username"} or "username" in payload or "userName" in payload:
                 return self._handle_password_login(body, content_type, authorization)
@@ -1012,7 +1054,7 @@ class LocalAccounts:
                 "openId": account["open_id"],
                 "tokenAccess": access_token,
                 "createTime": now,
-                "expireSeconds": int(account["expire_seconds"]),
+                "expireSeconds": self.access_ttl_seconds,
             }
 
     def verify_access_token(self, token: str) -> Optional[Dict[str, Any]]:

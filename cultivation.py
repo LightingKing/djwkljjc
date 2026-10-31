@@ -1,10 +1,14 @@
 """Actor cultivation using APK TaskInfo/ActorCultivation reward definitions.
 
 The APK omits the server's random daily-task distribution tables.  The local
-policy therefore offers original tasks with implemented progress sources, refreshing ``refreshAfterGot``
-tasks once per Beijing reset day.  Their contribution is capped at the
-configured lifetime ``dailyTaskMaxProgress`` (70), with permanent tasks filling
-the remaining progress.  This is an explicit local policy, not extracted data.
+policy therefore exposes every category-104 task, refreshing
+``refreshAfterGot`` tasks once per Beijing reset day.  Their contribution is
+capped at the configured lifetime ``dailyTaskMaxProgress`` (70), with
+permanent tasks filling the remaining progress.  A few task families have no
+trusted event source in the recovered server seam; those tasks use the local
+rule that a validated battle win counts as one completion when the target
+actor (or role) is deployed.  This is an explicit local policy, not extracted
+data.
 
 Only server hooks and saved actor state advance tasks.  HTTP clients cannot set
 progress. ``endTime`` is the completion time, not an invented expiry date.
@@ -36,16 +40,22 @@ CONFIG = {row["activityId"]: row for row in _rows("ActorCultivation")}
 REWARDS = {(row["activityId"], row["progress"]): row for row in _rows("ActorCultivationProgressReward")}
 TASKS = {row["id"]: row for row in _rows("TaskInfo") if row.get("category") == 104}
 SUPPORTED_GOALS = frozenset({58, 68, 70, 71, 76, 78, 79, 81, 82, 83, 91})
+# Actor-cultivation task families whose original per-battle event payload is
+# absent from this local server.  A won battle is the documented local
+# approximation; ``goalType`` and target actor/role still gate the increment.
+BATTLE_APPROX_GOALS = frozenset({73, 74, 75, 80, 84, 85, 86, 87, 88, 89, 90})
 
 
 def task_available(task):
-    """Only expose goals whose exact mode has an authoritative event source."""
-    goal, params = task["goalType"], task.get("taskParam", [])
-    if goal not in SUPPORTED_GOALS:
-        return False
-    # Activity 51 (51002/51003) is not open locally, and asynchronous PVP
-    # dungeon type 3 does not yet publish actor-cultivation battle events.
-    return goal != 71 and not (goal == 70 and len(params) > 1 and params[1] == 3)
+    """Expose every category-104 task under the local event policy.
+
+    ``SUPPORTED_GOALS`` remains useful documentation for goals with an exact
+    server hook.  Missing hooks are intentionally opened as well: their
+    progress is advanced by :meth:`LocalCultivation.on_battle_win` using the
+    battle-win approximation below.
+    """
+
+    return isinstance(task, Mapping) and _int(task.get("category")) == 104
 
 # The original task families are 530xx (1502) and 540xx (1514), while activity
 # IDs are 53001 and 53002; these identifiers must not be conflated.
@@ -117,7 +127,8 @@ class LocalCultivation:
     def _sync(self, profile, state):
         system = self.game.systems._state(profile)
         features = getattr(self.game, "profile_features", None)
-        feature_state = features._state(profile) if features is not None else {}
+        achievements = getattr(self.game, "achievements", None)
+        collected_novels = achievements._state(profile).get("novels", {}) if achievements is not None else {}
         notepads = {row["roleId"]: row for row in features.role_notepads(profile)} if features is not None else {}
         owned = self._owned(profile, system)
         now = self._now()
@@ -152,8 +163,9 @@ class LocalCultivation:
                 elif goal == 81:
                     value = int(bool(system.get("actorLikes", {}).get(str(params[0]), {}).get("liked")))
                 elif goal == 68:
-                    novels = feature_state.get("collections", {}).get("novels", [])
-                    value = int(any(_int(row.get("novelId")) == params[0] for row in novels if isinstance(row, dict)))
+                    # CollectionsNovel POST stores the claimed cover here. A
+                    # visible novel or a selected default cover is not collected.
+                    value = int(_int(collected_novels.get(str(params[0]), {}).get("curRewardNum")) > 0)
                 elif goal == 78 and len(params) > 1:
                     value = int(any(t.get("talentId") == params[1] for r in records for t in r.get("talents", [])))
                 entry["progress"] = min(task["maxProgress"], max(entry["progress"], value))
@@ -272,7 +284,8 @@ class LocalCultivation:
                 goal = task["goalType"]
                 matches = (goal == 70 and (len(params) == 1 or params[1] == _int(dungeon_type))
                            or goal == 71 and len(params) > 2 and params[1] == _int(activity_type) and _int(activity_id) in params[2:]
-                           or goal == 91 and _int(dungeon_id) in params[1:])
+                           or goal == 91 and _int(dungeon_id) in params[1:]
+                           or goal in BATTLE_APPROX_GOALS)
                 entry = state["tasks"].get(str(tid))
                 if matches and entry and not entry["rewardGot"]:
                     entry["progress"] = min(task["maxProgress"], entry["progress"] + 1)
@@ -347,12 +360,18 @@ class LocalCultivation:
     def handle_http(self, method, path, body, profile):
         route = urlsplit(path).path.rstrip("/").lower()
         task_match = re.fullmatch(r"/fci/task/(\d+)/reward-actor-cultivation", route)
+        vip_match = re.fullmatch(r"/fci/actor-cultivation/(\d+)/upgrade-vip", route)
+        new_match = re.fullmatch(r"/fci/actor-cultivation/(\d+)/new", route)
         if not route.startswith("/fci/actor-cultivation") and not task_match:
             return None
         if route == "/fci/actor-cultivation" and method == "GET":
             return 200, self.snapshot(profile)
         try:
             payload = json.loads(body) if body else {}
+            # Restifizer serializes the client's empty Lua table as JSON null.
+            # Only these operations have no request fields to validate.
+            if payload is None and (task_match or vip_match or new_match):
+                payload = {}
             if not isinstance(payload, dict):
                 raise ValueError()
         except (ValueError, TypeError, UnicodeDecodeError):
@@ -372,8 +391,6 @@ class LocalCultivation:
             with self._atomic(profile):
                 state = self._state(profile)
                 owned = self._sync(profile, state)
-                vip_match = re.fullmatch(r"/fci/actor-cultivation/(\d+)/upgrade-vip", route)
-                new_match = re.fullmatch(r"/fci/actor-cultivation/(\d+)/new", route)
                 if task_match and method == "POST":
                     result = self._task_reward(state, owned, int(task_match[1]))
                 elif vip_match and method == "POST":

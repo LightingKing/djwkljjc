@@ -461,10 +461,11 @@ class TriggeredEventTests(ModeTestBase):
 
     def test_list_shape_and_ticket_search(self):
         listed = self.ok("GET", "/fci/triggered-event/")
-        self.assertEqual(listed, {"eventInfo": [], "dailyTriggeredEventFinish": 0, "displayTriggeredEventTicket": False})
+        self.assertEqual(listed, {"eventInfo": [], "dailyTriggeredEventFinish": 0, "displayTriggeredEventTicket": True})
         self.assertEqual(self.item(80006), 5)  # daily fight tickets refreshed
         searched = self.ok("POST", "/fci/triggered-event/", {"ticketId": 80009})
-        self.assertEqual((searched["eventInfo"], searched["resChange"]), ([], []))  # no ticket: nothing
+        self.assertEqual(len(searched["eventInfo"]), 1)
+        self.assertEqual(searched["resChange"][0]["baseRes"]["countDelta"], -1)
         self.set_item(80009, 1)
         self.assertTrue(self.ok("GET", "/fci/triggered-event/")["displayTriggeredEventTicket"])
         searched = self.ok("POST", "/fci/triggered-event/", {"ticketId": 80009})

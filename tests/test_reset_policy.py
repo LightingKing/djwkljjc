@@ -89,17 +89,17 @@ class ResetIntegrationTests(unittest.TestCase):
     def test_daily_and_weekly_tickets_are_idempotent_capped_and_rollback_safe(self):
         modes = self.game.activity_modes
         initial = modes.refresh_daily_items(self.profile)
-        self.assertEqual({r["baseRes"]["id"] for r in initial}, {80001, 80002, 80003, 80005, 80006})
+        self.assertEqual({r["baseRes"]["id"] for r in initial}, {80001, 80002, 80003, 80005, 80006, 80009})
         self.assertEqual(modes.refresh_daily_items(self.profile), [])
         self.now[0] += 1
         rows = modes.refresh_daily_items(self.profile)
-        self.assertEqual({r["baseRes"]["id"] for r in rows}, {80001, 80002})
+        self.assertEqual({r["baseRes"]["id"] for r in rows}, {80001, 80002, 80009})
         self.now[0] = ts("2026-11-01T22:00:00Z")
         modes.refresh_daily_items(self.profile)
         items = self.game.systems._state(self.profile)["items"]
         self.assertEqual({i: items[str(i)]["count"] for i in (80001, 80002, 80003, 80005, 80006)},
                          {80001: 3, 80002: 4, 80003: 4, 80005: 6, 80006: 5})
-        self.assertNotIn("80009", items)
+        self.assertEqual(items["80009"]["count"], 3)
         self.now[0] -= 14 * 86400
         self.assertEqual(modes.refresh_daily_items(self.profile), [])
 

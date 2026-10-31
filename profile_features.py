@@ -419,6 +419,38 @@ class LocalProfileFeatures:
             self._sync_signboard(profile, state, notepads)
             return [self._notepad_json(notepads[key]) for key in sorted(notepads, key=int)]
 
+    def pending_role_presents(self, profile: Mapping[str, Any]) -> list[dict[str, Any]]:
+        """One list for welfare and red points; Beijing 06:00 daily boundary.
+
+        The 70% offer roll is local policy. Shard IDs come from Role.decomposeRes,
+        never arithmetic on role IDs. Existing claim timestamps also protect
+        saves made by the former UTC-day implementation from a second claim.
+        """
+        with self._lock:
+            pads = self.role_notepads(profile)
+            claims = self._state(profile).get('rolePresents', {})
+            day = policy_for(self.game).day_index(self._now())
+            start = policy_for(self.game).day_start_from_index(day)
+            roles = {_int(row.get('id')): row for row in table_rows('Role')}
+            items = {_int(row.get('id')) for row in table_rows('ItemInfo')}
+            pending = []
+            for pad in pads:
+                role_id = _int(pad.get('roleId'))
+                if _int(pad.get('favourLevel')) < 9 or f'{day}:{role_id}' in claims:
+                    continue
+                if any(str(key).endswith(f':{role_id}') and _int(stamp) >= start
+                       for key, stamp in claims.items()):
+                    continue
+                if (int(profile['account_id']) * 31 + day * 17 + role_id * 13) % 100 >= 70:
+                    continue
+                resource = roles.get(role_id, {}).get('decomposeRes', {})
+                item_id = _int(resource.get('id'))
+                if _int(resource.get('type')) != 11 or item_id not in items:
+                    continue
+                pending.append({'presentId': role_id, 'roleId': role_id, 'presentType': 1,
+                                'rewards': [{'type': 11, 'id': item_id, 'count': 5}]})
+            return pending
+
     def role_notepad(self, profile: Mapping[str, Any], role_id: Any) -> Optional[dict[str, Any]]:
         """One RoleNotePadInfo (camelCase) or ``None`` when the role is not owned."""
 
@@ -694,7 +726,11 @@ class LocalProfileFeatures:
         medals = []
         for value in values:
             if isinstance(value, Mapping) and _int(value.get("id")) > 0:
+                expires = _int(value.get("expireTime", value.get("expire_time")))
+                if expires and expires <= self._now():
+                    continue
                 medals.append({"id": _int(value.get("id")), "gotTime": _int(value.get("gotTime", value.get("got_time"))),
+                               "expireTime": expires,
                                "isNew": bool(value.get("isNew", value.get("is_new", False)))})
         medals.sort(key=lambda item: item["id"])
         if not tail:
@@ -898,7 +934,6 @@ class LocalProfileFeatures:
             game["draws"] = _int(game.get("draws")) + max(1, _int(payload.get("count", 1), 1)); prize = {"id": game["draws"], "type": 7, "count": 20}
             game.setdefault("prizes", []).append(prize); self._save(profile, state); return 200, {"prize": prize, "draws": game["draws"], "sandbox": True}
         if lower.startswith("/fci/share"):
-            if method != "POST": return 405, {"error": "method_not_allowed", "message": "POST required"}
             share = state.setdefault("share", {"weeklyRewarded": False, "actorRewardGot": 0, "weekKey": None})
             # The client treats this as a weekly share reward.  Keep the
             # reset tied to the server clock so tests and long-running local
@@ -913,6 +948,18 @@ class LocalProfileFeatures:
                 share["weekKey"] = current_week
                 share["weeklyRewarded"] = False
                 share["actorRewardGot"] = 0
+                self._save(profile, state)
+            if method == "GET":
+                # The Monday refresh push is followed by a GET in the native
+                # client.  This is a read of the persisted weekly state, so
+                # it must not consume the reward or require a request body.
+                return 200, {
+                    "weeklyRewarded": bool(share.get("weeklyRewarded")),
+                    "actorRewardGot": _int(share.get("actorRewardGot")),
+                    "resChange": [],
+                    "sandbox": True,
+                }
+            if method != "POST": return 405, {"error": "method_not_allowed", "message": "POST required"}
             if share.get("weeklyRewarded"): return 200, {"weeklyRewarded": True, "actorRewardGot": _int(share.get("actorRewardGot")), "resChange": [], "sandbox": True}
             ok, changes, error = self.game.economy._change_resources(profile, [{"type": 7, "id": 0, "param": 0, "count": 50}])
             if not ok: return 409, {"error": error or "resource_update_failed"}

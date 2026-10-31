@@ -43,6 +43,7 @@ from server.core.push_service import PushService
 from server.core.notifications import wire_game_notifications
 from server.core.reset_scheduler import ResetScheduler
 from server.core.patch_versions import select_patch_manifest, PatchVersionError, PatchVersionMismatch
+from server.core.client_errors import client_error_reply, is_client_route
 from storage.compat import ensure_unified_store, resolve_unified_store_path
 
 
@@ -703,10 +704,12 @@ class FixtureServer(ThreadingHTTPServer):
                     return result if result is not None else (501, {
                         "error": "route_not_implemented", "path": route,
                     })
-                try:
-                    self.route_registry.register_path(route, handler, method="POST", interface=interface)
-                except Exception:
-                    continue
+                methods = ("GET", "POST") if interface == "ApiChipExchange" else ("POST",)
+                for method in methods:
+                    try:
+                        self.route_registry.register_path(route, handler, method=method, interface=interface)
+                    except Exception:
+                        continue
 
     def dispatch_contract(self, method: str, path: str, request: Mapping[str, Any]):
         """Dispatch a request through the registry when a handler is bound."""
@@ -1027,6 +1030,8 @@ class FixtureHandler(BaseHTTPRequestHandler):
         return value.replace("\r", "").replace("\n", "")[:256]
 
     def _json_response(self, status: int, payload: dict[str, object], send_body: bool = True) -> None:
+        if status >= 400 and is_client_route(self.path):
+            status, payload = client_error_reply(status, payload)
         body = json.dumps(payload, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
         self._send_bytes(status, body, "application/json; charset=utf-8", send_body)
 
@@ -1633,7 +1638,7 @@ document.querySelector('#refresh').addEventListener('click',load);load();
                 self.server.audit_log.write(**base_record, status=status, handler='local_guest_accounts', handler_error=payload.get('error') if status >= 400 else None, handler_error_message=payload.get('message') if status >= 400 else None)
                 return
 
-        if self.server.game is not None and parsed.path.startswith('/fci/'):
+        if self.server.game is not None and (parsed.path.startswith('/fci/') or parsed.path.startswith('/match/')):
             game_path = parsed.path + ('?' + parsed.query if parsed.query else '')
             result = self.server.game.handle_http(method, game_path, payload_body,
                 self.headers.get('Content-Type'), self.headers.get('Authorization'))

@@ -22,6 +22,7 @@ from server.core.reset import ResetPolicy
 from server.core.atomic import AtomicMutations
 
 import json
+import logging
 import re
 import shutil
 import sqlite3
@@ -87,6 +88,12 @@ try:
     from .profile_features import LocalProfileFeatures
 except ImportError:  # pragma: no cover - direct PYTHONPATH execution
     from profile_features import LocalProfileFeatures
+try:
+    from .welfare_features import LocalWelfareFeatures
+    from .maze import LocalMaze
+except ImportError:  # pragma: no cover - direct PYTHONPATH execution
+    from welfare_features import LocalWelfareFeatures
+    from maze import LocalMaze
 try:
     from .storage.compat import (
         configure_legacy_connection,
@@ -569,6 +576,10 @@ class LocalGame:
         # separate local table so it can evolve without changing the legacy
         # bootstrap schema.  It is still in the same SQLite/WAL store.
         self.profile_features = LocalProfileFeatures(self, clock=self._clock)
+        # Welfare tabs and the newly exposed Maze activity use isolated
+        # profile-feature state so their local rules remain restart-safe.
+        self.welfare = LocalWelfareFeatures(self, clock=self._clock)
+        self.maze = LocalMaze(self, clock=self._clock)
         # Daily/main tasks from the client TaskInfo table (tasks.py).
         self.tasks = LocalTasks(self, clock=self._clock)
         # Achievements (历程) and collections (图鉴/novels).
@@ -1226,6 +1237,10 @@ class LocalGame:
     def login_messages(self, account: Mapping[str, Any]) -> List[Message]:
         """Return the exact bootstrap push message names and protobuf bytes."""
 
+        with self._lock:
+            return self._login_messages_locked(account)
+
+    def _login_messages_locked(self, account: Mapping[str, Any]) -> List[Message]:
         profile = self._profile(account)
         now_ms = self._now() * 1000
         self.mall.settle_month_card(profile)
@@ -1369,6 +1384,27 @@ class LocalGame:
         json_format.ParseDict(self.dungeons.chapter_detail(profile, chapter_id), message)
         return message
 
+    def _legacy_tournament_message(self, route: str, payload: Any) -> Any:
+        """Use typed responses for the legacy async-PvP HTTP resources."""
+        route = _route(route)
+        names = {
+            "/fci/asyncpvprecord": "ApiAsyncPvpRecordInfo.result",
+            "/fci/asyncpvpmatch": "ApiAsyncPvpMatch.result",
+            "/fci/asyncpvptargetdetail": "ApiAsyncPvpTargetDetail.result",
+        }
+        name = next((value for key, value in names.items()
+                     if route == key or route.startswith(key + "/")), None)
+        if name is None or not isinstance(payload, Mapping):
+            return payload
+        if name.endswith("TargetDetail.result") and "result" not in payload:
+            payload = {"result": payload}
+        try:
+            message = message_factory.GetMessageClass(self._pool.FindMessageTypeByName(name))()
+            json_format.ParseDict(dict(payload), message)
+            return message
+        except Exception:
+            return payload
+
     def _handle_http_unlocked(
         self,
         method: str,
@@ -1403,7 +1439,12 @@ class LocalGame:
             # Leave non-FCI paths (patch/clientupdate/fixtures) to the parent
             # fixture router; authenticating them here would turn them into
             # a misleading 401 before a fixture can answer.
-            if not route.startswith("/fci/"):
+            # BurstLink's native matcher is addressed through the separate
+            # matchUrl host (``/match/BurstLinkPVPMatch``) while all player
+            # state remains under /fci.  The local server keeps both seams in
+            # the same authenticated dispatcher so the original client can
+            # enter a deterministic robot room without a retired match host.
+            if not (route.startswith("/fci/") or route.startswith("/match/")):
                 return None
             # Entering routes are authenticated with the same local access
             # token, then delegated to the evidence-bounded entering module.
@@ -1421,13 +1462,31 @@ class LocalGame:
                 return cultivation_result
             tournament_result = self.tournament.handle_http(method, path, body, profile)
             if tournament_result is not None:
-                return tournament_result
-            if route.lower().startswith('/fci/rolepresent/'):
-                if method.upper() == 'GET' and route.lower() == '/fci/rolepresent/':
-                    return 200, []
-                # The APK defines presentation and timing but supplies no
-                # returned-gift reward pool. A fabricated id cannot pay out.
-                return 404, {'error': 'role_present_not_found'}
+                status, result = tournament_result
+                return status, self._legacy_tournament_message(route, result) if status == 200 else result
+            if route.rstrip('/').lower() == '/fci/rolepresent' or route.lower().startswith('/fci/rolepresent/'):
+                # Welfare2/WlfRolePresent: GET is an array. POST selects by
+                # URL and sends JSON null (there is no body selection field).
+                if method.upper() == 'GET':
+                    return 200, self.profile_features.pending_role_presents(profile)
+                if method.upper() != 'POST':
+                    return 405, {'error': 'method_not_allowed'}
+                suffix = route.rstrip('/').split('/')[-1]
+                if not suffix.isdigit():
+                    return 400, {'error': 'invalid_role_present_id'}
+                present_id = int(suffix)
+                with self.atomic_mutation():
+                    eligible = self.profile_features.pending_role_presents(profile)
+                    chosen = next((row for row in eligible if row['presentId'] == present_id), None)
+                    if chosen is None:
+                        return 409, {'error': 'role_present_not_available'}
+                    from grants import grant_rewards
+                    changes = grant_rewards(self, profile, chosen['rewards'])
+                    feature_state = self.profile_features._state(profile)
+                    day = self.reset_policy.day_index(self._now())
+                    feature_state.setdefault('rolePresents', {})[f'{day}:{chosen["roleId"]}'] = self._now()
+                    self.profile_features._save(profile, feature_state)
+                    return 200, {'presents': chosen, 'resChange': changes}
             guild_result = self.guild.handle_http(method, path, body, profile)
             if guild_result is not None:
                 return guild_result
@@ -1465,6 +1524,12 @@ class LocalGame:
             achievements_result = self.achievements.handle_http(method, path, body, profile)
             if achievements_result is not None:
                 return achievements_result
+            welfare_result = self.welfare.handle_http(method, path, body, profile)
+            if welfare_result is not None:
+                return welfare_result
+            maze_result = self.maze.handle_http(method, path, body, profile)
+            if maze_result is not None:
+                return maze_result
             systems_result = self.systems.handle_http(method, path, body, profile)
             if systems_result is not None:
                 return systems_result
@@ -1490,7 +1555,19 @@ class LocalGame:
             # points) only from these redpoint fields.
             if (method.upper() == "GET" and route.rstrip("/") == "/fci/redpoint/data"
                     and result is not None and result[0] == 200 and isinstance(result[1], dict)):
-                result = (200, {**result[1], **self.events.redpoint_fields(profile), **self.mall.redpoint_fields(profile),
+                event_redpoints = self.events.redpoint_fields(profile)
+                # Present.presentId is uint32 in ApiRolePresent.redpoint;
+                # older local records used the internal day:role key here.
+                # Normalize that key at the HTTP boundary while retaining it
+                # in the profile ledger for idempotency.
+                try:
+                    role_present = event_redpoints.get("rolePresentRedpoint", {}).get("presents", [])
+                    for present in role_present:
+                        if isinstance(present, dict):
+                            present["presentId"] = int(present.get("roleId", present.get("presentId", 0)) or 0)
+                except Exception:
+                    pass
+                result = (200, {**result[1], **event_redpoints, **self.mall.redpoint_fields(profile),
                                 **self.achievements.redpoint_fields(profile),
                                 **self.activity_modes.redpoint_fields(profile),
                                 **(self.social.redpoint_fields(profile) if hasattr(self.social, "redpoint_fields") else {}),
@@ -1536,6 +1613,12 @@ class LocalGame:
         achievements_result = self.achievements.handle_http(method, path, body, profile)
         if achievements_result is not None:
             return achievements_result
+        welfare_result = self.welfare.handle_http(method, path, body, profile)
+        if welfare_result is not None:
+            return welfare_result
+        maze_result = self.maze.handle_http(method, path, body, profile)
+        if maze_result is not None:
+            return maze_result
         systems_result = self.systems.handle_http(method, path, body, profile)
         if systems_result is not None:
             return systems_result
@@ -1602,7 +1685,12 @@ class LocalGame:
             if result is not None and result[0] == 200 and method.upper() != 'GET' and authorization:
                 account, error = self._authorized(authorization)
                 if account is not None and error is None:
-                    self.cultivation.sync(self._profile(account))
+                    try:
+                        self.cultivation.sync(self._profile(account))
+                    except Exception:
+                        # The primary operation is already committed. A derived
+                        # task refresh must not turn success into a retryable 500.
+                        logging.getLogger(__name__).exception("post-request cultivation refresh failed")
             if before is not None:
                 self._push_base_info_if_changed(before)
             return result

@@ -88,6 +88,18 @@ class SocialClientProtocolTests(unittest.TestCase):
         self.assertEqual(self.call("DELETE", path + "/99999")[0], 404)
         self.assertEqual(self.call("POST", path, {"content": "x" * 129})[0], 400)
 
+    def test_board_pagination_does_not_repeat_short_final_page(self):
+        path = "/fci/player-message/local-bot-001"
+        for index in range(6):
+            self.assertEqual(self.call("POST", path, {"content": str(index)})[0], 200)
+
+        status, first = self.call("GET", path + "?page=1&perPage=5")
+        self.assertEqual((status, len(first)), (200, 5))
+        status, second = self.call("GET", path + "?page=2&perPage=5")
+        self.assertEqual((status, len(second)), (200, 1))
+        status, third = self.call("GET", path + "?page=3&perPage=5")
+        self.assertEqual((status, third), (200, []))
+
     def test_applications_persist_accept_reject_and_notify_real_parameters(self):
         status, pending = self.call("GET", "/fci/applylist/")
         self.assertEqual(status, 200)

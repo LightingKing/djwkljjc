@@ -444,6 +444,16 @@ STAGE_MATERIAL_POOL: tuple[int, ...] = tuple(sorted(
     int(row["id"]) for row in _client_table_rows("ItemInfo")
     if row.get("id") and 207 in (row.get("sources") or [])
 ))
+# ``ProfitDetail`` guild skills target item function classes rather than
+# individual item ids (for example, funcType 7 is a star-up material and
+# funcType 2 is an equipment EXP potion).  Keep this projection local to the
+# reward path so a missing/partial ItemInfo export simply leaves the skill
+# inoperative for that item.
+ITEM_FUNC_TYPES: dict[int, int] = {
+    int(row["id"]): int(row.get("funcType", 0) or 0)
+    for row in _client_table_rows("ItemInfo")
+    if row.get("id")
+}
 # Drops.  The real per-stage drop groups (Dungeon_<n>_<type>_<m>) were
 # server-only; the client tables only carry what the stage window shows:
 #   - dropDisplayFirst: the first-clear rewards ("首通获得"), granted in full;
@@ -681,6 +691,24 @@ SPECIAL_MODE_ALIASES = {
     # JSON seam sometimes carries that numeric value instead of a mode name.
     "3": "gold", "4": "tower", "5": "maze", "6": "tournament",
 }
+
+# Team PVE (零境探险队) uses the client-owned TeamDungeonGroup table.  The
+# original 2.0.4 table contains seven groups with eight level stages each;
+# keep that mapping here so the HTTP compatibility seam can work even when a
+# server-only table is not available.  Rewards and unlock levels come from
+# the exported DungeonReward rows (7011-7078).  The multiplayer websocket
+# service was retired, so the local route creates two deterministic AI
+# teammates and runs the same FightActiveData/balance flow as a normal
+# dungeon.
+TEAM_DUNGEON_GROUPS: dict[int, list[int]] = {
+    group: [7000 + group * 10 + level for level in range(1, 9)]
+    for group in range(1, 8)
+}
+TEAM_DUNGEON_ACTIVITY_ID = 23001
+TEAM_DUNGEON_LEVEL_LIMIT = 30
+TEAM_DUNGEON_TICKET_ID = 80005
+TEAM_DUNGEON_TICKET_TYPE = 11
+TEAM_DUNGEON_DUNGEON_TYPE = 10
 
 
 def _chapter_ids(row: Mapping[str, Any]) -> tuple[int, ...]:
@@ -1388,6 +1416,240 @@ class LocalDungeons:
                 for row in rows
             ],
         }
+
+    # ------------------------------------------------------------------ team PVE
+    def _team_ticket_count(self, profile: Mapping[str, Any]) -> int:
+        modes = getattr(self.game, "activity_modes", None)
+        if modes is not None and hasattr(modes, "_item_count"):
+            try:
+                return int(modes._item_count(profile, TEAM_DUNGEON_TICKET_ID))
+            except Exception:
+                pass
+        try:
+            state = self.game.systems._state(profile)
+            item = (state.get("items") or {}).get(str(TEAM_DUNGEON_TICKET_ID)) or {}
+            return max(0, int(item.get("count", 0) or 0))
+        except Exception:
+            return 0
+
+    def _team_change_ticket(self, profile: Mapping[str, Any], delta: int) -> Optional[dict[str, Any]]:
+        modes = getattr(self.game, "activity_modes", None)
+        if modes is not None and hasattr(modes, "_change_item"):
+            try:
+                return modes._change_item(profile, TEAM_DUNGEON_TICKET_ID, int(delta))
+            except Exception:
+                return None
+        return None
+
+    @staticmethod
+    def _team_stage_group(dungeon_id: int) -> tuple[int, int] | None:
+        value = int(dungeon_id)
+        for group, stages in TEAM_DUNGEON_GROUPS.items():
+            if value in stages:
+                return group, stages.index(value) + 1
+        return None
+
+    def _team_ai_members(self, profile: Mapping[str, Any], dungeon_uid: int) -> list[dict[str, Any]]:
+        """Return two stable bot members for a local team run."""
+
+        names = ("本地协战·黑雪姬", "本地协战·桐人")
+        actors = (1002, 1003, 1004, 1007, 1011, 2108)
+        account = int(profile.get("account_id", 0) or 0)
+        result: list[dict[str, Any]] = []
+        for index in range(2):
+            first = actors[(account + dungeon_uid + index * 2) % len(actors)]
+            second = actors[(account + dungeon_uid + index * 2 + 1) % len(actors)]
+            result.append({
+                "playerId": f"local-team-bot-{dungeon_uid}-{index + 1}",
+                "name": names[index],
+                "level": max(30, int(profile.get("level", TEAM_DUNGEON_LEVEL_LIMIT) or TEAM_DUNGEON_LEVEL_LIMIT)),
+                "actors": [{"id": first, "uid": 0}, {"id": second, "uid": 0}],
+                "isRobot": True,
+                "ready": True,
+            })
+        return result
+
+    def _team_room(self, profile: Mapping[str, Any], dungeon_uid: int, dungeon_id: int, actor_ids: list[int], actor_uids: list[int], *, status: str = "ready") -> dict[str, Any]:
+        player_id = str(profile.get("player_id", "local"))
+        own_actors = [{"id": int(actor_id), "uid": int(uid)} for actor_id, uid in zip(actor_ids, actor_uids) if int(actor_id or 0) > 0 and int(uid or 0) > 0]
+        bots = self._team_ai_members(profile, dungeon_uid)
+        members = [{"playerId": player_id, "name": str(profile.get("name", "本地玩家")), "isRobot": False, "ready": True, "actors": own_actors}, *bots]
+        return {
+            "roomId": int(dungeon_uid),
+            "dungeonUid": int(dungeon_uid),
+            "dungeonId": int(dungeon_id),
+            "masterId": player_id,
+            "memberList": [str(row["playerId"]) for row in members],
+            "memberReadyState": {str(row["playerId"]): bool(row.get("ready", True)) for row in members},
+            "members": members,
+            "aiTeammates": bots,
+            "status": status,
+            "localAi": True,
+        }
+
+    def _team_groups(self, profile: Mapping[str, Any]) -> Response:
+        # The original endpoint returns an activityId -> TeamDungeonGroup id
+        # map (the client looks up TeamDungeonGroup locally).
+        groups = {str(TEAM_DUNGEON_ACTIVITY_ID): 1}
+        return 200, {
+            "result": groups,
+            "groups": [
+                {"groupId": group, "dungeonIds": list(stages), "bgPicture": f"Dungeon_team_bg_{group}"}
+                for group, stages in TEAM_DUNGEON_GROUPS.items()
+            ],
+            "activityId": TEAM_DUNGEON_ACTIVITY_ID,
+            "levelLimit": TEAM_DUNGEON_LEVEL_LIMIT,
+            "ticket": {"type": TEAM_DUNGEON_TICKET_TYPE, "id": TEAM_DUNGEON_TICKET_ID, "count": 1},
+            "tickets": self._team_ticket_count(profile),
+            "localAi": True,
+        }
+
+    def _team_enter(self, profile: Mapping[str, Any], request: Mapping[str, Any]) -> Response:
+        try:
+            player_level = int(profile.get("level", 1) or 1)
+        except (TypeError, ValueError):
+            player_level = 1
+        if player_level < TEAM_DUNGEON_LEVEL_LIMIT:
+            return 409, {"error": "team_dungeon_level_locked", "levelLimit": TEAM_DUNGEON_LEVEL_LIMIT}
+        try:
+            group = int(request.get("dungeonGroup", request.get("groupId", 1)) or 1)
+            level = int(request.get("level", request.get("difficulty", 1)) or 1)
+        except (TypeError, ValueError):
+            return 400, {"error": "invalid_team_dungeon_level"}
+        dungeon_id_raw = request.get("dungeonId", request.get("dungeon_id"))
+        try:
+            dungeon_id = int(dungeon_id_raw) if dungeon_id_raw is not None else int(TEAM_DUNGEON_GROUPS.get(group, [])[max(0, level - 1)])
+        except (TypeError, ValueError, IndexError):
+            return 400, {"error": "invalid_team_dungeon_id"}
+        stage = self._team_stage_group(dungeon_id)
+        if stage is None:
+            return 404, {"error": "team_dungeon_not_found", "dungeonId": dungeon_id}
+        group, level = stage
+        if level > 1 and player_level < int((STAGE_REWARD_ROWS.get(dungeon_id) or {}).get("difficultLevelLow", level) or level):
+            return 409, {"error": "team_dungeon_level_locked", "level": level}
+        actor_ids, actor_uids = self._fight_team(profile, request.get("selectActorGroupId", request.get("select_actor_group_id")))
+        if not any(actor_uids):
+            return 409, {"error": "profile_has_no_actors"}
+        with self._lock, closing(self._connect()) as connection, connection:
+            existing = connection.execute(
+                "SELECT dungeon_uid, actor_uids_json, created_at, status FROM local_dungeons WHERE account_id = ? AND dungeon_id = ? AND mode = 'team' AND status = 'active' LIMIT 1",
+                (int(profile["account_id"]), dungeon_id),
+            ).fetchone()
+            if existing is not None:
+                stored = [int(value) for value in json.loads(existing["actor_uids_json"] or "[]")]
+                if len(stored) == 6:
+                    actor_uids = stored
+                    state = self.game.systems._state(profile)
+                    actor_ids = [int((actor_store.get(profile, state, uid) or {}).get("id", 0)) for uid in actor_uids]
+                uid = int(existing["dungeon_uid"])
+                return 200, {
+                    "dungeonUid": uid, "dungeonId": dungeon_id, "mode": "team", "groupId": group, "level": level,
+                    "baseInfo": self._base_info(profile, dungeon_id, actor_ids, actor_uids, dungeon_type=TEAM_DUNGEON_DUNGEON_TYPE, activity_id=TEAM_DUNGEON_ACTIVITY_ID),
+                    "roomInfo": self._team_room(profile, uid, dungeon_id, actor_ids, actor_uids), "resChange": [], "retry": True, "localAi": True,
+                }
+            if self._team_ticket_count(profile) < 1:
+                return 409, {"error": "team_dungeon_ticket_not_enough", "ticketId": TEAM_DUNGEON_TICKET_ID, "tickets": 0}
+            ticket_change = self._team_change_ticket(profile, -1)
+            if ticket_change is None:
+                return 409, {"error": "team_dungeon_ticket_not_enough", "ticketId": TEAM_DUNGEON_TICKET_ID}
+            uid = self._new_uid(connection)
+            created = int(self._clock())
+            connection.execute(
+                "INSERT INTO local_dungeons (dungeon_uid, account_id, player_id, dungeon_id, dungeon_type, actor_uids_json, status, created_at, closed_at, mode, activity_id, floor, node) VALUES (?, ?, ?, ?, ?, ?, 'active', ?, NULL, 'team', ?, ?, ?)",
+                (uid, int(profile["account_id"]), str(profile["player_id"]), dungeon_id, TEAM_DUNGEON_DUNGEON_TYPE,
+                 json.dumps(actor_uids, separators=(",", ":")), created, str(TEAM_DUNGEON_ACTIVITY_ID), level, 0),
+            )
+        return 200, {
+            "dungeonUid": uid, "dungeonId": dungeon_id, "mode": "team", "groupId": group, "level": level,
+            "baseInfo": self._base_info(profile, dungeon_id, actor_ids, actor_uids, dungeon_type=TEAM_DUNGEON_DUNGEON_TYPE, activity_id=TEAM_DUNGEON_ACTIVITY_ID, create_time=created),
+            "roomInfo": self._team_room(profile, uid, dungeon_id, actor_ids, actor_uids),
+            "resChange": [ticket_change], "ticket": {"type": TEAM_DUNGEON_TICKET_TYPE, "id": TEAM_DUNGEON_TICKET_ID, "countDelta": -1},
+            "tickets": self._team_ticket_count(profile), "localAi": True,
+        }
+
+    def _team_balance(self, profile: Mapping[str, Any], dungeon_uid: int, body: bytes | bytearray | str | Mapping[str, Any] | None) -> Response:
+        with self._lock, closing(self._connect()) as connection, connection:
+            row = connection.execute(
+                "SELECT dungeon_id, status, active_data, balance_json, closed_at, actor_uids_json FROM local_dungeons WHERE dungeon_uid = ? AND account_id = ? AND mode = 'team'",
+                (dungeon_uid, int(profile["account_id"])),
+            ).fetchone()
+        if row is None:
+            return 404, {"error": "team_dungeon_not_found"}
+        if row["status"] != "active":
+            if row["balance_json"]:
+                try:
+                    cached = json.loads(row["balance_json"])
+                except (TypeError, ValueError, json.JSONDecodeError):
+                    cached = None
+                if isinstance(cached, dict):
+                    return 200, cached
+            return 409, {"error": "team_dungeon_not_active", "status": row["status"]}
+        active = self._decode_active_bytes(bytes(row["active_data"])) if row["active_data"] else None
+        request = _body_object(body)
+        won = bool(active is not None and int(active.winTeam) == 1)
+        if active is None and request.get("win") is not None:
+            won = bool(request.get("win"))
+        if active is None and not request.get("win"):
+            return 409, {"error": "battle_not_finished", "message": "FightActiveData PATCH is required before balance"}
+        dungeon_id = int(row["dungeon_id"])
+        rewards = [dict(item) for item in (STAGE_REWARD_ROWS.get(dungeon_id) or {}).get("dropDisplay", []) if isinstance(item, Mapping)] if won else []
+        reward_changes: list[dict[str, Any]] = []
+        if won:
+            modes = getattr(self.game, "activity_modes", None)
+            if modes is not None and hasattr(modes, "_grant"):
+                reward_changes = modes._grant(profile, rewards, dungeon_type=TEAM_DUNGEON_DUNGEON_TYPE)
+            else:
+                ok, reward_changes, error = self._resource_changes(profile, rewards)
+                if not ok:
+                    return 409, {"error": error or "resource_update_failed"}
+        balance_time = int(self._clock())
+        if not self._claim_terminal(profile, dungeon_uid, won=won, balance_time=balance_time):
+            return 409, {"error": "team_dungeon_not_active"}
+        try:
+            actor_uids = [int(value) for value in json.loads(row["actor_uids_json"] or "[]")]
+        except (TypeError, ValueError):
+            actor_uids = []
+        payload = {
+            "dungeonUid": dungeon_uid, "dungeonId": dungeon_id, "mode": "team", "localAi": True,
+            "balanced": True, "balanceTime": balance_time, "win": won, "firstFinish": won,
+            "profits": reward_changes, "resChange": reward_changes, "expChange": [],
+            "playerDamages": [{"playerId": str(profile.get("player_id", "local")), "damage": 1000 if won else 300},
+                               *[{"playerId": bot["playerId"], "damage": 700 if won else 200} for bot in self._team_ai_members(profile, dungeon_uid)]],
+            "roomInfo": self._team_room(profile, dungeon_uid, dungeon_id, [], actor_uids, status="finished"),
+            "balanceInfo": {"balanced": True, "win": won, "firstFinish": won, "balanceTime": balance_time, "profits": reward_changes, "resChange": reward_changes},
+        }
+        self._store_balance(profile, dungeon_uid, payload)
+        return 200, payload
+
+    def _team_http(self, method: str, route: str, body: bytes | bytearray | str | None, profile: Mapping[str, Any]) -> Optional[Response]:
+        route = route.rstrip("/").casefold()
+        if "/teamdungeongroups" in route:
+            return self._team_groups(profile) if method == "GET" else (405, {"error": "method_not_allowed"})
+        if "/teamdungeonurl" in route:
+            return (200, {"url": "ws://127.0.0.1:19102/fci/teamdungeon/", "localAi": True}) if method == "GET" else (405, {"error": "method_not_allowed"})
+        if "/teamdungeon" not in route:
+            return None
+        if route.endswith("/info") or route.endswith("/summary") or route == "/fci/teamdungeon":
+            if method == "GET":
+                return self._team_groups(profile)
+            if method == "POST":
+                return self._team_enter(profile, _body_object(body))
+        match = re.search(r"/teamdungeon/(?:dungeon|room|match|run/)?(\d+)", route)
+        uid_text = match.group(1) if match else None
+        if route.endswith("/enter") or route.endswith("/start") or route.endswith("/create") or route.endswith("/join"):
+            return self._team_enter(profile, _body_object(body)) if method == "POST" else (405, {"error": "method_not_allowed"})
+        if uid_text and route.endswith("/active"):
+            return self._active(profile, int(uid_text), body) if method == "PATCH" else (405, {"error": "method_not_allowed"})
+        if uid_text and route.endswith("/balance"):
+            return self._team_balance(profile, int(uid_text), body) if method == "POST" else (405, {"error": "method_not_allowed"})
+        if uid_text and method == "GET":
+            with self._lock, closing(self._connect()) as connection:
+                row = connection.execute("SELECT dungeon_uid, dungeon_id, actor_uids_json, status FROM local_dungeons WHERE dungeon_uid = ? AND account_id = ? AND mode = 'team'", (int(uid_text), int(profile["account_id"]))).fetchone()
+            if row is None:
+                return 404, {"error": "team_dungeon_not_found"}
+            actor_uids = [int(value) for value in json.loads(row["actor_uids_json"] or "[]")]
+            return 200, {"dungeonUid": int(row["dungeon_uid"]), "dungeonId": int(row["dungeon_id"]), "status": row["status"], "actorUid": actor_uids, "roomInfo": self._team_room(profile, int(row["dungeon_uid"]), int(row["dungeon_id"]), [], actor_uids, status=str(row["status"])) , "localAi": True}
+        return None
 
     def _progress(
         self,
@@ -2389,6 +2651,8 @@ class LocalDungeons:
         res_changes: list[dict[str, Any]] = []
         exp_changes: list[dict[str, Any]] = []
         state = systems._state(profile)
+        profit_rules = self._guild_profit_rules(profile)
+        dungeon_type = _dungeon_type(dungeon_id)
 
         # Character EXP for the team that fought (slot index = position in
         # the stored team; older rows fall back to the saved group).
@@ -2404,6 +2668,9 @@ class LocalDungeons:
             if actor is None:
                 continue
             gain = int(row.get("expActor" if int(member.get("index", 0)) < 3 else "expAssistant", 0) or 0) * runs
+            gain = self._profit_scaled(
+                gain, profit_rules, dungeon_type=dungeon_type, profit_type=3, rng=rng,
+            )
             if gain <= 0:
                 continue
             level_before = max(1, int(actor.get("level", 1) or 1))
@@ -2421,7 +2688,12 @@ class LocalDungeons:
         for _ in range(runs):
             equip_id = equipment.roll_stage_equipment(int(dungeon_id), first_finish, getattr(self, "_equip_rng", None))
             if equip_id:
-                res_changes.append(equipment.grant_equipment(self.game, profile, equip_id, state=state))
+                equip_count = self._profit_scaled(
+                    1, profit_rules, dungeon_type=dungeon_type, profit_type=8,
+                    res_type=RES_EQUIP, rng=rng,
+                )
+                for _ in range(equip_count):
+                    res_changes.append(equipment.grant_equipment(self.game, profile, equip_id, state=state))
         systems._save(profile, state)
 
         drops: dict[tuple[int, int], dict[str, int]] = {}
@@ -2455,8 +2727,92 @@ class LocalDungeons:
                             add(key[0], key[1], int(item.get("count", 0) or 0))
         if STAGE_MATERIAL_POOL and self._has_exp_material_group(tokens):
             add(RES_ITEM, STAGE_MATERIAL_POOL[(int(dungeon_id) - 1) % len(STAGE_MATERIAL_POOL)], runs)
+        for entry in drops.values():
+            item_id = int(entry.get("id", 0) or 0)
+            entry["count"] = self._profit_scaled(
+                int(entry.get("count", 0) or 0), profit_rules,
+                dungeon_type=dungeon_type, profit_type=8, res_type=RES_ITEM,
+                func_type=ITEM_FUNC_TYPES.get(item_id, 0), rng=rng,
+            )
         res_changes.extend(self._grant(profile, list(drops.values())))
         return res_changes, exp_changes
+
+    def _guild_profit_rules(self, profile: Mapping[str, Any]) -> list[dict[str, Any]]:
+        """Read active guild ProfitDetail rows without making rewards fragile.
+
+        Guild state is optional for old saves and isolated dungeon tests.  A
+        missing module, an expired skill, or a malformed row must leave the
+        canonical reward calculation unchanged.
+        """
+
+        guild = getattr(self.game, "guild", None)
+        reader = getattr(guild, "active_profit_rules", None)
+        if not callable(reader):
+            return []
+        try:
+            rows = reader(profile)
+        except Exception:
+            return []
+        if not isinstance(rows, (list, tuple)):
+            return []
+        return [dict(row) for row in rows if isinstance(row, Mapping)]
+
+    @staticmethod
+    def _profit_scaled(
+        base: int,
+        rules: list[Mapping[str, Any]],
+        *,
+        dungeon_type: int,
+        profit_type: int = 0,
+        res_type: int = 0,
+        func_type: int = 0,
+        rng: Any = None,
+    ) -> int:
+        """Apply active ratio ProfitDetail rows to one reward quantity.
+
+        ProfitDetail ratios use the same 10,000 denominator as the guild
+        donation settlement table.  Fractional quantities are carried as a
+        deterministic extra unit when the supplied RNG hits the remainder;
+        this preserves integer resource ledgers while avoiding systematic
+        truncation of a 15%/20% skill on one-unit drops.
+        """
+
+        quantity = max(0, int(base or 0))
+        if quantity <= 0:
+            return quantity
+        for rule in rules:
+            allowed = rule.get("dungeonType", rule.get("dungeon_type", []))
+            if isinstance(allowed, (int, str)):
+                allowed = [allowed]
+            try:
+                if allowed and int(dungeon_type) not in {int(value) for value in allowed}:
+                    continue
+            except (TypeError, ValueError):
+                continue
+            try:
+                rule_type = int(rule.get("type", 0) or 0)
+                target_res = int(rule.get("resType", rule.get("res_type", 0)) or 0)
+                target_func = int(rule.get("funcType", rule.get("func_type", 0)) or 0)
+                add = int(rule.get("add", 0) or 0)
+            except (TypeError, ValueError, OverflowError):
+                continue
+            if profit_type and rule_type != int(profit_type):
+                continue
+            if target_res and target_res != int(res_type):
+                continue
+            if target_func and target_func != int(func_type):
+                continue
+            if add <= 0:
+                continue
+            if bool(rule.get("isRatio", rule.get("is_ratio", False))):
+                numerator = quantity * add
+                whole, remainder = divmod(numerator, 10000)
+                if remainder and rng is not None and float(rng.random()) < (remainder / 10000.0):
+                    whole += 1
+                quantity += whole
+            else:
+                quantity += add
+        return quantity
 
     @staticmethod
     def _team_statistics(active: Any) -> tuple[Any, Any]:
@@ -2819,6 +3175,11 @@ class LocalDungeons:
             ).fetchone()
         if row is None:
             return 404, {"error": "dungeon_not_found"}
+        if row["mode"] == "team":
+            # Canonical /fci/dungeon/<uid>/balance is also accepted by the
+            # local client shim; use the Team PVE reward path rather than the
+            # generic special-dungeon energy path.
+            return self._team_balance(profile, dungeon_uid, body)
         if row["status"] != "active":
             if row["balance_json"]:
                 try:
@@ -3210,6 +3571,9 @@ class LocalDungeons:
     ) -> Optional[Response]:
         route = _route(path)
         method = method.upper()
+        team_result = self._team_http(method, route, body, profile)
+        if team_result is not None:
+            return team_result
         # The original client uses feature-specific GoldDungeon*/Tower*/Maze*
         # and Tournament* resources.  Their retired descriptors are not
         # available, so expose a small JSON compatibility seam alongside the

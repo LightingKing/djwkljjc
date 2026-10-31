@@ -10,6 +10,8 @@ from contextlib import closing
 from pathlib import Path
 from unittest.mock import patch
 
+from google.protobuf import message_factory
+
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tests"))
@@ -60,6 +62,10 @@ class PaymentRemediationTests(unittest.TestCase):
         status, result = self.deliver(token)
         self.assertEqual(status, 200, result)
         return token, result
+
+    def native(self, path, schema, **fields):
+        cls = message_factory.GetMessageClass(self.game._pool.FindMessageTypeByName(schema))
+        return self.game.handle_http("POST", path, cls(**fields).SerializeToString(), "application/wireformat", self.auth)
 
     def month_mails(self):
         return [mail for mail in self.game.systems._state(self.profile())["mails"] if "monthCardDay" in mail]
@@ -184,12 +190,21 @@ class PaymentRemediationTests(unittest.TestCase):
     def test_month_daily_mail_claim_is_free_currency_and_once(self):
         self.buy(MONTH)
         mail = self.month_mails()[0]
-        before_total, before_paid = self.balance(5), self.balance(27)
+        before_total, before_paid, before_gold = self.balance(5), self.balance(27), self.balance(7)
         for _ in range(2):
             status, _ = self.game.mailbox.handle_http("PATCH", f'/fci/mail/{mail["id"]}',
                                                      b'{"attachmentsGot":true}', self.profile())
             self.assertEqual(status, 200)
         self.assertEqual((self.balance(5), self.balance(27)), (before_total + 50, before_paid))
+        self.assertEqual(self.balance(7), before_gold + 20000)
+
+    def test_month_daily_mail_matches_original_misc_configuration(self):
+        misc = json.loads((ROOT / "data/client-tables/Misc.json").read_text(encoding="utf-8"))["rows"][0]
+        self.assertEqual(misc["monthCardRewardDaily"], [{"type": 5, "count": 50}, {"type": 7, "count": 20000}])
+        self.buy(MONTH)
+        self.assertEqual(self.month_mails()[0]["attachments"], [
+            {"type": row["type"], "id": row.get("id", 0), "param": row.get("param", 0), "count": row["count"]}
+            for row in misc["monthCardRewardDaily"]])
 
     def test_month_has_exactly_thirty_daily_entitlements(self):
         self.buy(MONTH)
@@ -231,6 +246,55 @@ class PaymentRemediationTests(unittest.TestCase):
         direct = [r for r in self.game.mall.activity_gifts if r.get("giftPage") == 3]
         self.assertTrue(direct)
         self.assertTrue(all(r["activityId"] in opened for r in direct))
+
+    def test_visible_repeated_products_buy_with_native_orders_on_both_platforms(self):
+        mall = self.game.mall
+        status, activities = self.game.handle_http("GET", "/fci/activity/", authorization=self.auth)
+        self.assertEqual(status, 200, activities)
+        opened = {row["activityId"] for row in activities if row["type"] == 15}
+        for mall_id in (860, 870, 926, 927):
+            with self.subTest(mall=mall_id):
+                row = mall.catalog.mall[mall_id]
+                product_id = row["productId"]
+                product = mall.catalog.products[product_id]
+                self.assertIn(row["activityId"], opened)
+                first = mall.catalog.mall_row_for_product(product_id)
+                self.assertNotIn(first["activityId"], opened)
+                self.assertEqual(mall.catalog.mall_row_for_product(
+                    product_id, open_activity_ids=mall.open_activity_ids)["id"], mall_id)
+                count = product["maxBuyCount"]
+                item_id, unit = product["purchaseRes"][0]["id"], product["purchaseRes"][0]["count"]
+                before = self.game.systems._state(self.profile())["items"].get(str(item_id), {}).get("count", 0)
+                for purchased in range(1, count + 1):
+                    status, touched = self.native("/fci/purchasetouch/?source=direct", "ApiPurchaseTouchProduct",
+                        product_id=product_id, is_guest=True, platform=product["platform"], channel=5, count=product["count"])
+                    self.assertEqual(status, 200, touched)
+                    fields = {"product_id": product_id, "trade_data": touched["tradeData"],
+                              "platform": product["platform"], "channel": 5}
+                    status, delivered = self.native("/fci/purchasedelevery/", "ApiPurchaseDelevery", **fields)
+                    self.assertEqual(status, 200, delivered)
+                    self.assertEqual(delivered["buyCount"], purchased)
+                    status, replay = self.native("/fci/purchasedelevery/", "ApiPurchaseDelevery", **fields)
+                    self.assertEqual((status, replay["resChange"]), (200, []))
+                self.assertEqual(self.game.systems._state(self.profile())["items"][str(item_id)]["count"], before + count * unit)
+                status, result = self.native("/fci/purchasetouch/", "ApiPurchaseTouchProduct",
+                                             product_id=product_id, platform=product["platform"])
+                self.assertEqual(status, 409, result)
+
+    def test_duplicate_product_closure_rejects_native_delivery_without_losing_receipt(self):
+        mall = self.game.mall
+        product_id = mall.catalog.mall[860]["productId"]
+        status, touched = self.native("/fci/purchasetouch/", "ApiPurchaseTouchProduct", product_id=product_id)
+        self.assertEqual(status, 200, touched)
+        fields = {"product_id": product_id, "trade_data": touched["tradeData"]}
+        before = copy.deepcopy(mall._state(self.profile()))
+        mall.open_activity_ids.remove(15860)
+        status, result = self.native("/fci/purchasedelevery/", "ApiPurchaseDelevery", **fields)
+        self.assertEqual(status, 409, result)
+        self.assertEqual(mall._state(self.profile()), before)
+        self.assertEqual(self.game.systems._state(self.profile())["items"].get("60001", {}).get("count", 0), 0)
+        mall.open_activity_ids.add(15860)
+        self.assertEqual(self.native("/fci/purchasedelevery/", "ApiPurchaseDelevery", **fields)[0], 200)
 
 
 if __name__ == "__main__":

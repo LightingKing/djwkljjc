@@ -1,11 +1,61 @@
 {
   "appVersion": "2.0.4.59162.0",
-  "patchVersion": 5,
+  "patchVersion": 7,
   "modules": [
-    {"source": "sources/login.lua", "target": "assetbundle/data/lua/window/login/login", "originalSha256": "7bb80bcd7dbede6d4be6027ea9936f165a62715ab1e7db4127d8406383a1d6c4"},
-    {"source": "sources/auth.lua", "target": "assetbundle/data/lua/window/auth/auth", "originalSha256": "08ee811367d6ca80896da4c11ec753f1908a7584043b32730c9c492bcfde911b"},
-    {"source": "sources/iaphandler.lua", "target": "assetbundle/data/lua/manager/iaphandler", "originalSha256": "0e84d01f67546752cb1f01e476f946bdc59c2851b8afb65b14ff72b35426e021"},
-    {"source": "sources/actorutil.lua", "target": "assetbundle/data/lua/common/actorutil", "originalSha256": "e8040bfde750f4ac7b03fee3e6f931ee21e5837dfa9badb1ae166d7fcb8840f8"},
-    {"source": "sources/resourceexchange.lua", "target": "assetbundle/data/lua/window/resourceexchange/resourceexchange", "originalSha256": "f79f11ee0dc50c63b7fe6193e20e63a06e4b58e6d02b188b88a2015c284e41fe"}
+    {
+      "source": "sources/login.lua",
+      "target": "assetbundle/data/lua/window/login/login",
+      "originalSha256": "7bb80bcd7dbede6d4be6027ea9936f165a62715ab1e7db4127d8406383a1d6c4"
+    },
+    {
+      "source": "sources/auth.lua",
+      "target": "assetbundle/data/lua/window/auth/auth",
+      "originalSha256": "08ee811367d6ca80896da4c11ec753f1908a7584043b32730c9c492bcfde911b"
+    },
+    {
+      "source": "sources/iaphandler.lua",
+      "target": "assetbundle/data/lua/manager/iaphandler",
+      "originalSha256": "0e84d01f67546752cb1f01e476f946bdc59c2851b8afb65b14ff72b35426e021"
+    },
+    {
+      "source": "sources/actorutil.lua",
+      "target": "assetbundle/data/lua/common/actorutil",
+      "originalSha256": "e8040bfde750f4ac7b03fee3e6f931ee21e5837dfa9badb1ae166d7fcb8840f8"
+    },
+    {
+      "source": "sources/resourceexchange.lua",
+      "target": "assetbundle/data/lua/window/resourceexchange/resourceexchange",
+      "originalSha256": "f79f11ee0dc50c63b7fe6193e20e63a06e4b58e6d02b188b88a2015c284e41fe"
+    },
+    {
+      "source": "sources/restifizermanager.lua",
+      "target": "assetbundle/data/lua/manager/restifizermanager",
+      "originalSha256": "45ac8875b53019b2113617158cdad3d4c3621e6249c6ebabe2b49b922a45ae16"
+    },
+    {
+      "source": "sources/purchaseactivitygift.lua",
+      "target": "assetbundle/data/lua/window/purchase/purchaseactivitygift",
+      "originalSha256": "32bba995204364c3325a13680ee249fba692f23f93fc2492611bc5cef3352d23"
+    },
+    {
+      "source": "sources/purchasegiftitem.lua",
+      "target": "assetbundle/data/lua/window/purchase/purchasegiftitem",
+      "originalSha256": "e3e89964a8fe1efd8f4d506677a587d6ee36588c174d37ee638211b5704d63c2"
+    },
+    {
+      "source": "sources/purchasebuy.lua",
+      "target": "assetbundle/data/lua/window/purchasebuy/purchasebuy",
+      "originalSha256": "f8179408e3c39559f220f1d333b30bd0ba5771181a22b070dd7cb8d54b80acac"
+    },
+    {
+      "source": "sources/activity.lua",
+      "target": "assetbundle/data/lua/window/activity/activity",
+      "originalSha256": "9a3046436230bb9b51139e5d7ebde1df7d03316f79237571d49825a02c5d6936"
+    },
+    {
+      "source": "sources/windowutil.lua",
+      "target": "assetbundle/data/lua/common/windowutil",
+      "originalSha256": "7698c0454718a71750fead33e3ea6f8910bda47292a592795eea9ac194dce703"
+    }
   ]
 }

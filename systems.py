@@ -11,12 +11,13 @@ from __future__ import annotations
 from server.core.reset import policy_for, period_due
 
 import json
+import hashlib
 import random
 import time
 from contextlib import closing
 from pathlib import Path
 from typing import Any, Mapping, Optional
-from urllib.parse import urlsplit
+from urllib.parse import parse_qs, urlsplit
 
 from google.protobuf import message_factory
 
@@ -147,6 +148,60 @@ MANUAL_BOXES: dict[int, list[dict[str, Any]]] = {}
 for _row in _client_table_rows("ManualBox"):
     if _row.get("id") and isinstance(_row.get("inBox"), dict):
         MANUAL_BOXES.setdefault(int(_row["id"]), []).append(_row)
+
+# The original DropInfo/Box tables were server-only and were not present in
+# the 2.0.4 client export.  Keep the replacement pools explicit and versioned
+# so a later recovery can replace them without changing the item-use contract.
+# ``weight`` is in a 10,000 point domain; a fixed row has an implicit 10,000
+# weight.  The client only renders the resulting STResourceDynamic rows, so
+# all rewards here are existing ItemInfo/EquipInfo resources.
+RANDOM_BOX_RULES: dict[int, dict[str, Any]] = {
+    # Local reconstruction of the public international-server description:
+    # ascension boxes grant two same-tier materials, ten of each.
+    85003: {"mode": "fixed", "dropId": "Box_85003", "rewards": [
+        {"type": _RES_ITEM, "id": 30011, "count": 10},
+        {"type": _RES_ITEM, "id": 30012, "count": 10},
+    ]},
+    85004: {"mode": "fixed", "dropId": "Box_85004", "rewards": [
+        {"type": _RES_ITEM, "id": 30016, "count": 10},
+        {"type": _RES_ITEM, "id": 30017, "count": 10},
+    ]},
+    85006: {"mode": "fixed", "dropId": "Box_85006", "rewards": [
+        {"type": _RES_ITEM, "id": 30021, "count": 10},
+        {"type": _RES_ITEM, "id": 30022, "count": 10},
+    ]},
+    # The client marks 75001/75002 as quality-4 boxes.  International data
+    # confirms one random equipment item of the corresponding quality.
+    75001: {"mode": "equipment", "dropId": "Box_75001_15", "quality": 4, "weight": 10000},
+    75002: {"mode": "equipment", "dropId": "Box_75001_15", "quality": 4, "weight": 10000},
+    # Activity 54000's DropInfo was also server-only.  Keep its six rewards
+    # usable with a conservative q4 ascension-material pair; each is limited
+    # to one use by ItemInfo.maxUseCount.
+    54001: {"mode": "fixed", "dropId": "Box_54001_1", "rewards": [
+        {"type": _RES_ITEM, "id": 30021, "count": 5},
+        {"type": _RES_ITEM, "id": 30022, "count": 5},
+    ]},
+    54002: {"mode": "fixed", "dropId": "Box_54002_1", "rewards": [
+        {"type": _RES_ITEM, "id": 30021, "count": 5},
+        {"type": _RES_ITEM, "id": 30022, "count": 5},
+    ]},
+    54003: {"mode": "fixed", "dropId": "Box_54003_1", "rewards": [
+        {"type": _RES_ITEM, "id": 30021, "count": 5},
+        {"type": _RES_ITEM, "id": 30022, "count": 5},
+    ]},
+    54004: {"mode": "fixed", "dropId": "Box_54004_1", "rewards": [
+        {"type": _RES_ITEM, "id": 30021, "count": 5},
+        {"type": _RES_ITEM, "id": 30022, "count": 5},
+    ]},
+    54005: {"mode": "fixed", "dropId": "Box_54005_1", "rewards": [
+        {"type": _RES_ITEM, "id": 30021, "count": 5},
+        {"type": _RES_ITEM, "id": 30022, "count": 5},
+    ]},
+    54006: {"mode": "fixed", "dropId": "Box_54006_1", "rewards": [
+        {"type": _RES_ITEM, "id": 30021, "count": 5},
+        {"type": _RES_ITEM, "id": 30022, "count": 5},
+    ]},
+}
 RESOURCE_COMPOSE: dict[tuple[int, int], dict[str, Any]] = {
     (int(row["targetRes"].get("type", 0) or 0), int(row["targetRes"].get("id", 0) or 0)): row
     for row in _client_table_rows("ResourceCompose") if isinstance(row.get("targetRes"), dict)
@@ -1864,7 +1919,8 @@ class LocalSystems:
         return None
 
     def _item_resource(self, method: str, route: str, body: Body, profile: Mapping[str, Any], state: dict[str, Any]) -> Optional[Response]:
-        lower = route.lower(); payload = self._request_values(body)
+        query = parse_qs(urlsplit(route).query, keep_blank_values=True)
+        lower = _route(route).lower(); payload = self._request_values(body)
         item_route = lower in {"/fci/item", "/fci/item/", "/fci/item/use", "/fci/item/sell"} or any(token in lower for token in ("playeritem", "itemuse", "item-use", "itemsell", "item/sell", "/item/"))
         resource_route = any(token in lower for token in ("baseresource", "base-resource", "resourcecompose", "resource-compose", "/resource/compose", "resource/newflag", "resource-new-flag", "resourcefull"))
         if not (item_route or resource_route): return None
@@ -1878,6 +1934,24 @@ class LocalSystems:
                 return 405, {"error": "method_not_allowed", "message": "POST required"}
             return client_route(body, profile, state)
         items = state.setdefault("items", {})
+
+        if method in {"GET", "HEAD"} and (lower.rstrip("/") == "/fci/item" or lower.startswith("/fci/item/")):
+            def item_view(item_id):
+                value = items.get(str(item_id), {})
+                # A consumed stack still has a binding: return zero so ItemChange
+                # can clear it instead of leaving the stale client count intact.
+                return {"id": item_id, "count": _int(value.get("count")),
+                        "gotTime": _int(value.get("gotTime")), "isNew": bool(value.get("isNew", False))}
+            tail = lower.rstrip("/").rsplit("/", 1)[-1]
+            if tail != "item":
+                if not tail.isdecimal() or int(tail) <= 0:
+                    return 400, {"error": "invalid_item_uid"}
+                return 200, item_view(int(tail))
+            if "uids" in query:
+                values = [value.strip() for group in query["uids"] for value in group.split(",")]
+                if any(not value.isdecimal() or int(value) <= 0 for value in values):
+                    return 400, {"error": "invalid_item_uids"}
+                return 200, [item_view(int(value)) for value in values]
 
         # The real client uses a typed single-item endpoint for the item
         # detail popup.  Keep the historical list endpoint as JSON below, but
@@ -3294,7 +3368,10 @@ class LocalSystems:
         active = {_int(row.get("activityId")) for row in schedule.snapshot(self._now()).get("active", [])}
         return any(_int(row.get("actorId")) == _int(source.get("id"))
                    and _int(target.get("id")) in [_int(value) for value in row.get("targetId", [])]
-                   and _int(row.get("activityId")) in active for row in DIFF_ACTOR_INHERIT)
+                   # Activity 33001 is the client's permanent whitelist row;
+                   # it is absent from the dated phase list by design.
+                   and (_int(row.get("activityId")) in active or _int(row.get("activityId")) == 33001)
+                   for row in DIFF_ACTOR_INHERIT)
 
     @staticmethod
     def _inherit_talents(left: Mapping[str, Any], right: Mapping[str, Any], use_new: bool,
@@ -3826,10 +3903,96 @@ class LocalSystems:
             entry.count = change["count"]; entry.count_delta = change["countDelta"]
         return 200, result
 
+    @staticmethod
+    def _box_request_key(payload: Mapping[str, Any]) -> str:
+        """Read an optional client retry key without making ordinary calls idempotent.
+
+        The stock 2.0.4 client sends only ``id`` and ``count``.  It has no
+        request-id field, so synthesising a key from those values would make
+        two intentional consecutive openings look like a retry.  Newer local
+        tooling may send any of these common spellings to get exactly-once
+        behaviour across a timeout/reconnect.
+        """
+
+        for key in ("requestId", "request_id", "idempotencyKey", "idempotency_key"):
+            value = payload.get(key)
+            if value is not None and str(value).strip():
+                return str(value).strip()[:128]
+        return ""
+
+    @staticmethod
+    def _box_rng(profile: Mapping[str, Any], item_id: int, sequence: int, request_key: str = "") -> random.Random:
+        """Return a stable per-account/per-box stream for local rewards."""
+
+        account_id = _int(profile.get("account_id"))
+        seed_material = f"ljjc-random-box-v1:{account_id}:{item_id}:{sequence}:{request_key}".encode()
+        seed = int.from_bytes(hashlib.blake2b(seed_material, digest_size=16).digest(), "big")
+        return random.Random(seed)
+
+    def _random_box_rewards(self, profile: Mapping[str, Any], item_id: int, count: int,
+                            sequence: int, request_key: str = "") -> list[dict[str, int]]:
+        """Roll the D1 local pool once per box and return STResource rows."""
+
+        info = ITEM_INFO.get(item_id, {})
+        rule = RANDOM_BOX_RULES.get(item_id)
+        if rule is None:
+            # Future funcType=6 rows still get a safe local implementation:
+            # quality-matched star material, or equipment for broadType=1.
+            quality = max(1, _int(info.get("quality"), 1))
+            if _int(info.get("broadType")) == 1:
+                rule = {"mode": "equipment", "quality": quality, "weight": 10000}
+            else:
+                pool = [
+                    _int(row.get("id")) for row in ITEM_INFO.values()
+                    if _int(row.get("type")) == 1 and _int(row.get("funcType")) == 7
+                    and _int(row.get("quality"), 0) == quality
+                ]
+                rule = {"mode": "item_pool", "pool": sorted(item for item in pool if item > 0), "weight": 10000}
+
+        rng = self._box_rng(profile, item_id, sequence, request_key)
+        rewards: list[dict[str, int]] = []
+        mode = str(rule.get("mode", "fixed"))
+        if mode == "fixed":
+            fixed = [dict(reward) for reward in rule.get("rewards", []) if isinstance(reward, Mapping)]
+            for _ in range(count):
+                rewards.extend(fixed)
+            return rewards
+        if mode == "equipment":
+            pool = list(equip_store.EQUIP_POOLS.get(_int(rule.get("quality")), []))
+            if not pool:
+                return []
+            for _ in range(count):
+                rewards.append({"type": _RES_EQUIP, "id": int(rng.choice(pool)), "count": 1})
+            return rewards
+        if mode == "item_pool":
+            pool = [_int(item) for item in rule.get("pool", []) if _int(item) in ITEM_INFO]
+            if not pool:
+                return []
+            for _ in range(count):
+                rewards.append({"type": _RES_ITEM, "id": int(rng.choice(pool)), "count": 1})
+            return rewards
+        return []
+
+    def _box_reply_from_receipt(self, receipt: Mapping[str, Any]) -> Optional[Any]:
+        encoded = str(receipt.get("responseHex", ""))
+        if not encoded:
+            return None
+        try:
+            result = self._message("ApiPlayerItemUse.result")
+            result.ParseFromString(bytes.fromhex(encoded))
+            return result
+        except Exception:
+            return None
+
     def _item_use(self, body: Body, profile: Mapping[str, Any], state: dict[str, Any]) -> Response:
-        """ManualBox (funcType 12): the ``index``-th ManualBox row of the box,
-        ``count`` times.  Box (6) contents were the server-only DropInfo
-        table, so those boxes are refused instead of granting invented items."""
+        """Use ManualBox (12) or a local, durable random box (6).
+
+        Random-box DropInfo was server-only in the recovered APK.  D1 uses the
+        explicit ``RANDOM_BOX_RULES`` table above, rolls with a stable
+        account/item/sequence seed, and stores the typed response as a receipt
+        when the caller supplies a retry key.  The stock client has no retry
+        key, so consecutive ordinary openings remain independent.
+        """
 
         payload = self._request_values(body)
         if "id" not in payload:
@@ -3842,10 +4005,14 @@ class LocalSystems:
             return 404, {"error": "item_not_found", "id": item_id}
         if count <= 0:
             return 400, {"error": "invalid_count"}
+        func = _int(info.get("funcType"))
+        if func == _ITEM_FUNC_BOX:
+            max_use = _int(info.get("maxUseCount"))
+            if max_use > 0 and count > max_use:
+                return 400, {"error": "count_exceeds_max_use", "id": item_id, "maxUseCount": max_use}
         owned = self._items_owned(state, item_id)
         if owned < count:
             return 409, {"error": "insufficient_item", "id": item_id, "required": count, "owned": owned}
-        func = _int(info.get("funcType"))
         if func == _ITEM_FUNC_MANUAL_BOX:
             rows = MANUAL_BOXES.get(item_id) or []
             if not 0 <= index < len(rows):
@@ -3854,18 +4021,65 @@ class LocalSystems:
             content["count"] = _int(content.get("count"), 1) * count
             rewards = [content]
         elif func == _ITEM_FUNC_BOX:
-            return 409, {"error": "box_drop_table_unavailable", "id": item_id,
-                         "message": "DropInfo (box contents) was server-only"}
+            request_key = self._box_request_key(payload)
+            receipts = state.setdefault("randomBoxReceipts", {})
+            if not isinstance(receipts, dict):
+                receipts = {}
+                state["randomBoxReceipts"] = receipts
+            if request_key:
+                previous = receipts.get(request_key)
+                if isinstance(previous, Mapping):
+                    same_request = (_int(previous.get("itemId")) == item_id
+                                    and _int(previous.get("count")) == count
+                                    and _int(previous.get("index")) == index)
+                    if not same_request:
+                        return 409, {"error": "idempotency_key_reused", "requestId": request_key}
+                    duplicate = self._box_reply_from_receipt(previous)
+                    if duplicate is not None:
+                        return 200, duplicate
+            sequence = _int(state.get("randomBoxUseSeq")) + 1
+            state["randomBoxUseSeq"] = sequence
+            rewards = self._random_box_rewards(profile, item_id, count, sequence, request_key)
+            if not rewards:
+                state["randomBoxUseSeq"] = sequence - 1
+                return 409, {"error": "box_drop_table_unavailable", "id": item_id,
+                             "message": "No local reward pool is configured for this box"}
         else:
             return 409, {"error": "item_not_usable", "id": item_id, "funcType": func}
         result = self._message("ApiPlayerItemUse.result")
         change = self._items_take(state, {item_id: count})[0]
         entry = result.res_change.add().base_res
-        entry.type = change["type"]; entry.id = change["id"]; entry.count = change["count"]; entry.count_delta = change["countDelta"]
+        entry.type = change["type"]; entry.id = change["id"]; entry.param = change["param"]
+        entry.count = change["count"]; entry.count_delta = change["countDelta"]
         error = self._grant_contents(profile, state, rewards, result)
         if error is not None:
             state["items"][str(item_id)]["count"] = _int(state["items"][str(item_id)].get("count")) + count
+            if func == _ITEM_FUNC_BOX:
+                state["randomBoxUseSeq"] = max(0, _int(state.get("randomBoxUseSeq")) - 1)
             return 409, {"error": error}
+        if func == _ITEM_FUNC_BOX:
+            request_key = self._box_request_key(payload)
+            # Every successful opening has a durable audit row.  Explicit
+            # request keys additionally make timeout retries exactly-once.
+            receipt_id = request_key or f"seq:{_int(state.get('randomBoxUseSeq'))}"
+            receipts = state.setdefault("randomBoxReceipts", {})
+            if isinstance(receipts, dict):
+                receipts[receipt_id] = {
+                    "requestId": request_key,
+                    "receiptId": receipt_id,
+                    "sequence": _int(state.get("randomBoxUseSeq")),
+                    "itemId": item_id,
+                    "count": count,
+                    "index": index,
+                    "rewards": [dict(reward) for reward in rewards],
+                    "responseHex": result.SerializeToString().hex(),
+                    "createdAt": self._now(),
+                }
+                # Keep the state bounded while retaining the most recent
+                # explicit keys for practical retry windows.
+                if len(receipts) > 512:
+                    for old_key in sorted(receipts, key=lambda key: _int(receipts[key].get("sequence")) if isinstance(receipts[key], Mapping) else 0)[:-512]:
+                        receipts.pop(old_key, None)
         self._save(profile, state)
         return 200, result
 
@@ -3968,6 +4182,14 @@ class LocalSystems:
         if lower == "/fci/profit":
             if method != "GET":
                 return 405, {"error": "method_not_allowed"}
+            guild = getattr(self.game, "guild", None)
+            if guild is not None:
+                try:
+                    return 200, guild.active_profits(profile)
+                except Exception:
+                    # A cosmetic profit refresh must not turn a committed
+                    # guild operation into a client-resetting 500.
+                    return 200, []
             return 200, []
         return None
 
@@ -3979,7 +4201,7 @@ class LocalSystems:
         # PATCH payloads for compatibility).
         for handler in (self._actor_group, self._flags_and_profit, self._cultivation, self._player_profile, self._actor_maintenance, self._equipment_maintenance, self._item_resource, self._medal_seal_cultivation,
                         self._gacha, self._actor, self._equip, self._mail, self._relation, self._guild):
-            result = handler(method, route, body, profile, state)
+            result = handler(method, path if handler == self._item_resource else route, body, profile, state)
             if result is not None:
                 return result
         result = self._task(method, route, body, profile, state)

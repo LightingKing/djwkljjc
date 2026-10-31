@@ -163,18 +163,12 @@ def run_smoke() -> dict[str, Any]:
                 raise AssertionError("shop 1 goods list is empty")
             status, trade = call("POST", "/fci/ShopTrade/", {"shopId": 1, "info": goods[0]})
             require(status, path="shop trade")
-            status, voucher = call("POST", "/fci/recharge/voucher/", {"rechargeId": 51})
-            require(status, path="sandbox voucher")
-            status, duplicate = call("POST", "/fci/recharge/voucher/", {"rechargeId": 51})
-            require(status, expected=409, path="sandbox voucher retry")
-            if duplicate.get("error") != "recharge_reward_already_claimed":
-                raise AssertionError("voucher retry was not an explicit idempotent conflict")
             status, touch = call("POST", "/fci/purchasetouch", {"productId": "local.sandbox.60", "count": 1})
             require(status, path="sandbox purchase order")
             token = str(touch.trade_data)
             status, delivered = call("POST", "/fci/purchasedelevery", {"tradeData": token})
             require(status, path="sandbox purchase delivery")
-            return {"shops": shops, "goods": goods, "trade": trade, "voucher": voucher, "delivered": delivered}
+            return {"shops": shops, "goods": goods, "trade": trade, "delivered": delivered}
 
         def events():
             status, activity = call("GET", "/fci/activity/")
@@ -197,7 +191,7 @@ def run_smoke() -> dict[str, Any]:
             require(status, path="mail obtain retry")
             if len(obtained_again.res_change) != 0:
                 raise AssertionError("mail retry granted the attachment twice")
-            status, gacha = call("POST", "/fci/gachatrade/", {"count": 1})
+            status, gacha = call("POST", "/fci/gachatrade/", {"id": 1, "gachaFree": True})
             require(status, path="sandbox gacha")
             return {"activity": activity, "tasks": tasks, "mail": mail, "gacha": gacha}
 

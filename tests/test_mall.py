@@ -134,6 +134,25 @@ class LocalMallTests(unittest.TestCase):
         orders = self.mall.orders(self.profile())
         self.assertEqual([(o["product_id"], o["status"]) for o in orders], [(GEM60, "delivered")])
 
+    def test_delivery_reply_cache_is_bounded_and_old_token_replays_without_credit(self):
+        profile = self.profile()
+        state = self.mall._state(profile)
+        for index in range(mall_module.MAX_DELIVERED_REPLIES + 7):
+            token = f"local-sandbox:synthetic-{index}"
+            self.mall._remember_delivery(state, token, {
+                "transactionId": f"order-{index}", "productId": GEM60,
+                "channel": 5, "resChange": [{"baseRes": {"type": 5, "countDelta": 120}}],
+            })
+        self.assertEqual(len(state["delivered"]), mall_module.MAX_DELIVERED_REPLIES)
+        self.assertEqual(len(state["deliveredTokens"]), mall_module.MAX_DELIVERED_REPLIES + 7)
+        self.mall._save(profile, state)
+
+        # The oldest full reply has been evicted, but its marker still makes
+        # a retry idempotent and returns no second resource delta.
+        status, replay = self.call("POST", "/fci/purchasedelevery/", {"tradeData": "local-sandbox:synthetic-0"})
+        self.assertEqual(status, 200)
+        self.assertEqual((replay["transactionId"], replay["resChange"]), ("order-0", []))
+
     def test_recharge_bonus_is_bound_mizi(self):
         self.recharge(GEM1280)
         self.assertEqual((self.balance(5), self.balance(27)), (2560, 1280))

@@ -1,5 +1,10 @@
 [
   {
+    "source": "I:/workspace/mobilegame/analysis/lua-decompiled/manager__restifizermanager.lua",
+    "destination": "sources/restifizermanager.lua",
+    "sha256": "2b31f82ae700265b7d7393567c414da346748b26eeea1313a8d71aa18a4e45c9"
+  },
+  {
     "source": "I:/workspace/mobilegame/runtime/auth_m18.lua",
     "destination": "sources/auth.lua",
     "sha256": "cd3eaa9bfe9ff54a0be320f607557ed7a9dec365705dd6eb95c735ad9887b335"
@@ -38,5 +43,32 @@
     "source": "I:/workspace/mobilegame/runtime/ljjc-lua/fci-lua53.opmap",
     "destination": "fci-lua53.opmap",
     "sha256": "b63eb2c982e1b6337ec0ccb5e96ae0b35490ca58f70d0cbf72855340d6df3425"
+  },
+  {
+    "source": "I:/workspace/mobilegame/analysis/lua-decompiled/window__purchase__purchaseactivitygift.lua",
+    "destination": "sources/purchaseactivitygift.lua",
+    "sha256": "dec4e1dc57db6fe11d10726ea67f32d7aac6ace51d2651aa91cd6f71e263d0e7"
+  },
+  {
+    "source": "I:/workspace/mobilegame/analysis/lua-decompiled/window__purchase__purchasegiftitem.lua",
+    "destination": "sources/purchasegiftitem.lua",
+    "sha256": "b4177b8c40694cdfa3adee7009135c51d6228d0bc990bc573d3084c6af61ea79"
+  },
+  {
+    "source": "I:/workspace/mobilegame/analysis/lua-decompiled/window__purchasebuy__purchasebuy.lua",
+    "destination": "sources/purchasebuy.lua",
+    "sha256": "6b62efe1c362ba4dc35bac312fca5b071ad5cd51fef6d9b63939d0d029c459ea"
+  },
+  {
+    "source": "I:/workspace/mobilegame/analysis/ljjc_manifest_out/assets/Patch/assetbundle/data/lua/window/activity/activity",
+    "destination": "sources/activity.lua",
+    "sha256": "5f278763e131465685eef4e29812dab2f75265954d249a9d600d6e3c3b31c29f",
+    "reason": "D4 Maze activity entry and level gate"
+  },
+  {
+    "source": "I:/workspace/mobilegame/analysis/ljjc_manifest_out/assets/Patch/assetbundle/data/lua/common/windowutil",
+    "destination": "sources/windowutil.lua",
+    "sha256": "c77c803bc9abcf47df0215359956125afefdd1caf8907413acbee41630f8c3fb",
+    "reason": "D4 Maze activity entry and level gate"
   }
 ]

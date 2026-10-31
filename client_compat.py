@@ -45,16 +45,11 @@ _STATIC: dict[str, Any] = {
     "/fci/webactivity": {"activities": []},
     # PushService/SceneFight store these maps as received.
     "/fci/event-dungeon/record": {},
-    "/fci/teamdungeongroups": {},
     # ApiDeployMission.get: no deploy mission row exists locally (the typed
     # reply carried one empty entry the client rendered as a mission).
     "/fci/deploy/mission": {"missionInfo": [], "accomplishNum": 0},
     # Only read while a CultivationPvP activity is open.
     "/fci/challenge-mode/reward": {"scoreRecord": {}, "rewardRecords": []},
-    # Welfare chip-exchange tab binds the DBGamePlayer.ChipExchangeInfo object.
-    "/fci/chipexchange": {"lastActivitySeason": 0, "modifyCount": 0, "settlePosInfo": [], "exchangePosInfo": []},
-    # Welfare role-present tab reads a list (#data, m_data[1]).
-    "/fci/rolepresent": [],
 }
 
 

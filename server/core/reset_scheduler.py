@@ -37,10 +37,11 @@ class ResetScheduler:
             self.last_error = None
             for account_id in account_ids:
                 try:
-                    with self.game._lock:
-                        social_tick = getattr(self.game.social, 'tick', None)
-                        if social_tick is not None:
-                            social_tick(self.game._profile({'accountId': account_id}))
+                    # Social login/world-chat ticks are driven by the push
+                    # connection.  The calendar worker must only settle
+                    # persisted reset boundaries; running social.tick every
+                    # second held the game lock and replayed the full social
+                    # scan for every connected account.
                     processed += bool(self._settle(account_id))
                 except Exception:
                     self.last_error = 'reset_failed'

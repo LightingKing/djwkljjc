@@ -187,9 +187,22 @@ class FriendsProfileTests(unittest.TestCase):
         state = self.game.systems._state(profile)
         state["medals"] = {"7": {"id": 7, "gotTime": 123, "isNew": True}, "3": {"id": 3, "gotTime": 99, "isNew": False}}
         self.game.systems._save(profile, state)
-        self.assertEqual(self.call("GET", "/fci/medal/7"), (200, {"id": 7, "gotTime": 123, "isNew": True}))
+        self.assertEqual(self.call("GET", "/fci/medal/7"), (200, {"id": 7, "gotTime": 123, "expireTime": 0, "isNew": True}))
         self.assertEqual(self.call("GET", "/fci/medal/8"), (200, {}))
         self.assertEqual([row["id"] for row in self.call("GET", "/fci/medal/")[1]], [3, 7])
+
+    def test_season_medal_uses_original_28_day_expiry_and_typed_push(self):
+        pushes = []
+        self.game.base_push_notifier = lambda profile, kind, params: pushes.append((kind, params))
+        self.grant((8, 1004, 1))
+        medal = self.call("GET", "/fci/medal/1004")[1]
+        self.assertEqual(medal["expireTime"], self.now[0] + 28 * 86400)
+        self.assertIn((49, (1004,)), pushes)
+        self.now[0] += 28 * 86400 - 1
+        self.assertEqual(self.call("GET", "/fci/medal/1004")[1]["id"], 1004)
+        self.now[0] += 1
+        self.assertEqual(self.call("GET", "/fci/medal/1004"), (200, {}))
+        self.assertEqual(self.call("GET", "/fci/medal/"), (200, []))
 
     # ------------------------------------------------------------ RoleNotePad
     def test_one_notepad_per_owned_role(self):
