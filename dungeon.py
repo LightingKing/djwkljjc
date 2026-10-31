@@ -2745,7 +2745,14 @@ class LocalDungeons:
                 dungeon_type=dungeon_type, profit_type=8, res_type=RES_ITEM,
                 func_type=ITEM_FUNC_TYPES.get(item_id, 0), rng=rng,
             )
-        res_changes.extend(self._grant(profile, list(drops.values())))
+        rewards = list(drops.values())
+        welfare = getattr(self.game, "welfare", None)
+        if welfare is not None:
+            rewards = welfare.replace_chip_rewards(profile, dungeon_id, rewards)
+        res_changes.extend(self._grant(profile, rewards))
+        if welfare is not None:
+            res_changes.extend(welfare.grant_battle_materials(
+                profile, dungeon_id, dungeon_type=dungeon_type, runs=runs))
         return res_changes, exp_changes
 
     def _guild_profit_rules(self, profile: Mapping[str, Any]) -> list[dict[str, Any]]:

@@ -38,7 +38,8 @@ class RaceClientTests(unittest.TestCase):
 
     def call(self, method, path, body=None, game=None):
         raw = body if isinstance(body, bytes) else json.dumps(body).encode() if body is not None else None
-        return (game or self.game).handle_http(method, path, raw, "application/json", self.auth)
+        return (game or self.game).handle_http(method, path, raw,
+            "application/wireformat" if isinstance(body, bytes) else "application/json", self.auth)
 
     def info(self):
         status, data = self.call("GET", "/fci/RacePVPInfo")
@@ -297,7 +298,7 @@ class RaceClientTests(unittest.TestCase):
         return [mail for mail in self.game.systems._state(self.profile).get("mails", [])
                 if mail.get("senderName") == "残梦之境"]
 
-    def test_abandoned_or_uploaded_run_is_replaced_but_fresh_create_is_replayed(self):
+    def test_abandoned_run_is_closed_uploaded_run_is_balanced_and_fresh_create_is_replayed(self):
         first = self.enter()
         self.now[0] += self.race.CREATE_RETRY_SECONDS + 1
         second = self.enter()
@@ -307,7 +308,9 @@ class RaceClientTests(unittest.TestCase):
         self.call("PATCH", f"/fci/dungeon/{second['dungeonUid']}/active/", self.snapshot(second).SerializeToString())
         third = self.enter()
         self.assertNotEqual(second["dungeonUid"], third["dungeonUid"])
-        self.assertEqual(self.race._run(self.profile, second["dungeonUid"])["status"], "closed")
+        restored = self.race._run(self.profile, second["dungeonUid"])
+        self.assertEqual(restored["status"], "balanced")
+        self.assertEqual(restored["balance"], {"curBattleScore": 2500, "highBattleScore": 2500})
         self.assertEqual(self.enter()["dungeonUid"], third["dungeonUid"])
         self.assertEqual(self.item(80004), 3)
         self.assertEqual(self.fight(third), {"curBattleScore": 2500, "highBattleScore": 2500})
@@ -339,6 +342,9 @@ class RaceClientTests(unittest.TestCase):
         mails = self.race_mails()
         compensation = [mail for mail in mails if "补偿" in mail["title"]]
         self.assertEqual(len(compensation), 1)
+        self.assertEqual(len(mails), 1)  # No ranking reward for an unfinished run.
+        self.assertFalse(self.race._load(self.profile)["enrolled"])
+        self.assertIsNone(self.race._load(self.profile)["lastParticipatedCycle"])
         self.assertEqual(compensation[0]["attachments"], [{"type": 11, "id": 80004, "count": 1, "param": 0}])
         reboot = LocalGame(self.root / "game", self.accounts, clock=lambda: self.now[0])
         self.assertEqual(self.call("POST", f"/fci/racepvp-dungeon/{first['dungeonUid']}/balance/", {}, game=reboot)[1], result)
@@ -533,6 +539,197 @@ class RaceClientTests(unittest.TestCase):
         self.info()
         self.assertEqual(len(self.race_mails()), 1)
         self.assertEqual(len(published), 1)
+
+    def test_login_and_browsing_nine_cycles_never_enroll_or_grant_cycle_or_season_rewards(self):
+        origin = self.race._cycle_at(self.now[0])["index"]
+        original_resources = self.game._profile(self.account)["resources"]
+        for step in range(9):
+            with self.subTest(cycle=step):
+                cycle = self.race._cycle_by_index(origin + step)
+                self.now[0] = cycle["start"]
+                list(self.game.login_messages(self.account))
+                self.assertEqual(self.info()["score"], 200)
+                self.assertFalse(self.call("GET", "/fci/RacePVPSummary/")[1]["rewardTag"])
+                self.assertEqual(self.item(80004), 6)
+                self.now[0] = cycle["end"]
+                list(self.game.login_messages(self.account))
+                self.assertEqual(self.info()["score"], 200)
+                state = self.race._load(self.profile)
+                self.assertFalse(state["enrolled"])
+                self.assertIsNone(state["seasonOrigin"])
+                self.assertIsNone(state["lastParticipatedCycle"])
+                self.assertEqual(state["settlements"], [])
+                self.assertEqual(state.get("seasonSettlements", []), [])
+                self.assertEqual(self.race_mails(), [])
+                self.assertEqual(self.item(80004), 0)
+        self.assertEqual(self.game._profile(self.account)["resources"], original_resources)
+
+    def test_empty_cancel_in_next_cycle_does_not_take_rank_points_or_earn_rewards(self):
+        self.fight(self.enter(), damage=400000)
+        self.now[0] = self.info()["endTime"]
+        closed = self.info()
+        self.assertEqual(closed["score"], 240)
+        self.assertEqual(len(self.race_mails()), 1)
+        self.now[0] = closed["endTime"]
+        empty = self.enter()
+        self.assertFalse(self.race._load(self.profile)["enrolled"])
+        self.assertEqual(self.call("DELETE", f"/fci/racepvp-dungeon/{empty['dungeonUid']}")[0], 200)
+        self.now[0] = self.info()["endTime"]
+        self.assertEqual(self.info()["score"], 240)
+        self.assertEqual(len(self.race_mails()), 1)
+        self.assertEqual(len(self.race._load(self.profile)["settlements"]), 1)
+
+    def test_native_zero_damage_surrender_counts_and_first_real_battle_anchors_season(self):
+        origin = self.race._cycle_at(self.now[0])["index"]
+        self.info()
+        self.now[0] = self.race._cycle_by_index(origin + 3)["start"]
+        run = self.enter()
+        self.assertIsNone(self.race._load(self.profile)["seasonOrigin"])
+        # Common/DungeonUtil.LeaveRacePvp(3) uploads the current bare snapshot;
+        # it does not replace winTeam=0 with a fabricated loss or require damage.
+        snapshot = self.snapshot(run, damage=0, own_damage=0, round_no=0, win=0)
+        self.assertEqual(self.call("PATCH", f"/fci/dungeon/{run['dungeonUid']}/active/", snapshot.SerializeToString())[0], 200)
+        self.assertFalse(self.race._load(self.profile)["enrolled"])
+        result = self.call("POST", f"/fci/racepvp-dungeon/{run['dungeonUid']}/balance/", b"")[1]
+        self.assertEqual(result, {"curBattleScore": 0, "highBattleScore": 0})
+        state = self.race._load(self.profile)
+        self.assertTrue(state["enrolled"])
+        self.assertEqual((state["seasonOrigin"], state["lastParticipatedCycle"], state["round"]), (origin + 3, origin + 3, 1))
+        self.now[0] = state["cycleEnd"]
+        self.info()
+        self.assertEqual(len(self.race_mails()), 1)
+
+    def test_twenty_four_native_reentries_recover_uploaded_surrender_once_and_spend_one_new_ticket(self):
+        run = self.enter()
+        active = self.snapshot(run, damage=60000, round_no=2, win=0)
+        self.call("PATCH", f"/fci/dungeon/{run['dungeonUid']}/active/", active.SerializeToString())
+        cls = message_factory.GetMessageClass(self.game._pool.FindMessageTypeByName("ApiRacePVPDungeon"))
+        body = cls(dungeon_id=run["baseInfo"]["dungeonId"], select_actor_group_id=1).SerializeToString()
+        reboot = LocalGame(self.root / "game", self.accounts, clock=lambda: self.now[0])
+        with ThreadPoolExecutor(max_workers=24) as executor:
+            replies = list(executor.map(lambda i: self.call("POST", "/fci/racepvp-dungeon/", body,
+                                                           game=self.game if i % 2 else reboot), range(24)))
+        self.assertTrue(all(code == 200 for code, _ in replies), replies)
+        self.assertEqual(len({data["dungeonUid"] for _, data in replies}), 1)
+        self.assertNotEqual(replies[0][1]["dungeonUid"], run["dungeonUid"])
+        self.assertEqual(self.item(80004), 4)
+        recovered = self.race._run(self.profile, run["dungeonUid"])
+        self.assertEqual(recovered["status"], "balanced")
+        self.assertEqual(recovered["balance"], {"curBattleScore": 6000, "highBattleScore": 6000})
+        self.assertEqual(self.race._own(self.profile, self.race._load(self.profile))["battleScore"], 6000)
+        self.assertEqual(self.call("POST", f"/fci/racepvp-dungeon/{run['dungeonUid']}/balance/", b"")[1], recovered["balance"])
+        reward_cls = message_factory.GetMessageClass(self.game._pool.FindMessageTypeByName("ApiRacePVPBattleScoreReward"))
+        reward_body = reward_cls(battle_score=2000).SerializeToString()
+        self.assertEqual(self.call("POST", "/fci/RacePVPBattleScoreReward/", reward_body)[0], 200)
+        self.assertEqual(self.call("POST", "/fci/RacePVPBattleScoreReward/", reward_body)[1], {"resChange": []})
+        self.assertEqual((self.item(40002), self.item(10001)), (20, 20))
+
+    def test_last_ticket_completed_run_is_recovered_even_when_new_entry_cannot_be_paid(self):
+        for _ in range(5):
+            self.fight(self.enter(), damage=10000)
+        run = self.enter()
+        self.call("PATCH", f"/fci/dungeon/{run['dungeonUid']}/active/", self.snapshot(run, damage=90000).SerializeToString())
+        cls = message_factory.GetMessageClass(self.game._pool.FindMessageTypeByName("ApiRacePVPDungeon"))
+        body = cls(dungeon_id=run["baseInfo"]["dungeonId"], select_actor_group_id=1).SerializeToString()
+        before_bag = self.game.systems._state(self.profile)
+        before_resources = self.game._profile(self.account)["resources"]
+        status, error = self.call("POST", "/fci/racepvp-dungeon/", body)
+        self.assertEqual((status, error["error"]), (409, "race_ticket_exhausted"))
+        self.assertEqual(self.item(80004), 0)
+        self.assertEqual(self.game.systems._state(self.profile), before_bag)
+        self.assertEqual(self.game._profile(self.account)["resources"], before_resources)
+        self.assertEqual(self.race._run(self.profile, run["dungeonUid"])["balance"], {"curBattleScore": 9000, "highBattleScore": 9000})
+        self.assertEqual(self.race._own(self.profile, self.race._load(self.profile))["battleScore"], 9000)
+
+    def test_reentry_write_failure_rolls_back_recovery_new_ticket_and_notifications(self):
+        run = self.enter()
+        self.call("PATCH", f"/fci/dungeon/{run['dungeonUid']}/active/", self.snapshot(run, damage=60000).SerializeToString())
+        cls = message_factory.GetMessageClass(self.game._pool.FindMessageTypeByName("ApiRacePVPDungeon"))
+        body = cls(dungeon_id=run["baseInfo"]["dungeonId"], select_actor_group_id=1).SerializeToString()
+        before = (self.race._load(self.profile), self.race._run(self.profile, run["dungeonUid"]),
+                  self.game.systems._state(self.profile))
+        original = self.race._save_run
+        def fail_new_run(profile, data):
+            if data["dungeonUid"] != run["dungeonUid"]:
+                raise RuntimeError("new run failed")
+            return original(profile, data)
+        self.pushes.clear()
+        with patch.object(self.race, "_save_run", side_effect=fail_new_run):
+            with self.assertRaisesRegex(RuntimeError, "new run failed"):
+                self.call("POST", "/fci/racepvp-dungeon/", body)
+        self.assertEqual((self.race._load(self.profile), self.race._run(self.profile, run["dungeonUid"]),
+                          self.game.systems._state(self.profile)), before)
+        self.assertEqual(self.pushes, [])
+        self.assertEqual(self.call("POST", "/fci/racepvp-dungeon/", body)[0], 200)
+        self.assertEqual(self.item(80004), 4)
+        self.assertTrue(self.race._load(self.profile)["enrolled"])
+
+    def test_old_phantom_participation_migration_preserves_assets_without_future_rewards(self):
+        self.info()
+        legacy = self.race._load(self.profile)
+        legacy.pop("participationVersion")
+        legacy.update(enrolled=True, lastParticipatedCycle=legacy["cycle"], seasonOrigin=legacy["cycle"], score=480)
+        self.race._save(self.profile, legacy)  # Explicit version-2 migration fixture.
+        before_bag = self.game.systems._state(self.profile)
+        before_resources = self.game._profile(self.account)["resources"]
+        self.assertEqual(self.info()["score"], 480)
+        repaired = self.race._load(self.profile)
+        self.assertFalse(repaired["enrolled"])
+        self.assertIsNone(repaired["lastParticipatedCycle"])
+        self.assertIsNone(repaired["seasonOrigin"])
+        self.assertEqual(self.game.systems._state(self.profile), before_bag)
+        self.assertEqual(self.game._profile(self.account)["resources"], before_resources)
+        self.now[0] = self.race._cycle_by_index(legacy["cycle"] + 8)["start"]
+        self.assertEqual(self.info()["score"], 480)
+        self.assertEqual(self.race_mails(), [])
+
+    def test_old_participation_migration_uses_last_balanced_cycle_instead_of_last_login(self):
+        self.fight(self.enter(), damage=400000)
+        previous = self.race._load(self.profile)
+        self.now[0] = previous["nextStart"]
+        self.info()
+        state = self.race._load(self.profile)
+        state.pop("participationVersion")
+        state.update(enrolled=True, lastParticipatedCycle=state["cycle"])
+        self.race._save(self.profile, state)  # Old version marked every login.
+        mails = self.race_mails()
+        self.info()
+        migrated = self.race._load(self.profile)
+        self.assertFalse(migrated["enrolled"])
+        self.assertEqual(migrated["lastParticipatedCycle"], previous["cycle"])
+        self.assertEqual(migrated["seasonOrigin"], previous["seasonOrigin"])
+        self.assertEqual(self.race_mails(), mails)
+
+    def test_legacy_weekly_migration_keeps_a_previous_week_real_battle_when_current_room_is_unused(self):
+        created = self.enter()
+        self.fight(created, damage=400000)
+        previous = self.race._load(self.profile)
+        self.now[0] = self.race._cycle_by_index(previous["cycle"] + 2)["start"]
+        self.info()
+        current = self.race._load(self.profile)
+        # Explicit old weekly-schema fixture: this week's room was only viewed,
+        # while the last real finished run belongs to the prior weekly room.
+        legacy = {key: current[key] for key in ("week", "round", "score", "oldScore", "players", "rewardRecved",
+                                              "activeUid", "isNew", "settlements", "status", "endTime", "dungeonId")}
+        legacy["week"] = self.game.reset_policy.period_start(self.now[0], "week")
+        legacy["round"] = 2
+        self.race._save(self.profile, legacy)
+        old_run = self.race._run(self.profile, created["dungeonUid"])
+        old_run.pop("cycle")
+        old_run.pop("cycleEnd")
+        old_run["week"] = self.game.reset_policy.period_start(old_run["createdAt"], "week")
+        self.race._save_run(self.profile, old_run)
+        before_bag = self.game.systems._state(self.profile)
+        self.info()
+        migrated = self.race._load(self.profile)
+        self.assertFalse(migrated["enrolled"])
+        self.assertEqual(migrated["lastParticipatedCycle"], previous["cycle"])
+        self.assertLessEqual(migrated["seasonOrigin"], previous["cycle"])
+        self.assertEqual(self.race._run(self.profile, created["dungeonUid"])["cycle"], previous["cycle"])
+        self.assertEqual(self.game.systems._state(self.profile), before_bag)
+        self.now[0] = self.race._cycle_by_index(migrated["seasonOrigin"] + 8)["start"]
+        self.info()
+        self.assertEqual(len([m for m in self.race_mails() if "赛季" in m["title"]]), 1)
 
 
 if __name__ == "__main__":

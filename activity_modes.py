@@ -1038,6 +1038,10 @@ class LocalActivityModes:
         record.update(finished=True, multiPower=multi, doneTimes=_int(record.get("doneTimes")) + 1)
         self._save(profile, state)
         reward_changes = self._grant(profile, drops, dungeon_type=DUNGEON_TYPE["material"])
+        welfare = getattr(self.game, "welfare", None)
+        if welfare is not None:
+            reward_changes.extend(welfare.grant_battle_materials(
+                profile, dungeon_id, dungeon_type=DUNGEON_TYPE["material"], runs=multi))
         tasks = getattr(self.game, "tasks", None)
         if tasks is not None:
             tasks.on_battle_win(profile, dungeon_id, energy, mode="activity", stats=self._battle_stats(active),

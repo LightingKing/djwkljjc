@@ -5,6 +5,7 @@ import json
 import tempfile
 import threading
 import unittest
+from datetime import datetime, timezone
 from http.client import HTTPConnection
 from pathlib import Path
 
@@ -19,7 +20,8 @@ class WelfareNativeHttpTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.root = Path(self.temp.name)
         self.accounts = LocalAccounts(self.root / "accounts")
-        self.game = LocalGame(self.root / "game", self.accounts)
+        self.now = [int(datetime(2026, 10, 30, 4, tzinfo=timezone.utc).timestamp())]
+        self.game = LocalGame(self.root / "game", self.accounts, clock=lambda: self.now[0])
         self.account, self.auth = guest(self.accounts)
         self.server = FixtureServer(
             ("127.0.0.1", 0), self.root, JsonlLogger(self.root / "requests.jsonl"),
@@ -55,7 +57,7 @@ class WelfareNativeHttpTests(unittest.TestCase):
         status, info = self.request("GET", "/fci/chipexchange/")
         self.assertEqual(status, 200)
         self.assertEqual(info, {
-            "lastActivitySeason": 1, "modifyCount": 0,
+            "lastActivitySeason": 20261026, "modifyCount": 0,
             "settlePosInfo": [], "exchangePosInfo": [],
         })
 
@@ -70,10 +72,10 @@ class WelfareNativeHttpTests(unittest.TestCase):
         status, changed = self.request("POST", "/fci/chipexchange/", native)
         self.assertEqual(status, 200)
         self.assertEqual(changed, {
-            "lastActivitySeason": 1, "modifyCount": 2,
-            "settlePosInfo": order[::-1], "exchangePosInfo": order[::-1],
+            "lastActivitySeason": 20261026, "modifyCount": 2,
+            "settlePosInfo": order[::-1], "exchangePosInfo": [],
         })
-        self.game = LocalGame(self.root / "game", self.accounts)
+        self.game = LocalGame(self.root / "game", self.accounts, clock=lambda: self.now[0])
         self.server.game = self.game
         self.assertEqual(self.request("GET", "/fci/chipexchange/"), (200, changed))
         self.assertEqual(self.request("POST", "/fci/chipexchange/", native), (200, changed))
