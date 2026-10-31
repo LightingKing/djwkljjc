@@ -10,6 +10,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from accounts import LocalAccounts
 from game import LocalGame
+from grants import grant_rewards
 
 
 def guest(accounts: LocalAccounts):
@@ -82,6 +83,10 @@ class LocalProfileFeaturesTests(unittest.TestCase):
             accounts = LocalAccounts(root / "accounts")
             game = LocalGame(root / "game", accounts)
             _account, auth = guest(accounts)
+            grant_rewards(game, game._profile(_account), [
+                {"type": 11, "id": 1016, "count": 25},
+                {"type": 11, "id": 2001, "count": 1},
+            ])
             for path, body in (
                 ("/fci/jigsawpuzzle/lighten/", {"cellId": 1}),
                 ("/fci/postcard/lighten/", {"cellId": 2}),
@@ -94,6 +99,11 @@ class LocalProfileFeaturesTests(unittest.TestCase):
             status, repeated = game.handle_http("POST", "/fci/share/", b'{"actorId":1001}', authorization=auth)
             self.assertEqual(status, 200)
             self.assertEqual(repeated["resChange"], [])
+            status, current = game.handle_http("GET", "/fci/share/", authorization=auth)
+            self.assertEqual(status, 200)
+            self.assertTrue(current["weeklyRewarded"])
+            self.assertEqual(current["actorRewardGot"], 1001)
+            self.assertEqual(current["resChange"], [])
             restarted = LocalGame(root / "game", accounts)
             status, jigsaw = restarted.handle_http("GET", "/fci/jigsawpuzzle/", authorization=auth)
             self.assertEqual(status, 200)

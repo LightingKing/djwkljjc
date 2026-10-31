@@ -74,20 +74,18 @@ class LocalSystemsTests(unittest.TestCase):
                 if path == "/fci/relation/applyfriend/":
                     self.assertEqual(result.result.player_id, "local-bot-001")
                     self.assertTrue(result.result.name)
-            # Native async matching stays closed until a verified arena
-            # dungeon is configured. A rejected request must not touch assets.
-            resources_before = game._profile(account)["resources"]
+            # Native async matching is open locally.  A refresh consumes the
+            # real 80001 item and returns a typed target response.
             assets_before = game.systems._state(profile)
-            status, unavailable = game.handle_http(
+            assets_before.setdefault("items", {})["80001"] = {"id": 80001, "count": 1}
+            game.systems._save(profile, assets_before)
+            status, refreshed = game.handle_http(
                 "POST", "/fci/asyncpvpmatch/", b'{"index":1}', "application/json", auth
             )
-            self.assertEqual(status, 501)
-            self.assertEqual(unavailable["error"], "tournament_asyncpvp_not_configured")
-            self.assertFalse(unavailable["dungeonConfigured"])
-            self.assertEqual(game._profile(account)["resources"], resources_before)
-            assets_after = game.systems._state(profile)
-            for field in ("actorInstances", "equips", "items"):
-                self.assertEqual(assets_after.get(field), assets_before.get(field), field)
+            self.assertEqual(status, 200)
+            self.assertEqual(refreshed.DESCRIPTOR.full_name, "ApiAsyncPvpMatch.result")
+            self.assertEqual(refreshed.index, 1)
+            self.assertEqual(game.systems._state(profile)["items"]["80001"]["count"], 0)
             # The enhance consumed its food and fed EXP into the real item.
             state = game.systems._state(profile)
             self.assertEqual(state["items"]["40001"]["count"], 0)

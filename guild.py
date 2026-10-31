@@ -35,17 +35,23 @@ BOT_WISHES = tuple(dict.fromkeys([min(ROLES)] + sorted(
     key for key, role in ROLES.items() if int(role["id"]) in CULTIVATION_ROLES)))
 HEAD_PHOTOS = frozenset(int(row["id"]) for row in _client_rows("PlayerHeadPhoto"))
 # The original GuildSkill prefab has four slots. ProfitDetail supplies their
-# actual display parameters; the GuildSkill fee table was not
-# recovered. Leave its proto defaults at zero and reject activation below.
+# effect parameters; the fee table is not present in the extracted client
+# tables, so the native contract uses the documented local rule below.
 SKILL_PROFITS = [r for r in _client_rows("ProfitDetail") if 101 <= int(r["id"]) <= 104]
+SKILL_DURATION = 43200
+SKILL_SCORE_COST = 500
+SKILL_MAX_USE_COUNT = 1
 ROUTE_PATTERNS = (
     r"/fci/guild-recommend/", r"/fci/guild-search/", r"/fci/guild-player/",
     r"/fci/guild-player/invited/", r"/fci/guild/",
     r"/fci/guild/\d+/", r"/fci/guild/\d+/members/",
-    r"/fci/guild/\d+/pending-members/", r"/fci/guild/\d+/invited-members/",
+    r"/fci/guild/\d+/members/[^/]+/",
+    r"/fci/guild/\d+/pending-members/", r"/fci/guild/\d+/pending-members/[^/]+/",
+    r"/fci/guild/\d+/invited-members/",
     r"/fci/guild/\d+/members/quit/", r"/fci/guild/\d+/donate/",
     r"/fci/guild/\d+/donate/(?:request|send|touch)/",
-    r"/fci/guild/\d+/(?:vote|skill|record)/",
+    r"/fci/guild/\d+/(?:vote|skill|record|president|vice-president|socialgroup)/",
+    r"/fci/guild/\d+/vice-president/[^/]+/",
 )
 
 
@@ -115,7 +121,9 @@ class LocalGuild:
                 "president": president, "vicePresident": [], "createTime": now,
                 "qqGroup": "", "membersCount": len(members), "score": 0}
         guild = {"baseInfo": base, "members": members, "botIds": list(b["playerId"] for b in bots),
-                 "donateInfo": {}, "receipts": {}}
+                 "donateInfo": {}, "receipts": {}, "skills": {}, "pendingMembers": {},
+                 "invitedMembers": {}, "voteInfo": {"inVote": False, "endTime": 0,
+                 "playersSupport": [], "playersKick": []}}
         self._new_week(guild, now)
         return guild
 
@@ -153,6 +161,12 @@ class LocalGuild:
         """Upgrade saved appearances and missing wishes without losing aid history."""
         bots = {bot["playerId"]: bot for bot in self.game.social.bots.all()}
         for guild in state["guilds"].values():
+            guild.setdefault("skills", {})
+            guild.setdefault("pendingMembers", {})
+            guild.setdefault("invitedMembers", {})
+            guild.setdefault("voteInfo", {"inVote": False, "endTime": 0,
+                                           "playersSupport": [], "playersKick": []})
+            guild["baseInfo"].setdefault("score", 0)
             for pid, member in guild["members"].items():
                 if pid in bots:
                     member["headPhoto"] = self.game.profile_features.bot_head_photo(bots[pid])
@@ -327,6 +341,36 @@ class LocalGuild:
     def player_data(self, profile):
         return self._run(profile, lambda conn, state, player, now, notices: dict(player))
 
+    def active_profits(self, profile):
+        """Return the currently effective native ProfitDetail rows for a member.
+
+        ``systems`` uses this projection for GET ``/fci/profit/``; expiry is
+        cleaned by the same state load that serves guild details.
+        """
+        def read(conn, state, player, now, notices):
+            gid = _int(player.get("guildId"))
+            guild = state["guilds"].get(str(gid))
+            if guild is None:
+                return []
+            return [{"id": row["id"], "type": row["type"], "add": row["add"],
+                     "startTime": row["startTime"], "endTime": row["endTime"]}
+                    for row in self._skills(guild, now) if row["endTime"] > now]
+        return self._run(profile, read)
+
+    def active_profit_rules(self, profile):
+        """Return active effect filters for battle reward integration."""
+        def read(conn, state, player, now, notices):
+            gid = _int(player.get("guildId"))
+            guild = state["guilds"].get(str(gid))
+            if guild is None:
+                return []
+            active = {row["id"] for row in self._skills(guild, now) if row["endTime"] > now}
+            return [{"id": _int(row["id"]), "type": _int(row.get("type")), "add": _int(row.get("add")),
+                     "isRatio": bool(row.get("isRatio")), "dungeonType": list(row.get("dungeonType") or []),
+                     "resType": _int(row.get("resType")), "funcType": _int(row.get("funcType"))}
+                    for row in SKILL_PROFITS if _int(row.get("id")) in active]
+        return self._run(profile, read)
+
     def _request(self, body, type_name):
         raw = body.encode() if isinstance(body, str) else bytes(body or b"")
         if not raw:
@@ -346,19 +390,32 @@ class LocalGuild:
             except Exception as exc:
                 raise GuildError("invalid_request", 400) from exc
 
-    @staticmethod
-    def _skills():
-        return [{"id": int(row["id"]), "type": _int(row.get("type")),
-                 "add": _int(row.get("add")), "time": _int(row.get("time")),
-                 "maxUseCount": 0, "scoreCost": 0, "startTime": 0, "endTime": 0}
-                for row in SKILL_PROFITS]
+    def _skills(self, guild, now=None):
+        now = self._now() if now is None else int(now)
+        saved = guild.setdefault("skills", {})
+        result = []
+        for row in SKILL_PROFITS:
+            skill_id = int(row["id"])
+            active = saved.get(str(skill_id)) or {}
+            start = _int(active.get("startTime"))
+            end = _int(active.get("endTime"))
+            if end and end <= now:
+                start = end = 0
+                saved.pop(str(skill_id), None)
+            result.append({"id": skill_id, "type": _int(row.get("type")),
+                           "add": _int(row.get("add")), "time": SKILL_DURATION,
+                           "maxUseCount": SKILL_MAX_USE_COUNT,
+                           "scoreCost": SKILL_SCORE_COST, "startTime": start, "endTime": end})
+        return result
 
-    @staticmethod
-    def _detail(guild, changes=None):
+    def _detail(self, guild, changes=None, now=None):
         return {"baseInfo": guild["baseInfo"], "members": list(guild["members"].values()),
-                "pendingMembers": [], "invitedMembers": [], "skills": LocalGuild._skills(),
+                "pendingMembers": list(guild.get("pendingMembers", {}).values()),
+                "invitedMembers": list(guild.get("invitedMembers", {}).values()),
+                "skills": self._skills(guild, now),
                 "donateInfo": guild["donateInfo"], "resChange": changes or [],
-                "voteInfo": {"inVote": False, "endTime": 0, "playersSupport": [], "playersKick": []}}
+                "voteInfo": guild.get("voteInfo", {"inVote": False, "endTime": 0,
+                                                     "playersSupport": [], "playersKick": []})}
 
     def _collected_roles(self, conn, profile):
         bag = self._system_state(conn, profile)
@@ -378,6 +435,8 @@ class LocalGuild:
         request_type = {"/fci/guild-search/": "ApiGuildSearch", "/fci/guild-player/": "ApiGuildPlayer"}.get(route, "ApiGuild")
         for suffix, name in (("donate/request/", "ApiGuildDonateRequest"), ("donate/send/", "ApiGuildDonateSend"),
                              ("donate/touch/", "ApiGuildDonateTouch"), ("pending-members/", "ApiGuildMemberPending"),
+                             ("invited-members/", "ApiGuildMemberInvite"), ("socialgroup/", "ApiGuildSocialGroup"),
+                             ("vote/", "ApiGuildVotePresident"), ("vice-president/", "ApiGuildVicePresident"),
                              ("members/quit/", "ApiGuildMembersQuit"), ("members/", "ApiGuildMembers"),
                              ("skill/", "ApiGuildSkill")):
             if route.endswith(suffix):
@@ -402,12 +461,14 @@ class LocalGuild:
                 player["guildLevelChanged"] = bool(body["guildLevelChanged"])
             return 200, dict(player)
         if route == "/fci/guild-player/invited/" and method == "GET":
-            return 200, []
+            invited = {_int(value) for value in player.get("invitedGuildId", [])}
+            return 200, [guild["baseInfo"] for key, guild in state["guilds"].items()
+                         if _int(key) in invited]
         if route == "/fci/guild/" and method == "POST":
             if player["guildId"]:
                 existing = state["guilds"].get(str(player["guildId"]))
                 if existing and existing["baseInfo"]["president"] == pid and existing["baseInfo"]["name"] == str(body.get("name", "")).strip():
-                    return 200, self._detail(existing)
+                    return 200, self._detail(existing, now=now)
                 raise GuildError("already_in_guild")
             if _int(profile.get("level")) < RULES["createMinLevel"]:
                 raise GuildError("guild_level_locked", 403)
@@ -425,7 +486,7 @@ class LocalGuild:
             state["guilds"][str(gid)] = guild
             player.update(guildId=gid, type=2, joinTime=now, pendingGuildId=[], invitedGuildId=[])
             notices.extend([(profile, 25, []), (profile, 26, []), (profile, 1, [])])
-            return 200, self._detail(guild, changes)
+            return 200, self._detail(guild, changes, now)
         match = re.fullmatch(r"/fci/guild/(\d+)/(.*)", route)
         if not match:
             return 405, {"error": "method_not_allowed"}
@@ -433,10 +494,153 @@ class LocalGuild:
         guild = state["guilds"].get(str(gid))
         if guild is None:
             raise GuildError("guild_not_found", 404)
+        guild.setdefault("pendingMembers", {})
+        guild.setdefault("invitedMembers", {})
+        guild.setdefault("voteInfo", {"inVote": False, "endTime": 0,
+                                       "playersSupport": [], "playersKick": []})
+        manager = player["type"] in (1, 2) or str(guild["baseInfo"].get("president")) == pid
+
+        # Guild administration uses the native verbs from the client.  The
+        # local service keeps bot and player members in the same state map, so
+        # all of these operations are durable and idempotent.
+        if action == "" and method == "PATCH":
+            if not manager:
+                raise GuildError("guild_manager_required", 403)
+            for field, limit in (("name", RULES["maxNameLen"]), ("billboard", RULES["maxBillboardLen"])):
+                if field in body:
+                    value = str(body[field]).strip()
+                    if field == "name" and not 1 <= len(value) <= limit:
+                        raise GuildError("invalid_guild_name_or_billboard", 400)
+                    if field == "billboard" and len(value) > limit:
+                        raise GuildError("invalid_guild_name_or_billboard", 400)
+                    guild["baseInfo"][field] = value
+            for field in ("icon", "skin", "qqGroup"):
+                if field in body:
+                    guild["baseInfo"][field] = str(body[field]) if field in ("icon", "qqGroup") else _int(body[field])
+            return 200, self._detail(guild, now=now)
+
+        if action in ("socialgroup", "socialgroup/") and method == "PATCH":
+            if not manager:
+                raise GuildError("guild_manager_required", 403)
+            if body.get("resetQq") or body.get("resetWx"):
+                guild["baseInfo"]["qqGroup"] = ""
+            elif "qqGroupId" in body:
+                guild["baseInfo"]["qqGroup"] = str(body.get("qqGroupId") or "")
+            return 200, {"qqGroupId": str(guild["baseInfo"].get("qqGroup", "")),
+                         "isBoundWx": bool(body.get("isBoundWx", False)), "joinQq": False,
+                         "joinWx": False, "resetQq": False, "resetWx": False}
+
+        if action == "president/" and method == "POST":
+            if not manager:
+                raise GuildError("guild_manager_required", 403)
+            target = str(body.get("newPresident", ""))
+            if target not in guild["members"]:
+                raise GuildError("guild_member_not_found", 404)
+            old = str(guild["baseInfo"].get("president", pid))
+            guild["members"].get(old, {}).update(type=0)
+            guild["members"][target].update(type=2)
+            old_state = state["players"].get(old)
+            if old_state:
+                old_state["data"]["type"] = 0
+            target_state = state["players"].get(target)
+            if target_state:
+                target_state["data"].update(guildId=gid, type=2)
+            guild["baseInfo"]["president"] = target
+            guild["baseInfo"]["presidentName"] = guild["members"][target].get("name", target)
+            guild["baseInfo"]["vicePresident"] = [v for v in guild["baseInfo"].get("vicePresident", []) if str(v) != target]
+            if target == pid:
+                player["type"] = 2
+            return 200, self._detail(guild, now=now)
+
+        if action == "vice-president/" and method == "PUT":
+            if not manager:
+                raise GuildError("guild_manager_required", 403)
+            target = str(body.get("playerId", ""))
+            if target not in guild["members"]:
+                raise GuildError("guild_member_not_found", 404)
+            if target == str(guild["baseInfo"].get("president")):
+                raise GuildError("guild_president_cannot_be_vice", 409)
+            vice = [str(v) for v in guild["baseInfo"].get("vicePresident", []) if str(v) in guild["members"]]
+            if target not in vice:
+                vice.append(target)
+            guild["baseInfo"]["vicePresident"] = vice
+            guild["members"][target]["type"] = 1
+            return 200, self._detail(guild, now=now)
+
+        vice_match = re.fullmatch(r"vice-president/([^/]+)/", action)
+        if vice_match and method == "DELETE":
+            if not manager:
+                raise GuildError("guild_manager_required", 403)
+            target = vice_match.group(1)
+            guild["baseInfo"]["vicePresident"] = [v for v in guild["baseInfo"].get("vicePresident", []) if str(v) != target]
+            if target in guild["members"]:
+                guild["members"][target]["type"] = 0
+            return 200, self._detail(guild, now=now)
+
+        invite_match = action == "invited-members/"
+        if invite_match and method == "PUT":
+            if not manager:
+                raise GuildError("guild_manager_required", 403)
+            target = str(body.get("playerId", ""))
+            if not target:
+                raise GuildError("invalid_player_id", 400)
+            if target in guild["members"]:
+                raise GuildError("already_in_guild", 409)
+            row = conn.execute("SELECT player_id,name,level FROM game_profiles WHERE player_id=?", (target,)).fetchone()
+            member = {"playerId": target, "name": str(row["name"]) if row else target,
+                      "level": _int(row["level"], 1) if row else 1, "applyTime": now,
+                      "headPhoto": 0, "socialPicture": ""}
+            guild["invitedMembers"][target] = member
+            invited = state["players"].setdefault(target, {"accountId": _int(row["account_id"]) if row and "account_id" in row.keys() else 0,
+                                                               "data": self._player_default()})
+            invited["data"].setdefault("invitedGuildId", [])
+            if gid not in invited["data"]["invitedGuildId"]:
+                invited["data"]["invitedGuildId"].append(gid)
+            return 200, member
+
+        pending_match = re.fullmatch(r"pending-members(?:/([^/]+))?/", action)
+        if pending_match and method == "DELETE":
+            if not manager:
+                raise GuildError("guild_manager_required", 403)
+            target = pending_match.group(1)
+            if target:
+                guild["pendingMembers"].pop(target, None)
+            else:
+                guild["pendingMembers"].clear()
+            return 200, self._detail(guild, now=now)
+
+        member_match = re.fullmatch(r"members/([^/]+)/", action)
+        if member_match and method == "DELETE":
+            if not manager:
+                raise GuildError("guild_manager_required", 403)
+            target = member_match.group(1)
+            if target == str(guild["baseInfo"].get("president")):
+                raise GuildError("cannot_kick_president", 409)
+            if target not in guild["members"]:
+                raise GuildError("guild_member_not_found", 404)
+            guild["members"].pop(target, None)
+            guild["baseInfo"]["membersCount"] = len(guild["members"])
+            target_state = state["players"].get(target)
+            if target_state:
+                target_state["data"].update(guildId=0, type=0, lastQuitTime=now)
+            return 200, self._detail(guild, now=now)
         if method == "GET" and action in ("", "members/"):
-            return 200, self._detail(guild) if action == "" else list(guild["members"].values())
+            return 200, self._detail(guild, now=now) if action == "" else list(guild["members"].values())
         if method == "PUT" and action in ("pending-members/", "members/"):
-            if str(body.get("playerId", "")) != pid:
+            requested = str(body.get("playerId", ""))
+            # Managers approve a pending player with PUT /members/.  A normal
+            # player keeps the original self-join flow used by the client.
+            if action == "members/" and requested != pid:
+                if not manager or requested not in guild["pendingMembers"]:
+                    raise GuildError("guild_member_approval_required", 403)
+                target = guild["pendingMembers"].pop(requested)
+                guild["members"][requested] = dict(target, type=0)
+                guild["baseInfo"]["membersCount"] = len(guild["members"])
+                target_state = state["players"].setdefault(requested, {"accountId": 0, "data": self._player_default()})
+                target_state["data"].update(guildId=gid, type=0, joinTime=now,
+                                             pendingGuildId=[], invitedGuildId=[])
+                return 200, self._detail(guild, now=now)
+            if requested != pid:
                 raise GuildError("guild_self_join_only", 403)
             if player["guildId"] == gid:
                 return 200, {}
@@ -448,6 +652,8 @@ class LocalGuild:
                 raise GuildError("guild_full")
             guild["members"][pid] = self._member(profile)
             guild["baseInfo"]["membersCount"] = len(guild["members"])
+            guild["pendingMembers"].pop(pid, None)
+            guild["invitedMembers"].pop(pid, None)
             player.update(guildId=gid, type=0, joinTime=now, pendingGuildId=[], invitedGuildId=[])
             notices.extend([(profile, 25, []), (profile, 26, []), (profile, 27, [])])
             return 200, {}
@@ -479,22 +685,68 @@ class LocalGuild:
             return 200, dict(player)
         if action == "skill/":
             if method == "GET":
-                return 200, self._skills()
+                return 200, self._skills(guild, now)
             if method == "POST":
-                raise GuildError("guild_skill_activation_unavailable", 403)
-        if method == "GET" and action in ("pending-members/", "invited-members/", "record/"):
+                is_vice = pid in {str(v) for v in guild["baseInfo"].get("vicePresident", [])}
+                if is_vice:
+                    player["type"] = 1
+                if player["type"] not in (1, 2):
+                    raise GuildError("guild_skill_only_allowed_admin", 403)
+                skill_id = _int(body.get("id"))
+                use_count = _int(body.get("useCount", body.get("use_count")), 1)
+                if use_count != 1:
+                    raise GuildError("guild_skill_invalid_use_count", 400)
+                row = next((item for item in SKILL_PROFITS if _int(item.get("id")) == skill_id), None)
+                if row is None:
+                    raise GuildError("guild_skill_not_found", 404)
+                skills = guild.setdefault("skills", {})
+                current = skills.get(str(skill_id)) or {}
+                if _int(current.get("endTime")) > now:
+                    raise GuildError("guild_skill_opened_before")
+                if _int(guild["baseInfo"].get("score")) < SKILL_SCORE_COST:
+                    raise GuildError("guild_skill_score_insufficient")
+                guild["baseInfo"]["score"] = _int(guild["baseInfo"].get("score")) - SKILL_SCORE_COST
+                start, end = now, now + SKILL_DURATION
+                active = {"startTime": start, "endTime": end, "useCount": use_count}
+                skills[str(skill_id)] = active
+                info = next(item for item in self._skills(guild, now) if item["id"] == skill_id)
+                profit = {"id": skill_id, "type": _int(row.get("type")), "add": _int(row.get("add")),
+                          "startTime": start, "endTime": end}
+                # The native client refreshes skill slots and profit details for
+                # every online member after the shared transaction commits.
+                for member_id, member in guild["members"].items():
+                    owner = state["players"].get(str(member_id))
+                    if owner:
+                        notices.append(({"account_id": owner["accountId"], "player_id": member_id}, 56, []))
+                        notices.append(({"account_id": owner["accountId"], "player_id": member_id}, 51, []))
+                return 200, {"guildSkillInfo": info, "baseInfo": guild["baseInfo"], "profit": profit}
+        if method == "GET" and action == "pending-members/":
+            return 200, list(guild["pendingMembers"].values())
+        if method == "GET" and action == "invited-members/":
+            return 200, list(guild["invitedMembers"].values())
+        if method == "GET" and action == "record/":
             return 200, []
         if method == "GET" and action == "vote/":
-            return 200, self._detail(guild)["voteInfo"]
+            return 200, guild["voteInfo"]
+        if method == "POST" and action == "vote/":
+            if not guild["voteInfo"].get("inVote"):
+                return 200, guild["voteInfo"]
+            support = bool(body.get("voteSupport"))
+            field = "playersSupport" if support else "playersKick"
+            values = [str(v) for v in guild["voteInfo"].setdefault(field, [])]
+            if pid not in values:
+                values.append(pid)
+            guild["voteInfo"][field] = values
+            return 200, guild["voteInfo"]
         if method == "GET" and action == "donate/":
             return 200, guild["donateInfo"]
         if method == "POST" and action.startswith("donate/"):
             if now < player["limitEndTime"]:
                 raise GuildError("guild_function_cooldown")
-            return self._aid(conn, guild, player, profile, action, body, now, notices)
+            return self._aid(conn, state, guild, player, profile, action, body, now, notices)
         return 405, {"error": "method_not_allowed"}
 
-    def _aid(self, conn, guild, player, profile, action, body, now, notices):
+    def _aid(self, conn, state, guild, player, profile, action, body, now, notices):
         pid, info = str(profile["player_id"]), guild["donateInfo"]
         if action == "donate/request/":
             if now < player["donateLimitEndTime"]:
@@ -584,6 +836,9 @@ class LocalGuild:
         donor["donateCountWeekly"] += 1
         score = RULES["donateRefund"]["count"]
         player["guildScoreRecord"] += score
+        # GuildSkill spends shared guild popularity. Each accepted donation
+        # contributes the same auditable ten points as the member refund.
+        guild["baseInfo"]["score"] = _int(guild["baseInfo"].get("score")) + score
         guild["members"][pid]["guildScoreRecord"] = player["guildScoreRecord"]
         guild["members"][pid]["guildScore"] += score
         result = {"donate": request, "donatePlayerInfo": info["donatePlayerInfo"], "resChange": changes}
@@ -593,6 +848,11 @@ class LocalGuild:
         if cultivation is not None:
             cultivation.record(profile, 82, param=res["id"])
         notices.extend([(profile, 3, [str(res["id"])]), (profile, 1, []), (profile, 58, []), (profile, 25, [])])
+        for member_id, member in guild["members"].items():
+            owner = state["players"].get(str(member_id))
+            if owner:
+                notices.append(({"account_id": owner["accountId"], "player_id": member_id}, 55,
+                                [guild["baseInfo"]["score"], member_id, member.get("guildScoreRecord", 0)]))
         return 200, result
 
 

@@ -81,6 +81,12 @@ _DAY = 86400
 # so the client neither shows a preheat tag nor an expiry countdown.
 MALL_ACTIVITY_START = 1704067200  # 2024-01-01T00:00:00Z
 
+# Full delivery replies include every resource delta and used to grow the
+# per-account JSON state forever. Keep a bounded recent reply cache while a
+# compact token marker preserves idempotent retries after a reply is trimmed.
+MAX_DELIVERED_REPLIES = 128
+MAX_DELIVERED_TOKENS = 1024
+
 
 def _int(value: Any, default: int = 0) -> int:
     try:
@@ -279,7 +285,7 @@ class LocalMall:
             state = {}
         if not isinstance(state, dict):
             state = {}
-        for key in ("mall", "purchase", "pending", "firstDouble", "monthCard"):
+        for key in ("mall", "purchase", "pending", "firstDouble", "monthCard", "delivered", "deliveredTokens"):
             if not isinstance(state.get(key), dict):
                 state[key] = {}
         return state
@@ -702,6 +708,28 @@ class LocalMall:
             contents.append({"type": RES_PLAYER_MONEY, "id": 0, "count": bonus})  # bound bonus 迷子
         return contents
 
+    @staticmethod
+    def _delivery_marker(reply: Mapping[str, Any]) -> dict[str, Any]:
+        """The small durable subset needed to answer an old-token retry."""
+
+        return {
+            "transactionId": str(reply.get("transactionId", "")),
+            "productId": str(reply.get("productId", "")),
+            "channel": _int(reply.get("channel")),
+        }
+
+    def _remember_delivery(self, state: dict[str, Any], token: str, reply: Mapping[str, Any]) -> None:
+        """Store a bounded full reply plus a compact idempotency marker."""
+
+        delivered = state.setdefault("delivered", {})
+        markers = state.setdefault("deliveredTokens", {})
+        delivered[token] = dict(reply)
+        markers[token] = self._delivery_marker(reply)
+        while len(delivered) > MAX_DELIVERED_REPLIES:
+            delivered.pop(next(iter(delivered)), None)
+        while len(markers) > MAX_DELIVERED_TOKENS:
+            markers.pop(next(iter(markers)), None)
+
     def purchase_delivery(self, profile: Mapping[str, Any], body: Body) -> Optional[Response]:
         """``POST fci/purchasedelevery/``: redeem the sandbox token and credit the product.
 
@@ -725,6 +753,21 @@ class LocalMall:
                 reply['buyCount'] = self._effective(state['purchase'].get(str(done.get('productId'))),
                                                     self._product_interval(str(done.get('productId'))), self._now())
                 return 200, reply
+            marker = state.get("deliveredTokens", {}).get(token)
+            if isinstance(marker, Mapping):
+                # The full response was evicted, but the token marker still
+                # proves this order was delivered. Return a replay-safe
+                # summary and never credit the product a second time.
+                product_id = str(marker.get("productId", ""))
+                return 200, {
+                    "transactionId": str(marker.get("transactionId", token.removeprefix("local-sandbox:"))),
+                    "googlePurchaseToken": "",
+                    "channel": _int(request.get("channel"), _int(marker.get("channel"))),
+                    "productId": product_id,
+                    "buyCount": self._effective(state["purchase"].get(product_id), self._product_interval(product_id), self._now()),
+                    "resChange": [],
+                    "sandbox": True,
+                }
             return None
         if not token:
             return None
@@ -760,8 +803,7 @@ class LocalMall:
             "channel": _int(request.get("channel"), _int(pending.get("channel"))),
             "productId": product_id, "buyCount": buy_count, "resChange": res_change, "sandbox": True,
         }
-        delivered = state.setdefault("delivered", {})
-        delivered[token] = reply
+        self._remember_delivery(state, token, reply)
         self._save(profile, state)
         self._order(str(pending.get("orderId") or token), profile, kind="iap", status="delivered",
                     product_id=product_id, price=float(product.get("price") or 0), currency="CNY_SANDBOX",

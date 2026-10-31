@@ -244,11 +244,11 @@ class CultivationIntegrationTests(unittest.TestCase):
         self.assertEqual(self.item(20002), 0)
         self.assertEqual(self.info()["progress"], 1)  # permanent task remains claimed
 
-    def test_unavailable_specific_modes_are_hidden_and_not_claimable(self):
+    def test_specific_modes_are_visible_and_claimable_after_local_battle_progress(self):
         ids = {row["id"] for row in self.ok("GET", "/fci/task/")["tasks"]}
         for tid in (53003, 54003, 53006, 54006):
-            self.assertNotIn(tid, ids)
-            self.assertEqual(self.call("POST", f"/fci/task/{tid}/reward-actor-cultivation/", {})[0], 404)
+            self.assertIn(tid, ids)
+            self.assertEqual(self.call("POST", f"/fci/task/{tid}/reward-actor-cultivation/", {})[0], 409)
         self.assertTrue({53001, 53002, 53007, 53008, 53055} <= ids)
 
     def test_native_guild_wishes_cover_both_cultivation_roles(self):

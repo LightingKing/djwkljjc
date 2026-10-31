@@ -89,6 +89,12 @@ try:
 except ImportError:  # pragma: no cover - direct PYTHONPATH execution
     from profile_features import LocalProfileFeatures
 try:
+    from .welfare_features import LocalWelfareFeatures
+    from .maze import LocalMaze
+except ImportError:  # pragma: no cover - direct PYTHONPATH execution
+    from welfare_features import LocalWelfareFeatures
+    from maze import LocalMaze
+try:
     from .storage.compat import (
         configure_legacy_connection,
         ensure_unified_store,
@@ -570,6 +576,10 @@ class LocalGame:
         # separate local table so it can evolve without changing the legacy
         # bootstrap schema.  It is still in the same SQLite/WAL store.
         self.profile_features = LocalProfileFeatures(self, clock=self._clock)
+        # Welfare tabs and the newly exposed Maze activity use isolated
+        # profile-feature state so their local rules remain restart-safe.
+        self.welfare = LocalWelfareFeatures(self, clock=self._clock)
+        self.maze = LocalMaze(self, clock=self._clock)
         # Daily/main tasks from the client TaskInfo table (tasks.py).
         self.tasks = LocalTasks(self, clock=self._clock)
         # Achievements (历程) and collections (图鉴/novels).
@@ -1370,6 +1380,27 @@ class LocalGame:
         json_format.ParseDict(self.dungeons.chapter_detail(profile, chapter_id), message)
         return message
 
+    def _legacy_tournament_message(self, route: str, payload: Any) -> Any:
+        """Use typed responses for the legacy async-PvP HTTP resources."""
+        route = _route(route)
+        names = {
+            "/fci/asyncpvprecord": "ApiAsyncPvpRecordInfo.result",
+            "/fci/asyncpvpmatch": "ApiAsyncPvpMatch.result",
+            "/fci/asyncpvptargetdetail": "ApiAsyncPvpTargetDetail.result",
+        }
+        name = next((value for key, value in names.items()
+                     if route == key or route.startswith(key + "/")), None)
+        if name is None or not isinstance(payload, Mapping):
+            return payload
+        if name.endswith("TargetDetail.result") and "result" not in payload:
+            payload = {"result": payload}
+        try:
+            message = message_factory.GetMessageClass(self._pool.FindMessageTypeByName(name))()
+            json_format.ParseDict(dict(payload), message)
+            return message
+        except Exception:
+            return payload
+
     def _handle_http_unlocked(
         self,
         method: str,
@@ -1404,7 +1435,12 @@ class LocalGame:
             # Leave non-FCI paths (patch/clientupdate/fixtures) to the parent
             # fixture router; authenticating them here would turn them into
             # a misleading 401 before a fixture can answer.
-            if not route.startswith("/fci/"):
+            # BurstLink's native matcher is addressed through the separate
+            # matchUrl host (``/match/BurstLinkPVPMatch``) while all player
+            # state remains under /fci.  The local server keeps both seams in
+            # the same authenticated dispatcher so the original client can
+            # enter a deterministic robot room without a retired match host.
+            if not (route.startswith("/fci/") or route.startswith("/match/")):
                 return None
             # Entering routes are authenticated with the same local access
             # token, then delegated to the evidence-bounded entering module.
@@ -1422,13 +1458,98 @@ class LocalGame:
                 return cultivation_result
             tournament_result = self.tournament.handle_http(method, path, body, profile)
             if tournament_result is not None:
-                return tournament_result
-            if route.lower().startswith('/fci/rolepresent/'):
-                if method.upper() == 'GET' and route.lower() == '/fci/rolepresent/':
-                    return 200, []
-                # The APK defines presentation and timing but supplies no
-                # returned-gift reward pool. A fabricated id cannot pay out.
-                return 404, {'error': 'role_present_not_found'}
+                status, result = tournament_result
+                return status, self._legacy_tournament_message(route, result) if status == 200 else result
+            if route.lower().startswith('/fci/rolepresent'):
+                # RolePresent is a daily, account-persistent gift.  Public
+                # evidence only fixes the level-9 threshold and five-shard
+                # reward; the exact probability/pool is local policy (70%,
+                # role shard id = 20000 + role id).  The roll is deterministic
+                # for the Beijing day so re-login cannot reroll it.
+                feature_state = self.profile_features._state(profile)
+                presents = feature_state.setdefault('rolePresents', {})
+                day = int(self._now() // 86400)
+                notepads = self.profile_features.role_notepads(profile)
+                eligible = []
+                for pad in notepads:
+                    role_id = int(pad.get('roleId', 0) or 0)
+                    if int(pad.get('favourLevel', 0) or 0) < 9:
+                        continue
+                    key = f'{day}:{role_id}'
+                    if key not in presents:
+                        roll = (int(profile['account_id']) * 31 + day * 17 + role_id * 13) % 100
+                        if roll < 70:
+                            # ApiRolePresent/DBNotePadInfo.Present.presentId
+                            # is uint32.  Keep the day-scoped key only in the
+                            # local ledger; the wire id is the role id and is
+                            # therefore stable and directly selectable.
+                            eligible.append({'presentId': role_id, 'roleId': role_id,
+                                             'presentType': 1,
+                                             'rewards': [{'type': 11, 'id': 20000 + role_id, 'count': 5}]})
+                # The redpoint payload is a repeated Present list, while the
+                # claim response carries one Present plus dynamic deltas.
+                def present_message(name):
+                    try:
+                        return message_factory.GetMessageClass(self._pool.FindMessageTypeByName(name))()
+                    except Exception:
+                        return None
+
+                if method.upper() == 'GET':
+                    result = present_message('ApiRolePresent.result')
+                    if result is None:
+                        return 200, eligible
+                    if eligible:
+                        json_format.ParseDict(eligible[0], result.presents)
+                    return 200, result
+                if method.upper() not in {'POST', 'PUT'}:
+                    return 405, {'error': 'method_not_allowed'}
+                raw = body.decode('utf-8') if isinstance(body, (bytes, bytearray)) else (body or '{}')
+                try:
+                    request = json.loads(raw) if isinstance(raw, str) else dict(raw)
+                except (TypeError, ValueError):
+                    request = {}
+                wire_request = None
+                try:
+                    wire_request = message_factory.GetMessageClass(
+                        self._pool.FindMessageTypeByName('ApiPresentTargetActor'))()
+                    wire_request.ParseFromString(body or b'')
+                except Exception:
+                    wire_request = None
+                role_id = int(request.get('roleId', request.get('role_id', 0)) or 0)
+                if not role_id and wire_request is not None:
+                    role_id = int(getattr(wire_request, 'present_target_actor', 0) or 0)
+                # Native callers may submit the present id rather than role id.
+                if not role_id:
+                    role_id = int(request.get('presentId', request.get('present_id', 0)) or 0)
+                if not role_id:
+                    role_id = int(feature_state.get('rolePresentTargetActor', 0) or 0)
+                if not role_id:
+                    # The native flow stores the selected role through
+                    # /fci/present-target-actor/.  That route is owned by
+                    # LocalSystems, so read its durable player-profile field
+                    # when the claim itself has an empty body.
+                    try:
+                        system_state = self.systems._state(profile)
+                        player_profile = system_state.get('player_profile', {})
+                        role_id = int(player_profile.get('presentTargetActor', 0) or 0)
+                    except Exception:
+                        role_id = 0
+                key = f'{day}:{role_id}'
+                if key in presents or role_id not in {int(row.get('roleId', 0) or 0) for row in eligible}:
+                    return 409, {'error': 'role_present_not_available'}
+                from grants import grant_rewards
+                changes = grant_rewards(self, profile, [{'type': 11, 'id': 20000 + role_id, 'count': 5}])
+                presents[key] = self._now()
+                self.profile_features._save(profile, feature_state)
+                result = present_message('ApiRolePresent.result')
+                if result is None:
+                    return 200, {'presentId': role_id, 'resChange': changes}
+                chosen = next(row for row in eligible if int(row.get('roleId', 0)) == role_id)
+                json_format.ParseDict(chosen, result.presents)
+                for change in changes:
+                    dynamic = result.res_change.add()
+                    json_format.ParseDict(change, dynamic)
+                return 200, result
             guild_result = self.guild.handle_http(method, path, body, profile)
             if guild_result is not None:
                 return guild_result
@@ -1466,6 +1587,12 @@ class LocalGame:
             achievements_result = self.achievements.handle_http(method, path, body, profile)
             if achievements_result is not None:
                 return achievements_result
+            welfare_result = self.welfare.handle_http(method, path, body, profile)
+            if welfare_result is not None:
+                return welfare_result
+            maze_result = self.maze.handle_http(method, path, body, profile)
+            if maze_result is not None:
+                return maze_result
             systems_result = self.systems.handle_http(method, path, body, profile)
             if systems_result is not None:
                 return systems_result
@@ -1491,7 +1618,19 @@ class LocalGame:
             # points) only from these redpoint fields.
             if (method.upper() == "GET" and route.rstrip("/") == "/fci/redpoint/data"
                     and result is not None and result[0] == 200 and isinstance(result[1], dict)):
-                result = (200, {**result[1], **self.events.redpoint_fields(profile), **self.mall.redpoint_fields(profile),
+                event_redpoints = self.events.redpoint_fields(profile)
+                # Present.presentId is uint32 in ApiRolePresent.redpoint;
+                # older local records used the internal day:role key here.
+                # Normalize that key at the HTTP boundary while retaining it
+                # in the profile ledger for idempotency.
+                try:
+                    role_present = event_redpoints.get("rolePresentRedpoint", {}).get("presents", [])
+                    for present in role_present:
+                        if isinstance(present, dict):
+                            present["presentId"] = int(present.get("roleId", present.get("presentId", 0)) or 0)
+                except Exception:
+                    pass
+                result = (200, {**result[1], **event_redpoints, **self.mall.redpoint_fields(profile),
                                 **self.achievements.redpoint_fields(profile),
                                 **self.activity_modes.redpoint_fields(profile),
                                 **(self.social.redpoint_fields(profile) if hasattr(self.social, "redpoint_fields") else {}),
@@ -1537,6 +1676,12 @@ class LocalGame:
         achievements_result = self.achievements.handle_http(method, path, body, profile)
         if achievements_result is not None:
             return achievements_result
+        welfare_result = self.welfare.handle_http(method, path, body, profile)
+        if welfare_result is not None:
+            return welfare_result
+        maze_result = self.maze.handle_http(method, path, body, profile)
+        if maze_result is not None:
+            return maze_result
         systems_result = self.systems.handle_http(method, path, body, profile)
         if systems_result is not None:
             return systems_result

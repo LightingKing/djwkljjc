@@ -1,10 +1,14 @@
 """Actor cultivation using APK TaskInfo/ActorCultivation reward definitions.
 
 The APK omits the server's random daily-task distribution tables.  The local
-policy therefore offers original tasks with implemented progress sources, refreshing ``refreshAfterGot``
-tasks once per Beijing reset day.  Their contribution is capped at the
-configured lifetime ``dailyTaskMaxProgress`` (70), with permanent tasks filling
-the remaining progress.  This is an explicit local policy, not extracted data.
+policy therefore exposes every category-104 task, refreshing
+``refreshAfterGot`` tasks once per Beijing reset day.  Their contribution is
+capped at the configured lifetime ``dailyTaskMaxProgress`` (70), with
+permanent tasks filling the remaining progress.  A few task families have no
+trusted event source in the recovered server seam; those tasks use the local
+rule that a validated battle win counts as one completion when the target
+actor (or role) is deployed.  This is an explicit local policy, not extracted
+data.
 
 Only server hooks and saved actor state advance tasks.  HTTP clients cannot set
 progress. ``endTime`` is the completion time, not an invented expiry date.
@@ -36,16 +40,22 @@ CONFIG = {row["activityId"]: row for row in _rows("ActorCultivation")}
 REWARDS = {(row["activityId"], row["progress"]): row for row in _rows("ActorCultivationProgressReward")}
 TASKS = {row["id"]: row for row in _rows("TaskInfo") if row.get("category") == 104}
 SUPPORTED_GOALS = frozenset({58, 68, 70, 71, 76, 78, 79, 81, 82, 83, 91})
+# Actor-cultivation task families whose original per-battle event payload is
+# absent from this local server.  A won battle is the documented local
+# approximation; ``goalType`` and target actor/role still gate the increment.
+BATTLE_APPROX_GOALS = frozenset({73, 74, 75, 80, 84, 85, 86, 87, 88, 89, 90})
 
 
 def task_available(task):
-    """Only expose goals whose exact mode has an authoritative event source."""
-    goal, params = task["goalType"], task.get("taskParam", [])
-    if goal not in SUPPORTED_GOALS:
-        return False
-    # Activity 51 (51002/51003) is not open locally, and asynchronous PVP
-    # dungeon type 3 does not yet publish actor-cultivation battle events.
-    return goal != 71 and not (goal == 70 and len(params) > 1 and params[1] == 3)
+    """Expose every category-104 task under the local event policy.
+
+    ``SUPPORTED_GOALS`` remains useful documentation for goals with an exact
+    server hook.  Missing hooks are intentionally opened as well: their
+    progress is advanced by :meth:`LocalCultivation.on_battle_win` using the
+    battle-win approximation below.
+    """
+
+    return isinstance(task, Mapping) and _int(task.get("category")) == 104
 
 # The original task families are 530xx (1502) and 540xx (1514), while activity
 # IDs are 53001 and 53002; these identifiers must not be conflated.
@@ -274,7 +284,8 @@ class LocalCultivation:
                 goal = task["goalType"]
                 matches = (goal == 70 and (len(params) == 1 or params[1] == _int(dungeon_type))
                            or goal == 71 and len(params) > 2 and params[1] == _int(activity_type) and _int(activity_id) in params[2:]
-                           or goal == 91 and _int(dungeon_id) in params[1:])
+                           or goal == 91 and _int(dungeon_id) in params[1:]
+                           or goal in BATTLE_APPROX_GOALS)
                 entry = state["tasks"].get(str(tid))
                 if matches and entry and not entry["rewardGot"]:
                     entry["progress"] = min(task["maxProgress"], entry["progress"] + 1)

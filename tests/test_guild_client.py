@@ -111,7 +111,7 @@ class GuildClientTests(unittest.TestCase):
                 self.assertEqual(native("POST", "/fci/guild-recommend/", raw),
                                  (400, {"error": "invalid_request"}))
 
-    def test_four_native_skill_slots_are_inactive_and_activation_never_charges(self):
+    def test_four_native_skill_slots_expose_profit_contract_and_activation(self):
         status, detail = self.call("POST", "/fci/guild/", {"name": "技能测试", "icon": "1"})
         self.assertEqual(status, 200)
         gid = detail["baseInfo"]["id"]
@@ -121,14 +121,29 @@ class GuildClientTests(unittest.TestCase):
         self.assertEqual([row["type"] for row in skills], [3, 8, 8, 8])
         for row in skills:
             self.assert_message("ApiGuildSkill.result", row)
-            self.assertEqual(row["time"], 18000)
-            self.assertEqual((row["startTime"], row["endTime"], row["maxUseCount"], row["scoreCost"]), (0, 0, 0, 0))
-        before = self.game._profile(self.account)["resources"]
+            self.assertEqual(row["time"], 43200)
+            self.assertEqual((row["startTime"], row["endTime"], row["maxUseCount"], row["scoreCost"]), (0, 0, 1, 500))
+        # Seed the documented shared-popularity balance for this isolated
+        # activation contract test; real donation settlement raises this same
+        # guild baseInfo.score through the normal route.
+        with closing(self.game._connect()) as conn, conn:
+            state = self.guild._load(conn, self.now[0])
+            state["guilds"][str(gid)]["baseInfo"]["score"] = 500
+            self.guild._save(conn, state, self.now[0])
         request = message_factory.GetMessageClass(self.game._pool.FindMessageTypeByName("ApiGuildSkill"))(id=101, use_count=1)
         status, result = self.call("POST", f"/fci/guild/{gid}/skill/", request.SerializeToString())
-        self.assertEqual((status, result["error"]), (403, "guild_skill_activation_unavailable"))
-        self.assertEqual(self.game._profile(self.account)["resources"], before)
-        self.assertEqual(self.call("GET", f"/fci/guild/{gid}/")[1], dict(detail, resChange=[]))
+        self.assertEqual(status, 200)
+        self.assertEqual(result["guildSkillInfo"]["id"], 101)
+        self.assertEqual(result["guildSkillInfo"]["endTime"] - result["guildSkillInfo"]["startTime"], 43200)
+        self.assertEqual(result["baseInfo"]["score"], 0)
+        self.assertEqual(result["profit"]["id"], 101)
+        self.assert_message("ApiGuildSkill.post", result)
+        self.assertEqual(self.guild.active_profit_rules(self.profile)[0]["dungeonType"], [2])
+        self.assertEqual(self.call("POST", f"/fci/guild/{gid}/skill/", request.SerializeToString()),
+                         (409, {"error": "guild_skill_opened_before"}))
+        self.now[0] += 43200
+        self.assertEqual(self.call("GET", f"/fci/guild/{gid}/skill/")[1][0]["startTime"], 0)
+        self.assertEqual(self.guild.active_profits(self.profile), [])
 
     def test_saved_guild_repairs_photos_and_adds_wish_without_discarding_donations(self):
         self.join()
@@ -187,6 +202,31 @@ class GuildClientTests(unittest.TestCase):
         self.assertEqual(self.balance(7), before - 100000)
         self.assertEqual(self.call("POST", "/fci/guild/", body)[0], 200)
         self.assertEqual(self.balance(7), before - 100000)
+
+    def test_manager_routes_update_invite_promote_kick_and_social_group(self):
+        status, created = self.call("POST", "/fci/guild/", {"name": "管理测试", "icon": "2"})
+        self.assertEqual(status, 200)
+        gid = created["baseInfo"]["id"]
+        with closing(self.game._connect()) as conn, conn:
+            state = self.guild._load(conn, self.now[0])
+            guild = state["guilds"][str(gid)]
+            bot = self.game.social.bots.get("local-bot-001")
+            guild["members"][bot["playerId"]] = self.guild._member(bot)
+            guild["baseInfo"]["membersCount"] = len(guild["members"])
+            self.guild._save(conn, state, self.now[0])
+        status, detail = self.call("PATCH", f"/fci/guild/{gid}/", {"billboard": "欢迎", "icon": "3"})
+        self.assertEqual((status, detail["baseInfo"]["billboard"], detail["baseInfo"]["icon"]), (200, "欢迎", "3"))
+        status, invited = self.call("PUT", f"/fci/guild/{gid}/invited-members/", {"playerId": "local-bot-002"})
+        self.assertEqual((status, invited["playerId"]), (200, "local-bot-002"))
+        self.assertEqual(self.call("GET", f"/fci/guild/{gid}/invited-members/")[1][0]["playerId"], "local-bot-002")
+        status, promoted = self.call("PUT", f"/fci/guild/{gid}/vice-president/", {"playerId": "local-bot-001"})
+        self.assertEqual((status, promoted["baseInfo"]["vicePresident"]), (200, ["local-bot-001"]))
+        status, demoted = self.call("DELETE", f"/fci/guild/{gid}/vice-president/local-bot-001/")
+        self.assertEqual((status, demoted["baseInfo"]["vicePresident"]), (200, []))
+        status, kicked = self.call("DELETE", f"/fci/guild/{gid}/members/local-bot-001/")
+        self.assertEqual((status, kicked["baseInfo"]["membersCount"]), (200, 1))
+        status, social = self.call("PATCH", f"/fci/guild/{gid}/socialgroup/", {"qqGroupId": "12345"})
+        self.assertEqual((status, social["qqGroupId"]), (200, "12345"))
 
     def test_request_rejects_currency_unknown_or_uncollected_shards(self):
         self.join()

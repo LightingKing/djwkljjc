@@ -338,20 +338,23 @@ class ClientPatchV6Tests(unittest.TestCase):
         """)
 
 
-class CandidateV6Tests(unittest.TestCase):
-    def test_v6_is_cumulative_and_same_version_gets_no_patch(self):
+class CandidatePatchTests(unittest.TestCase):
+    def test_latest_candidate_is_cumulative_and_same_version_gets_no_patch(self):
         config = json.loads((PATCH / "modules.json").read_text(encoding="utf-8"))
-        self.assertEqual(config["patchVersion"], 6)
+        # The cumulative candidate advanced to v7 for the Maze entry patch;
+        # the login/redpoint/payment assertions below remain the v6 baseline.
+        self.assertEqual(config["patchVersion"], 7)
         self.assertEqual({row["source"] for row in config["modules"]}, {
             "sources/login.lua", "sources/auth.lua", "sources/iaphandler.lua", "sources/actorutil.lua",
             "sources/resourceexchange.lua", "sources/restifizermanager.lua",
-            "sources/purchaseactivitygift.lua", "sources/purchasegiftitem.lua", "sources/purchasebuy.lua"})
+            "sources/purchaseactivitygift.lua", "sources/purchasegiftitem.lua", "sources/purchasebuy.lua",
+            "sources/activity.lua", "sources/windowutil.lua"})
         manifest = {"version": config["appVersion"], "history": [
-            {"version": 6, "length": 100, "checksum": 100,
-             "urls": ["http://127.0.0.1:19080/ljjc-hot-update-v6.zip"]}]}
-        for version in range(6):
+            {"version": 7, "length": 100, "checksum": 100,
+             "urls": ["http://127.0.0.1:19080/ljjc-hot-update-v7.zip"]}]}
+        for version in range(7):
             self.assertEqual(select_patch_manifest(manifest, f"2.0.4.59162.{version}")["history"], manifest["history"])
-        for version in (6, 7, 10):
+        for version in (7, 8, 10):
             self.assertEqual(select_patch_manifest(manifest, f"2.0.4.59162.{version}")["history"], [])
 
 

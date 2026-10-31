@@ -1,5 +1,4 @@
-"""The native async arena must never fall through to a guessed local PvE run."""
-
+"""Native asynchronous arena contract and idempotency tests."""
 from contextlib import closing
 import json
 from pathlib import Path
@@ -10,7 +9,7 @@ from google.protobuf import json_format, message_factory
 
 from accounts import LocalAccounts
 from game import LocalGame
-from tournament import LocalTournament
+from tournament import LocalTournament, TOURNAMENT_ID
 import test_systems
 
 
@@ -19,95 +18,74 @@ class TournamentBoundaryTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.root = Path(self.temp.name)
         self.accounts = LocalAccounts(self.root / "accounts")
-        self.game = LocalGame(self.root / "game", self.accounts)
+        self.game = LocalGame(self.root / "game", self.accounts, initial_level=23,
+                              initial_resources=[{"type": 7, "id": 0, "param": 0, "count": 200000}])
         self.account, self.auth = test_systems.LocalSystemsTests._guest(self.accounts)
         self.profile = self.game._profile(self.account)
-        self.module = getattr(self.game, "tournament", None) or LocalTournament(self.game)
+        self.module = LocalTournament(self.game)
 
     def tearDown(self):
         self.temp.cleanup()
 
     def call(self, method, path, payload=None):
-        body = payload if isinstance(payload, bytes) else json.dumps(payload).encode() if payload is not None else None
-        return self.module.handle_http(method, path, body, self.profile)
+        raw = payload if isinstance(payload, bytes) else json.dumps(payload).encode() if payload is not None else None
+        return self.module.handle_http(method, path, raw, self.profile)
 
     def wire(self, name, **fields):
         return message_factory.GetMessageClass(self.game._pool.FindMessageTypeByName(name))(**fields).SerializeToString()
 
-    def test_summary_is_legal_empty_native_response(self):
-        status, result = self.call("GET", "/fci/tournament/summary/")
-        self.assertEqual((status, result), (200, {"activityInfo": []}))
-        message_type = message_factory.GetMessageClass(self.game._pool.FindMessageTypeByName("ApiTournamentSummary.result"))
-        json_format.ParseDict(result, message_type()).SerializeToString()
-        self.assertEqual(self.call("POST", "/fci/tournament/summary/")[0], 405)
+    def test_summary_info_cost_and_wire_enter_are_native_contracts(self):
+        status, summary = self.call("GET", "/fci/tournament/summary/")
+        self.assertEqual(status, 200)
+        self.assertEqual(summary["activityInfo"][0]["activity"]["category"], 3)
+        self.assertEqual(summary["activityInfo"][0]["activity"]["type"], 5)
+        status, info = self.call("GET", "/fci/tournament/info/5/50001/")
+        self.assertEqual((status, info["tournamentInfo"][0]["tournamentId"]), (200, TOURNAMENT_ID))
+        for name, payload in (("ApiTournamentSummary.result", summary), ("ApiTournamentInfo.result", info),
+                              ("ApiTournamentCost.get", self.call("GET", "/fci/tournament/cost/5/50001/")[1])):
+            cls = message_factory.GetMessageClass(self.game._pool.FindMessageTypeByName(name))
+            json_format.ParseDict(payload, cls())
+        self.assertEqual(self.call("GET", "/fci/tournament/cost/5/50001/")[1]["cost"]["count"], 0)
+        status, result = self.call("POST", "/fci/tournament/enter/", self.wire("ApiTournamentEnter", tournament_id=TOURNAMENT_ID, activity_type=5))
+        self.assertEqual((status, result), (200, {"enterResult": True, "resChange": []}))
+        self.assertEqual(self.call("GET", "/fci/tournament/enter/5/50001")[1]["winNum"], 0)
+        cls = message_factory.GetMessageClass(self.game._pool.FindMessageTypeByName("ApiTournamentEnter.post"))
+        self.assertEqual(json_format.ParseDict(result, cls()), cls.FromString(json_format.ParseDict(result, cls()).SerializeToString()))
 
-    def test_native_routes_report_missing_configuration_without_writes(self):
-        before = self.game._profile(self.account)["resources"]
-        for method, route, payload in [
-            ("GET", "/fci/tournament/info/5/50001/", None),
-            ("GET", "/fci/tournament/enter/5/50001", None),
-            ("POST", "/fci/tournament/enter/", {"activityType": 5, "tournamentId": 50001}),
-            ("POST", "/fci/tournament/dungeonenter/", {"activityType": 5, "tournamentId": 50001, "target_uid": "bot"}),
-            ("PATCH", "/fci/tournamentdungeon/123/active/", {}),
-            ("POST", "/fci/tournament/dungeonbalance/", {"activityType": 5}),
-            ("POST", "/fci/tournament/dungeonquit/", {"activityType": 5}),
-            ("POST", "/fci/tournament/winreward/", {"activityType": 5, "tournamentId": 50001}),
-            ("POST", "/fci/asyncpvpmatch/", {"index": 1}),
-            ("GET", "/fci/asyncpvptargetdetail/local-bot-001", None),
-        ]:
-            with self.subTest(route=route):
-                status, result = self.call(method, route, payload)
-                self.assertEqual(status, 501)
-                self.assertEqual(result["error"], "tournament_asyncpvp_not_configured")
-                self.assertFalse(result["dungeonConfigured"])
-                self.assertNotIn("dungeonId", result)
-        self.assertEqual(self.game._profile(self.account)["resources"], before)
-        with closing(self.game.dungeons._connect()) as connection:
-            self.assertEqual(connection.execute("SELECT COUNT(*) FROM local_dungeons").fetchone()[0], 0)
+    def test_real_run_balance_repeat_and_win_reward_are_exactly_once(self):
+        self.call("POST", "/fci/tournament/enter/", {"tournamentId": TOURNAMENT_ID, "activityType": 5})
+        target = self.call("GET", "/fci/tournament/enter/5/50001")[1]["asyncPvpTargetInfo"][0]
+        status, entered = self.call("POST", "/fci/tournament/dungeonenter/", {"tournamentId": TOURNAMENT_ID, "activityType": 5, "target_uid": target["uid"]})
+        self.assertEqual(status, 200)
+        uid = entered["dungeonUid"]
+        self.assertEqual(self.call("PATCH", f"/fci/tournamentdungeon/{uid}/active/", {"winTeam": 1})[0], 200)
+        status, balance = self.call("POST", "/fci/tournament/dungeonbalance/", {"activityType": 5})
+        self.assertEqual((status, balance["balanceInfo"]["win"], balance["winNum"]), (200, True, 1))
+        balance_cls = message_factory.GetMessageClass(self.game._pool.FindMessageTypeByName("ApiTournamentDungeonBalance.balance"))
+        json_format.ParseDict(balance, balance_cls())
+        self.assertEqual(self.call("POST", "/fci/tournament/dungeonbalance/", {"activityType": 5})[1], balance)
+        status, reward = self.call("POST", "/fci/tournament/winreward/", {"tournamentId": TOURNAMENT_ID, "activityType": 5, "winNum": 1})
+        self.assertEqual(status, 200)
+        self.assertTrue(reward["resChange"])
+        task_rows = {row["id"]: row for row in self.game.tasks.snapshot(self.profile)["tasks"]}
+        self.assertEqual(task_rows[12]["progress"], 1)
+        self.assertEqual(self.call("POST", "/fci/tournament/winreward/", {"tournamentId": TOURNAMENT_ID, "activityType": 5, "winNum": 1})[0], 409)
+        record = self.call("GET", "/fci/asyncpvprecord/")[1]
+        self.assertEqual(record["todayMaxWinNum"], 1)
+        self.assertNotIn(1, record["leftRewardsWinNum"])
 
-    def test_wire_enter_is_identified_before_old_pve_handler(self):
-        body = self.wire("ApiTournamentEnter", tournament_id=50001, activity_type=5)
-        self.assertTrue(self.module.handles("/fci/tournament/enter/", body))
-        self.assertEqual(self.call("POST", "/fci/tournament/enter/", body)[0], 501)
-        other = self.wire("ApiTournamentEnter", tournament_id=18001, activity_type=18)
-        self.assertFalse(self.module.handles("/fci/tournament/enter/", other))
-
-    def test_other_modes_and_local_pve_are_not_claimed(self):
-        for route, payload in [
-            ("/fci/tournament/enter/", {"stage": 1}),
-            ("/fci/tournament/info/", None),
-            ("/fci/tournament/123/balance", {}),
-            ("/fci/tournament/info/18/18001", None),
-            ("/fci/tournament/enter/", {"activityType": 18, "tournamentId": 18001}),
-            ("/fci/BurstLinkPVPInfo/", None),
-            ("/fci/RacePVPInfo/", None),
-            ("/fci/asyncpvp/match", {}),
-            ("/fci/asyncpvprecord/", None),
-        ]:
-            with self.subTest(route=route):
-                self.assertIsNone(self.call("GET", route, payload))
-
-    def test_game_dispatch_rejects_json_and_wire_enter_before_pve(self):
-        before = self.game._profile(self.account)["resources"]
-        for content_type, body in [
-            ("application/json", b'{"tournamentId":50001,"activityType":5}'),
-            ("application/wireformat", self.wire("ApiTournamentEnter", tournament_id=50001, activity_type=5)),
-        ]:
-            with self.subTest(content_type=content_type):
-                status, result = self.game.handle_http("POST", "/fci/tournament/enter/", body, content_type, self.auth)
-                self.assertEqual(status, 501)
-                self.assertEqual(result["error"], "tournament_asyncpvp_not_configured")
-        for method, path, body in [
-            ("GET", "/fci/tournament/info/5/50001/", None),
-            ("POST", "/fci/asyncpvpmatch/", b'{"index":1}'),
-            ("GET", "/fci/asyncpvptargetdetail/bot", None),
-        ]:
-            self.assertEqual(self.game.handle_http(method, path, body, "application/json", self.auth)[0], 501)
-        self.assertEqual(self.game.handle_http("GET", "/fci/tournament/summary/", None, "application/json", self.auth),
-                         (200, {"activityInfo": []}))
-        self.assertEqual(self.game._profile(self.account)["resources"], before)
-        with closing(self.game.dungeons._connect()) as connection:
-            self.assertEqual(connection.execute("SELECT COUNT(*) FROM local_dungeons").fetchone()[0], 0)
+    def test_refresh_is_zero_based_consumes_item_and_caps_at_three(self):
+        bag = self.game.systems._state(self.profile)
+        bag.setdefault("items", {})["80001"] = {"count": 3}
+        self.game.systems._save(self.profile, bag)
+        original = self.call("GET", "/fci/tournament/enter/5/50001")[1]["asyncPvpTargetInfo"][0]["uid"]
+        for index in range(3):
+            status, result = self.call("POST", "/fci/asyncpvpmatch/", {"index": index})
+            self.assertEqual((status, result["index"]), (200, index))
+            if index == 0:
+                self.assertNotEqual(result["targetActor"]["uid"], original)
+        self.assertEqual(self.call("POST", "/fci/asyncpvpmatch/", {"index": 0})[0], 409)
+        self.assertEqual(self.call("GET", "/fci/asyncpvprecord/")[1]["canRefresh"], False)
 
 
 if __name__ == "__main__":

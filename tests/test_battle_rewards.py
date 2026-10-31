@@ -15,8 +15,10 @@ from accounts import LocalAccounts  # noqa: E402
 from dungeon import (  # noqa: E402
     ACTOR_LEVELS,
     DUNGEON_CONFIG,
+    ITEM_FUNC_TYPES,
     REPEAT_DROP_CHANCE,
     STAGE_MATERIAL_POOL,
+    LocalDungeons,
     _roll_actor_level,
 )
 from game import LocalGame  # noqa: E402
@@ -185,6 +187,69 @@ class BattleRewardTests(unittest.TestCase):
         # Training/challenge stages have no repeat drop groups (dropId []).
         self._win(5001)
         self.assertEqual({key: value for key, value in _gains(self._win(5001)).items() if value}, {})
+
+    def test_guild_profit_rules_scale_battle_exp_items_and_equipment(self):
+        """Active ProfitDetail rows affect each matching battle reward class."""
+
+        # Keep the test at the dungeon boundary: the guild route itself has
+        # separate contract coverage, while this verifies that the reward
+        # settlement consumes the native effect filters and ratios.
+        rules = [
+            # Actor EXP, normal chapter stages, +15%.
+            {"id": 101, "type": 3, "add": 1500, "isRatio": True,
+             "dungeonType": [2], "resType": 0, "funcType": 0},
+            # Equipment, normal and tower stages, +20%.
+            {"id": 102, "type": 8, "add": 2000, "isRatio": True,
+             "dungeonType": [5, 2], "resType": 12, "funcType": 0},
+            # Star-up material (ItemInfo.funcType 7), normal stages, +15%.
+            {"id": 103, "type": 8, "add": 1500, "isRatio": True,
+             "dungeonType": [2], "resType": 11, "funcType": 7},
+        ]
+        self.game.guild.active_profit_rules = lambda profile: rules
+
+        balance = self._win(8)
+        gains = _gains(balance)
+        # DungeonReward[8].expActor is 165; deterministic remainder rounding
+        # gives 165 * 1.15 = 190.  Star material 30001 is one base unit and
+        # receives the same carried remainder, while equipment 1 * 1.20
+        # grants a second equipment entry.
+        self.assertEqual(balance["expChange"][0]["addExp"], 190)
+        self.assertEqual(gains[(11, 30001)], 2)
+        self.assertEqual(len([change for change in balance["resChange"] if "equip" in change]), 2)
+
+    def test_guild_profit_rule_matches_equipment_exp_item_function_type(self):
+        """ProfitDetail 104 targets equipment EXP potions (funcType 2)."""
+
+        self.assertEqual(ITEM_FUNC_TYPES.get(30001), 7)
+        self.assertEqual(
+            LocalDungeons._profit_scaled(
+                1,
+                [{"type": 8, "add": 2000, "isRatio": True,
+                  "dungeonType": [5, 2], "resType": 11, "funcType": 2}],
+                dungeon_type=2, profit_type=8, res_type=11, func_type=2,
+                rng=_FixedRandom(0.0),
+            ),
+            2,
+        )
+        self.assertEqual(
+            LocalDungeons._profit_scaled(
+                1,
+                [{"type": 8, "add": 2000, "isRatio": True,
+                  "dungeonType": [5, 2], "resType": 11, "funcType": 2}],
+                dungeon_type=2, profit_type=8, res_type=11, func_type=7,
+                rng=_FixedRandom(0.0),
+            ),
+            1,
+        )
+        # A malformed optional row must not make an otherwise valid battle
+        # fail settlement.
+        self.assertEqual(
+            LocalDungeons._profit_scaled(
+                1, [{"type": "not-an-int", "add": "?"}],
+                dungeon_type=2, profit_type=8, rng=_FixedRandom(0.0),
+            ),
+            1,
+        )
 
     def test_multi_power_scales_cost_exp_and_drops(self):
         # Clear stage 2 with all three targets (no statistics -> all done).

@@ -8,6 +8,7 @@ from pathlib import Path
 import equipment
 from accounts import LocalAccounts
 from game import LocalGame
+from grants import grant_rewards
 
 
 class LocalSystemsMaintenanceTests(unittest.TestCase):
@@ -212,6 +213,7 @@ class LocalSystemsMaintenanceTests(unittest.TestCase):
             self.assertEqual((status, resources.DESCRIPTOR.full_name), (200, "ApiPlayerBaseResource.result"))
             status, flag = self._call(game, token, "POST", "/fci/resource/newflag/", {"isNew": True})
             self.assertEqual((status, flag.DESCRIPTOR.full_name), (200, "ApiResourceNewFlag.patch"))
+            grant_rewards(game, game._profile(_account), [{"type": 11, "id": 1016, "count": 1}])
             status, filled = self._call(game, token, "POST", "/fci/seal/fill/", {"cellId": 4})
             self.assertEqual((status, filled.DESCRIPTOR.full_name), (200, "ApiSealFill.result"))
 

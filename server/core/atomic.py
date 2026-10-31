@@ -57,11 +57,22 @@ class AtomicMutations:
     def transaction(self):
         owner = getattr(self.local, 'owner', None)
         if owner is not None:
+            # Nested mutations share the outer connection.  A savepoint keeps
+            # a failed child operation from poisoning the whole request when
+            # the caller deliberately catches that exception and continues.
+            # Explicit ``borrowed().rollback()`` still marks the owner failed
+            # because it represents a request-wide rollback decision.
+            owner.savepoint_counter += 1
+            savepoint = f"ljjc_nested_{owner.savepoint_counter}"
+            owner.connection.execute(f'SAVEPOINT {savepoint}')
             try:
                 yield
             except BaseException:
-                owner.failed = True
+                owner.connection.execute(f'ROLLBACK TO SAVEPOINT {savepoint}')
+                owner.connection.execute(f'RELEASE SAVEPOINT {savepoint}')
                 raise
+            else:
+                owner.connection.execute(f'RELEASE SAVEPOINT {savepoint}')
             return
         game = self.game
         callbacks = []
@@ -76,6 +87,7 @@ class AtomicMutations:
                 connection.execute('BEGIN IMMEDIATE')
                 owner = type('Transaction', (), {})()
                 owner.connection, owner.callbacks, owner.failed = connection, callbacks, False
+                owner.savepoint_counter = 0
                 self.local.owner = owner
                 yield
                 if owner.failed:

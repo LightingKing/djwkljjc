@@ -902,7 +902,6 @@ class LocalProfileFeatures:
             game["draws"] = _int(game.get("draws")) + max(1, _int(payload.get("count", 1), 1)); prize = {"id": game["draws"], "type": 7, "count": 20}
             game.setdefault("prizes", []).append(prize); self._save(profile, state); return 200, {"prize": prize, "draws": game["draws"], "sandbox": True}
         if lower.startswith("/fci/share"):
-            if method != "POST": return 405, {"error": "method_not_allowed", "message": "POST required"}
             share = state.setdefault("share", {"weeklyRewarded": False, "actorRewardGot": 0, "weekKey": None})
             # The client treats this as a weekly share reward.  Keep the
             # reset tied to the server clock so tests and long-running local
@@ -917,6 +916,18 @@ class LocalProfileFeatures:
                 share["weekKey"] = current_week
                 share["weeklyRewarded"] = False
                 share["actorRewardGot"] = 0
+                self._save(profile, state)
+            if method == "GET":
+                # The Monday refresh push is followed by a GET in the native
+                # client.  This is a read of the persisted weekly state, so
+                # it must not consume the reward or require a request body.
+                return 200, {
+                    "weeklyRewarded": bool(share.get("weeklyRewarded")),
+                    "actorRewardGot": _int(share.get("actorRewardGot")),
+                    "resChange": [],
+                    "sandbox": True,
+                }
+            if method != "POST": return 405, {"error": "method_not_allowed", "message": "POST required"}
             if share.get("weeklyRewarded"): return 200, {"weeklyRewarded": True, "actorRewardGot": _int(share.get("actorRewardGot")), "resChange": [], "sandbox": True}
             ok, changes, error = self.game.economy._change_resources(profile, [{"type": 7, "id": 0, "param": 0, "count": 50}])
             if not ok: return 409, {"error": error or "resource_update_failed"}

@@ -41,7 +41,10 @@ ACTIVITY_SORT_ROW1 = [39, 40, 31, 27, 2, 3, 17, 30, 10, 5, 20, 42, 18, 23]
 UNLOCK_LEVEL = {2: 10, 3: 16, 17: 18, 30: 18, 10: 20, 31: 32, 5: 23, 18: 28, 20: 26, 23: 30}
 # xlsx ActivityDungeon: base material activities and their multipleActivityId.
 COLLECTION_IDS = {2001: 2101, 2002: 2102, 2003: 2103}
-PERMANENT_TYPES = {2, 3, 10, 17, 20, 30, 31}
+# Type 23 is the locally opened TeamDungeon activity (D3).  It is a
+# permanent entry alongside the existing material, tower, arena and race
+# activities, even though its level gate remains 30.
+PERMANENT_TYPES = {2, 3, 5, 10, 17, 18, 20, 23, 30, 31}
 
 
 def is_activity_on(activity: dict, now: int) -> bool:
@@ -104,11 +107,12 @@ class PermanentActivityEntryTests(unittest.TestCase):
         self.assertEqual({row["type"] for row in permanent}, PERMANENT_TYPES)
         by_id = {row["activityId"]: row for row in permanent}
         self.assertEqual(
-            sorted(by_id), [2001, 2002, 2003, 3001, 10001, 17001, 20001, 30001, 31001],
+            sorted(by_id), [2001, 2002, 2003, 3001, 5001, 10001, 17001, 18001, 20001, 23001, 30001, 31001],
         )
         self.assertEqual({row["activityId"] for row in rows if row["type"] == 53}, {53001, 53002})
         for row in permanent:
-            self.assertEqual(row["category"], 1)  # ActivityCategory_WeeklyActivity
+            expected_category = 3 if row["type"] in {5, 18} else 1
+            self.assertEqual(row["category"], expected_category)
             self.assertEqual(row["timeType"], 1)  # ActivityTimeType_Forever
             self.assertTrue(row["forever"])
             self.assertEqual(row["timestampEnd"], 0)
@@ -160,8 +164,8 @@ class PermanentActivityEntryTests(unittest.TestCase):
         rows = self.rows()
         # Forced tutorial 14 (Lv10, UnlockWindow ActivityStageChoose2) clicks
         # the first Activity slot: CollectionDungeon is the only unlocked group.
-        self.assertEqual(menu_types(rows, self.now[0], 10), [2, 31, 3, 17, 30, 10, 20])
-        self.assertEqual(menu_types(rows, self.now[0], 32), [31, 2, 3, 17, 30, 10, 20])
+        self.assertEqual(menu_types(rows, self.now[0], 10), [2, 31, 3, 17, 30, 10, 5, 20, 18, 23])
+        self.assertEqual(menu_types(rows, self.now[0], 32), [31, 2, 3, 17, 30, 10, 5, 20, 18, 23])
         # Before this change the menu was empty: 12/15/25/46 are not sorted.
         legacy = [row for row in rows if row["type"] not in PERMANENT_TYPES]
         self.assertEqual(menu_types(legacy, self.now[0], 60), [])
@@ -169,7 +173,7 @@ class PermanentActivityEntryTests(unittest.TestCase):
     def test_entries_stay_open_across_days(self):
         for _ in range(9):
             self.now[0] += DAY
-            self.assertEqual(menu_types(self.rows(), self.now[0], 60), [31, 2, 3, 17, 30, 10, 20])
+            self.assertEqual(menu_types(self.rows(), self.now[0], 60), [31, 2, 3, 17, 30, 10, 5, 20, 18, 23])
 
     # -- attached schedule document ----------------------------------------
     def test_shipped_schedule_document_lists_the_permanent_modes(self):

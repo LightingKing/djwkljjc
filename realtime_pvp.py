@@ -651,6 +651,16 @@ class LocalRealtimePvp:
     BURST_ROUNDS = 5
     BURST_PLAYERS = 3
     BURST_TICKETS = 1
+    # Client 2.0.4's native BurstLink constants.  The original matcher and
+    # FightService are unavailable in the local build, so the HTTP seam below
+    # publishes a deterministic robot room and accepts the normal balance
+    # callback.  80003 is the extracted RefreshPrice type-18 ticket.
+    BURST_ACTIVITY_TYPE = 18
+    BURST_ACTIVITY_ID = 18001
+    BURST_DUNGEON_ID = 18001
+    BURST_TICKET_ID = 80003
+    BURST_MAX_WINS = 5
+    BURST_MAX_LOSSES = 3
 
     def __init__(self, game: Any, *, clock=None) -> None:
         self.game = game
@@ -767,6 +777,251 @@ class LocalRealtimePvp:
             "isRobot": False,
             "score": 0,
         }
+
+    # ----------------------------------------------------------- native BurstLink
+    # The following helpers mirror the names and JSON fields of the recovered
+    # ApiBurstLink* messages.  They intentionally share the existing
+    # local_realtime_pvp_state row with the compact compatibility state machine
+    # above, keeping retries/restarts idempotent without a second ledger.
+    @staticmethod
+    def _native_default() -> dict[str, Any]:
+        return {"main": [], "assistant": [], "groups": {"1": {"members": []}},
+                "active": None, "lastWin": False, "lastBalanced": False,
+                "received": False}
+
+    def _native(self, state: dict[str, Any]) -> dict[str, Any]:
+        value = state["burst"].get("native")
+        if not isinstance(value, dict):
+            value = self._native_default()
+            state["burst"]["native"] = value
+        defaults = self._native_default()
+        for key, fallback in defaults.items():
+            # ``active`` intentionally defaults to ``None`` and becomes a
+            # dictionary after matching.  ``isinstance(active, type(None))``
+            # would erase that persisted run every time the state was read.
+            # For nullable fields, validate only that the key exists; all
+            # non-null values are consumed through the guarded checks below.
+            if key not in value or (fallback is not None and not isinstance(value[key], type(fallback))):
+                value[key] = fallback.copy() if isinstance(fallback, (dict, list)) else fallback
+        return value
+
+    def _native_actors(self, profile: Mapping[str, Any]) -> list[dict[str, Any]]:
+        ids, uids = self.game.dungeons._fight_team(profile)
+        actors = []
+        for actor_id, uid in zip(ids, uids):
+            if int(uid or 0):
+                actor = self.game.dungeons._fight_actor(profile, actor_id, uid)
+                if actor:
+                    actors.append(actor)
+        # A local profile can be created with only one actor; the client still
+        # requires three slots per side, so deterministic copies fill previews
+        # while the selected group retains real UIDs.
+        if not actors:
+            actor = self.game.dungeons._fight_actor(profile, int(profile.get("actor_id") or 1001), 1)
+            if actor:
+                actors.append(actor)
+        return actors
+
+    def _native_request(self, body: Body, message_name: str) -> dict[str, Any]:
+        """Decode JSON or the exact protobuf request emitted by the client."""
+        if isinstance(body, Mapping):
+            return dict(body)
+        raw = body.encode("utf-8") if isinstance(body, str) else bytes(body or b"")
+        if not raw:
+            return {}
+        if raw.lstrip()[:1] in (b"{", b"["):
+            try:
+                value = json.loads(raw.decode("utf-8"))
+                return dict(value) if isinstance(value, Mapping) else {}
+            except (UnicodeDecodeError, ValueError):
+                return {}
+        try:
+            cls = message_factory.GetMessageClass(self.game._pool.FindMessageTypeByName(message_name))
+            message = cls(); message.ParseFromString(raw)
+            return json_format.MessageToDict(message)
+        except Exception:
+            return {}
+
+    @staticmethod
+    def _uid(actor: Mapping[str, Any]) -> int:
+        return _int(actor.get("uid", actor.get("actorUid", 0)))
+
+    def _native_info(self, profile: Mapping[str, Any], state: dict[str, Any]) -> dict[str, Any]:
+        bucket = state["burst"]
+        native = self._native(state)
+        active = native.get("active") if isinstance(native.get("active"), dict) else None
+        return {
+            # Compatibility keys retained for the existing local dashboard;
+            # the native client ignores unknown JSON fields.
+            "mode": "burst",
+            "tickets": int(bucket.get("tickets", 0)),
+            "maxTickets": int(self.BURST_TICKETS),
+            "playerId": str(profile.get("player_id", "local")),
+            "isRobot": False,
+            "expireSeconds": 0,
+            "baseInfo": {
+                "createTime": int(active.get("createdAt", self._now()) if active else self._now()),
+                "quitTime": 0,
+                "level": int(profile.get("level", 1) or 1),
+                "name": str(profile.get("name", "本地玩家")),
+                "winNum": int(bucket.get("wins", 0)),
+                "failNum": int(bucket.get("losses", 0)),
+            },
+            "balanceInfo": {"balanced": bool(native.get("lastBalanced")), "isWin": bool(native.get("lastWin"))},
+            "actorsInfo": {
+                "curMainActor": [_int(v) for v in native.get("main", [])],
+                "curAssistantActor": [_int(v) for v in native.get("assistant", [])],
+                "battleActorGroup": [_int(v) for v in native.get("main", []) + native.get("assistant", [])],
+                "playerActors": [],
+            },
+            "matchInfo": {},
+            "dungeonId": int(self.BURST_DUNGEON_ID),
+            "reward": self._native_rewards(),
+            "resChange": [],
+        }
+
+    @staticmethod
+    def _native_rewards() -> list[dict[str, Any]]:
+        # No BurstLink reward table survived extraction.  Keep a visible,
+        # deterministic cumulative table using the local gold resource; the
+        # policy is recorded as confidence D in docs/本地规则清单.md.
+        return [{"id": i, "reward": [{"type": 7, "id": 0, "count": 100 * i, "param": 0}],
+                 "nextReward": []} for i in range(1, 6)]
+
+    def _native_rand_actor(self, profile: Mapping[str, Any], native: dict[str, Any], actor_type: int = 0) -> dict[str, Any]:
+        pool = self._native_actors(profile)
+        selected = {_int(v) for v in native.get("main", []) + native.get("assistant", [])}
+        choices = [actor for actor in pool if self._uid(actor) not in selected]
+        if not choices:
+            choices = pool
+        return {
+            "randActor": choices[:3],
+            "selectActor": [actor for actor in pool if self._uid(actor) in selected],
+            "curMainActor": [_int(v) for v in native.get("main", [])],
+            "curAssistantActor": [_int(v) for v in native.get("assistant", [])],
+        }
+
+    def _native_group(self, profile: Mapping[str, Any], state: dict[str, Any], payload: Optional[Mapping[str, Any]] = None) -> dict[str, Any]:
+        native = self._native(state)
+        groups = payload.get("actorGroups") if isinstance(payload, Mapping) else None
+        if isinstance(groups, Mapping):
+            clean = {}
+            for key, group in groups.items():
+                if not isinstance(group, Mapping):
+                    continue
+                members = []
+                for member in group.get("members") or []:
+                    if not isinstance(member, Mapping):
+                        continue
+                    members.append({"index": _int(member.get("index")), "actorUid": _int(member.get("actorUid")),
+                                    "actorId": _int(member.get("actorId"))})
+                clean[str(key)] = {"members": members}
+            if clean:
+                native["groups"] = clean
+                members = clean.get("1", next(iter(clean.values()))) .get("members", [])
+                native["main"] = [_int(m.get("actorUid")) for m in members if _int(m.get("index")) < 3 and _int(m.get("actorUid"))]
+                native["assistant"] = [_int(m.get("actorUid")) for m in members if _int(m.get("index")) >= 3 and _int(m.get("actorUid"))]
+        return native["groups"]
+
+    def _publish_native_match(self, profile: Mapping[str, Any], dungeon: Mapping[str, Any]) -> None:
+        """Deliver ScMatchNtf when a WebSocket session is available.
+
+        The local HTTP tests and offline clients can use the REST balance route
+        directly; a connected original client also gets the same typed push
+        message used by the native window.  Missing push descriptors/sessions
+        are intentionally harmless.
+        """
+        services = getattr(getattr(self.game, "base_push_notifier", None), "push_services", ())
+        try:
+            cls = message_factory.GetMessageClass(self.game._pool.FindMessageTypeByName("ScMatchNtf"))
+            payload = json_format.ParseDict({"fightsvrUrl": "", "dungeonInfo": dict(dungeon)}, cls())
+            data = payload.SerializeToString()
+        except Exception:
+            return
+        for service in tuple(services or ()):
+            try:
+                key = service.key_for_account_id(profile.get("account_id"))
+                if key is not None:
+                    service.publish(key, "ScMatchNtf", data)
+            except Exception:
+                continue
+
+    def _native_match(self, profile: Mapping[str, Any], state: dict[str, Any]) -> Response:
+        native = self._native(state)
+        bucket = state["burst"]
+        active = native.get("active")
+        if isinstance(active, dict) and not active.get("balanced"):
+            return 200, {"matchTime": 0, "maxWaitTime": 1}
+        if int(bucket.get("tickets", 0)) <= 0:
+            return 409, {"error": "ticket_exhausted", "mode": "burst", "nextResetAt": self._next_reset()}
+        if not native.get("main"):
+            native["main"] = [self._uid(actor) for actor in self._native_actors(profile)[:3]]
+        if not native.get("assistant"):
+            native["assistant"] = [self._uid(actor) for actor in self._native_actors(profile)[3:6]]
+        match_no = int(bucket.get("nativeMatch", 0)) + 1
+        uid = 7_000_000_000_000 + int(profile["account_id"]) * 1000 + match_no
+        actors = self._native_actors(profile)
+        own = [actor for actor in actors if self._uid(actor) in set(native["main"] + native["assistant"])]
+        if not own:
+            own = actors[:3]
+        bot = self._bot(int(profile["account_id"]), match_no, 1, burst=True)
+        bot_actors = [{"id": int(actor_id), "uid": 0, "level": int(bot["level"]), "quality": 1, "star": 1,
+                       "attrs": []} for actor_id in bot["actorIds"]]
+        dungeon = {"dungeonUid": int(uid), "dungeonId": int(self.BURST_DUNGEON_ID), "dungeonType": 6,
+                   "expireSeconds": 3600, "state": 1,
+                   "teams": [{"members": [{"playerId": str(profile.get("player_id", "local")),
+                                             "name": str(profile.get("name", "本地玩家")),
+                                             "level": int(profile.get("level", 1) or 1), "actors": own}]},
+                              {"members": [{"playerId": bot["playerId"], "name": bot["name"],
+                                             "level": int(bot["level"]), "actors": bot_actors}]}]}
+        native["active"] = {"uid": int(uid), "createdAt": self._now(), "balanced": False,
+                             "dungeon": dungeon, "win": None}
+        native["lastBalanced"] = False
+        bucket["tickets"] = int(bucket.get("tickets", 0)) - 1
+        bucket["nativeMatch"] = match_no
+        self._save(profile, state)
+        self._publish_native_match(profile, dungeon)
+        return 200, {"matchTime": 0, "maxWaitTime": 1}
+
+    def _native_balance(self, profile: Mapping[str, Any], state: dict[str, Any], body: Body) -> Response:
+        native = self._native(state)
+        active = native.get("active")
+        if not isinstance(active, dict):
+            return 409, {"error": "burstlink_dungeon_not_found"}
+        if active.get("balanced"):
+            return 200, {"isWin": bool(active.get("win")), "winNum": int(state["burst"].get("wins", 0)),
+                          "failNum": int(state["burst"].get("losses", 0)), "rewards": []}
+        payload = self._native_request(body, "ApiBurstLinkDunBalance")
+        won = bool(payload.get("win", payload.get("isWin", True)))
+        active["balanced"] = True
+        active["win"] = won
+        native["lastWin"] = won
+        native["lastBalanced"] = True
+        bucket = state["burst"]
+        if won:
+            bucket["wins"] = int(bucket.get("wins", 0)) + 1
+        else:
+            bucket["losses"] = int(bucket.get("losses", 0)) + 1
+        native["active"] = active
+        self._save(profile, state)
+        return 200, {"isWin": won, "winNum": int(bucket["wins"]), "failNum": int(bucket["losses"]), "rewards": []}
+
+    def _native_claim(self, profile: Mapping[str, Any], state: dict[str, Any]) -> Response:
+        native = self._native(state)
+        bucket = state["burst"]
+        if int(bucket.get("wins", 0)) < self.BURST_MAX_WINS and int(bucket.get("losses", 0)) < self.BURST_MAX_LOSSES:
+            return 409, {"error": "burstlink_not_finished"}
+        if native.get("received"):
+            return 200, {"resChange": []}
+        total = max(0, min(self.BURST_MAX_WINS, int(bucket.get("wins", 0)))) * 100
+        changes: list[dict[str, Any]] = []
+        if total:
+            ok, changes, error = self.game.economy._change_resources(profile, [{"type": 7, "id": 0, "count": total}])
+            if not ok:
+                return 409, {"error": error or "resource_update_failed"}
+        native["received"] = True
+        self._save(profile, state)
+        return 200, {"resChange": changes}
 
     def _summary(self, mode: str, bucket: Mapping[str, Any]) -> dict[str, Any]:
         return {
@@ -915,6 +1170,74 @@ class LocalRealtimePvp:
         race_result = self.race.handle_http(method, path, body, profile)
         if race_result is not None:
             return race_result
+        # Native 2.0.4 BurstLink requests.  The client uses the match server
+        # URL for matching and the FCI URL for the player/settlement resources;
+        # both are handled by this deterministic local AI implementation.
+        if route in {"/fci/burstlinkpvpinfo", "/fci/burstlinkpvpinfo/"}:
+            with shared_process_lock(self.game.db_path), self._lock:
+                state = self._state(profile)
+                method_upper = method.upper()
+                if method_upper == "GET":
+                    return 200, self._native_info(profile, state)
+                if method_upper == "POST":
+                    self._native(state)
+                    self._save(profile, state)
+                    return 200, {"resChange": [], **self._native_info(profile, state)}
+                return 405, {"error": "method_not_allowed", "message": "GET or POST required"}
+        if route in {"/fci/burstlinkpvprandactorinfo", "/fci/burstlinkpvprandactorinfo/"} or route.startswith("/fci/burstlinkpvprandactorinfo/"):
+            with shared_process_lock(self.game.db_path), self._lock:
+                state = self._state(profile)
+                native = self._native(state)
+                method_upper = method.upper()
+                if method_upper == "GET":
+                    return 200, self._native_rand_actor(profile, native)
+                if method_upper in {"POST", "PUT"}:
+                    request = self._native_request(body, "ApiBurstLinkPVPRandActor")
+                    actor_uid = _int(request.get("actorUid", request.get("uid")))
+                    actor_type = _int(route.rsplit("/", 1)[-1]) if route.rsplit("/", 1)[-1].isdigit() else 0
+                    target = native["main"] if actor_type in {0, 1} else native["assistant"]
+                    if actor_uid and actor_uid not in target:
+                        target.append(actor_uid)
+                    self._save(profile, state)
+                    return 200, self._native_rand_actor(profile, native, actor_type)
+                return 405, {"error": "method_not_allowed"}
+        if route in {"/fci/burstlinkpvpactor", "/fci/burstlinkpvpactor/"}:
+            if method.upper() == "GET":
+                return 200, {"actor": self._native_actors(profile)}
+            return 405, {"error": "method_not_allowed", "message": "GET required"}
+        if route in {"/fci/burstlinkpvpactorgroup", "/fci/burstlinkpvpactorgroup/"}:
+            with shared_process_lock(self.game.db_path), self._lock:
+                state = self._state(profile)
+                if method.upper() == "GET":
+                    return 200, self._native(state)["groups"]
+                if method.upper() in {"PUT", "POST"}:
+                    groups = self._native_group(profile, state, self._native_request(body, "ApiBurstLinkPvpBattleGroup"))
+                    self._save(profile, state)
+                    return 200, {"result": {"actorGroups": groups}}
+                return 405, {"error": "method_not_allowed"}
+        if route in {"/fci/burstlinkdunbalance", "/fci/burstlinkdunbalance/"}:
+            if method.upper() != "POST":
+                return 405, {"error": "method_not_allowed", "message": "POST required"}
+            with shared_process_lock(self.game.db_path), self._lock:
+                state = self._state(profile)
+                return self._native_balance(profile, state, body)
+        if route in {"/fci/burstlinkpvpbalance", "/fci/burstlinkpvpbalance/"}:
+            if method.upper() != "POST":
+                return 405, {"error": "method_not_allowed", "message": "POST required"}
+            with shared_process_lock(self.game.db_path), self._lock:
+                state = self._state(profile)
+                return self._native_claim(profile, state)
+        if route in {"/match/burstlinkpvpmatch", "/match/burstlinkpvpmatch/"}:
+            with shared_process_lock(self.game.db_path), self._lock:
+                state = self._state(profile)
+                if method.upper() == "POST":
+                    return self._native_match(profile, state)
+                if method.upper() == "PUT":
+                    native = self._native(state)
+                    native["active"] = None
+                    self._save(profile, state)
+                    return 200, {}
+                return 405, {"error": "method_not_allowed", "message": "POST or PUT required"}
         # Preserve BurstLink's old simulation without allowing the obsolete
         # action-string Race routes to create a second reward/ticket economy.
         if any(token in route for token in ("racepvp", "race-pvp")):

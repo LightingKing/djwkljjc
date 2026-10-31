@@ -66,6 +66,10 @@ permanentActivities:
     - id: gold-dungeon
       type: 17           # GoldDungeon -> window DungeonGold (UnlockWindow 18, Lv18)
       activityId: 17001
+    - id: team-dungeon
+      type: 23           # DungeonTeam -> window DungeonTeam (local AI teammates)
+      activityId: 23001
+      levelLimit: 30
     - id: challenge-mode
       type: 30           # ChallengeMode -> ChapterChallenge (UnlockWindow 16, Lv18)
       activityId: 30001
@@ -78,18 +82,47 @@ permanentActivities:
     - id: race-pvp
       type: 20
       activityId: 20001
+    - id: async-pvp
+      type: 5           # Tournament_AsyncPvp / 虚像之境
+      activityId: 5001
+      category: 3
+      levelLimit: 23
+    - id: burstlink
+      type: 18          # BurstLinkPvp / 超频连线
+      activityId: 18001
+      category: 3
+      levelLimit: 28
     - id: actor-cultivation-1502
       type: 53
       activityId: 53001
     - id: actor-cultivation-1514
       type: 53
       activityId: 53002
+    - id: diff-actor-inherit
+      type: 33           # DiffActorInherit; whitelist is the exported 33001 row
+      activityId: 33001
+    - id: condition-reward
+      type: 35           # True-love contract manual actor choice
+      activityId: 35001
+    - id: maze
+      type: 34           # Local Maze entry; client widgets/routes are present
+      activityId: 34001
+      levelLimit: 1
+    - id: seal
+      type: 16           # Welfare tab Seal16
+      activityId: 16001
+    - id: chip-exchange
+      type: 44           # Welfare tab ChipExchange44
+      activityId: 44001
+    - id: postcard
+      type: 26           # Welfare tab Postcard26
+      activityId: 26001
+    - id: jigsaw
+      type: 48           # Welfare tab Jigsaw48
+      activityId: 48001
+    - id: theme-tasks
+      type: 43           # Welfare tab Theme43
+      activityId: 43001
     # Not listed:
-    # - Maze (34): in no ActivitySort row and no other UI entry, so the 2.0.4
-    #   client can never show it.
-    # - DungeonTeam (23, Lv30): multiplayer routes remain unimplemented.
-    # - Tournament_AsyncPvp (5, Lv23) / BurstLinkPvp (18, Lv28): category 3
-    #   (Tournament) entries additionally need a matching
-    #   fci/tournament/summary/ activityInfo[] record and fci/tournament/info.
     # - EventDungeon (27), EventDungeon_Autumn2018(+Hard) (39/40),
     #   RacePVPActivity (42): dated events, schedule them as phases instead.

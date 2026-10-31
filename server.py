@@ -704,10 +704,12 @@ class FixtureServer(ThreadingHTTPServer):
                     return result if result is not None else (501, {
                         "error": "route_not_implemented", "path": route,
                     })
-                try:
-                    self.route_registry.register_path(route, handler, method="POST", interface=interface)
-                except Exception:
-                    continue
+                methods = ("GET", "POST") if interface == "ApiChipExchange" else ("POST",)
+                for method in methods:
+                    try:
+                        self.route_registry.register_path(route, handler, method=method, interface=interface)
+                    except Exception:
+                        continue
 
     def dispatch_contract(self, method: str, path: str, request: Mapping[str, Any]):
         """Dispatch a request through the registry when a handler is bound."""
@@ -1636,7 +1638,7 @@ document.querySelector('#refresh').addEventListener('click',load);load();
                 self.server.audit_log.write(**base_record, status=status, handler='local_guest_accounts', handler_error=payload.get('error') if status >= 400 else None, handler_error_message=payload.get('message') if status >= 400 else None)
                 return
 
-        if self.server.game is not None and parsed.path.startswith('/fci/'):
+        if self.server.game is not None and (parsed.path.startswith('/fci/') or parsed.path.startswith('/match/')):
             game_path = parsed.path + ('?' + parsed.query if parsed.query else '')
             result = self.server.game.handle_http(method, game_path, payload_body,
                 self.headers.get('Content-Type'), self.headers.get('Authorization'))

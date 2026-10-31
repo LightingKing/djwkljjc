@@ -58,5 +58,17 @@
     "source": "I:/workspace/mobilegame/analysis/lua-decompiled/window__purchasebuy__purchasebuy.lua",
     "destination": "sources/purchasebuy.lua",
     "sha256": "6b62efe1c362ba4dc35bac312fca5b071ad5cd51fef6d9b63939d0d029c459ea"
+  },
+  {
+    "source": "I:/workspace/mobilegame/analysis/ljjc_manifest_out/assets/Patch/assetbundle/data/lua/window/activity/activity",
+    "destination": "sources/activity.lua",
+    "sha256": "5f278763e131465685eef4e29812dab2f75265954d249a9d600d6e3c3b31c29f",
+    "reason": "D4 Maze activity entry and level gate"
+  },
+  {
+    "source": "I:/workspace/mobilegame/analysis/ljjc_manifest_out/assets/Patch/assetbundle/data/lua/common/windowutil",
+    "destination": "sources/windowutil.lua",
+    "sha256": "c77c803bc9abcf47df0215359956125afefdd1caf8907413acbee41630f8c3fb",
+    "reason": "D4 Maze activity entry and level gate"
   }
 ]

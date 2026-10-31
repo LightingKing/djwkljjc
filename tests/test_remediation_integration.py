@@ -65,26 +65,34 @@ class IntegrationTests(unittest.TestCase):
             self.assertEqual(messages, [])
         self.assertEqual([entry[1] for entry in messages], ['ScMails'])
 
-    def test_inner_failure_cannot_be_swallowed_to_commit_partial_work(self):
-        with self.assertRaisesRegex(RuntimeError, 'nested mutation failed'):
-            with self.game.atomic_mutation():
-                try:
-                    with self.game.atomic_mutation():
-                        state = self.game.systems._state(self.profile)
-                        state['atomicProbe'] = True
-                        self.game.systems._save(self.profile, state)
-                        raise ValueError('failed')
-                except ValueError:
-                    pass
-        self.assertNotIn('atomicProbe', self.game.systems._state(self.profile))
+    def test_inner_failure_rolls_back_to_savepoint_when_swallowed(self):
+        with self.game.atomic_mutation():
+            state = self.game.systems._state(self.profile)
+            state['outerProbe'] = True
+            self.game.systems._save(self.profile, state)
+            try:
+                with self.game.atomic_mutation():
+                    nested = self.game.systems._state(self.profile)
+                    nested['atomicProbe'] = True
+                    self.game.systems._save(self.profile, nested)
+                    raise ValueError('failed')
+            except ValueError:
+                pass
+        committed = self.game.systems._state(self.profile)
+        self.assertTrue(committed['outerProbe'])
+        self.assertNotIn('atomicProbe', committed)
 
-    def test_unavailable_campaign_and_role_present_never_pay_placeholder_rewards(self):
+    def test_condition_reward_and_role_present_use_open_local_contracts(self):
         before = self.game._profile(self.account)['resources']
         status, payload = self.call('GET', '/fci/conditionreward/')
         self.assertEqual(status, 200)
-        self.assertFalse(payload.has_reward_qualification)
-        self.assertEqual(self.call('POST', '/fci/conditionreward/', b'{}')[0], 409)
-        self.assertEqual(self.call('GET', '/fci/RolePresent/'), (200, []))
-        self.assertEqual(self.call('POST', '/fci/RolePresent/1', b'{}')[0], 404)
+        self.assertTrue(payload.has_reward_qualification)
+        self.assertEqual(payload.manual_box_reward.id, 121001)
+        status, claimed = self.call('POST', '/fci/conditionreward/', b'{"manualBoxIndex":0}')
+        self.assertEqual(status, 200)
+        self.assertGreater(len(claimed.manual_box_res_change), 0)
+        status, present = self.call('GET', '/fci/RolePresent/')
+        self.assertEqual(status, 200)
+        self.assertEqual(present.DESCRIPTOR.full_name, 'ApiRolePresent.result')
         self.assertEqual(self.game._profile(self.account)['resources'], before)
 

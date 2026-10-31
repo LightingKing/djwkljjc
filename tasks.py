@@ -68,7 +68,11 @@ _DESCRIPTOR = _ROOT / "data" / "descriptor_set.pb"
 # TaskCategory enum (descriptor_set.pb).
 CATEGORY_ROUTINE = 1
 CATEGORY_MAIN = 2
-OWNED_CATEGORIES = (CATEGORY_ROUTINE, CATEGORY_MAIN)
+CATEGORY_ACTIVITY = 102
+CATEGORY_RANDOM = 104
+# Category 104 is owned by LocalCultivation, which has actor-specific
+# progress and daily random selection.  Keep it out of the generic task store.
+OWNED_CATEGORIES = (CATEGORY_ROUTINE, CATEGORY_MAIN, CATEGORY_ACTIVITY)
 # Deadline/Repeat/Newbie/Challenge/Favour have no local source yet; listing
 # them in ``disableCategory`` hides their tabs (TaskUtil.CheckCategory).
 DISABLED_CATEGORIES = [3, 4, 5, 6, 7]
@@ -160,6 +164,8 @@ def _task_def(row: Mapping[str, Any]) -> dict[str, Any]:
         "preTaskId": _int(row.get("preTaskId")),
         "recordBeforeGot": bool(row.get("recordBeforeGot")),
         "deleteAfterReward": bool(row.get("deleteAfterReward")),
+        "extraActivePoint": _int(row.get("extraActivePoint")),
+        "extraActivePointType": _int(row.get("extraActivePointType"), 1),
     }
 
 
@@ -170,6 +176,8 @@ TASKS: dict[int, dict[str, Any]] = {
 }
 ROUTINE_IDS = tuple(sorted(tid for tid, task in TASKS.items() if task["category"] == CATEGORY_ROUTINE))
 MAIN_IDS = tuple(sorted(tid for tid, task in TASKS.items() if task["category"] == CATEGORY_MAIN))
+ACTIVITY_IDS = tuple(sorted(tid for tid, task in TASKS.items() if task["category"] == CATEGORY_ACTIVITY))
+RANDOM_IDS = tuple(sorted(tid for tid, task in TASKS.items() if task["category"] == CATEGORY_RANDOM))
 ACTIVE_POINT_REWARDS: dict[int, list[dict[str, int]]] = {
     _int(row.get("targetActivePoint")): _rewards(row.get("reward"))
     for row in _rows("TaskActivePointReward") if _int(row.get("targetActivePoint")) > 0
@@ -178,6 +186,15 @@ WEEK_ACTIVE_POINT_REWARDS: dict[int, list[dict[str, int]]] = {
     _int(row.get("activePoint")): _rewards(row.get("reward"))
     for row in _rows("WeekActivePointReward") if _int(row.get("activePoint")) > 0
 }
+# Activity extra-active-point milestones.  The original client keeps these in
+# ``DbPlayerTask.TaskExtraActivePointInfo`` (one accumulator per activity
+# type), rather than in the ordinary daily/weekly task counters.
+EXTRA_ACTIVE_POINT_REWARDS: dict[int, dict[int, list[dict[str, int]]]] = {}
+for _row in _rows("TaskExtraActivePointReward"):
+    _extra_type = _int(_row.get("activePointType"), 0)
+    _extra_target = _int(_row.get("activePoint"), 0)
+    if _extra_type > 0 and _extra_target > 0:
+        EXTRA_ACTIVE_POINT_REWARDS.setdefault(_extra_type, {})[_extra_target] = _rewards(_row.get("reward"))
 
 _TASK_TYPE_NAMES: Optional[dict[str, int]] = None
 
@@ -258,6 +275,10 @@ class LocalTasks:
             "loginDay": None,
             "dungeonWins": {},
             "towerMaxFloor": 0,
+            # ``type`` -> {season, points, rewardGot}.  The local activity
+            # season is deliberately stable until a future activity-season
+            # source is restored; points therefore survive daily resets.
+            "extraActivePoint": {},
         }
 
     def _seed_history(self, profile: Mapping[str, Any], state: dict[str, Any]) -> None:
@@ -291,6 +312,8 @@ class LocalTasks:
                     state = {}
                 for key, value in self._default_state().items():
                     state.setdefault(key, value)
+                if not isinstance(state.get("extraActivePoint"), dict):
+                    state["extraActivePoint"] = {}
                 return state
             state = self._default_state()
             self._seed_history(profile, state)
@@ -299,6 +322,77 @@ class LocalTasks:
                 (account_id, json.dumps(state, separators=(",", ":")), self._now()),
             )
             return state
+
+    @staticmethod
+    def _extra_entry(state: dict[str, Any], point_type: int) -> dict[str, Any]:
+        """Return a normalized per-type extra-active-point accumulator."""
+
+        all_entries = state.setdefault("extraActivePoint", {})
+        if not isinstance(all_entries, dict):
+            all_entries = {}
+            state["extraActivePoint"] = all_entries
+        key = str(max(0, _int(point_type)))
+        entry = all_entries.get(key)
+        if not isinstance(entry, dict):
+            entry = {}
+            all_entries[key] = entry
+        entry["season"] = _int(entry.get("season"), 1) or 1
+        entry["points"] = max(0, _int(entry.get("points"), 0))
+        got = entry.get("rewardGot", [])
+        entry["rewardGot"] = sorted({_int(value) for value in got}) if isinstance(got, list) else []
+        return entry
+
+    def _extra_payload(self, state: Mapping[str, Any], point_type: int) -> dict[str, Any]:
+        point_type = _int(point_type)
+        milestones = EXTRA_ACTIVE_POINT_REWARDS.get(point_type, {})
+        raw_all = state.get("extraActivePoint", {})
+        raw_entry = raw_all.get(str(point_type), {}) if isinstance(raw_all, Mapping) else {}
+        entry = raw_entry if isinstance(raw_entry, Mapping) else {}
+        points = max(0, _int(entry.get("points"), 0))
+        got = {_int(value) for value in (entry.get("rewardGot") or [])}
+        progress = []
+        for target, reward in sorted(milestones.items()):
+            row = {
+                "targetActivePoint": target,
+                "rewardGot": target in got,
+                "reward": list(reward),
+            }
+            # Some 2.0.4 JSON bindings used the generated long name.  Keeping
+            # this alias costs nothing and lets both native request paths read
+            # the same payload.
+            row["rewardSTResource"] = list(reward)
+            progress.append(row)
+        return {
+            "extraActivePointType": point_type,
+            "extraActivePoint": points,
+            "progress": progress,
+        }
+
+    def extra_active_point_snapshot(self, profile: Mapping[str, Any], point_type: int = 1) -> dict[str, Any]:
+        """Return the native extra-active-point result for an activity type."""
+
+        with self._lock:
+            state = self._state(profile)
+            self._extra_entry(state, point_type)
+            self._save(profile, state)
+            return self._extra_payload(state, point_type)
+
+    def record_extra_active_point(self, profile: Mapping[str, Any], amount: int = 1,
+                                  point_type: int = 1) -> dict[str, Any]:
+        """Add activity points from a completed activity task/battle.
+
+        Activity task handlers can call this hook without knowing the storage
+        shape.  The value is monotonic within the local activity season; the
+        client may continue displaying points after the final milestone.
+        """
+
+        amount = max(0, _int(amount))
+        with self._lock:
+            state = self._state(profile)
+            entry = self._extra_entry(state, point_type)
+            entry["points"] = entry["points"] + amount
+            self._save(profile, state)
+            return self._extra_payload(state, point_type)
 
     def _save(self, profile: Mapping[str, Any], state: Mapping[str, Any]) -> None:
         with self._lock, closing(self.game._connect()) as connection, connection:
@@ -319,6 +413,12 @@ class LocalTasks:
             pre = task["preTaskId"]
             if not pre or (tasks.get(str(pre)) or {}).get("rewardGot"):
                 yield task
+        # Activity tasks were previously filtered out with category 102/104.
+        # Keep the client-visible set bounded: all 19 category-102 tasks are
+        # available each local activity cycle, while three deterministic
+        # category-104 tasks stand in for the unavailable random-roll service.
+        for tid in ACTIVITY_IDS:
+            yield TASKS[tid]
 
     def _history(self, task: Mapping[str, Any], state: Mapping[str, Any], now: int) -> int:
         """Progress a ``recordBeforeGot`` task already earned before it was offered."""
@@ -361,6 +461,10 @@ class LocalTasks:
         tasks = state["tasks"]
         if period_due(state.get("day"), day):
             for tid in ROUTINE_IDS:
+                tasks.pop(str(tid), None)
+            for tid in ACTIVITY_IDS:
+                tasks.pop(str(tid), None)
+            for tid in RANDOM_IDS:
                 tasks.pop(str(tid), None)
             state["day"], state["activePoint"], state["activePointRewardGot"] = day, 0, []
         if period_due(state.get("week"), week):
@@ -561,15 +665,26 @@ class LocalTasks:
             shown.add(task["id"])
             # endTime 0 = no deadline; WidgetTaskSlot.Update and
             # TaskUtil.CheckTaskTime do arithmetic on it, so it must be present.
-            rows.append({"id": task["id"], "progress": _int(entry.get("progress")),
-                         "isDone": bool(entry.get("isDone")), "rewardGot": bool(entry.get("rewardGot")),
-                         "endTime": 0})
+            row = {"id": task["id"], "progress": _int(entry.get("progress")),
+                   "isDone": bool(entry.get("isDone")), "rewardGot": bool(entry.get("rewardGot")),
+                   "endTime": 0}
+            # The legacy TaskUtil binding only defines the five fields above
+            # for routine/main tasks.  Activity task rows (60000+) use the
+            # newer generated shape with category and extra-active-point
+            # metadata; keeping the two wire shapes separate avoids breaking
+            # older clients while still exposing C9 data to the activity tab.
+            if task["id"] >= 60000:
+                row.update({"category": task["category"],
+                            "activePoint": task["activePoint"],
+                            "extraActivePoint": task["extraActivePoint"],
+                            "extraActivePointType": task["extraActivePointType"]})
+            rows.append(row)
         cultivation = getattr(self.game, 'cultivation', None)
         extra = cultivation.task_snapshot(profile) if cultivation is not None else {}
         return {
             "tasks": rows + extra.get('tasks', []),
             # Make the owned categories authoritative when the client merges.
-            "delTasks": [tid for tid in ROUTINE_IDS + MAIN_IDS if tid not in shown] + extra.get('delTasks', []),
+            "delTasks": [tid for tid in ROUTINE_IDS + MAIN_IDS + ACTIVITY_IDS + RANDOM_IDS if tid not in shown] + extra.get('delTasks', []),
             "disableCategory": list(DISABLED_CATEGORIES),
             "activePoint": _int(state["activePoint"]),
             "activePointRewardGot": [_int(v) for v in state["activePointRewardGot"]],
@@ -621,6 +736,27 @@ class LocalTasks:
             if method != "POST":
                 return 405, {"error": "method_not_allowed", "message": "POST required"}
             return self._claim_week_active_point(profile, _int(_json(body).get("weekActivePoint")))
+        # Activity extra-active-point window.  The native client first reads
+        # ``.../extra-activepoint/<type>`` and then posts the selected
+        # milestone to ``.../extra-activepoint/reward``.
+        if route.startswith("/fci/task/extra-activepoint/"):
+            suffix = route[len("/fci/task/extra-activepoint/"):].strip("/")
+            if suffix.isdigit():
+                if method != "GET":
+                    return 405, {"error": "method_not_allowed", "message": "GET required"}
+                point_type = _int(suffix)
+                if point_type not in EXTRA_ACTIVE_POINT_REWARDS:
+                    return 404, {"error": "unknown_active_point_type", "message": f"type {point_type} is not configured"}
+                return 200, self.extra_active_point_snapshot(profile, point_type)
+            if suffix == "reward":
+                if method != "POST":
+                    return 405, {"error": "method_not_allowed", "message": "POST required"}
+                request = _json(body)
+                point_type = _int(request.get("extraActivePointType", request.get("extra_active_point_type", 1)), 1)
+                target = _int(request.get("extraActivePoint", request.get("extra_active_point", 0)))
+                if point_type not in EXTRA_ACTIVE_POINT_REWARDS:
+                    return 404, {"error": "unknown_active_point_type", "message": f"type {point_type} is not configured"}
+                return self._claim_extra_active_point(profile, point_type, target)
         parts = route.split("/")
         # /fci/task/<id>/reward -> ["", "fci", "task", "<id>", "reward"]
         if len(parts) == 5 and parts[:3] == ["", "fci", "task"] and parts[4] == "reward" and parts[3].isdigit():
@@ -650,6 +786,10 @@ class LocalTasks:
             if points:
                 state["activePoint"] = _int(state["activePoint"]) + points
                 state["weekActivePoint"] = _int(state["weekActivePoint"]) + points
+            extra_points = _int(task.get("extraActivePoint"))
+            if extra_points:
+                extra = self._extra_entry(state, _int(task.get("extraActivePointType"), 1))
+                extra["points"] += extra_points
             self._sync(profile, state)  # successors, CompletePnTask, active-point task
             self._save(profile, state)
             changes = grant_rewards(self.game, profile, task["reward"])
@@ -697,6 +837,35 @@ class LocalTasks:
             self._save(profile, state)
             changes = grant_rewards(self.game, profile, rewards)
             return 200, {"resChange": changes, "rewardGot": [_int(v) for v in got]}
+
+    def _claim_extra_active_point(self, profile: Mapping[str, Any], point_type: int, target: int) -> Response:
+        milestones = EXTRA_ACTIVE_POINT_REWARDS.get(_int(point_type), {})
+        rewards = milestones.get(_int(target))
+        if rewards is None:
+            return 404, {"error": "unknown_extra_active_point", "message": f"no milestone {target}"}
+        with self._lock:
+            state = self._state(profile)
+            entry = self._extra_entry(state, point_type)
+            got = entry["rewardGot"]
+            target = _int(target)
+            if target in got:
+                return 409, {"error": "extra_active_point_reward_got", "message": f"{target} already claimed"}
+            if _int(entry["points"]) < target:
+                return 409, {"error": "extra_active_point_insufficient",
+                             "message": f"{entry['points']} < {target}"}
+            got.append(target)
+            got.sort()
+            self._save(profile, state)
+            changes = grant_rewards(self.game, profile, rewards)
+            payload = self._extra_payload(state, point_type)
+        # ApiTaskExtraActivePointReward.Types.post has the claimed Progress
+        # plus resource deltas.  Return the complete list so the native window
+        # can update all five cells after one claim.
+        return 200, {
+            "extraActivePointType": _int(point_type),
+            "progress": payload["progress"],
+            "resChange": changes,
+        }
 
 
 __all__ = ["LocalTasks", "TASKS", "TaskNotifier", "task_type"]

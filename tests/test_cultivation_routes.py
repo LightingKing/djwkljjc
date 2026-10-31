@@ -200,8 +200,10 @@ class CultivationRouteTests(unittest.TestCase):
         self.assertEqual(status, 200, result)
         equips = [c.equip for c in result.res_change if c.HasField("equip")]
         self.assertEqual([(e.id, e.count_delta) for e in equips], [(10300, 1)])
-        self.assertEqual(self._call("POST", "/fci/itemuse/", {"id": 85003, "count": 1})[0], 409)
-        self.assertEqual(self._item(85003), 1)
+        status, box_result = self._call("POST", "/fci/itemuse/", {"id": 85003, "count": 1})
+        self.assertEqual(status, 200, box_result)
+        self.assertEqual(self._item(85003), 0)
+        self.assertIn((30011, 10, 10), [(b.id, b.count, b.count_delta) for b in self._bases(box_result)])
         self.assertEqual(self._call("POST", "/fci/itemuse/", {"id": 121001, "count": 1, "index": 0})[0], 409)
 
     def test_resource_compose_follows_recipes_and_chains(self):

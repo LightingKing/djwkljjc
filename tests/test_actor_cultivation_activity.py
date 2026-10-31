@@ -89,9 +89,12 @@ class ActorCultivationActivityTests(unittest.TestCase):
         self.assertEqual({t["id"] for t in tasks}, {tid for tid, t in TASKS.items()
                                                   if tid < 54000 and task_available(t)})
         self.assertTrue(all(t["actorCultivationActivityId"] == 53001 and t["res"]["category"] == 104 for t in tasks))
-        self.assertEqual(self.claim(53030)[0], 404)  # no authoritative per-actor kill source
-        self.assertEqual(self.claim(53003)[0], 404)  # closed activity 51
-        self.assertEqual(self.claim(53006)[0], 404)  # async PVP has no actor task hook
+        # C10 keeps the original rows visible.  Missing role-level telemetry
+        # uses the documented local battle approximation, so an untouched row
+        # is a normal incomplete-task conflict rather than a hidden 404.
+        self.assertEqual(self.claim(53030)[0], 409)
+        self.assertEqual(self.claim(53003)[0], 409)
+        self.assertEqual(self.claim(53006)[0], 409)
 
     def test_claim_requires_real_progress_and_does_not_accept_client_override(self):
         self.own()
@@ -293,7 +296,9 @@ class ActorCultivationActivityTests(unittest.TestCase):
                      and not task.get("refreshAfterGot")]
         for tid in permanent:
             self.assertEqual(self.claim(tid)[0], 200, tid)
-        self.assertEqual(self.info()["progress"], 30)
+        # The local approximation also completes the previously hidden
+        # permanent rows, adding their configured cultivation progress.
+        self.assertEqual(self.info()["progress"], 40)
         for day in range(9):
             self.now[0] += 86400
             for dungeon_type, times in ((2, 5), (5, 5), (3, 1), (9, 2), (13, 2)):
@@ -308,7 +313,7 @@ class ActorCultivationActivityTests(unittest.TestCase):
                     self.assertEqual(status, 200)
                     if result["progress"] == 100:
                         break
-        self.assertEqual((self.info()["progress"], self.info()["progressDaily"]), (100, 70))
+        self.assertEqual((self.info()["progress"], self.info()["progressDaily"]), (100, 60))
         self.assertEqual(self.reward(100)[0], 200)
 
 
