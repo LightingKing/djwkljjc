@@ -219,7 +219,16 @@ class LocalTournament:
             if route.startswith("/fci/asyncpvptargetdetail/"):
                 if method != "GET": return 405, {"error": "method_not_allowed"}
                 uid = route.rsplit("/", 1)[-1]
-                return 200, self._run(profile, lambda c, s, n: self._target_detail(s, uid))
+                target = self._run(profile, lambda c, s, n: self._target_detail(s, uid))
+                # TournamentActorGroup.RequestTargetDetail reads response.uid
+                # and response.targetBattleActors, with no .result unwrap.
+                # Send the leaf message so the legacy dispatcher preserves its
+                # type instead of wrapping it in ApiAsyncPvpTargetDetail.result.
+                # Otherwise FightActorInfo[2].actors is nil and TLog crashes
+                # before the native battle can start (real-client P0 evidence).
+                cls = message_factory.GetMessageClass(self.game._pool.FindMessageTypeByName(
+                    "DBAsyncPvpBattleRecord.BattleRecord"))
+                return 200, json_format.ParseDict(target, cls())
             if route == "/fci/asyncpvpmatch":
                 if method != "POST": return 405, {"error": "method_not_allowed"}
                 payload = self._request("match", body)

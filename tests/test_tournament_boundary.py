@@ -1,8 +1,10 @@
 """Native asynchronous arena contract and idempotency tests."""
 from contextlib import closing
+from http.client import HTTPConnection
 import json
 from pathlib import Path
 import tempfile
+import threading
 import unittest
 
 from google.protobuf import json_format, message_factory
@@ -11,6 +13,7 @@ from accounts import LocalAccounts
 from game import LocalGame
 from tournament import LocalTournament, TOURNAMENT_ID
 from local_mailbox import send_mail
+from server import FixtureServer, JsonlLogger
 import test_systems
 
 
@@ -157,12 +160,46 @@ class TournamentBoundaryTests(unittest.TestCase):
         for target in targets:
             status, detail = self.game_call("GET", f"/fci/asyncpvptargetdetail/{target['uid']}")
             self.assertEqual(status, 200)
-            actors = detail.result.target_battle_actors
+            actors = detail.target_battle_actors
             self.assertEqual(len({a.id for a in actors}), 3)
             for actor in actors:
                 self.assertTrue(actor.skills)
                 self.assertTrue(any(attr.type == 1 and attr.value > 0 for attr in actor.attrs))
                 self.assertTrue(all(skill.id // 1000 == actor.id for skill in actor.skills))
+
+    def test_http_target_detail_is_the_direct_native_fight_callback_object(self):
+        # TournamentActorGroup.RequestTargetDetail uses response.uid and
+        # response.targetBattleActors directly. A result wrapper leaves the
+        # second FightActorInfo.actors nil and crashes TLog.CollectBeginInfo.
+        target = self.game_call("GET", f"/fci/tournament/enter/5/{TOURNAMENT_ID}")[1]["asyncPvpTargetInfo"][0]
+        server = FixtureServer(("127.0.0.1", 0), self.root, JsonlLogger(self.root / "arena-http.jsonl"))
+        server.accounts, server.game = self.accounts, self.game
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            with closing(HTTPConnection("127.0.0.1", server.server_port, timeout=5)) as connection:
+                connection.request("GET", f"/fci/asyncpvptargetdetail/{target['uid']}",
+                                   headers={"Authorization": self.auth, "Accept": "application/wireformat"})
+                response = connection.getresponse()
+                raw = response.read()
+                self.assertEqual(response.status, 200)
+            envelope_type = message_factory.GetMessageClass(self.game._pool.FindMessageTypeByName("RestfulResponse"))
+            envelope = envelope_type.FromString(raw)
+            callback_type = message_factory.GetMessageClass(self.game._pool.FindMessageTypeByName(envelope.message.type))
+            callback = json_format.MessageToDict(callback_type.FromString(envelope.message.data),
+                                                always_print_fields_with_no_presence=True)
+            self.assertEqual(callback.get("uid"), target["uid"])
+            self.assertNotIn("result", callback)
+            # The native Lua builds this second team verbatim, then TLog
+            # iterates #team.actors. Verify the final decoded HTTP shape.
+            enemy_team = {"playerId": callback["uid"], "actors": callback["targetBattleActors"]}
+            self.assertEqual(len(enemy_team["actors"]), 3)
+            self.assertEqual([a["id"] for a in enemy_team["actors"]], [a["id"] for a in target["targetBattleActors"]])
+            self.assertTrue(all(a["uid"] and a["attrs"] and a["skills"] for a in enemy_team["actors"]))
+        finally:
+            server.shutdown()
+            server.server_close()
+            thread.join(2)
 
     def test_invalid_native_routes_and_requests_do_not_write(self):
         self.call("GET", f"/fci/tournament/enter/5/{TOURNAMENT_ID}")
