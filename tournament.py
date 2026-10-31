@@ -114,8 +114,17 @@ class LocalTournament:
             "uid": uid, "name": f"异步对手{index + 1}",
             "level": TOURNAMENT_LEVEL_LIMIT, "headPhoto": 1, "socialPicture": "",
             "playerId": uid, "isWin": False,
-            "targetBattleActors": [json_format.MessageToDict(actor) for actor in actors.player_actors],
+            # Native InitGameLogic.buildActorFromData clears a whole team
+            # unless it has exactly DEFINE.ACTOR_NUM (six) seats. Empty
+            # support seats still need STActor entries with id/uid zero.
+            "targetBattleActors": [json_format.MessageToDict(actor) for actor in actors.player_actors]
+                                  + self._empty_support_slots(),
         }
+
+    @staticmethod
+    def _empty_support_slots():
+        return [{"id": 0, "uid": 0, "defaultIndex": slot, "attrs": [], "skills": []}
+                for slot in range(3, 6)]
 
     def _targets(self):
         return [self._target(index) for index in range(TARGET_COUNT)]
@@ -135,9 +144,14 @@ class LocalTournament:
         # Repair already persisted placeholder teams without resetting wins,
         # claims, target identities, or an in-progress native battle.
         for index, target in enumerate(state["targets"]):
-            if not target.get("targetBattleActors") or any(not actor.get("attrs") or not actor.get("skills")
-                                                           for actor in target["targetBattleActors"]):
+            actors = target.get("targetBattleActors") or []
+            if len(actors) not in (3, 6) or any(not actor.get("attrs") or not actor.get("skills")
+                                               for actor in actors if _int(actor.get("id"))):
                 target["targetBattleActors"] = self._target(index)["targetBattleActors"]
+            elif len(actors) == 3:
+                # Already persisted real three-main lineups need only empty
+                # seats, preserving their generation, skills and attributes.
+                target["targetBattleActors"] = actors + self._empty_support_slots()
         state["week"] = week
         return state
 

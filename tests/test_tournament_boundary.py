@@ -3,6 +3,7 @@ from contextlib import closing
 from http.client import HTTPConnection
 import json
 from pathlib import Path
+import re
 import tempfile
 import threading
 import unittest
@@ -15,6 +16,11 @@ from tournament import LocalTournament, TOURNAMENT_ID
 from local_mailbox import send_mail
 from server import FixtureServer, JsonlLogger
 import test_systems
+
+try:
+    from lupa.lua53 import LuaRuntime
+except ImportError:
+    LuaRuntime = None
 
 
 class TournamentBoundaryTests(unittest.TestCase):
@@ -161,8 +167,12 @@ class TournamentBoundaryTests(unittest.TestCase):
             status, detail = self.game_call("GET", f"/fci/asyncpvptargetdetail/{target['uid']}")
             self.assertEqual(status, 200)
             actors = detail.target_battle_actors
-            self.assertEqual(len({a.id for a in actors}), 3)
+            self.assertEqual(len(actors), 6)
+            self.assertEqual(len({a.id for a in actors if a.id}), 3)
             for actor in actors:
+                if not actor.id:
+                    self.assertEqual(actor.uid, 0)
+                    continue
                 self.assertTrue(actor.skills)
                 self.assertTrue(any(attr.type == 1 and attr.value > 0 for attr in actor.attrs))
                 self.assertTrue(all(skill.id // 1000 == actor.id for skill in actor.skills))
@@ -193,13 +203,83 @@ class TournamentBoundaryTests(unittest.TestCase):
             # The native Lua builds this second team verbatim, then TLog
             # iterates #team.actors. Verify the final decoded HTTP shape.
             enemy_team = {"playerId": callback["uid"], "actors": callback["targetBattleActors"]}
-            self.assertEqual(len(enemy_team["actors"]), 3)
+            self.assertEqual(len(enemy_team["actors"]), 6)
             self.assertEqual([a["id"] for a in enemy_team["actors"]], [a["id"] for a in target["targetBattleActors"]])
-            self.assertTrue(all(a["uid"] and a["attrs"] and a["skills"] for a in enemy_team["actors"]))
+            self.assertTrue(all(a["uid"] and a["attrs"] and a["skills"] for a in enemy_team["actors"] if a["id"]))
         finally:
             server.shutdown()
             server.server_close()
             thread.join(2)
+
+    @unittest.skipIf(LuaRuntime is None, "native Lua test requires hot-update/requirements.txt")
+    def test_native_build_actor_from_data_keeps_all_three_enemy_units(self):
+        source_root = Path(__file__).resolve().parents[3] / "analysis/lua-decompiled"
+        if not source_root.is_dir():
+            self.skipTest("original decompiled client Lua is unavailable")
+        source = (source_root / "logic__initgamelogic.lua").read_text(encoding="utf-8")
+        native_function = re.search(r"^function buildActorFromData\(.*?^end$", source, re.M | re.S).group()
+        runtime = LuaRuntime()
+        runtime.execute("""
+            PB={enum={DungeonType={None=0}}}
+            function require(_) return PB end
+            warnings={}
+            function warning(_,text) warnings[#warnings+1]=text end
+            function setActorDataImpl(actor,id,seat,team)
+              actor.actorInfo.id=id; actor.seat=seat; actor.team=team
+            end
+            function setActorTableImpl() error('unexpected test-only actor path') end
+        """)
+        runtime.globals().DEFINE = runtime.execute((source_root / "logic__define.lua").read_text(encoding="utf-8"))
+        runtime.execute(native_function)
+        target = self.game_call("GET", f"/fci/tournament/enter/5/{TOURNAMENT_ID}")[1]["asyncPvpTargetInfo"][1]
+        status, detail = self.game_call("GET", f"/fci/asyncpvptargetdetail/{target['uid']}")
+        self.assertEqual(status, 200)
+        decoded = json_format.MessageToDict(type(detail).FromString(detail.SerializeToString()),
+                                           always_print_fields_with_no_presence=True)
+        actors = runtime.table()
+        for seat, actor in enumerate(decoded["targetBattleActors"], 1):
+            # The native STActor list becomes one RoundActorInfo per seat;
+            # run the original Lua's count validation, not a Python replica.
+            actors[seat] = runtime.table_from({"seat": seat, "actorInfo": runtime.table_from(actor)})
+        player = runtime.table_from({"playerId": decoded["uid"], "actorList": actors})
+        team = runtime.table_from({"team": 2, "playerList": runtime.table_from([player])})
+        teams = runtime.table_from([team])
+        hp = runtime.table_from([runtime.table_from([0] * 6), runtime.table_from([0] * 6)])
+        runtime.globals().buildActorFromData(teams, hp, 3, 0)
+        remaining = teams[1].playerList[1].actorList
+        self.assertEqual(len(remaining), 6)
+        self.assertEqual([remaining[i].actorInfo.id for i in range(1, 7)],
+                         [actor["id"] for actor in decoded["targetBattleActors"]])
+        self.assertEqual(sum(remaining[i].actorInfo.id != 0 for i in range(1, 7)), 3)
+        self.assertEqual(len(runtime.globals().warnings), 0)
+
+    def test_legacy_three_seat_targets_migrate_without_resetting_record_or_run(self):
+        self.call("GET", f"/fci/tournament/enter/5/{TOURNAMENT_ID}")
+        # Explicit pre-fix save fixture: migration must preserve the existing
+        # win ledger and target identities, including the pending second fight.
+        with closing(self.game._connect()) as conn, conn:
+            row = conn.execute("SELECT state_json FROM local_tournament_state WHERE account_id=?",
+                               (self.profile["account_id"],)).fetchone()
+            old = json.loads(row["state_json"])
+            for target in old["targets"]:
+                target["targetBattleActors"] = target["targetBattleActors"][:3]
+            old["wins"], old["claimed"], old["targets"][0]["isWin"] = 1, [1], True
+            old["run"] = {"uid": 1700000000001, "target_uid": old["targets"][1]["uid"], "active": True,
+                          "snapshot": None, "balanced": False, "win": False, "dungeon_id": 4001}
+            conn.execute("UPDATE local_tournament_state SET state_json=? WHERE account_id=?",
+                         (json.dumps(old), self.profile["account_id"]))
+        status, entered = self.game_call("GET", f"/fci/tournament/enter/5/{TOURNAMENT_ID}")
+        self.assertEqual((status, entered["winNum"]), (200, 1))
+        for before, after in zip(old["targets"], entered["asyncPvpTargetInfo"]):
+            self.assertEqual(after["uid"], before["uid"])
+            self.assertEqual(after["isWin"], before["isWin"])
+            self.assertEqual(after["targetBattleActors"][:3], before["targetBattleActors"])
+            self.assertEqual([a["id"] for a in after["targetBattleActors"][3:]], [0, 0, 0])
+        with closing(self.game._connect()) as conn:
+            saved = json.loads(conn.execute("SELECT state_json FROM local_tournament_state WHERE account_id=?",
+                                           (self.profile["account_id"],)).fetchone()["state_json"])
+        self.assertEqual(saved["claimed"], [1])
+        self.assertEqual(saved["run"], old["run"])
 
     def test_invalid_native_routes_and_requests_do_not_write(self):
         self.call("GET", f"/fci/tournament/enter/5/{TOURNAMENT_ID}")
