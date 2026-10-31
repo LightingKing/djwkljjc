@@ -109,6 +109,9 @@ class LocalBotPool:
         for bot in self._bots:
             if str(bot["playerId"]) == str(player_id):
                 return self._snapshot(bot)
+        lookup = getattr(self, "guild_lookup", None)
+        if callable(lookup):
+            return lookup(str(player_id))
         return None
 
     def pick(self, account_id: int, *, offset: int = 0) -> dict[str, Any]:
@@ -124,6 +127,7 @@ class LocalSocial:
         self._lock = game._lock
         self._clock = clock or game._now
         self.bots = bots or LocalBotPool(clock=self._clock)
+        self.bots.guild_lookup = self._guild_bot
         with self._lock, closing(self.game._connect()) as connection, connection:
             connection.execute(
                 """
@@ -134,6 +138,10 @@ class LocalSocial:
                 )
                 """
             )
+
+    def _guild_bot(self, player_id):
+        guild = getattr(self.game, "guild", None)
+        return guild.bot_profile(player_id) if guild is not None else None
 
     def _now(self) -> int:
         return int(self._clock())

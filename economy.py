@@ -14,6 +14,7 @@ State that belongs to the economy is kept in a separate SQLite file so older
 from __future__ import annotations
 
 from server.core.reset import DEFAULT_RESET_POLICY, ResetPolicy, policy_for, period_due
+from server.core.atomic import track_mapping
 
 import json
 import os
@@ -1436,6 +1437,7 @@ class LocalEconomy:
                 connection.execute("UPDATE game_profiles SET resources_json = ?, updated_at = ? WHERE account_id = ?",
                                    (json.dumps(result, separators=(",", ":")), self._now(), int(profile["account_id"])))
             if isinstance(profile, dict):
+                track_mapping(self.game, profile, "resources")
                 profile["resources"] = result
             return True, deltas, None
 

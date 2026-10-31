@@ -70,8 +70,16 @@ class ResetScheduler:
             race = getattr(game.realtime_pvp, 'race', None)
             if race is not None:
                 items += race.refresh_daily_items(profile)
+            maze = getattr(game, 'maze', None)
+            if maze is not None:
+                # Maze uses the shared daily/Monday 06:00 policy and owns its item
+                # push, so do not add its changes to the notification list.
+                maze.refresh_daily_items(profile)
             task_payload = None
             if due[0]:
+                tournament = getattr(game, 'tournament', None)
+                if tournament is not None:
+                    tournament.refresh_daily_record(profile)
                 state = game.tasks._state(profile)
                 game.tasks._sync(profile, state)
                 game.tasks._mark_login(state)

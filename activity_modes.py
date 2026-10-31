@@ -27,7 +27,7 @@ Client evidence (analysis/lua-decompiled):
 from __future__ import annotations
 
 from server.core.reset import policy_for, period_due
-from storage.compat import shared_process_lock
+from server.core.atomic import track_mapping
 
 import json
 import random
@@ -672,7 +672,7 @@ class LocalActivityModes:
         Offline accrual stops at the configured cap; rollback never replays a
         previously settled period.  The scheduler can safely call this again.
         """
-        with self._lock, shared_process_lock(self.game.db_path):
+        with self.game.atomic_mutation():
             policy, now = policy_for(self.game), self._now()
             state = self._state(profile)
             sys_state = self.game.systems._state(profile)
@@ -706,7 +706,6 @@ class LocalActivityModes:
             # including legacy split-store mode.  A crash cannot commit one
             # without the other; do not call two independent module _save's.
             with closing(self.game._connect()) as connection, connection:
-                connection.execute("BEGIN IMMEDIATE")
                 if changes:
                     connection.execute("UPDATE local_system_state SET state_json = ?, updated_at = ? WHERE account_id = ?",
                                        (json.dumps(sys_state, separators=(",", ":")), now, int(profile["account_id"])))
@@ -767,6 +766,7 @@ class LocalActivityModes:
                                (level, json.dumps(resources, separators=(",", ":")), self._now(),
                                 int(profile["account_id"])))
         if isinstance(profile, dict):
+            track_mapping(self.game, profile, "level", "resources")
             profile["level"], profile["resources"] = level, resources
         if level > level_before:
             tasks = getattr(self.game, "tasks", None)
@@ -860,7 +860,10 @@ class LocalActivityModes:
         }.get(parts[1], ""), None)
         if handler is None:
             return None
-        return handler(method.upper(), parts[2:], body, profile)
+        # Entry costs, run creation and balance receipts use several module
+        # saves; all of them must succeed together, including nested refreshes.
+        with self.game.atomic_mutation():
+            return handler(method.upper(), parts[2:], body, profile)
 
     def _run_routes(self, method: str, sub: list[str], body: Any, profile: Mapping[str, Any]) -> Optional[Response]:
         """``{uid}`` DELETE, ``{uid}/active`` PATCH, ``{uid}/balance`` POST."""

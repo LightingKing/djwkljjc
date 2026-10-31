@@ -41,6 +41,7 @@ SKILL_PROFITS = [r for r in _client_rows("ProfitDetail") if 101 <= int(r["id"]) 
 SKILL_DURATION = 43200
 SKILL_SCORE_COST = 500
 SKILL_MAX_USE_COUNT = 1
+LOCAL_GUILD_BOT_COUNT = 5
 ROUTE_PATTERNS = (
     r"/fci/guild-recommend/", r"/fci/guild-search/", r"/fci/guild-player/",
     r"/fci/guild-player/invited/", r"/fci/guild-player/invited/\d+/", r"/fci/guild/",
@@ -52,6 +53,7 @@ ROUTE_PATTERNS = (
     r"/fci/guild/\d+/donate/(?:request|send|touch)/",
     r"/fci/guild/\d+/(?:vote|skill|record|president|vice-president|socialgroup)/",
     r"/fci/guild/\d+/vice-president/[^/]+/",
+    r"/fci/guild/\d+/group/unlink/",
 )
 
 
@@ -110,11 +112,15 @@ class LocalGuild:
 
     def _new_guild(self, gid, name, now, profile=None, body=None):
         body = body or {}
-        bots = [] if profile else self.game.social.bots.all()[(gid - 1) * 5:gid * 5]
+        bots = ([dict(bot, playerId=f"local-guild-{gid}-bot-{i + 1}")
+                 for i, bot in enumerate(self.game.social.bots.all()[:LOCAL_GUILD_BOT_COUNT])]
+                if profile else self.game.social.bots.all()[(gid - 1) * 5:gid * 5])
         members = {b["playerId"]: self._member(b, president=(n == 0)) for n, b in enumerate(bots)}
         if profile:
+            for member in members.values():
+                member["type"] = 0
             members[profile["player_id"]] = self._member(profile, president=True)
-        president = next(iter(members))
+        president = profile["player_id"] if profile else next(iter(members))
         base = {"id": gid, "name": name, "icon": str(body.get("icon", "1")),
                 "billboard": str(body.get("billboard", "本地机器人公会")), "skin": _int(body.get("skin")),
                 "level": 1, "exp": 0, "presidentName": members[president]["name"],
@@ -124,8 +130,44 @@ class LocalGuild:
                  "donateInfo": {}, "receipts": {}, "skills": {}, "pendingMembers": {},
                  "invitedMembers": {}, "voteInfo": {"inVote": False, "endTime": 0,
                  "playersSupport": [], "playersKick": []}}
+        guild["localBots"] = {bot["playerId"]: bot for bot in bots} if profile else {}
+        guild["localBotVersion"] = 1 if profile else 0
+        guild["memberLastActive"] = {member_id: now for member_id in members}
         self._new_week(guild, now)
         return guild
+
+    def bot_profile(self, player_id):
+        """Read an existing guild bot without creating a member or friend."""
+        if not re.fullmatch(r"local-guild-\d+-bot-\d+", str(player_id)):
+            return None
+        with self._lock, closing(self.game._connect()) as conn:
+            row = conn.execute("SELECT state_json FROM local_guild_state WHERE id=1").fetchone()
+            if row:
+                bot = json.loads(row["state_json"]).get("guildBots", {}).get(str(player_id))
+                if bot:
+                    return dict(bot, actors=list(bot["actors"]))
+        return None
+
+    def _add_local_bots(self, guild, now):
+        """One-time migration: preserve real wishes and never refill on GET."""
+        if guild.get("localBotVersion") or int(guild["baseInfo"]["id"]) < 100:
+            return
+        gid = guild["baseInfo"]["id"]
+        local_bots = guild.setdefault("localBots", {})
+        for i, template in enumerate(self.game.social.bots.all()[:LOCAL_GUILD_BOT_COUNT]):
+            if len(guild["members"]) >= RULES["maxMemberCount"]:
+                break
+            pid = f"local-guild-{gid}-bot-{i + 1}"
+            bot = dict(template, playerId=pid)
+            local_bots[pid] = bot
+            guild["members"][pid] = self._member(bot)
+            guild["botIds"].append(pid)
+            guild.setdefault("memberLastActive", {})[pid] = now
+            guild.setdefault("botInventory", {})[pid] = {str(key[1]): 10 for key in ROLES}
+            guild["donateInfo"]["donatePlayerInfo"][pid] = {"donateCountWeekly": 0, "playerName": bot["name"]}
+            guild["donateInfo"]["donates"][pid] = self._donation(pid, BOT_WISHES[i % len(BOT_WISHES)], now)
+        guild["baseInfo"]["membersCount"] = len(guild["members"])
+        guild["localBotVersion"] = 1
 
     def _member(self, profile, president=False):
         if "account_id" in profile:
@@ -154,8 +196,8 @@ class LocalGuild:
             guild["botInventory"][pid] = {str(key[1]): 10 for key in ROLES}
             guild["donateInfo"]["donatePlayerInfo"][pid] = {
                 "donateCountWeekly": 0, "playerName": guild["members"][pid]["name"]}
-            if i < len(BOT_WISHES):
-                resource = BOT_WISHES[i]
+            if i < len(BOT_WISHES) or pid in guild.get("localBots", {}):
+                resource = BOT_WISHES[i % len(BOT_WISHES)]
                 guild["donateInfo"]["donates"][pid] = self._donation(pid, resource, start)
 
     def _repair_guilds(self, conn, state, now):
@@ -175,6 +217,10 @@ class LocalGuild:
             else:
                 state.setdefault("orphanedPlayers", {})[pid] = state["players"].pop(pid)
         for guild in state["guilds"].values():
+            self._add_local_bots(guild, now)
+            guild_bots = dict(bots, **guild.get("localBots", {}))
+            for pid in guild["members"]:
+                guild.setdefault("memberLastActive", {}).setdefault(pid, now)
             guild.setdefault("skills", {})
             guild.setdefault("pendingMembers", {})
             guild.setdefault("invitedMembers", {})
@@ -183,8 +229,8 @@ class LocalGuild:
             guild["baseInfo"].setdefault("score", 0)
             guild["botIds"] = [pid for pid in guild["botIds"] if pid in guild["members"]]
             for pid, member in guild["members"].items():
-                if pid in bots:
-                    member["headPhoto"] = self.game.profile_features.bot_head_photo(bots[pid])
+                if pid in guild_bots:
+                    member["headPhoto"] = self.game.profile_features.bot_head_photo(guild_bots[pid])
                 else:
                     row = conn.execute("SELECT f.state_json FROM local_profile_features f "
                                        "JOIN game_profiles p ON p.account_id=f.account_id WHERE p.player_id=?", (pid,)).fetchone()
@@ -222,6 +268,11 @@ class LocalGuild:
                            enumerate(("本地互助社", "电击训练社", "周末冒险社"), 1)}, "players": {}, "nextId": 100}
 
     def _save(self, conn, state, now):
+        # Keep a profile after a bot is kicked or its guild is dissolved so a
+        # real friend relationship never becomes an invisible dangling ID.
+        registry = state.setdefault("guildBots", {})
+        for guild in state["guilds"].values():
+            registry.update(guild.get("localBots", {}))
         conn.execute("INSERT INTO local_guild_state(id,state_json,updated_at) VALUES(1,?,?) "
                      "ON CONFLICT(id) DO UPDATE SET state_json=excluded.state_json,updated_at=excluded.updated_at",
                      (_dump(state), now))
@@ -300,7 +351,7 @@ class LocalGuild:
                     # An unknown/deleted profile must not block other guilds.
                     # Preserve any received aid for manual account recovery;
                     # robot wishes have no real account to credit.
-                    if not self.game.social.bots.get(pid) and sum(request["donatesCount"].values()):
+                    if pid not in guild["botIds"] and not self.game.social.bots.get(pid) and sum(request["donatesCount"].values()):
                         key = f'{guild["baseInfo"]["id"]}:{boundary}:{pid}'
                         state.setdefault("orphanedDonations", {})[key] = {
                             "guildId": guild["baseInfo"]["id"], "boundary": boundary,
@@ -338,6 +389,49 @@ class LocalGuild:
                     # The persisted operation must not fail after committing.
                     logging.getLogger(__name__).exception("guild notification failed after commit")
 
+    @staticmethod
+    def _notify_members(state, guild, notices, *types):
+        for pid in guild["members"]:
+            owner = state["players"].get(pid)
+            if owner:
+                for kind in types:
+                    notices.append(({"account_id": owner["accountId"], "player_id": pid}, kind, []))
+
+    def _refresh_votes(self, state, now, notices):
+        for guild in state["guilds"].values():
+            vote = guild["voteInfo"]
+            president = str(guild["baseInfo"]["president"])
+            if vote.get("inVote") and now >= vote["endTime"]:
+                eligible = set(guild["members"]) - {president}
+                kick = set(vote["playersKick"]) & eligible
+                support = set(vote["playersSupport"]) & eligible
+                if len(kick) > len(support):
+                    # Prefer an actual player; bots do not fabricate ballots.
+                    candidates = [guild["members"][pid] for pid in eligible if pid in state["players"]]
+                    if candidates:
+                        successor = min(candidates, key=lambda member: (
+                            0 if member["type"] == 1 else 1,
+                            -_int(member.get("guildScoreRecord")), member["playerId"]))
+                        target = successor["playerId"]
+                        if president in guild["members"]:
+                            guild["members"][president]["type"] = 0
+                        if president in state["players"]:
+                            state["players"][president]["data"]["type"] = 0
+                        successor["type"] = 2
+                        state["players"][target]["data"]["type"] = 2
+                        guild["baseInfo"].update(president=target, presidentName=successor["name"])
+                        guild["baseInfo"]["vicePresident"] = [pid for pid in guild["baseInfo"]["vicePresident"] if pid != target]
+                        self._notify_members(state, guild, notices, 25, 26, 27)
+                vote["inVote"] = False
+                guild["voteCooldownUntil"] = vote["endTime"] + RULES["voteCoolDown"]
+                self._notify_members(state, guild, notices, 57)
+            elif (not vote.get("inVote") and now >= _int(guild.get("voteCooldownUntil"))
+                  and now - guild["memberLastActive"].get(president, now) >= RULES["voteStartPresidentLeave"]
+                  and any(pid != president and pid in state["players"] for pid in guild["members"])):
+                guild["voteInfo"] = {"inVote": True, "endTime": now + RULES["voteLastTime"],
+                                     "playersSupport": [], "playersKick": []}
+                self._notify_members(state, guild, notices, 57)
+
     def _run(self, profile, callback):
         notices = []
         with self.game.atomic_mutation():
@@ -348,7 +442,11 @@ class LocalGuild:
                     player = state["players"].setdefault(str(profile["player_id"]),
                         {"accountId": int(profile["account_id"]), "data": self._player_default()})
                     self._repair_guilds(conn, state, now)
+                    current = state["guilds"].get(str(player["data"]["guildId"]))
+                    if current and str(profile["player_id"]) in current["members"]:
+                        current["memberLastActive"][str(profile["player_id"])] = now
                     self._refresh(conn, state, now, notices)
+                    self._refresh_votes(state, now, notices)
                     result = callback(conn, state, player["data"], now, notices)
                     self._save(conn, state, now)
                     if isinstance(profile, dict):
@@ -541,6 +639,8 @@ class LocalGuild:
         if action == "" and method == "PATCH":
             if not manager:
                 raise GuildError("guild_manager_required", 403)
+            updates = {}
+            cost = 0
             for field, limit in (("name", RULES["maxNameLen"]), ("billboard", RULES["maxBillboardLen"])):
                 if field in body:
                     value = str(body[field]).strip()
@@ -548,11 +648,38 @@ class LocalGuild:
                         raise GuildError("invalid_guild_name_or_billboard", 400)
                     if field == "billboard" and len(value) > limit:
                         raise GuildError("invalid_guild_name_or_billboard", 400)
-                    guild["baseInfo"][field] = value
+                    if field == "name" and value != guild["baseInfo"]["name"]:
+                        if any(other["baseInfo"]["id"] != gid and
+                               other["baseInfo"]["name"].casefold() == value.casefold()
+                               for other in state["guilds"].values()):
+                            raise GuildError("guild_name_exists")
+                        cost += RULES["renameCost"]
+                    updates[field] = value
             for field in ("icon", "skin", "qqGroup"):
                 if field in body:
-                    guild["baseInfo"][field] = str(body[field]) if field in ("icon", "qqGroup") else _int(body[field])
+                    if field == "icon":
+                        if not 1 <= _int(body[field]) <= RULES["badgeCount"]:
+                            raise GuildError("invalid_guild_icon", 400)
+                        value = str(_int(body[field]))
+                        if value != guild["baseInfo"]["icon"]:
+                            cost += RULES["editIconCost"]
+                        updates[field] = value
+                    else:
+                        updates[field] = str(body[field]) if field == "qqGroup" else _int(body[field])
+            if guild["baseInfo"]["score"] < cost:
+                raise GuildError("guild_score_insufficient")
+            guild["baseInfo"].update(updates)
+            guild["baseInfo"]["score"] -= cost
+            self._notify_members(state, guild, notices, 26)
             return 200, self._detail(guild, now=now)
+
+        if action == "group/unlink/" and method == "POST":
+            if not manager:
+                raise GuildError("guild_manager_required", 403)
+            guild["baseInfo"]["qqGroup"] = ""
+            self._notify_members(state, guild, notices, 26)
+            # Msdk.eFlag.eFlag_Succ is 0 in the shipped IL2CPP constants.
+            return 200, {"ret": 0, "errorcode": 0}
 
         if action in ("socialgroup", "socialgroup/") and method == "PATCH":
             if not manager:
@@ -583,6 +710,11 @@ class LocalGuild:
             guild["baseInfo"]["president"] = target
             guild["baseInfo"]["presidentName"] = guild["members"][target].get("name", target)
             guild["baseInfo"]["vicePresident"] = [v for v in guild["baseInfo"].get("vicePresident", []) if str(v) != target]
+            if guild["voteInfo"].get("inVote"):
+                guild["voteInfo"]["inVote"] = False
+                guild["voteInfo"]["endTime"] = now
+                guild["voteCooldownUntil"] = now + RULES["voteCoolDown"]
+                self._notify_members(state, guild, notices, 57)
             if target == pid:
                 player["type"] = 2
             return 200, guild["baseInfo"]
@@ -800,13 +932,19 @@ class LocalGuild:
             return 200, guild["voteInfo"]
         if method == "POST" and action == "vote/":
             if not guild["voteInfo"].get("inVote"):
-                return 200, guild["voteInfo"]
+                raise GuildError("guild_vote_not_open")
+            if pid == str(guild["baseInfo"]["president"]):
+                raise GuildError("guild_president_cannot_vote", 403)
             support = bool(body.get("voteSupport"))
             field = "playersSupport" if support else "playersKick"
+            opposite = "playersKick" if support else "playersSupport"
+            if pid in guild["voteInfo"][opposite]:
+                raise GuildError("guild_vote_already_cast")
             values = [str(v) for v in guild["voteInfo"].setdefault(field, [])]
             if pid not in values:
                 values.append(pid)
             guild["voteInfo"][field] = values
+            self._notify_members(state, guild, notices, 57)
             return 200, guild["voteInfo"]
         if method == "GET" and action == "donate/":
             return 200, guild["donateInfo"]

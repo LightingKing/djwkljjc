@@ -66,21 +66,27 @@ class IntegrationTests(unittest.TestCase):
         self.assertEqual([entry[1] for entry in messages], ['ScMails'])
 
     def test_inner_failure_rolls_back_to_savepoint_when_swallowed(self):
+        callbacks = []
         with self.game.atomic_mutation():
             state = self.game.systems._state(self.profile)
             state['outerProbe'] = True
             self.game.systems._save(self.profile, state)
+            self.game.after_commit(lambda: callbacks.append('outer'))
             try:
                 with self.game.atomic_mutation():
-                    nested = self.game.systems._state(self.profile)
-                    nested['atomicProbe'] = True
-                    self.game.systems._save(self.profile, nested)
-                    raise ValueError('failed')
+                    with closing(self.game._connect()) as connection, connection:
+                        nested = self.game.systems._state(self.profile)
+                        nested['atomicProbe'] = True
+                        self.game.systems._save(self.profile, nested)
+                        self.game.after_commit(lambda: callbacks.append('rolled-back'))
+                        raise ValueError('failed')
             except ValueError:
                 pass
+            self.assertEqual(callbacks, [])
         committed = self.game.systems._state(self.profile)
         self.assertTrue(committed['outerProbe'])
         self.assertNotIn('atomicProbe', committed)
+        self.assertEqual(callbacks, ['outer'])
 
     def test_condition_reward_and_role_present_use_open_local_contracts(self):
         before = self.game._profile(self.account)['resources']

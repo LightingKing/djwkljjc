@@ -1315,6 +1315,12 @@ class LocalGame:
             self.realtime_pvp.race.refresh_daily_items(profile)
         except Exception:
             pass
+        try:
+            # MazeEnter reads both ticket counts immediately, before Summary
+            # can repair the client's item cache. Settle Maze before bootstrap.
+            self.maze.refresh_daily_items(profile)
+        except Exception:
+            logging.getLogger(__name__).exception("login maze ticket refresh failed")
         items = self._types["DBGamePlayer.ItemPackage"]()
         # Items owned in local play (drops, rewards) live in LocalSystems
         # state; include them so a re-login shows the real bag.  Item 90001
@@ -1340,8 +1346,9 @@ class LocalGame:
                 item_ids.add(int(key))
         # Always-read items (count used without nil checks): 90001 by
         # TlogUtil after every battle, gacha tickets 60001/60002 by
-        # Window_Gacha's cost check (GachaType 1/2 cost).
-        for always_present in (60001, 60002, 90001):
+        # Window_Gacha's cost check (GachaType 1/2 cost), and 80007/80008
+        # by MazeEnter.OnEnter, including locked or fully spent tickets.
+        for always_present in (60001, 60002, 80007, 80008, 90001):
             if always_present not in item_ids:
                 items.items.add(id=always_present, count=0)
         messages.append(("DBGamePlayer.ItemPackage", items.SerializeToString()))

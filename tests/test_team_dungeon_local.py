@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import json
+from contextlib import closing
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 
 from accounts import LocalAccounts
 from game import LocalGame
+from grants import grant_rewards
 import test_systems
 
 
@@ -18,9 +21,7 @@ class TeamDungeonLocalTests(unittest.TestCase):
         self.game = LocalGame(root / "game", self.accounts, initial_level=30)
         self.account, self.auth = test_systems.LocalSystemsTests._guest(self.accounts)
         profile = self.game._profile(self.account)
-        state = self.game.systems._state(profile)
-        state.setdefault("items", {})["80005"] = {"count": 1, "gotTime": 0}
-        self.game.systems._save(profile, state)
+        grant_rewards(self.game, profile, [{"type": 11, "id": 80005, "count": 1}])
 
     def tearDown(self):
         self.temp.cleanup()
@@ -68,6 +69,49 @@ class TeamDungeonLocalTests(unittest.TestCase):
         self.assertEqual(self.call("POST", f"/fci/dungeon/{uid}/balance", {})[0], 200)
         status, exhausted = self.call("POST", "/fci/teamdungeon/enter", {"dungeonId": 7011})
         self.assertEqual((status, exhausted["error"]), (409, "team_dungeon_ticket_not_enough"))
+
+    def team_runs(self):
+        with closing(self.game._connect()) as conn:
+            return conn.execute("SELECT COUNT(*) FROM local_dungeons WHERE mode='team'").fetchone()[0]
+
+    def test_local_entry_failures_roll_back_ticket_and_run_then_retry_once(self):
+        # This tests the existing local helper's transaction only. The native
+        # DungeonTeamService room protocol is a separate implementation task.
+        profile = self.game._profile(self.account)
+        for failing_step in ('_new_uid', '_team_room'):
+            with self.subTest(failing_step=failing_step):
+                with patch.object(self.game.dungeons, failing_step, side_effect=RuntimeError('create failed')):
+                    with self.assertRaisesRegex(RuntimeError, 'create failed'):
+                        self.game.dungeons._team_enter(profile, {'dungeonId': 7011})
+                self.assertEqual(self.game.activity_modes._item_count(profile, 80005), 1)
+                self.assertEqual(self.team_runs(), 0)
+        status, first = self.game.dungeons._team_enter(profile, {'dungeonId': 7011})
+        self.assertEqual(status, 200)
+        status, replay = self.game.dungeons._team_enter(profile, {'dungeonId': 7011})
+        self.assertEqual((status, replay['dungeonUid']), (200, first['dungeonUid']))
+        self.assertEqual(self.game.activity_modes._item_count(profile, 80005), 0)
+        self.assertEqual(self.team_runs(), 1)
+
+    def test_ticket_helper_swallowed_failure_does_not_commit_a_partial_debit(self):
+        profile = self.game._profile(self.account)
+        original = self.game.activity_modes._change_item
+        def failing_debit(*args, **kwargs):
+            original(*args, **kwargs)
+            raise RuntimeError('failure after ticket save')
+        with patch.object(self.game.activity_modes, '_change_item', side_effect=failing_debit):
+            result = self.game.dungeons._team_enter(profile, {'dungeonId': 7011})
+        self.assertEqual(result[0], 409)
+        self.assertEqual(self.game.activity_modes._item_count(profile, 80005), 1)
+        self.assertEqual(self.team_runs(), 0)
+
+    def test_successful_team_entry_is_undone_when_the_outer_transaction_fails(self):
+        profile = self.game._profile(self.account)
+        with self.assertRaisesRegex(ValueError, 'outer failed'):
+            with self.game.atomic_mutation():
+                self.assertEqual(self.game.dungeons._team_enter(profile, {'dungeonId': 7011})[0], 200)
+                raise ValueError('outer failed')
+        self.assertEqual(self.game.activity_modes._item_count(profile, 80005), 1)
+        self.assertEqual(self.team_runs(), 0)
 
 
 if __name__ == "__main__":

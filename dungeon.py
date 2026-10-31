@@ -28,6 +28,7 @@ import yaml
 from google.protobuf import json_format
 
 from server.core.content import DungeonConfig, load_dungeon_config
+from server.core.atomic import track_mapping
 
 
 Response = Tuple[int, Any]
@@ -1317,7 +1318,8 @@ class LocalDungeons:
             item = resources[index[key]]
             item["count"] = max(0, int(item.get("count", 0)) + delta)
             deltas.append({"type": rtype, "id": rid, "param": param, "count": int(item["count"]), "countDelta": delta})
-        with self._lock, closing(self._connect()) as connection, connection:
+        connect = getattr(self.game, "_connect", self._connect)
+        with self._lock, closing(connect()) as connection, connection:
             updated = connection.execute(
                 "UPDATE game_profiles SET resources_json = ?, updated_at = ? WHERE account_id = ?",
                 (json.dumps(resources, separators=(",", ":")), int(self._clock()), int(profile["account_id"])),
@@ -1325,6 +1327,7 @@ class LocalDungeons:
             if updated.rowcount != 1:
                 return False, [], "profile_not_found"
         if isinstance(profile, dict):
+            track_mapping(self.game, profile, "resources")
             profile["resources"] = resources
         return True, deltas, None
 
@@ -1436,7 +1439,10 @@ class LocalDungeons:
         modes = getattr(self.game, "activity_modes", None)
         if modes is not None and hasattr(modes, "_change_item"):
             try:
-                return modes._change_item(profile, TEAM_DUNGEON_TICKET_ID, int(delta))
+                # The compatibility helper returns None on a debit error.
+                # Roll back any partial save before converting that error.
+                with self.game.atomic_mutation():
+                    return modes._change_item(profile, TEAM_DUNGEON_TICKET_ID, int(delta))
             except Exception:
                 return None
         return None
@@ -1530,7 +1536,7 @@ class LocalDungeons:
         actor_ids, actor_uids = self._fight_team(profile, request.get("selectActorGroupId", request.get("select_actor_group_id")))
         if not any(actor_uids):
             return 409, {"error": "profile_has_no_actors"}
-        with self._lock, closing(self._connect()) as connection, connection:
+        with self.game.atomic_mutation(), self._lock, closing(self.game._connect()) as connection, connection:
             existing = connection.execute(
                 "SELECT dungeon_uid, actor_uids_json, created_at, status FROM local_dungeons WHERE account_id = ? AND dungeon_id = ? AND mode = 'team' AND status = 'active' LIMIT 1",
                 (int(profile["account_id"]), dungeon_id),
@@ -1559,13 +1565,13 @@ class LocalDungeons:
                 (uid, int(profile["account_id"]), str(profile["player_id"]), dungeon_id, TEAM_DUNGEON_DUNGEON_TYPE,
                  json.dumps(actor_uids, separators=(",", ":")), created, str(TEAM_DUNGEON_ACTIVITY_ID), level, 0),
             )
-        return 200, {
-            "dungeonUid": uid, "dungeonId": dungeon_id, "mode": "team", "groupId": group, "level": level,
-            "baseInfo": self._base_info(profile, dungeon_id, actor_ids, actor_uids, dungeon_type=TEAM_DUNGEON_DUNGEON_TYPE, activity_id=TEAM_DUNGEON_ACTIVITY_ID, create_time=created),
-            "roomInfo": self._team_room(profile, uid, dungeon_id, actor_ids, actor_uids),
-            "resChange": [ticket_change], "ticket": {"type": TEAM_DUNGEON_TICKET_TYPE, "id": TEAM_DUNGEON_TICKET_ID, "countDelta": -1},
-            "tickets": self._team_ticket_count(profile), "localAi": True,
-        }
+            return 200, {
+                "dungeonUid": uid, "dungeonId": dungeon_id, "mode": "team", "groupId": group, "level": level,
+                "baseInfo": self._base_info(profile, dungeon_id, actor_ids, actor_uids, dungeon_type=TEAM_DUNGEON_DUNGEON_TYPE, activity_id=TEAM_DUNGEON_ACTIVITY_ID, create_time=created),
+                "roomInfo": self._team_room(profile, uid, dungeon_id, actor_ids, actor_uids),
+                "resChange": [ticket_change], "ticket": {"type": TEAM_DUNGEON_TICKET_TYPE, "id": TEAM_DUNGEON_TICKET_ID, "countDelta": -1},
+                "tickets": self._team_ticket_count(profile), "localAi": True,
+            }
 
     def _team_balance(self, profile: Mapping[str, Any], dungeon_uid: int, body: bytes | bytearray | str | Mapping[str, Any] | None) -> Response:
         with self._lock, closing(self._connect()) as connection, connection:
@@ -2561,15 +2567,17 @@ class LocalDungeons:
         within the current level.
         """
 
+        updated_profile = dict(profile)
         level_before, exp_before, level_after, exp_after = self._apply_exp_delta(
-            profile, exp_delta
+            updated_profile, exp_delta
         )
         # A level-up can leave the in-level remainder equal to the old value
         # (0 -> Lv2 with 0 left), so compare both level and EXP.
         if (level_after, exp_after) == (level_before, exp_before):
             return level_before, exp_before, level_after, exp_after
-        resources = profile["resources"]
-        with self._lock, closing(self._connect()) as connection, connection:
+        resources = updated_profile["resources"]
+        connect = getattr(self.game, "_connect", self._connect)
+        with self._lock, closing(connect()) as connection, connection:
             connection.execute(
                 "UPDATE game_profiles SET level = ?, resources_json = ?, updated_at = ? WHERE account_id = ?",
                 (
@@ -2579,6 +2587,9 @@ class LocalDungeons:
                     int(profile["account_id"]),
                 ),
             )
+        if isinstance(profile, dict):
+            track_mapping(self.game, profile, "level", "resources")
+            profile.update(level=level_after, resources=resources)
         return level_before, exp_before, level_after, exp_after
 
     @staticmethod

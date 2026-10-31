@@ -16,7 +16,7 @@ python client-patch/hot-update/build.py `
 ```
 
 `--config` and `--zip-name` are also configurable. Outputs are compiled
-bundles, `ljjc-hot-update-v6.zip`, `patch-manifest.json`, and
+bundles, `ljjc-hot-update-v7.zip`, `patch-manifest.json`, and
 `build-report.json`. Copying the ZIP to the fixture directory and changing
 the service's manifest are separate deployment actions owned by the caller.
 No output is named `force-patch.json`.
@@ -52,3 +52,28 @@ exercise the Lua branches, FCI conversion, ZIP construction, and pure version
 selection policy. A successful offline build does not certify cold start,
 Unity rendering, or a real account purchase. Those gates are listed in
 `docs/客户端补丁-v6-验收.md`. The v5 acceptance record remains historical evidence.
+
+The default `modules.json` and its eleven source modules remain the v7 build
+inputs. The cumulative v8 candidate uses `modules-v8.json`, which adds
+`sources/mazemain.lua` and `sources/dungeonbalancefailed.lua`. The MazeMain
+one-line change indexes maze prize boxes by quality,
+matching the lookup and sprite names, so repeated prizes merge their counts.
+The failure-window title adds an AsyncPvp-specific branch that reuses the
+native activity title key `WeekActivitiesType_Name_5`; it no longer asks for
+the absent `DungeonName_4001`. The native success route uses
+`DungeonBalanceBurstLink`, which does not look up dungeon names and is unchanged.
+Build it explicitly without changing a v7 candidate or the online manifest:
+
+```powershell
+python client-patch/hot-update/build.py `
+  --config client-patch/hot-update/modules-v8.json `
+  --bundle-root '<decoded APK>/assets/Patch' `
+  --output-dir '<new v8 offline candidate directory>' `
+  --base-url 'http://127.0.0.1:19080' `
+  --zip-name ljjc-hot-update-v8.zip
+```
+
+`source-origins-v8.json` records the added source's provenance; the unchanged
+v7 modules retain `source-origins.json`. Run `tests/test_client_patch_v8.py`
+for the native Lua reward display and cumulative patch selection contracts.
+The native maze journey still requires separate emulator acceptance.

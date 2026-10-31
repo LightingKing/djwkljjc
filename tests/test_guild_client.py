@@ -17,7 +17,7 @@ from google.protobuf import json_format, message_factory
 from accounts import LocalAccounts
 from game import LocalGame
 from grants import grant_rewards
-from guild import LocalGuild
+from guild import LocalGuild, RULES
 from profile_features import actor_role, role_head_photo
 import test_systems
 
@@ -74,6 +74,162 @@ class GuildClientTests(unittest.TestCase):
         msg = json_format.ParseDict(payload, cls())
         decoded = cls.FromString(msg.SerializeToString())
         self.assertEqual(decoded, msg)
+
+    def earn_guild_score(self, gid, rounds=1):
+        """Only inventory is a fixture; popularity comes from native sends."""
+        for round_index in range(rounds):
+            if round_index:
+                self.now[0] = self.native("GET", f"/fci/guild/{gid}/donate/")[1]["nextBalanceTime"]
+            info = self.native("GET", f"/fci/guild/{gid}/donate/")[1]
+            self.assertEqual(len(info["donates"]), 5)
+            for wish in info["donates"].values():
+                res = dict(wish["donateRes"], count=10)
+                grant_rewards(self.game, self.profile, [res])
+                for _ in range(10):
+                    status, result = self.native("POST", f"/fci/guild/{gid}/donate/send/",
+                        {"playerIdRequest": wish["requestPlayerId"], "res": dict(res, count=1)},
+                        message="ApiGuildDonateSend")
+                    self.assertEqual(status, 200, result)
+
+    def test_self_created_guild_has_finite_native_wishes_and_visible_bot_profiles(self):
+        status, created = self.native("POST", "/fci/guild/", {"name": "互助来源", "icon": "1"}, message="ApiGuild")
+        self.assertEqual(status, 200)
+        gid = created["baseInfo"]["id"]
+        self.assertEqual(created["baseInfo"]["membersCount"], 6)
+        self.earn_guild_score(gid)
+        self.assertEqual(self.native("GET", f"/fci/guild/{gid}/")[1]["baseInfo"]["score"], 500)
+        wishes = self.native("GET", f"/fci/guild/{gid}/donate/")[1]
+        for target, wish in wishes["donates"].items():
+            self.assertEqual(sum(wish["donatesCount"].values()), 10)
+            status, summary = self.native("GET", f"/fci/playersummary/{target}")
+            self.assertEqual((status, summary["playerId"]), (200, target))
+            self.assert_message("PlayerSummaryInfo", summary)
+            self.assertEqual(self.native("POST", f"/fci/guild/{gid}/donate/send/",
+                {"playerIdRequest": target, "res": dict(wish["donateRes"], count=1)},
+                message="ApiGuildDonateSend"), (409, {"error": "donation_request_full"}))
+        fresh = LocalGame(self.root / "game", self.accounts, clock=lambda: self.now[0])
+        self.assertEqual(fresh.guild.player_data(fresh._profile(self.account))["guildScoreRecord"], 500)
+        self.assertEqual(self.native("GET", f"/fci/guild/{gid}/donate/")[1], wishes)
+        self.now[0] = wishes["nextBalanceTime"]
+        renewed = self.native("GET", f"/fci/guild/{gid}/donate/")[1]
+        self.assertEqual(len(renewed["donates"]), 5)
+        self.assertTrue(all(not row["donatesCount"] for row in renewed["donates"].values()))
+
+    def test_native_rename_icon_fees_validation_retry_and_rollback(self):
+        gid = self.native("POST", "/fci/guild/", {"name": "改名收费", "icon": "1"})[1]["baseInfo"]["id"]
+        path = f"/fci/guild/{gid}/"
+        before = self.native("GET", path)[1]
+        self.assertEqual(self.native("PATCH", path, {"name": "未够人气"}, message="ApiGuild"),
+                         (409, {"error": "guild_score_insufficient"}))
+        self.assertEqual(self.native("GET", path)[1], before)
+        self.earn_guild_score(gid, rounds=4)
+        gold = self.balance(7)
+        before = self.native("GET", path)[1]
+        for change in ({"name": "本地互助社"}, {"icon": "7"}, {"name": "改名不提交", "icon": "invalid"}):
+            self.assertIn(self.native("PATCH", path, change, message="ApiGuild")[0], (400, 409))
+            self.assertEqual(self.native("GET", path)[1], before)
+        with patch.object(self.game.guild, "_save", side_effect=RuntimeError("rename save failed")):
+            with self.assertRaisesRegex(RuntimeError, "rename save failed"):
+                self.native("PATCH", path, {"name": "失败改名"}, message="ApiGuild")
+        self.assertEqual(self.native("GET", path)[1], before)
+        status, renamed = self.native("PATCH", path, {"name": "有效新名"}, message="ApiGuild")
+        self.assertEqual((status, renamed["baseInfo"]["score"]), (200, 1000))
+        self.assertEqual(self.native("PATCH", path, {"name": "有效新名"}, message="ApiGuild")[1], renamed)
+        status, changed = self.native("PATCH", path, {"icon": "3"}, message="ApiGuild")
+        self.assertEqual((status, changed["baseInfo"]["score"], changed["baseInfo"]["icon"]), (200, 0, "3"))
+        self.assertEqual(self.balance(7), gold)
+
+    def test_native_group_unlink_null_and_scope(self):
+        gid = self.native("POST", "/fci/guild/", {"name": "本地解绑", "icon": "1"})[1]["baseInfo"]["id"]
+        self.native("PATCH", f"/fci/guild/{gid}/socialgroup/", {"qqGroupId": "12345"}, message="ApiGuildSocialGroup")
+        self.assertEqual(self.native("POST", "/fci/guild/1/group/unlink/", b"null")[0], 403)
+        self.assertEqual(self.native("POST", f"/fci/guild/{gid}/group/unlink/", b"null"), (200, {"ret": 0, "errorcode": 0}))
+        self.assertEqual(self.native("GET", f"/fci/guild/{gid}/")[1]["baseInfo"]["qqGroup"], "")
+
+    def test_native_vote_auto_start_one_ballot_and_succession(self):
+        gid = self.native("POST", "/fci/guild/", {"name": "投票接任", "icon": "1"})[1]["baseInfo"]["id"]
+        member, auth = self.new_player()
+        pid = member["player_id"]
+        self.native("PUT", f"/fci/guild/{gid}/invited-members/", {"playerId": pid}, message="ApiGuildMemberInvite")
+        self.native("PUT", f"/fci/guild/{gid}/members/", {"playerId": pid}, auth=auth, message="ApiGuildMembers")
+        path = f"/fci/guild/{gid}/vote/"
+        self.now[0] += RULES["voteStartPresidentLeave"] - 1
+        self.assertFalse(self.native("GET", path, auth=auth)[1]["inVote"])
+        self.now[0] += 1
+        status, vote = self.native("GET", path, auth=auth)
+        self.assertEqual(status, 200)
+        self.assertTrue(vote["inVote"])
+        self.assertEqual(vote["endTime"], self.now[0] + RULES["voteLastTime"])
+        self.assert_message("DbGuildData.VoteInfo", vote)
+        status, vote = self.native("POST", path, {"voteSupport": False}, auth=auth, message="ApiGuildVotePresident")
+        self.assertEqual((status, vote["playersKick"], vote["playersSupport"]), (200, [pid], []))
+        self.assertEqual(self.native("POST", path, {"voteSupport": False}, auth=auth, message="ApiGuildVotePresident")[1], vote)
+        self.assertEqual(self.native("POST", path, {"voteSupport": True}, auth=auth, message="ApiGuildVotePresident")[0], 409)
+        self.now[0] = vote["endTime"]
+        self.assertFalse(self.native("GET", path, auth=auth)[1]["inVote"])
+        self.assertEqual(self.native("GET", f"/fci/guild/{gid}/", auth=auth)[1]["baseInfo"]["president"], pid)
+        self.assertEqual(self.native("GET", "/fci/guild-player/", auth=auth)[1]["type"], 2)
+        self.assertTrue(any(kind == 57 for _, kind, _ in self.pushes))
+
+    def test_native_vote_failed_cooldown_and_president_login_resets_inactivity(self):
+        self.join()
+        path = "/fci/guild/1/vote/"
+        self.now[0] += RULES["voteStartPresidentLeave"]
+        vote = self.native("GET", path)[1]
+        self.assertTrue(vote["inVote"])
+        self.native("POST", path, {"voteSupport": True}, message="ApiGuildVotePresident")
+        self.now[0] = vote["endTime"]
+        self.assertFalse(self.native("GET", path)[1]["inVote"])
+        self.now[0] += RULES["voteCoolDown"] - 1
+        self.assertFalse(self.native("GET", path)[1]["inVote"])
+        self.now[0] += 1
+        self.assertTrue(self.native("GET", path)[1]["inVote"])
+
+        owner, owner_auth = self.new_player()
+        gid = self.native("POST", "/fci/guild/", {"name": "在线会长", "icon": "1"}, auth=owner_auth)[1]["baseInfo"]["id"]
+        member, auth = self.new_player()
+        self.native("PUT", f"/fci/guild/{gid}/invited-members/", {"playerId": member["player_id"]}, auth=owner_auth)
+        self.native("PUT", f"/fci/guild/{gid}/members/", {"playerId": member["player_id"]}, auth=auth)
+        self.now[0] += RULES["voteStartPresidentLeave"]
+        # Login uses this path even when the player never opens the guild UI.
+        self.game.guild.player_data(owner)
+        self.assertFalse(self.native("GET", f"/fci/guild/{gid}/vote/", auth=auth)[1]["inVote"])
+
+    def test_guild_bot_lookup_does_not_accept_unsolicited_friend_approval(self):
+        created = self.native("POST", "/fci/guild/", {"name": "机器人资料", "icon": "1"})[1]
+        gid = created["baseInfo"]["id"]
+        targets = [member["playerId"] for member in created["members"] if member["playerId"] != self.profile["player_id"]]
+        target = targets[0]
+        before = self.native("GET", "/fci/friendlist")[1]
+        self.native("POST", "/fci/applylist", {"targetList": [target], "isAgree": True}, message="ApiRelationApplyList")
+        self.assertEqual(self.native("GET", "/fci/friendlist")[1], before)
+        self.assertEqual(self.native("POST", "/fci/applyfriend", {"targetId": target}, message="ApiRelationApplyFriend")[0], 200)
+        for pid in targets:
+            self.assertEqual(self.native("DELETE", f"/fci/guild/{gid}/members/{pid}")[0], 200)
+        self.assertEqual(self.native("GET", f"/fci/guild/{gid}/")[1]["baseInfo"]["membersCount"], 1)
+        self.assertEqual(self.native("POST", f"/fci/guild/{gid}/members/quit/", {"playerId": self.profile["player_id"]}, message="ApiGuildMembersQuit")[0], 200)
+        self.assertEqual(self.native("GET", f"/fci/playersummary/{target}")[1]["playerId"], target)
+        self.assertIn(target, [row["playerId"] for row in self.native("GET", "/fci/friendlist")[1]])
+
+    def test_legacy_self_created_guild_migrates_without_refilling_existing_wish(self):
+        created = self.native("POST", "/fci/guild/", {"name": "旧公会迁移", "icon": "1"})[1]
+        gid = created["baseInfo"]["id"]
+        self.native("POST", f"/fci/guild/{gid}/donate/request/", {"res": {"type": 11, "id": 20001}}, message="ApiGuildDonateRequest")
+        # Migration-only fixture reproduces the released one-member guild.
+        with closing(self.game._connect()) as conn, conn:
+            state = self.guild._load(conn, self.now[0])
+            guild = state["guilds"][str(gid)]
+            wish = guild["donateInfo"]["donates"][self.profile["player_id"]]
+            guild["members"] = {self.profile["player_id"]: guild["members"][self.profile["player_id"]]}
+            guild["botIds"] = []
+            guild.pop("localBotVersion")
+            guild.pop("localBots")
+            guild["donateInfo"]["donates"] = {self.profile["player_id"]: wish}
+            self.guild._save(conn, state, self.now[0])
+        info = self.native("GET", f"/fci/guild/{gid}/donate/")[1]
+        self.assertEqual(len(info["donates"]), 6)
+        self.assertEqual(info["donates"][self.profile["player_id"]], wish)
+        self.assertEqual(self.native("GET", f"/fci/guild/{gid}/donate/")[1], info)
 
     def test_routes_membership_and_descriptor_roundtrip_persist(self):
         status, recommendations = self.call("POST", "/fci/guild-recommend/")
@@ -137,13 +293,7 @@ class GuildClientTests(unittest.TestCase):
             self.assert_message("ApiGuildSkill.result", row)
             self.assertEqual(row["time"], 43200)
             self.assertEqual((row["startTime"], row["endTime"], row["maxUseCount"], row["scoreCost"]), (0, 0, 1, 500))
-        # Seed the documented shared-popularity balance for this isolated
-        # activation contract test; real donation settlement raises this same
-        # guild baseInfo.score through the normal route.
-        with closing(self.game._connect()) as conn, conn:
-            state = self.guild._load(conn, self.now[0])
-            state["guilds"][str(gid)]["baseInfo"]["score"] = 500
-            self.guild._save(conn, state, self.now[0])
+        self.earn_guild_score(gid)
         request = message_factory.GetMessageClass(self.game._pool.FindMessageTypeByName("ApiGuildSkill"))(id=101, use_count=1)
         status, result = self.call("POST", f"/fci/guild/{gid}/skill/", request.SerializeToString())
         self.assertEqual(status, 200)
@@ -223,8 +373,8 @@ class GuildClientTests(unittest.TestCase):
         gid = created["baseInfo"]["id"]
         member, auth = self.new_player()
         pid = member["player_id"]
-        status, detail = self.call("PATCH", f"/fci/guild/{gid}/", {"billboard": "欢迎", "icon": "3"})
-        self.assertEqual((status, detail["baseInfo"]["billboard"], detail["baseInfo"]["icon"]), (200, "欢迎", "3"))
+        status, detail = self.call("PATCH", f"/fci/guild/{gid}/", {"billboard": "欢迎"})
+        self.assertEqual((status, detail["baseInfo"]["billboard"], detail["baseInfo"]["icon"]), (200, "欢迎", "2"))
         status, invited = self.native("PUT", f"/fci/guild/{gid}/invited-members/", {"playerId": pid}, message="ApiGuildMemberInvite")
         self.assertEqual((status, invited["playerId"]), (200, pid))
         self.assertEqual(self.native("GET", f"/fci/guild/{gid}/invited-members/")[1][0]["playerId"], pid)
@@ -238,7 +388,7 @@ class GuildClientTests(unittest.TestCase):
         self.assert_message("DbGuildData.BaseInfo", demoted)
         self.assertEqual(self.native("GET", "/fci/guild-player/", auth=auth)[1]["type"], 0)
         status, kicked = self.native("DELETE", f"/fci/guild/{gid}/members/{pid}")
-        self.assertEqual((status, kicked["membersCount"]), (200, 1))
+        self.assertEqual((status, kicked["membersCount"]), (200, created["baseInfo"]["membersCount"]))
         self.assert_message("DbGuildData.BaseInfo", kicked)
         self.assertEqual(self.native("GET", "/fci/guild-player/", auth=auth)[1]["guildId"], 0)
         status, social = self.call("PATCH", f"/fci/guild/{gid}/socialgroup/", {"qqGroupId": "12345"})
@@ -275,7 +425,7 @@ class GuildClientTests(unittest.TestCase):
         self.assertEqual(self.native("GET", "/fci/guild-player/")[0], 200)
         self.assertEqual(self.native("GET", f"/fci/guild/{gid}/")[0], 200)
         saved = self.game.systems._state(recipient)["items"]["20001"]["count"]
-        self.assertEqual(saved, 1)
+        self.assertEqual(saved, 4)  # One real donation plus three finite robot donations.
         self.assertEqual(self.native("GET", "/fci/guild-player/", auth=auth)[1]["lastGuildDonateBalanceTime"], boundary)
         self.assertEqual(self.game.systems._state(recipient)["items"]["20001"]["count"], saved)
         with closing(self.game._connect()) as conn:
@@ -297,7 +447,7 @@ class GuildClientTests(unittest.TestCase):
         self.assertEqual(self.native("GET", "/fci/guild-player/", auth=auth)[1]["guildId"], 0)
         status, approved = self.native("PUT", f"/fci/guild/{gid}/members/", {"playerId": pid}, message="ApiGuildMembers")
         self.assertEqual(status, 200)
-        self.assertEqual(approved["membersCount"], 2)
+        self.assertEqual(approved["membersCount"], 7)
         self.assert_message("DbGuildData.BaseInfo", approved)
         status, transferred = self.native("POST", f"/fci/guild/{gid}/president/", {"newPresident": pid}, message="ApiGuildPresident")
         self.assertEqual(status, 200)

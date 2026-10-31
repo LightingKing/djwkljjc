@@ -7,7 +7,10 @@ client contracts.
 from __future__ import annotations
 
 from contextlib import closing
+import hashlib
 import json
+from pathlib import Path
+import random
 import re
 from collections.abc import Mapping
 from urllib.parse import urlsplit
@@ -27,6 +30,15 @@ REFRESH_ITEM_ID = 80001
 # Local lineups use distinct main characters with their real client-table
 # attributes and skills.  Refresh rotates the lineup as well as its uid.
 BOT_ACTOR_POOL = (1001, 1002, 1003, 1004, 1005, 1006)
+# D rule: the original weekly drop table is unavailable. Alternate two equal
+# pools from the native Role/ItemInfo fragments, drawing one fragment per day.
+_TABLES = Path(__file__).parent / "data/client-tables"
+_ITEMS = {row["id"]: row for row in json.loads((_TABLES / "ItemInfo.json").read_text(encoding="utf-8"))["rows"]}
+FRAGMENT_ITEMS = tuple(sorted({row["decomposeRes"]["id"] for row in
+    json.loads((_TABLES / "Role.json").read_text(encoding="utf-8"))["rows"]
+    if row.get("decomposeRes", {}).get("type") == 11
+    and _ITEMS.get(row["decomposeRes"]["id"], {}).get("funcType") == 3}))
+WEEKLY_FRAGMENT_POOLS = (FRAGMENT_ITEMS[::2], FRAGMENT_ITEMS[1::2])
 _REQUEST_SCHEMAS = {
     "match": "ApiAsyncPvpMatch",
     "enter": "ApiTournamentEnter", "balance": "ApiTournamentBalance",
@@ -139,8 +151,10 @@ class LocalTournament:
         state = json.loads(row["state_json"]) if row else self._default_state(now)
         state.setdefault("targets", self._targets()); state.setdefault("claimed", []); state.setdefault("run", None)
         day, week = policy_for(self.game).day_index(now), policy_for(self.game).week_index(now)
-        if _int(state.get("day")) != day:
+        reset = day > _int(state.get("day"))
+        if reset:
             state.update(day=day, wins=0, losses=0, refreshCount=0, claimed=[], run=None, targets=self._targets())
+            state.pop("fifthReward", None)
         # Repair already persisted placeholder teams without resetting wins,
         # claims, target identities, or an in-progress native battle.
         for index, target in enumerate(state["targets"]):
@@ -152,7 +166,15 @@ class LocalTournament:
                 # Already persisted real three-main lineups need only empty
                 # seats, preserving their generation, skills and attributes.
                 target["targetBattleActors"] = actors + self._empty_support_slots()
-        state["week"] = week
+        state["week"] = max(_int(state.get("week")), week)
+        if "fifthReward" not in state:
+            pool = WEEKLY_FRAGMENT_POOLS[state["week"] % len(WEEKLY_FRAGMENT_POOLS)]
+            # Stable per account/day, including rollback retries and restarts.
+            # Persist the actual reward so preview and claim always agree.
+            seed = hashlib.sha256(f"arena-v1:{profile['account_id']}:{state['day']}:{state['week']}".encode()).digest()
+            state["fifthReward"] = {"type": 11, "id": random.Random(seed).choice(pool), "count": 1}
+        if reset:
+            self._notify(profile, 44)
         return state
 
     def _save(self, conn, profile, state, now):
@@ -167,21 +189,32 @@ class LocalTournament:
                 result = callback(conn, state, now); self._save(conn, profile, state, now)
                 return result
 
+    def _notify(self, profile, push_type, params=()):
+        notifier = getattr(self.game, "base_push_notifier", None)
+        if notifier is not None:
+            self.game.after_commit(lambda: notifier(profile, push_type, params))
+
+    def refresh_daily_record(self, profile):
+        """Online calendar hook; _load owns the durable reset and push 44."""
+        if _int(profile.get("level")) >= TOURNAMENT_LEVEL_LIMIT:
+            return self._run(profile, lambda c, s, n: self._record(s, n))
+
     def _record(self, state, now=None):
         wins, claimed = _int(state.get("wins")), {_int(v) for v in state.get("claimed", [])}
         now = int(self.game._now()) if now is None else int(now)
+        now = max(now, policy_for(self.game).day_start_from_index(state["day"]))
         return {"todayMaxWinNum": wins, "leftRewardsWinNum": [n for n in (1, 3, 5) if n <= wins and n not in claimed],
                 "nextRefreshSyncpvpRecordTime": policy_for(self.game).next_boundary(now, "day"),
                 "canRefresh": _int(state.get("refreshCount")) < 3}
 
     @staticmethod
-    def _conf():
-        return {"id": TOURNAMENT_ID, "weekIndex": 0, "levelLimit": TOURNAMENT_LEVEL_LIMIT,
+    def _conf(state):
+        return {"id": TOURNAMENT_ID, "weekIndex": state["week"] % len(WEEKLY_FRAGMENT_POOLS), "levelLimit": TOURNAMENT_LEVEL_LIMIT,
                 "dungeonId": TOURNAMENT_DUNGEON_ID, "startTimeStamp": 0, "endTimeStamp": 0,
                 "preStartTimeStamp": 0, "reward": [
                     {"winNum": 1, "reward": {"type": 11, "id": 60001, "count": 1}},
                     {"winNum": 3, "reward": {"type": 11, "id": 60001, "count": 2}},
-                    {"winNum": 5, "reward": {"type": 11, "id": 123003, "count": 1}},
+                    {"winNum": 5, "reward": dict(state["fifthReward"])},
                 ], "rewardType": 0, "rewardId": 0, "endDieNum": 0, "winDropId": [], "failDropId": []}
 
     @staticmethod
@@ -197,10 +230,7 @@ class LocalTournament:
         entry["count"] = before - 1; self.game.systems._save(profile, state)
         return [{"baseRes": {"type": 11, "id": REFRESH_ITEM_ID, "param": 0, "count": before - 1, "countDelta": -1}}]
 
-    def _after_win(self, profile, state, response, rewards, record_tasks=True):
-        if rewards: response["resChange"] = grant_rewards(self.game, profile, rewards)
-        if not record_tasks:
-            return
+    def _after_win(self, profile, state):
         try:
             self.game.tasks.on_battle_win(profile, TOURNAMENT_DUNGEON_ID, 0, mode="tournament", dungeon_type=3, activity_type=5, activity_id=TOURNAMENT_ID)
             self.game.tasks.record(profile, 35, amount=1)
@@ -221,7 +251,8 @@ class LocalTournament:
             if re.fullmatch(r"/fci/tournament/info/5/\d+", route):
                 if method != "GET": return 405, {"error": "method_not_allowed"}
                 if int(route.rsplit("/", 1)[-1]) != TOURNAMENT_ID: return 404, {"error": "tournament_not_found"}
-                return 200, {"tournamentInfo": [{"tournamentId": TOURNAMENT_ID, "haveMysteryReward": True}], "tournamentConf": [self._conf()]}
+                return 200, self._run(profile, lambda c, s, n: {
+                    "tournamentInfo": [{"tournamentId": TOURNAMENT_ID, "haveMysteryReward": True}], "tournamentConf": [self._conf(s)]})
             if re.fullmatch(r"/fci/tournament/cost/5/\d+", route):
                 if method != "GET": return 405, {"error": "method_not_allowed"}
                 if int(route.rsplit("/", 1)[-1]) != TOURNAMENT_ID: return 404, {"error": "tournament_not_found"}
@@ -271,9 +302,11 @@ class LocalTournament:
                     target = _int(payload.get("winNum")); claimed = {_int(v) for v in s.get("claimed", [])}
                     if target not in (1, 3, 5) or _int(s.get("wins")) < target: raise TournamentError("win_reward_locked")
                     if target in claimed: raise TournamentError("win_reward_got")
-                    s.setdefault("claimed", []).append(target); reward = next(r["reward"] for r in self._conf()["reward"] if r["winNum"] == target)
+                    s.setdefault("claimed", []).append(target)
+                    reward = next(r["reward"] for r in self._conf(s)["reward"] if r["winNum"] == target)
+                    response["resChange"] = grant_rewards(self.game, profile, [reward])
                     response["asyncPvpRecord"] = self._record(s)
-                    self.game.after_commit(lambda: self._after_win(profile, s, response, [reward], record_tasks=False))
+                    self._notify(profile, 3, (reward["id"],))
                     return response
                 return 200, self._run(profile, claim)
             if route == "/fci/tournament/enter":
@@ -365,7 +398,7 @@ class LocalTournament:
         else: state["losses"] = _int(state.get("losses")) + 1
         response = {"balanceInfo": {"balanced": True, "balanceTime": now, "win": win, "targetsDone": [], "resChange": [], "profits": []}, "dieNum": _int(state.get("losses")), "winNum": _int(state.get("wins"))}
         run["response"] = response
-        if win: self.game.after_commit(lambda: self._after_win(profile, state, {"resChange": []}, []))
+        if win: self.game.after_commit(lambda: self._after_win(profile, state))
         return response
 
     @staticmethod
