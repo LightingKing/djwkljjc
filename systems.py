@@ -170,38 +170,60 @@ RANDOM_BOX_RULES: dict[int, dict[str, Any]] = {
         {"type": _RES_ITEM, "id": 30021, "count": 10},
         {"type": _RES_ITEM, "id": 30022, "count": 10},
     ]},
-    # The client marks 75001/75002 as quality-4 boxes.  International data
-    # confirms one random equipment item of the corresponding quality.
-    75001: {"mode": "equipment", "dropId": "Box_75001_15", "quality": 4, "weight": 10000},
-    75002: {"mode": "equipment", "dropId": "Box_75001_15", "quality": 4, "weight": 10000},
-    # Activity 54000's DropInfo was also server-only.  Keep its six rewards
-    # usable with a conservative q4 ascension-material pair; each is limited
-    # to one use by ItemInfo.maxUseCount.
+    # The client marks 75001/75002 as quality-4 boxes.  The APK exposes the
+    # eight 75001 DropInfo names but not their server-side contents or rates.
+    # Keep every recovered name in an explicit local table.  ``family_*``
+    # groups the three visible quality-4 equipment families (1xx/2xx/3xx),
+    # while ``pos_*`` groups the four equipment positions.  These selectors
+    # are a documented local fallback, not a claim that the CN DropInfo was
+    # recovered.  75002 only exposes the shared ``_15`` table and therefore
+    # uses the full quality-4 fallback pool.
+    75001: {"mode": "equipment", "dropId": "Box_75001_15", "quality": 4, "dropTables": [
+        {"dropId": "Box_75001_15", "weight": 1, "pool": "quality_4"},
+        {"dropId": "Box_75001_11_1", "weight": 1, "pool": "family_1xx"},
+        {"dropId": "Box_75001_11_2", "weight": 1, "pool": "family_2xx"},
+        {"dropId": "Box_75001_11_3", "weight": 1, "pool": "family_3xx"},
+        {"dropId": "Box_75001_12_1", "weight": 1, "pool": "pos_0"},
+        {"dropId": "Box_75001_12_2", "weight": 1, "pool": "pos_1"},
+        {"dropId": "Box_75001_12_3", "weight": 1, "pool": "pos_2"},
+        {"dropId": "Box_75001_12_4", "weight": 1, "pool": "pos_3"},
+    ]},
+    75002: {"mode": "equipment", "dropId": "Box_75001_15", "quality": 4, "dropTables": [
+        {"dropId": "Box_75001_15", "weight": 1, "pool": "quality_4"},
+    ]},
+    # Activity 54000's six ActivityDrop boxes are the reward rows from the
+    # original ActivityShopGoods table (shopGoodId 1..6): a signboard/scene
+    # resource and 150 bound 迷子.  The DropInfo itself was server-only, but
+    # the goods and resource ids are present in xlsx__activityshopgoods.lua.
+    # ItemInfo.maxUseCount=1 is the client-side maximum count for one use
+    # request (the item detail window passes this to its number editor); it is
+    # not an account-wide ownership limit.  A malformed batch count is rejected
+    # below while repeated single opens remain valid when the caller owns more.
     54001: {"mode": "fixed", "dropId": "Box_54001_1", "rewards": [
-        {"type": _RES_ITEM, "id": 30021, "count": 5},
-        {"type": _RES_ITEM, "id": 30022, "count": 5},
+        {"type": 30, "id": 1503, "count": 1}, {"type": _RES_PLAYER_MONEY, "id": 0, "count": 150},
     ]},
     54002: {"mode": "fixed", "dropId": "Box_54002_1", "rewards": [
-        {"type": _RES_ITEM, "id": 30021, "count": 5},
-        {"type": _RES_ITEM, "id": 30022, "count": 5},
+        {"type": 30, "id": 11703, "count": 1}, {"type": _RES_PLAYER_MONEY, "id": 0, "count": 150},
     ]},
     54003: {"mode": "fixed", "dropId": "Box_54003_1", "rewards": [
-        {"type": _RES_ITEM, "id": 30021, "count": 5},
-        {"type": _RES_ITEM, "id": 30022, "count": 5},
+        {"type": 30, "id": 106, "count": 1}, {"type": _RES_PLAYER_MONEY, "id": 0, "count": 150},
     ]},
     54004: {"mode": "fixed", "dropId": "Box_54004_1", "rewards": [
-        {"type": _RES_ITEM, "id": 30021, "count": 5},
-        {"type": _RES_ITEM, "id": 30022, "count": 5},
+        {"type": 30, "id": 1103, "count": 1}, {"type": _RES_PLAYER_MONEY, "id": 0, "count": 150},
     ]},
     54005: {"mode": "fixed", "dropId": "Box_54005_1", "rewards": [
-        {"type": _RES_ITEM, "id": 30021, "count": 5},
-        {"type": _RES_ITEM, "id": 30022, "count": 5},
+        {"type": 30, "id": 10103, "count": 1}, {"type": _RES_PLAYER_MONEY, "id": 0, "count": 150},
     ]},
     54006: {"mode": "fixed", "dropId": "Box_54006_1", "rewards": [
-        {"type": _RES_ITEM, "id": 30021, "count": 5},
-        {"type": _RES_ITEM, "id": 30022, "count": 5},
+        {"type": 30, "id": 502, "count": 1}, {"type": _RES_PLAYER_MONEY, "id": 0, "count": 150},
     ]},
 }
+
+# 85006 is the only sibling ascension box whose recovered ItemInfo row omits
+# maxUseCount.  Keep the client-visible batch cap consistent with 85003/85004
+# (10) until the server-only DropInfo is recovered; this prevents an unlimited
+# single request from producing an unbounded reward response.
+RANDOM_BOX_MAX_USE_OVERRIDES: dict[int, int] = {85006: 10}
 RESOURCE_COMPOSE: dict[tuple[int, int], dict[str, Any]] = {
     (int(row["targetRes"].get("type", 0) or 0), int(row["targetRes"].get("id", 0) or 0)): row
     for row in _client_table_rows("ResourceCompose") if isinstance(row.get("targetRes"), dict)
@@ -3929,6 +3951,33 @@ class LocalSystems:
         seed = int.from_bytes(hashlib.blake2b(seed_material, digest_size=16).digest(), "big")
         return random.Random(seed)
 
+    @staticmethod
+    def _local_equipment_pool(selector: Any, quality: int) -> list[int]:
+        """Resolve a documented local selector to concrete EquipInfo ids.
+
+        The 2.0.4 APK contains the 75001 ``dropIds`` strings but no DropInfo
+        rows.  Keeping selector resolution here makes the fallback explicit
+        and auditable, while allowing the server table to be replaced later
+        without changing the item-use route.
+        """
+
+        pool = [int(value) for value in equip_store.EQUIP_POOLS.get(quality, [])]
+        token = str(selector or "quality_%d" % quality)
+        if token == "quality_%d" % quality:
+            return pool
+        if token.startswith("family_") and token.endswith("xx"):
+            prefix = token[len("family_"):-2]
+            return [value for value in pool if str(value).startswith(prefix)]
+        if token.startswith("pos_"):
+            position = _int(token[4:], -1)
+            if position < 0:
+                return []
+            return [
+                value for value in pool
+                if _int((equip_store.EQUIP_INFO.get(value) or {}).get("pos"), 0) == position
+            ]
+        return []
+
     def _random_box_rewards(self, profile: Mapping[str, Any], item_id: int, count: int,
                             sequence: int, request_key: str = "") -> list[dict[str, int]]:
         """Roll the D1 local pool once per box and return STResource rows."""
@@ -3958,10 +4007,28 @@ class LocalSystems:
                 rewards.extend(fixed)
             return rewards
         if mode == "equipment":
-            pool = list(equip_store.EQUIP_POOLS.get(_int(rule.get("quality")), []))
-            if not pool:
-                return []
+            quality = _int(rule.get("quality"))
+            drop_tables = [
+                table for table in rule.get("dropTables", [])
+                if isinstance(table, Mapping)
+                and _int(table.get("weight"), 0) > 0
+                and self._local_equipment_pool(table.get("pool"), quality)
+            ]
             for _ in range(count):
+                if drop_tables:
+                    total_weight = sum(_int(table.get("weight"), 0) for table in drop_tables)
+                    pick = rng.randrange(total_weight)
+                    chosen = drop_tables[-1]
+                    for table in drop_tables:
+                        pick -= _int(table.get("weight"), 0)
+                        if pick < 0:
+                            chosen = table
+                            break
+                    pool = self._local_equipment_pool(chosen.get("pool"), quality)
+                else:
+                    pool = list(equip_store.EQUIP_POOLS.get(quality, []))
+                if not pool:
+                    return []
                 rewards.append({"type": _RES_EQUIP, "id": int(rng.choice(pool)), "count": 1})
             return rewards
         if mode == "item_pool":
@@ -4007,7 +4074,7 @@ class LocalSystems:
             return 400, {"error": "invalid_count"}
         func = _int(info.get("funcType"))
         if func == _ITEM_FUNC_BOX:
-            max_use = _int(info.get("maxUseCount"))
+            max_use = _int(info.get("maxUseCount")) or _int(RANDOM_BOX_MAX_USE_OVERRIDES.get(item_id))
             if max_use > 0 and count > max_use:
                 return 400, {"error": "count_exceeds_max_use", "id": item_id, "maxUseCount": max_use}
         owned = self._items_owned(state, item_id)
@@ -4064,17 +4131,23 @@ class LocalSystems:
             receipt_id = request_key or f"seq:{_int(state.get('randomBoxUseSeq'))}"
             receipts = state.setdefault("randomBoxReceipts", {})
             if isinstance(receipts, dict):
-                receipts[receipt_id] = {
+                # Keep the normal (stock-client) audit row compact.  Only a
+                # caller-supplied retry key needs a serialized response for
+                # exactly-once replay; sequence rows retain metadata useful
+                # for diagnostics without duplicating the full protobuf and
+                # reward list on every opening.
+                receipt = {
                     "requestId": request_key,
                     "receiptId": receipt_id,
                     "sequence": _int(state.get("randomBoxUseSeq")),
                     "itemId": item_id,
                     "count": count,
                     "index": index,
-                    "rewards": [dict(reward) for reward in rewards],
-                    "responseHex": result.SerializeToString().hex(),
                     "createdAt": self._now(),
                 }
+                if request_key:
+                    receipt["responseHex"] = result.SerializeToString().hex()
+                receipts[receipt_id] = receipt
                 # Keep the state bounded while retaining the most recent
                 # explicit keys for practical retry windows.
                 if len(receipts) > 512:

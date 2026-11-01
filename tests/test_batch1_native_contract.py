@@ -60,7 +60,10 @@ class NativeHttpTests(unittest.TestCase):
 
     def test_expected_rejection_and_internal_failure_have_native_notify_shape(self):
         status, error = self.request("POST", "/fci/item/use", b'{"itemId":80009,"count":1}')
-        self.assertEqual((status, error), (509, {"notify": {"code": "Window_ItemNotEnough"}}))
+        # ``client_errors`` uses the enum/localization key shipped by the
+        # client.  Window_ItemNotEnough was the pre-bfe9f3e expectation; the
+        # current native error path is Error_ItemNumNotEnough.
+        self.assertEqual((status, error), (509, {"notify": {"code": "Error_ItemNumNotEnough"}}))
         with patch.object(self.game, "handle_http", side_effect=RuntimeError("private failure detail")):
             status, error = self.request("GET", "/fci/baseinfo/")
         self.assertEqual((status, error), (507, {"notify": {"code": "Error_DbError"}}))

@@ -89,7 +89,9 @@ class LocalProfileFeaturesTests(unittest.TestCase):
             ])
             for path, body in (
                 ("/fci/jigsawpuzzle/lighten/", {"cellId": 1}),
-                ("/fci/postcard/lighten/", {"cellId": 2}),
+                # WlfPostcard puts the postcard id in the route.  The old
+                # profile seam had no id and is intentionally no longer used.
+                ("/fci/Postcard/Lighten/1", {"cellId": 2}),
                 ("/fci/clawcrane/", {"count": 1}),
                 ("/fci/share/", {"actorId": 1001}),
             ):

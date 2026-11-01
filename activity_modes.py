@@ -114,10 +114,10 @@ WEEKLY_REFRESH = {_int((r.get("refreshRes") or {}).get("id")): (_int((r.get("ref
                                                                  _int(r.get("refreshLimit")))
                   for r in _rows("DailyRefresh")
                   if _int(r.get("type")) == 2 and _int((r.get("refreshRes") or {}).get("type")) == 11}
-# 80009 is absent from the extracted DailyRefresh rows, but the local
-# remediation policy keeps the event ticket usable: one per Beijing day,
-# capped at three.  A recovered original row can replace this override.
-DAILY_REFRESH.setdefault(80009, (1, 3))
+# The recovered client row identifies 80009 as a weekly ticket with a ten
+# ticket cap, but omits its quantity.  Preserve the table's cadence and use
+# the local rule of one ticket per Beijing week.
+WEEKLY_REFRESH[80009] = (1, 10)
 
 DAY = 86400
 UID_BASE = 9_000_000_000_000  # disjoint from dungeon.py's millisecond uids
@@ -668,9 +668,9 @@ class LocalActivityModes:
     def refresh_daily_items(self, profile: Mapping[str, Any]) -> list[dict[str, Any]]:
         """Settle table-backed daily/weekly tickets with their markers atomically.
 
-        Missing/zero counts (80009 in the recovered table) grant nothing.
-        Offline accrual stops at the configured cap; rollback never replays a
-        previously settled period.  The scheduler can safely call this again.
+        Missing/zero counts grant nothing. Offline accrual stops at the
+        configured cap; rollback never replays a previously settled period.
+        The scheduler can safely call this again.
         """
         with self.game.atomic_mutation():
             policy, now = policy_for(self.game), self._now()

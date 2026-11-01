@@ -93,15 +93,36 @@ class ResetIntegrationTests(unittest.TestCase):
         self.assertEqual(modes.refresh_daily_items(self.profile), [])
         self.now[0] += 1
         rows = modes.refresh_daily_items(self.profile)
-        self.assertEqual({r["baseRes"]["id"] for r in rows}, {80001, 80002, 80009})
+        self.assertEqual({r["baseRes"]["id"] for r in rows}, {80001, 80002})
         self.now[0] = ts("2026-11-01T22:00:00Z")
         modes.refresh_daily_items(self.profile)
         items = self.game.systems._state(self.profile)["items"]
         self.assertEqual({i: items[str(i)]["count"] for i in (80001, 80002, 80003, 80005, 80006)},
                          {80001: 3, 80002: 4, 80003: 4, 80005: 6, 80006: 5})
-        self.assertEqual(items["80009"]["count"], 3)
+        self.assertEqual(items["80009"]["count"], 2)
         self.now[0] -= 14 * 86400
         self.assertEqual(modes.refresh_daily_items(self.profile), [])
+
+    def test_80009_is_weekly_and_caps_at_ten(self):
+        modes = self.game.activity_modes
+        initial = modes.refresh_daily_items(self.profile)
+        self.assertIn(80009, {row["baseRes"]["id"] for row in initial})
+        self.assertEqual(self.game.systems._state(self.profile)["items"]["80009"]["count"], 1)
+
+        # Crossing a Beijing day boundary alone must not replenish this
+        # ticket; its cadence is the recovered weekly DailyRefresh row.
+        self.now[0] += 86400
+        self.assertNotIn(80009, {row["baseRes"]["id"] for row in modes.refresh_daily_items(self.profile)})
+        self.assertEqual(self.game.systems._state(self.profile)["items"]["80009"]["count"], 1)
+
+        # Nine further week boundaries reach the ten-ticket storage cap.
+        for _ in range(9):
+            self.now[0] += 7 * 86400
+            modes.refresh_daily_items(self.profile)
+        self.assertEqual(self.game.systems._state(self.profile)["items"]["80009"]["count"], 10)
+        self.now[0] += 7 * 86400
+        self.assertEqual(modes.refresh_daily_items(self.profile), [])
+        self.assertEqual(self.game.systems._state(self.profile)["items"]["80009"]["count"], 10)
 
     def test_ticket_failure_rolls_back_inventory_and_marker_together(self):
         modes = self.game.activity_modes

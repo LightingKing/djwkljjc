@@ -1212,6 +1212,15 @@ class LocalEvents:
             activity.category = entry["category"]
             activity.time_type = entry["timeType"]
             activity.level_limit = entry["levelLimit"]
+            if entry["type"] == 23 and entry["activityId"] == 23001:
+                # DungeonTeam.lua indexes dayOpenTime[1] unconditionally.
+                # The recovered permanent-menu row had no historical window,
+                # so expose the local daily 06:00–24:00 opening explicitly.
+                day = activity.day_open_time.add()
+                day.time_start = "local"
+                day.time_end = "local"
+                day.timestamp_start = 6 * 3600
+                day.timestamp_end = 24 * 3600
             welfare = getattr(self.game, "welfare", None)
             if welfare is not None and entry["type"] in (16, 26, 44, 48):
                 window = welfare.cycle_window(now)

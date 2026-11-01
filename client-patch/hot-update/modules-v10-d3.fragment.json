@@ -1,0 +1,21 @@
+{
+  "appVersion": "2.0.4.59162.0",
+  "patchVersion": 10,
+  "modules": [
+    {
+      "source": "sources/dungeonteam-local.lua",
+      "target": "assetbundle/data/lua/window/dungeonteam/dungeonteam",
+      "originalSha256": "48be3f25ed11127d592cdca8f228266ccd62eac444e80da883e324680adb7e48"
+    },
+    {
+      "source": "sources/dungeonteamprepare-local.lua",
+      "target": "assetbundle/data/lua/window/dungeonteamprepare/dungeonteamprepare",
+      "originalSha256": "6d2fb589d931c918fc387b948fd69f069c842dae1f256eeb138cddeefe7e5c0ad"
+    },
+    {
+      "source": "sources/burstlinkactorgroup-v10.lua",
+      "target": "assetbundle/data/lua/window/burstlinkactorgroup/burstlinkactorgroup",
+      "originalSha256": "7acdc9f5cbf605f949986d2301746ce97bb05104661d90ac116401575ca9c7a5"
+    }
+  ]
+}

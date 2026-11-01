@@ -133,7 +133,10 @@ class PermanentActivityEntryTests(unittest.TestCase):
             if row["type"] in PERMANENT_TYPES:
                 self.assertEqual(set(row), set(login))
                 self.assertIsInstance(row["weekdays"], list)
-                self.assertEqual(row["dayOpenTime"], [])
+                if row["type"] == 23:
+                    self.assertEqual([(part["timestampStart"], part["timestampEnd"]) for part in row["dayOpenTime"]], [(21600, 86400)])
+                else:
+                    self.assertEqual(row["dayOpenTime"], [])
 
     def test_activity_ids_are_unique_through_the_full_dispatch(self):
         # ActivityManager keys m_mapActivityById by activityId alone.

@@ -223,6 +223,27 @@ class LocalTournament:
                 "timestampEnd": 0, "timestampClose": 0, "forever": True, "category": 3,
                 "levelLimit": TOURNAMENT_LEVEL_LIMIT, "weekdays": []}
 
+    @staticmethod
+    def _burst_activity():
+        # BurstLink is a separate native tournament entry.  The client uses
+        # the summary status to choose Join -> actor selection -> actor group;
+        # omitting it leaves the menu stuck on the remote-only flow.
+        return {"type": 18, "activityId": 18001, "timestampPreheat": 0, "timestampStart": 0,
+                "timestampEnd": 0, "timestampClose": 0, "forever": True, "category": 3,
+                "levelLimit": 28, "weekdays": []}
+
+    def _burst_status(self, profile):
+        state = self.game.realtime_pvp._state(profile)
+        native = self.game.realtime_pvp._native(state)
+        active = native.get("active")
+        if isinstance(active, Mapping) and not active.get("balanced"):
+            return 3  # TournamentStatus_Group_End
+        if len(native.get("main") or []) + len(native.get("assistant") or []) >= 6:
+            return 2  # TournamentStatus_Group
+        if native.get("paid"):
+            return 1  # TournamentStatus_Participation
+        return 0  # TournamentStatus_NoParticipation
+
     def _consume_refresh_item(self, profile):
         state = self.game.systems._state(profile); entry = state.setdefault("items", {}).setdefault(str(REFRESH_ITEM_ID), {"count": 0})
         before = _int(entry.get("count"))
@@ -244,7 +265,10 @@ class LocalTournament:
         try:
             if route == "/fci/tournament/summary":
                 if method != "GET": return 405, {"error": "method_not_allowed"}
-                return self._run(profile, lambda c, s, n: (200, {"activityInfo": [{"activity": self._activity(), "status": _int(s.get("status")), "redPoint": 0}]}))
+                return self._run(profile, lambda c, s, n: (200, {"activityInfo": [
+                    {"activity": self._activity(), "status": _int(s.get("status")), "redPoint": 0},
+                    {"activity": self._burst_activity(), "status": self._burst_status(profile), "redPoint": 0},
+                ]}))
             if route == "/fci/asyncpvprecord":
                 if method != "GET": return 405, {"error": "method_not_allowed"}
                 return 200, self._run(profile, lambda c, s, n: self._record(s))

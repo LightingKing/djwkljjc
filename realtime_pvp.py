@@ -61,6 +61,11 @@ def _int(value: Any, default=0) -> int:
         return default
 
 
+BURST_ACTOR_KIND = {_int(row.get("id")): _int(row.get("kind"))
+                    for row in _client_rows("ActorConfig")
+                    if _int(row.get("id")) and _int(row.get("kind"))}
+
+
 class RaceError(Exception):
     def __init__(self, error, status=409):
         self.error, self.status = error, status
@@ -714,14 +719,19 @@ class LocalRealtimePvp:
     RACE_TICKETS = 6
     BURST_ROUNDS = 5
     BURST_PLAYERS = 3
-    BURST_TICKETS = 1
-    # Client 2.0.4's native BurstLink constants.  The original matcher and
-    # FightService are unavailable in the local build, so the HTTP seam below
-    # publishes a deterministic robot room and accepts the normal balance
-    # callback.  80003 is the extracted RefreshPrice type-18 ticket.
+    BURST_TICKETS = 10
+    BURST_WEEKLY_GRANT = 2
+    # Client 2.0.4's native BurstLink constants.  The local matcher publishes
+    # a deterministic robot room and then enters the normal local FightLua
+    # scene.  80003 is the extracted DailyRefresh type-2 ticket (two per
+    # Beijing week, capped at ten); the type-18 RefreshPrice row is the
+    # client's one-ticket payment before matching.
     BURST_ACTIVITY_TYPE = 18
     BURST_ACTIVITY_ID = 18001
-    BURST_DUNGEON_ID = 18001
+    # No BurstLink-specific map survived extraction.  4001 is the recovered
+    # playable async arena map; dungeonType=8 keeps the BurstLink combat rules
+    # while allowing the stock local scene to load its DungeonMonster data.
+    BURST_DUNGEON_ID = 4001
     BURST_TICKET_ID = 80003
     BURST_MAX_WINS = 5
     BURST_MAX_LOSSES = 3
@@ -757,7 +767,7 @@ class LocalRealtimePvp:
             "race": {"day": "", "tickets": LocalRealtimePvp.RACE_TICKETS,
                      "rating": 1000, "wins": 0, "losses": 0,
                      "nextMatch": 1, "matches": [], "active": None},
-            "burst": {"day": "", "tickets": LocalRealtimePvp.BURST_TICKETS,
+            "burst": {"day": "", "tickets": 0, "inventoryTickets": None,
                       "wins": 0, "losses": 0, "nextMatch": 1,
                       "matches": [], "active": None},
         }
@@ -790,16 +800,34 @@ class LocalRealtimePvp:
                     continue
                 for key, fallback in default.items():
                     value.setdefault(key, fallback)
-            self._refresh_tickets(state)
+            self._refresh_tickets(state, profile)
             return state
 
-    def _refresh_tickets(self, state: dict[str, Any]) -> None:
+    def _burst_inventory_count(self, profile: Mapping[str, Any]) -> int:
+        """Read the canonical 80003 inventory after weekly refresh settlement."""
+        try:
+            state = self.game.systems._state(profile)
+            return max(0, _int((state.get("items") or {}).get(str(self.BURST_TICKET_ID), {}).get("count")))
+        except Exception:
+            return 0
+
+    def _refresh_tickets(self, state: dict[str, Any], profile: Mapping[str, Any] | None = None) -> None:
         day = self._day_key()
-        for mode, maximum in (("race", self.RACE_TICKETS), ("burst", self.BURST_TICKETS)):
-            bucket = state[mode]
-            if period_due(bucket.get("day"), day):
-                bucket["day"] = day
-                bucket["tickets"] = maximum
+        bucket = state["race"]
+        if period_due(bucket.get("day"), day):
+            bucket["day"] = day
+            bucket["tickets"] = self.RACE_TICKETS
+        if profile is None:
+            return
+        burst = state["burst"]
+        current = self._burst_inventory_count(profile)
+        previous = burst.get("inventoryTickets")
+        if previous is None:
+            burst["tickets"] = min(self.BURST_TICKETS, current)
+        elif current != _int(previous):
+            burst["tickets"] = max(0, min(self.BURST_TICKETS,
+                                           _int(burst.get("tickets")) + current - _int(previous)))
+        burst["inventoryTickets"] = current
 
     def _save(self, profile: Mapping[str, Any], state: Mapping[str, Any]) -> None:
         with self._lock, closing(self.game._connect()) as connection, connection:
@@ -851,7 +879,7 @@ class LocalRealtimePvp:
     def _native_default() -> dict[str, Any]:
         return {"main": [], "assistant": [], "groups": {"1": {"members": []}},
                 "active": None, "lastWin": False, "lastBalanced": False,
-                "received": False}
+                "received": False, "randSeed": 0, "status": 0, "paid": False}
 
     def _native(self, state: dict[str, Any]) -> dict[str, Any]:
         value = state["burst"].get("native")
@@ -870,16 +898,33 @@ class LocalRealtimePvp:
         return value
 
     def _native_actors(self, profile: Mapping[str, Any]) -> list[dict[str, Any]]:
-        ids, uids = self.game.dungeons._fight_team(profile)
+        # BurstLink's three-choice cards are temporary level-1 actors from the
+        # BurstLink pool, not the currently selected story group (and not a
+        # restriction to characters already owned by the account).  Preserve
+        # owned instance UIDs where available, then allocate stable synthetic
+        # UIDs for the remaining client-table actors.  The selected cards are
+        # still represented by ordinary STActor records, so the local scene
+        # can consume their id/uid pair without a remote FightService.
+        try:
+            from . import actors as actor_store
+        except ImportError:  # pragma: no cover - direct module import
+            import actors as actor_store
+        state = self.game.systems._state(profile)
+        records = actor_store.ordered(profile, state)
+        seen_ids = set()
         actors = []
-        for actor_id, uid in zip(ids, uids):
-            if int(uid or 0):
-                actor = self.game.dungeons._fight_actor(profile, actor_id, uid)
-                if actor:
-                    actors.append(actor)
-        # A local profile can be created with only one actor; the client still
-        # requires three slots per side, so deterministic copies fill previews
-        # while the selected group retains real UIDs.
+        for record in records:
+            actor = self.game.dungeons._fight_actor(profile, int(record["id"]), int(record["uid"]))
+            if actor:
+                actors.append(actor)
+                seen_ids.add(int(record["id"]))
+        for actor_id in sorted(actor_store.BASE_QUALITY):
+            if actor_id in seen_ids:
+                continue
+            uid = 1_000_000 + int(actor_id)
+            actor = self.game.dungeons._fight_actor(profile, int(actor_id), uid)
+            if actor:
+                actors.append(actor)
         if not actors:
             actor = self.game.dungeons._fight_actor(profile, int(profile.get("actor_id") or 1001), 1)
             if actor:
@@ -940,6 +985,7 @@ class LocalRealtimePvp:
             },
             "matchInfo": {},
             "dungeonId": int(self.BURST_DUNGEON_ID),
+            "cost": {"type": 11, "id": self.BURST_TICKET_ID, "count": 1},
             "reward": self._native_rewards(),
             "resChange": [],
         }
@@ -954,10 +1000,20 @@ class LocalRealtimePvp:
 
     def _native_rand_actor(self, profile: Mapping[str, Any], native: dict[str, Any], actor_type: int = 0) -> dict[str, Any]:
         pool = self._native_actors(profile)
+        if actor_type in {1, 2}:
+            wanted_kind = 1 if actor_type == 1 else 2
+            typed = [actor for actor in pool if BURST_ACTOR_KIND.get(_int(actor.get("id"))) == wanted_kind]
+            if typed:
+                pool = typed
         selected = {_int(v) for v in native.get("main", []) + native.get("assistant", [])}
         choices = [actor for actor in pool if self._uid(actor) not in selected]
         if not choices:
             choices = pool
+        # Stable pseudo-random order changes when the account/match/slot
+        # changes, while retries of the same GET return the same three cards.
+        seed = native.get("randSeed", 0) or 0
+        choices = sorted(choices, key=lambda actor: self._digest_int(
+            profile.get("account_id"), seed, actor_type, self._uid(actor), modulo=2**31 - 1))
         return {
             "randActor": choices[:3],
             "selectActor": [actor for actor in pool if self._uid(actor) in selected],
@@ -987,6 +1043,60 @@ class LocalRealtimePvp:
                 native["assistant"] = [_int(m.get("actorUid")) for m in members if _int(m.get("index")) >= 3 and _int(m.get("actorUid"))]
         return native["groups"]
 
+    def _validate_native_group(self, profile: Mapping[str, Any], payload: Optional[Mapping[str, Any]]) -> str | None:
+        """Validate the six native BurstLink slots before persisting them.
+
+        The actor-selection UI sends actor UIDs, while older local callers
+        could submit arbitrary IDs and later receive a room that did not
+        correspond to the account.  Keep empty slots valid while editing, but
+        reject unknown/duplicate UIDs and mismatched actor IDs at the HTTP
+        boundary.
+        """
+        groups = payload.get("actorGroups") if isinstance(payload, Mapping) else None
+        if not isinstance(groups, Mapping):
+            return None
+        owned = {}
+        for actor in self._native_actors(profile):
+            uid = self._uid(actor)
+            if uid:
+                owned[uid] = _int(actor.get("id"))
+        seen_uid: set[int] = set()
+        seen_index: set[int] = set()
+        members_to_validate: list[tuple[int, Mapping[str, Any], int]] = []
+        for group in groups.values():
+            if not isinstance(group, Mapping):
+                continue
+            for member in group.get("members") or []:
+                if not isinstance(member, Mapping):
+                    continue
+                index = _int(member.get("index"), -1)
+                if index < 0 or index >= 6:
+                    return "burstlink_actor_index_invalid"
+                if index in seen_index:
+                    return "burstlink_actor_index_duplicate"
+                seen_index.add(index)
+                uid = _int(member.get("actorUid"))
+                if not uid:
+                    continue
+                if uid not in owned:
+                    return "burstlink_actor_not_owned"
+                if uid in seen_uid:
+                    return "burstlink_actor_duplicate"
+                seen_uid.add(uid)
+                members_to_validate.append((index, member, uid))
+        # Report duplicate/ownership errors consistently before checking
+        # actor-kind placement.  A repeated UID can otherwise be rejected on
+        # the first slot's kind and hide the more actionable duplicate error.
+        for index, member, uid in members_to_validate:
+                actor_id = _int(member.get("actorId"))
+                if actor_id and actor_id != owned[uid]:
+                    return "burstlink_actor_mismatch"
+                expected_kind = 1 if index < 3 else 2
+                actual_kind = BURST_ACTOR_KIND.get(owned[uid])
+                if actual_kind and actual_kind != expected_kind:
+                    return "burstlink_actor_kind_mismatch"
+        return None
+
     def _publish_native_match(self, profile: Mapping[str, Any], dungeon: Mapping[str, Any]) -> None:
         """Deliver ScMatchNtf when a WebSocket session is available.
 
@@ -998,7 +1108,8 @@ class LocalRealtimePvp:
         services = getattr(getattr(self.game, "base_push_notifier", None), "push_services", ())
         try:
             cls = message_factory.GetMessageClass(self.game._pool.FindMessageTypeByName("ScMatchNtf"))
-            payload = json_format.ParseDict({"fightsvrUrl": "", "dungeonInfo": dict(dungeon)}, cls())
+            payload = json_format.ParseDict({"fightsvrUrl": "", "dungeonInfo": dict(dungeon)}, cls(),
+                                             ignore_unknown_fields=True)
             data = payload.SerializeToString()
         except Exception:
             return
@@ -1010,12 +1121,30 @@ class LocalRealtimePvp:
             except Exception:
                 continue
 
+    def _consume_native_ticket(self, profile: Mapping[str, Any], state: dict[str, Any]) -> list[dict[str, Any]] | None:
+        """Consume the 80003 item paid by the native BurstLink join flow."""
+        bucket = state["burst"]
+        current = self._burst_inventory_count(profile)
+        if current <= 0 or _int(bucket.get("tickets")) <= 0:
+            return None
+        change = self.game.activity_modes._change_item(profile, self.BURST_TICKET_ID, -1)
+        if change is None:
+            return None
+        bucket["tickets"] = max(0, _int(bucket.get("tickets")) - 1)
+        bucket["inventoryTickets"] = current - 1
+        return [change]
+
     def _native_match(self, profile: Mapping[str, Any], state: dict[str, Any]) -> Response:
         native = self._native(state)
         bucket = state["burst"]
         active = native.get("active")
         if isinstance(active, dict) and not active.get("balanced"):
-            return 200, {"matchTime": 0, "maxWaitTime": 1}
+            # A lost HTTP response or a reconnect can repeat the native
+            # matcher request.  Re-send the same local room so the client can
+            # enter the existing Fight scene instead of opening a spinner.
+            dungeon = active.get("dungeon") if isinstance(active.get("dungeon"), Mapping) else {}
+            return 200, {"matchTime": 0, "maxWaitTime": 1, "resChange": [],
+                         "localFight": True, "fightsvrUrl": "", "dungeonInfo": dungeon}
         if int(bucket.get("tickets", 0)) <= 0:
             return 409, {"error": "ticket_exhausted", "mode": "burst", "nextResetAt": self._next_reset()}
         if not native.get("main"):
@@ -1031,7 +1160,7 @@ class LocalRealtimePvp:
         bot = self._bot(int(profile["account_id"]), match_no, 1, burst=True)
         bot_actors = [{"id": int(actor_id), "uid": 0, "level": int(bot["level"]), "quality": 1, "star": 1,
                        "attrs": []} for actor_id in bot["actorIds"]]
-        dungeon = {"dungeonUid": int(uid), "dungeonId": int(self.BURST_DUNGEON_ID), "dungeonType": 6,
+        dungeon = {"dungeonUid": int(uid), "dungeonId": int(self.BURST_DUNGEON_ID), "dungeonType": 8,
                    "expireSeconds": 3600, "state": 1,
                    "teams": [{"members": [{"playerId": str(profile.get("player_id", "local")),
                                              "name": str(profile.get("name", "本地玩家")),
@@ -1039,13 +1168,25 @@ class LocalRealtimePvp:
                               {"members": [{"playerId": bot["playerId"], "name": bot["name"],
                                              "level": int(bot["level"]), "actors": bot_actors}]}]}
         native["active"] = {"uid": int(uid), "createdAt": self._now(), "balanced": False,
-                             "dungeon": dungeon, "win": None}
+                             "dungeon": dungeon, "win": None, "snapshot": None}
         native["lastBalanced"] = False
-        bucket["tickets"] = int(bucket.get("tickets", 0)) - 1
+        # The real client normally pays the type-18 RefreshPrice row before
+        # reaching the match URL.  Direct protocol callers (and recovery
+        # tools) may enter straight through /match; consume the canonical
+        # item-bag ticket only when the inventory did not move since the last
+        # state read.  Type 11 lives in LocalSystems, so passing it to the
+        # currency ledger would incorrectly return ``insufficient_resource``.
+        changes = []
+        if not self._native(state).get("paid"):
+            changes = self._consume_native_ticket(profile, state)
+            if changes is None:
+                return 409, {"error": "ticket_exhausted", "mode": "burst", "nextResetAt": self._next_reset()}
+        native["paid"] = False
         bucket["nativeMatch"] = match_no
         self._save(profile, state)
         self._publish_native_match(profile, dungeon)
-        return 200, {"matchTime": 0, "maxWaitTime": 1}
+        return 200, {"matchTime": 0, "maxWaitTime": 1, "resChange": changes,
+                      "localFight": True, "fightsvrUrl": "", "dungeonInfo": dungeon}
 
     def _native_balance(self, profile: Mapping[str, Any], state: dict[str, Any], body: Body) -> Response:
         native = self._native(state)
@@ -1055,8 +1196,18 @@ class LocalRealtimePvp:
         if active.get("balanced"):
             return 200, {"isWin": bool(active.get("win")), "winNum": int(state["burst"].get("wins", 0)),
                           "failNum": int(state["burst"].get("losses", 0)), "rewards": []}
-        payload = self._native_request(body, "ApiBurstLinkDunBalance")
-        won = bool(payload.get("win", payload.get("isWin", True)))
+        # The native balance request is an empty JSON object.  Its result is
+        # deliberately derived only from the terminal FightActiveData that
+        # was uploaded to the matching dungeon UID; accepting a guessed
+        # ``{"win": true}`` here would recreate the old free-win path.
+        self._native_request(body, "ApiBurstLinkDunBalance")
+        snapshot = active.get("snapshot")
+        if not isinstance(snapshot, Mapping):
+            return 409, {"error": "burstlink_battle_result_required"}
+        win_team = _int(snapshot.get("winTeam"))
+        if win_team not in (1, 2):
+            return 409, {"error": "burstlink_battle_result_required"}
+        won = win_team == 1
         active["balanced"] = True
         active["win"] = won
         native["lastWin"] = won
@@ -1231,6 +1382,15 @@ class LocalRealtimePvp:
 
     def handle_http(self, method: str, path: str, body: Body, profile: Mapping[str, Any]) -> Optional[Response]:
         route = self._route(path)
+        if "burstlink" in route or route.startswith("/match/"):
+            # The login bootstrap normally settles DailyRefresh first.  The
+            # direct HTTP seam is also used by native replay tests, so settle
+            # the same weekly 80003 row before reading native state.  Keep it
+            # outside the realtime lock to avoid nested SQLite transactions.
+            try:
+                self.game.activity_modes.refresh_daily_items(profile)
+            except Exception:
+                pass
         race_result = self.race.handle_http(method, path, body, profile)
         if race_result is not None:
             return race_result
@@ -1244,9 +1404,19 @@ class LocalRealtimePvp:
                 if method_upper == "GET":
                     return 200, self._native_info(profile, state)
                 if method_upper == "POST":
-                    self._native(state)
+                    native = self._native(state)
+                    if native.get("paid"):
+                        return 200, {"resChange": [], **self._native_info(profile, state)}
+                    changes = self._consume_native_ticket(profile, state)
+                    if changes is None:
+                        return 409, {"error": "ticket_exhausted", "mode": "burst", "nextResetAt": self._next_reset()}
+                    native["paid"] = True
                     self._save(profile, state)
-                    return 200, {"resChange": [], **self._native_info(profile, state)}
+                    # `_native_info` contains the compatibility descriptor and
+                    # deliberately defaults resChange to an empty list.  Put
+                    # the actual ticket delta after that expansion so the
+                    # native POST reply cannot silently discard the payment.
+                    return 200, {**self._native_info(profile, state), "resChange": changes}
                 return 405, {"error": "method_not_allowed", "message": "GET or POST required"}
         if route in {"/fci/burstlinkpvprandactorinfo", "/fci/burstlinkpvprandactorinfo/"} or route.startswith("/fci/burstlinkpvprandactorinfo/"):
             with shared_process_lock(self.game.db_path), self._lock:
@@ -1255,13 +1425,24 @@ class LocalRealtimePvp:
                 method_upper = method.upper()
                 if method_upper == "GET":
                     return 200, self._native_rand_actor(profile, native)
-                if method_upper in {"POST", "PUT"}:
+                if method_upper == "POST":
+                    return 200, self._native_rand_actor(profile, native, _int(route.rsplit("/", 1)[-1]) if route.rsplit("/", 1)[-1].isdigit() else 0)
+                if method_upper == "PUT":
                     request = self._native_request(body, "ApiBurstLinkPVPRandActor")
                     actor_uid = _int(request.get("actorUid", request.get("uid")))
                     actor_type = _int(route.rsplit("/", 1)[-1]) if route.rsplit("/", 1)[-1].isdigit() else 0
+                    owned = {_int(self._uid(actor)) for actor in self._native_actors(profile)}
+                    if actor_uid <= 0 or actor_uid not in owned:
+                        return 409, {"error": "burstlink_actor_not_owned"}
                     target = native["main"] if actor_type in {0, 1} else native["assistant"]
+                    other = native["assistant"] if target is native["main"] else native["main"]
+                    if actor_uid in other:
+                        return 409, {"error": "burstlink_actor_already_selected"}
+                    if actor_uid not in target and len(target) >= 3:
+                        return 409, {"error": "burstlink_actor_group_full"}
                     if actor_uid and actor_uid not in target:
                         target.append(actor_uid)
+                    native["randSeed"] = int(native.get("randSeed", 0)) + 1
                     self._save(profile, state)
                     return 200, self._native_rand_actor(profile, native, actor_type)
                 return 405, {"error": "method_not_allowed"}
@@ -1275,10 +1456,33 @@ class LocalRealtimePvp:
                 if method.upper() == "GET":
                     return 200, self._native(state)["groups"]
                 if method.upper() in {"PUT", "POST"}:
-                    groups = self._native_group(profile, state, self._native_request(body, "ApiBurstLinkPvpBattleGroup"))
+                    request = self._native_request(body, "ApiBurstLinkPvpBattleGroup")
+                    error = self._validate_native_group(profile, request)
+                    if error:
+                        return 409, {"error": error}
+                    groups = self._native_group(profile, state, request)
                     self._save(profile, state)
                     return 200, {"result": {"actorGroups": groups}}
                 return 405, {"error": "method_not_allowed"}
+        active_match = re.fullmatch(r"/fci/dungeon/(\d+)/active", route)
+        if active_match:
+            uid = int(active_match.group(1))
+            with shared_process_lock(self.game.db_path), self._lock:
+                state = self._state(profile)
+                native = self._native(state)
+                active = native.get("active")
+                if not isinstance(active, dict) or _int(active.get("uid")) != uid:
+                    # Let Dungeon/TeamPve handle its own shared active seam;
+                    # this handler owns only the persisted native Burst room.
+                    return None
+                payload = self._native_request(body, "FightActiveData")
+                if _int(payload.get("dungeonType")) != 8 or _int(payload.get("stageID")) != self.BURST_DUNGEON_ID:
+                    return 400, {"error": "burstlink_active_type_mismatch"}
+                if _int(payload.get("winTeam")) not in (1, 2):
+                    return 400, {"error": "burstlink_battle_result_required"}
+                active["snapshot"] = payload
+                self._save(profile, state)
+                return 200, {}
         if route in {"/fci/burstlinkdunbalance", "/fci/burstlinkdunbalance/"}:
             if method.upper() != "POST":
                 return 405, {"error": "method_not_allowed", "message": "POST required"}
