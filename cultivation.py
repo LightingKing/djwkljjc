@@ -1,14 +1,14 @@
 """Actor cultivation using APK TaskInfo/ActorCultivation reward definitions.
 
 The APK omits the server's random daily-task distribution tables.  The local
-policy therefore exposes every category-104 task, refreshing
-``refreshAfterGot`` tasks once per Beijing reset day.  Their contribution is
-capped at the configured lifetime ``dailyTaskMaxProgress`` (70), with
-permanent tasks filling the remaining progress.  A few task families have no
-trusted event source in the recovered server seam; those tasks use the local
-rule that a validated battle win counts as one completion when the target
-actor (or role) is deployed.  This is an explicit local policy, not extracted
-data.
+policy therefore draws a stable, per-account subset of category-104 tasks,
+refreshing ``refreshAfterGot`` tasks once per Beijing reset day.  The draw is
+persisted so a relogin cannot reroll it.  Their contribution is capped at the
+configured daily ``dailyTaskMaxProgress`` (70), with permanent tasks filling
+the remaining progress.  A few task families have no trusted event source in
+the recovered server seam; those tasks use the local rule that a validated
+battle win counts as one completion when the target actor (or role) is
+deployed.  This is an explicit local policy, not extracted data.
 
 Only server hooks and saved actor state advance tasks.  HTTP clients cannot set
 progress. ``endTime`` is the completion time, not an invented expiry date.
