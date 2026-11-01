@@ -38,6 +38,13 @@ SECOND_STORY_BATTLE_ID = 2013
 DUNGEON_CONFIG: DungeonConfig = load_dungeon_config()
 
 
+def _int(value: Any, default: int = 0) -> int:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
+
 def _load_stage_metadata() -> tuple[dict[int, dict[str, Any]], dict[str, Any]]:
     """Load the small verified ``DungeonMonster`` sample without inventing rows.
 
@@ -3027,11 +3034,13 @@ class LocalDungeons:
                 skill_counts[skill_id] = skill_counts.get(skill_id, 0) + 1
                 targets = len(getattr(item, "cardList", []) or [])
                 skill_enemy_counts[(actor_id, skill_id)] = max(skill_enemy_counts.get((actor_id, skill_id), 0), targets)
-        return {
+        basic = {
             "linkSkills": len(own.linkIdList),
             "bigSkills": len(own.bigSkillList),
             "kills": len(enemy.deadInfo) if enemy is not None else 0,
             "rounds": int(own.gameRound),
+        }
+        basic["cultivationStats"] = {
             "recordHpList": list(getattr(own, "recordHpList", []) or []),
             "ownDeadInfo": plain_dead(getattr(own, "deadInfo", [])),
             "enemyDeadInfo": plain_dead(getattr(enemy, "deadInfo", [])) if enemy is not None else [],
@@ -3041,6 +3050,7 @@ class LocalDungeons:
             "skillCounts": skill_counts,
             "skillEnemyCounts": skill_enemy_counts,
         }
+        return basic
 
     @staticmethod
     def _story_battle_exp_reward(dungeon_id: int) -> int:
@@ -3396,7 +3406,8 @@ class LocalDungeons:
                         profile, dungeon_id,
                         STAGE_ENERGY_COST.get(dungeon_id, 0) * multi_power,
                         mode=self._task_mode(dungeon_id, difficulty),
-                        stats=self._battle_stats(active),
+                        stats={k: v for k, v in self._battle_stats(active).items() if k != "cultivationStats"},
+                        cultivation_stats=self._battle_stats(active).get("cultivationStats"),
                         actor_uids=team_uids or (),
                         dungeon_type=_dungeon_type(dungeon_id),
                     )

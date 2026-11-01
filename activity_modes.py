@@ -839,15 +839,18 @@ class LocalActivityModes:
                 skill_counts[skill] = skill_counts.get(skill, 0) + 1
                 targets = len(getattr(item, "cardList", []) or [])
                 skill_enemy_counts[(aid, skill)] = max(skill_enemy_counts.get((aid, skill), 0), targets)
-        return {"linkSkills": len(own.linkIdList), "bigSkills": len(own.bigSkillList),
-                "kills": len(enemy.deadInfo) if enemy is not None else 0,
-                "recordHpList": list(getattr(own, "recordHpList", []) or []),
-                "ownDeadInfo": plain_dead(getattr(own, "deadInfo", [])),
-                "enemyDeadInfo": plain_dead(getattr(enemy, "deadInfo", [])) if enemy is not None else [],
-                "ownBuffKindList": list(getattr(own, "buffKindList", []) or []),
-                "enemyBuffKindList": list(getattr(enemy, "buffKindList", []) or []) if enemy is not None else [],
-                "actorSeats": actor_seats, "skillCounts": skill_counts,
-                "skillEnemyCounts": skill_enemy_counts}
+        basic = {"linkSkills": len(own.linkIdList), "bigSkills": len(own.bigSkillList),
+                 "kills": len(enemy.deadInfo) if enemy is not None else 0}
+        basic["cultivationStats"] = {
+            "recordHpList": list(getattr(own, "recordHpList", []) or []),
+            "ownDeadInfo": plain_dead(getattr(own, "deadInfo", [])),
+            "enemyDeadInfo": plain_dead(getattr(enemy, "deadInfo", [])) if enemy is not None else [],
+            "ownBuffKindList": list(getattr(own, "buffKindList", []) or []),
+            "enemyBuffKindList": list(getattr(enemy, "buffKindList", []) or []) if enemy is not None else [],
+            "actorSeats": actor_seats, "skillCounts": skill_counts,
+            "skillEnemyCounts": skill_enemy_counts,
+        }
+        return basic
 
     def _targets_done(self, dungeon_id: int, active: Any, won: bool) -> list[int]:
         """Star targets met (Logic/Target/TargetLogic.checkTarget); a win
@@ -1074,7 +1077,8 @@ class LocalActivityModes:
                 profile, dungeon_id, dungeon_type=DUNGEON_TYPE["material"], runs=multi))
         tasks = getattr(self.game, "tasks", None)
         if tasks is not None:
-            tasks.on_battle_win(profile, dungeon_id, energy, mode="activity", stats=self._battle_stats(active),
+            tasks.on_battle_win(profile, dungeon_id, energy, mode="activity", stats={k: v for k, v in self._battle_stats(active).items() if k != "cultivationStats"},
+                                cultivation_stats=self._battle_stats(active).get("cultivationStats"),
                                 actor_uids=run.get("actor_uids") or (), dungeon_type=DUNGEON_TYPE["material"],
                                 activity_type=ACTIVITY_TYPE["material"], activity_id=int(run.get("activity_id") or 0))
         trigger = getattr(self, "trigger_passive_event", None)
@@ -1150,7 +1154,8 @@ class LocalActivityModes:
         self._save(profile, state)
         tasks = getattr(self.game, "tasks", None)
         if tasks is not None:
-            tasks.on_battle_win(profile, dungeon_id, 0, mode="gold", stats=self._battle_stats(active),
+            tasks.on_battle_win(profile, dungeon_id, 0, mode="gold", stats={k: v for k, v in self._battle_stats(active).items() if k != "cultivationStats"},
+                                cultivation_stats=self._battle_stats(active).get("cultivationStats"),
                                 actor_uids=(run.get("actor_uids") or ()) if won else (), dungeon_type=DUNGEON_TYPE["gold"],
                                 activity_type=ACTIVITY_TYPE["gold"], activity_id=int(run.get("activity_id") or 0))
             if base_gold + kill_gold:
@@ -1405,7 +1410,8 @@ class LocalActivityModes:
             res_change = self._grant(profile, (DUNGEON_REWARD.get(dungeon_id) or {}).get("dropDisplay") or [])
             tasks = getattr(self.game, "tasks", None)
             if tasks is not None:
-                tasks.on_battle_win(profile, dungeon_id, 0, mode="tower", floor=floor, stats=self._battle_stats(active),
+                tasks.on_battle_win(profile, dungeon_id, 0, mode="tower", floor=floor, stats={k: v for k, v in self._battle_stats(active).items() if k != "cultivationStats"},
+                                cultivation_stats=self._battle_stats(active).get("cultivationStats"),
                                     actor_uids=run.get("actor_uids") or (), dungeon_type=DUNGEON_TYPE["tower"],
                                     activity_type=ACTIVITY_TYPE["tower"], activity_id=int(run.get("activity_id") or 0))
         return self._result(profile, won=won, res_change=res_change, first=first,
@@ -1842,7 +1848,8 @@ class LocalActivityModes:
         grants = self._grant(profile, drops or [])
         tasks = getattr(self.game, "tasks", None)
         if tasks is not None:
-            tasks.on_battle_win(profile, dungeon_id, 0, mode="triggered", stats=self._battle_stats(active),
+            tasks.on_battle_win(profile, dungeon_id, 0, mode="triggered", stats={k: v for k, v in self._battle_stats(active).items() if k != "cultivationStats"},
+                                cultivation_stats=self._battle_stats(active).get("cultivationStats"),
                                 actor_uids=run.get("actor_uids") or (), dungeon_type=DUNGEON_TYPE["triggered"],
                                 activity_type=ACTIVITY_TYPE["triggered"], activity_id=int(run.get("activity_id") or 0))
         return self._result(profile, won=True, res_change=[exp_entry] + ticket + grants, exp_changes=exp_changes,

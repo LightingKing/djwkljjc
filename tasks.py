@@ -573,6 +573,7 @@ class LocalTasks:
     def on_battle_win(self, profile: Mapping[str, Any], dungeon_id: int, energy_spent: int = 0, *,
                       mode: Optional[str] = None, floor: Optional[int] = None,
                       stats: Optional[Mapping[str, Any]] = None, actor_uids=None,
+                      cultivation_stats: Optional[Mapping[str, Any]] = None,
                       dungeon_type=0, activity_type=0, activity_id=0) -> list[int]:
         """Call once per won battle.
 
@@ -629,10 +630,11 @@ class LocalTasks:
             system = self.game.systems._state(profile)
             actor_ids = [record['id'] for uid in actor_uids
                          if (record := actors.get(profile, system, uid)) is not None]
+            cultivation_stats = cultivation_stats or (stats.get("cultivationStats", stats) if isinstance(stats, Mapping) else {})
             cultivation.on_battle_win(profile, dungeon_id, actor_ids=actor_ids,
                                       dungeon_type=dungeon_type, activity_type=activity_type,
                                       activity_id=activity_id,
-                                      stats={**dict(stats), "actorIds": actor_ids})
+                                      stats={**dict(cultivation_stats), "actorIds": actor_ids})
         return self._run(profile, mutate)
 
     def record(self, profile: Mapping[str, Any], goal: int | str, amount: int = 1, *,
