@@ -153,7 +153,16 @@ class LocalTournament:
         day, week = policy_for(self.game).day_index(now), policy_for(self.game).week_index(now)
         reset = day > _int(state.get("day"))
         if reset:
-            state.update(day=day, wins=0, losses=0, refreshCount=0, claimed=[], run=None, targets=self._targets())
+            # A pause/connection loss can leave the native dungeon open over
+            # the 06:00 reset.  Keep that one in-progress run long enough for
+            # its result to be uploaded and balanced; only completed runs are
+            # discarded with the daily record.
+            run = state.get("run")
+            carry_run = run if isinstance(run, dict) and run.get("active") and not run.get("balanced") else None
+            if carry_run is not None:
+                carry_run["crossedReset"] = True
+            state.update(day=day, wins=0, losses=0, refreshCount=0, claimed=[],
+                         run=carry_run, targets=self._targets())
             state.pop("fifthReward", None)
         # Repair already persisted placeholder teams without resetting wins,
         # claims, target identities, or an in-progress native battle.
@@ -387,7 +396,24 @@ class LocalTournament:
             # disconnect, including an old run with an empty parsed snapshot.
             if run.get("target_uid") == target["uid"]:
                 return {"dungeonUid": run["uid"], "dungeonId": TOURNAMENT_DUNGEON_ID}
-            raise TournamentError("tournament_run_active")
+            # If the client moved to another opponent without first sending a
+            # result (for example after a disconnected pause), close the
+            # orphaned run as a loss.  This releases the arena without
+            # fabricating a win and prevents the old snapshot from blocking
+            # every subsequent opponent until the next reset.
+            if not run.get("snapshot"):
+                run.update(active=False, balanced=True, win=False,
+                           response={"balanceInfo": {"balanced": True,
+                                                     "balanceTime": now,
+                                                     "win": False,
+                                                     "targetsDone": [],
+                                                     "resChange": [],
+                                                     "profits": []},
+                                      "dieNum": _int(state.get("losses")) + 1,
+                                      "winNum": _int(state.get("wins"))})
+                state["losses"] = _int(state.get("losses")) + 1
+            else:
+                raise TournamentError("tournament_run_active")
         uid = max(1000000000001, _int(run.get("uid")) + 1, now * 1000)
         state["run"] = {"uid": uid, "target_uid": target["uid"], "dungeon_id": TOURNAMENT_DUNGEON_ID, "active": True, "snapshot": None, "balanced": False, "win": False}
         return {"dungeonUid": uid, "dungeonId": TOURNAMENT_DUNGEON_ID}
@@ -396,7 +422,14 @@ class LocalTournament:
         run = state.get("run")
         if not run or _int(run.get("uid")) != uid: raise TournamentError("tournament_run_not_found", 404)
         if run.get("balanced") or not run.get("active"): raise TournamentError("tournament_run_closed")
-        if _int(payload.get("winTeam", payload.get("win_team"))) not in (1, 2):
+        # SceneFight sends winTeam=0 when the player exits/pauses before a
+        # side has won.  Proto3 omits that zero field, so require a gameRound
+        # marker for the omitted-zero native form; an entirely empty or
+        # incomplete message remains a malformed request.
+        win_value = payload.get("winTeam", payload.get("win_team"))
+        if win_value is None and "gameRound" not in payload and "game_round" not in payload:
+            raise TournamentError("tournament_result_required", 400)
+        if _int(win_value) not in (0, 1, 2):
             raise TournamentError("tournament_result_required", 400)
         if _int(payload.get("dungeonType"), 3) != 3 or _int(payload.get("stageID"), TOURNAMENT_DUNGEON_ID) != TOURNAMENT_DUNGEON_ID:
             raise TournamentError("tournament_snapshot_mismatch", 400)
@@ -428,7 +461,14 @@ class LocalTournament:
     @staticmethod
     def _dungeon_quit(state):
         if not state.get("run"): raise TournamentError("tournament_run_not_found", 404)
-        state["run"]["active"] = False
+        run = state["run"]
+        if run.get("balanced"):
+            return {"result": True}
+        # Keep the run balanceable: the native pause/quit path is equivalent
+        # to uploading FightActiveData(winTeam=0), followed by dungeonbalance.
+        if not run.get("snapshot"):
+            run["snapshot"] = {"dungeonType": 3, "stageID": TOURNAMENT_DUNGEON_ID,
+                                "gameRound": 0, "winTeam": 0}
         return {"result": True}
 
 

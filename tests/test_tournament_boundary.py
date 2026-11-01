@@ -143,9 +143,46 @@ class TournamentBoundaryTests(unittest.TestCase):
         self.assertEqual(status, 200)
         self.assertNotEqual(entered["dungeonUid"], next_run["dungeonUid"])
         self.assertEqual(self.game_call("POST", "/fci/tournament/dungeonquit/", {"activityType": 5})[0], 200)
-        before = self.saved_rows()
-        self.assertEqual(self.game_call("POST", "/fci/tournament/dungeonbalance/", {"activityType": 5})[0], 409)
-        self.assertEqual(self.saved_rows(), before)
+        status, quit_balance = self.game_call("POST", "/fci/tournament/dungeonbalance/", {"activityType": 5})
+        self.assertEqual((status, quit_balance["balanceInfo"]["win"], quit_balance["dieNum"]), (200, False, 2))
+
+    def test_pause_zero_result_closes_as_loss_and_cross_reset_run_can_balance(self):
+        now = [self.game._now()]
+        self.game._now = lambda: now[0]
+        target = self.call("GET", f"/fci/tournament/enter/5/{TOURNAMENT_ID}")[1]["asyncPvpTargetInfo"][0]
+        entered = self.call("POST", "/fci/tournament/dungeonenter/", {
+            "tournamentId": TOURNAMENT_ID, "activityType": 5, "target_uid": target["uid"]})[1]
+        active_path = f"/fci/tournamentdungeon/{entered['dungeonUid']}/active/"
+        self.assertEqual(self.game_call("PATCH", active_path, self.wire(
+            "FightActiveData", dungeonType=3, stageID=4001, gameRound=2, winTeam=0))[0], 200)
+        status, result = self.call("POST", "/fci/tournament/dungeonbalance/", {"activityType": 5})
+        self.assertEqual((status, result["balanceInfo"]["win"], result["dieNum"]), (200, False, 1))
+
+        # Start another run, cross the Beijing 06:00 boundary, then upload a
+        # normal result.  The reset must preserve this run instead of making
+        # the client receive tournament_run_not_found.
+        target = self.call("GET", f"/fci/tournament/enter/5/{TOURNAMENT_ID}")[1]["asyncPvpTargetInfo"][1]
+        entered = self.call("POST", "/fci/tournament/dungeonenter/", {
+            "tournamentId": TOURNAMENT_ID, "activityType": 5, "target_uid": target["uid"]})[1]
+        old_uid = entered["dungeonUid"]
+        now[0] = self.game.reset_policy.next_boundary(now[0], "day") + 60
+        self.assertEqual(self.call("GET", "/fci/asyncpvprecord/")[0], 200)
+        status, result = self.game_call("PATCH", f"/fci/tournamentdungeon/{old_uid}/active/", self.wire(
+            "FightActiveData", dungeonType=3, stageID=4001, gameRound=3, winTeam=1))
+        self.assertEqual(status, 200)
+        status, result = self.call("POST", "/fci/tournament/dungeonbalance/", {"activityType": 5})
+        self.assertEqual((status, result["balanceInfo"]["win"]), (200, True))
+
+    def test_entering_new_opponent_closes_orphaned_run(self):
+        targets = self.call("GET", f"/fci/tournament/enter/5/{TOURNAMENT_ID}")[1]["asyncPvpTargetInfo"]
+        first = self.call("POST", "/fci/tournament/dungeonenter/", {
+            "tournamentId": TOURNAMENT_ID, "activityType": 5, "target_uid": targets[0]["uid"]})[1]
+        status, second = self.call("POST", "/fci/tournament/dungeonenter/", {
+            "tournamentId": TOURNAMENT_ID, "activityType": 5, "target_uid": targets[1]["uid"]})
+        self.assertEqual(status, 200)
+        self.assertNotEqual(first["dungeonUid"], second["dungeonUid"])
+        status, result = self.call("POST", "/fci/tournament/dungeonbalance/", {"activityType": 5})
+        self.assertEqual((status, result.get("error")), (409, "tournament_snapshot_required"))
 
     def test_refresh_is_zero_based_consumes_item_and_caps_at_three(self):
         mail = send_mail(self.game, self.profile, "Arena test fixture", "Refresh tickets", [{"type": 11, "id": 80001, "count": 3}])
