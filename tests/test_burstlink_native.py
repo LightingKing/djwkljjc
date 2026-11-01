@@ -29,7 +29,8 @@ class NativeBurstLinkTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         root = Path(self.temp.name)
         self.accounts = LocalAccounts(root / "accounts")
-        self.game = LocalGame(root / "game", self.accounts, clock=lambda: 1793332800, initial_level=30)
+        self.game = LocalGame(root / "game", self.accounts, clock=lambda: 1793332800,
+                              initial_level=30, initial_actor_ids=[1001, 1002, 1003, 1004])
         self.account, self.auth = self.guest(self.accounts)
 
     def tearDown(self):
@@ -42,16 +43,29 @@ class NativeBurstLinkTests(unittest.TestCase):
     def test_native_info_actor_selection_accepts_wire_request(self):
         status, info = self.call("GET", "/fci/BurstLinkPvpInfo/")
         self.assertEqual(status, 200)
-        self.assertEqual(info["dungeonId"], 18001)
-        status, actors = self.call("GET", "/fci/BurstLinkPVPRandActorInfo/")
+        self.assertEqual((info["dungeonId"], info["tickets"], info["maxTickets"]), (4001, 2, 10))
+        status, actors = self.call("GET", "/fci/BurstLinkPVPRandActorInfo/1/")
         self.assertEqual(status, 200)
         self.assertTrue(actors["randActor"])
+        self.assertEqual(len({int(actor["uid"]) for actor in actors["randActor"]}),
+                         len(actors["randActor"]))
         uid = int(actors["randActor"][0]["uid"])
         request_type = self.game._pool.FindMessageTypeByName("ApiBurstLinkPVPRandActor")
         request = message_factory.GetMessageClass(request_type)(actor_uid=uid).SerializeToString()
-        status, selected = self.call("POST", "/fci/BurstLinkPVPRandActorInfo/1/", request, "application/wireformat")
+        status, selected = self.call("PUT", "/fci/BurstLinkPVPRandActorInfo/1/", request, "application/wireformat")
         self.assertEqual(status, 200)
         self.assertIn(uid, [int(value) for value in selected["curMainActor"]])
+
+    def test_tournament_summary_exposes_native_burst_entry_and_join_status(self):
+        status, summary = self.call("GET", "/fci/tournament/summary/")
+        self.assertEqual(status, 200)
+        burst = next(row for row in summary["activityInfo"] if row["activity"]["type"] == 18)
+        self.assertEqual((burst["activity"]["activityId"], burst["status"]), (18001, 0))
+        status, joined = self.call("POST", "/fci/BurstLinkPvpInfo/", {})
+        self.assertEqual(status, 200)
+        status, summary = self.call("GET", "/fci/tournament/summary/")
+        burst = next(row for row in summary["activityInfo"] if row["activity"]["type"] == 18)
+        self.assertEqual(burst["status"], 1)
 
     def test_native_match_push_shape_and_idempotent_balance(self):
         self.assertEqual(self.call("POST", "/fci/BurstLinkPvpInfo", {})[0], 200)
@@ -60,11 +74,48 @@ class NativeBurstLinkTests(unittest.TestCase):
         profile = self.game._profile(self.account)
         state = self.game.realtime_pvp._state(profile)
         dungeon = state["burst"]["native"]["active"]["dungeon"]
-        self.assertEqual(dungeon["dungeonType"], 6)
-        status, result = self.call("POST", "/fci/BurstLinkDunBalance/", b'{"win":true}')
+        self.assertEqual(dungeon["dungeonType"], 8)
+        status, result = self.call("POST", f"/fci/dungeon/{dungeon['dungeonUid']}/active/",
+                                   self.game._types["FightActiveData"](
+                                       dungeonType=8, stageID=4001, gameRound=5, winTeam=1
+                                   ).SerializeToString(), "application/wireformat")
+        self.assertEqual((status, result), (200, {}))
+        status, result = self.call("POST", "/fci/BurstLinkDunBalance/", b"{}")
         self.assertEqual((status, result["isWin"]), (200, True))
         status, duplicate = self.call("POST", "/fci/BurstLinkDunBalance/", b'{"win":false}')
         self.assertEqual((status, duplicate["isWin"]), (200, True))
+
+    def test_empty_balance_without_terminal_snapshot_is_rejected(self):
+        self.assertEqual(self.call("POST", "/fci/BurstLinkPvpInfo", {})[0], 200)
+        status, matching = self.call("POST", "/match/BurstLinkPVPMatch", b"{}")
+        self.assertEqual(status, 200)
+        status, result = self.call("POST", "/fci/BurstLinkDunBalance/", b"{}")
+        self.assertEqual((status, result["error"]), (409, "burstlink_battle_result_required"))
+
+    def test_balance_uses_fight_active_snapshot_instead_of_guessed_win(self):
+        self.assertEqual(self.call("POST", "/fci/BurstLinkPvpInfo", {})[0], 200)
+        status, matching = self.call("POST", "/match/BurstLinkPVPMatch", b"{}")
+        self.assertEqual(status, 200)
+        uid = matching["dungeonInfo"]["dungeonUid"]
+        active = self.game._types["FightActiveData"](
+            dungeonType=8, stageID=4001, gameRound=5, winTeam=2
+        )
+        self.assertEqual(self.call("PATCH", f"/fci/dungeon/{uid}/active/",
+                                   active.SerializeToString(), "application/wireformat")[0], 200)
+        status, result = self.call("POST", "/fci/BurstLinkDunBalance/", b'{"win":true}')
+        self.assertEqual((status, result["isWin"]), (200, False))
+
+    def test_native_group_rejects_unknown_and_duplicate_actor_uids(self):
+        status, actors = self.call("GET", "/fci/BurstLinkPVPRandActorInfo/1/")
+        self.assertEqual(status, 200)
+        uid = int(actors["randActor"][0]["uid"])
+        unknown = {"actorGroups": {"1": {"members": [{"index": 0, "actorUid": 999999}]}}}
+        status, result = self.call("PUT", "/fci/BurstLinkPvpActorGroup/", unknown)
+        self.assertEqual((status, result["error"]), (409, "burstlink_actor_not_owned"))
+        duplicate = {"actorGroups": {"1": {"members": [
+            {"index": 0, "actorUid": uid}, {"index": 1, "actorUid": uid}]}}}
+        status, result = self.call("PUT", "/fci/BurstLinkPvpActorGroup/", duplicate)
+        self.assertEqual((status, result["error"]), (409, "burstlink_actor_duplicate"))
 
 
 if __name__ == "__main__":

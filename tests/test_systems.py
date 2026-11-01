@@ -11,6 +11,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import equipment
 from accounts import LocalAccounts
 from game import LocalGame
+from local_mailbox import send_mail
 
 
 class LocalSystemsTests(unittest.TestCase):
@@ -74,11 +75,26 @@ class LocalSystemsTests(unittest.TestCase):
                 if path == "/fci/relation/applyfriend/":
                     self.assertEqual(result.result.player_id, "local-bot-001")
                     self.assertTrue(result.result.name)
-            # Native async matching is open locally.  A refresh consumes the
-            # real 80001 item and returns a typed target response.
-            assets_before = game.systems._state(profile)
-            assets_before.setdefault("items", {})["80001"] = {"id": 80001, "count": 1}
-            game.systems._save(profile, assets_before)
+            # Native async matching is open locally.  Deliver the refresh
+            # ticket through the same mailbox path used by the client, then
+            # claim it before refreshing; tests must not seed inventory state
+            # behind the API.
+            mail = send_mail(
+                game,
+                profile,
+                "Arena test fixture",
+                "Refresh ticket",
+                [{"type": 11, "id": 80001, "count": 1}],
+            )
+            status, claimed = game.handle_http(
+                "POST",
+                f"/fci/mail/{mail['id']}/obtain",
+                b"{}",
+                "application/json",
+                auth,
+            )
+            self.assertEqual(status, 200)
+            self.assertTrue(claimed.result.attachments_got)
             status, refreshed = game.handle_http(
                 "POST", "/fci/asyncpvpmatch/", b'{"index":1}', "application/json", auth
             )

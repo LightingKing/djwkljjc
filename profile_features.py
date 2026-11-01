@@ -909,19 +909,12 @@ class LocalProfileFeatures:
             if cell_id <= 0: return 400, {"error": "invalid_cell_id"}
             if cell_id not in game.setdefault("cells", []): game["cells"].append(cell_id); game["cells"].sort(); self._save(profile, state)
             return 200, {"cellId": cell_id, "resChange": [], "sandbox": True}
+        # Postcard is implemented by WelfareFeatures using the native
+        # WlfPostcard routes (including the postcard id in /Lighten/<id>).
+        # Keep this compatibility seam out of the dispatch path so the old
+        # duplicate implementation cannot shadow or diverge from it.
         if "postcard" in lower:
-            game = state.setdefault("postcard", {"cells": [], "received": False})
-            if method == "GET": return 200, {"isFirstEnter": not bool(game.get("cells")), "postcardInfo": list(game.get("cells", [])), "prizeInfo": {"received": bool(game.get("received"))}, "sandbox": True}
-            if method != "POST": return 405, {"error": "method_not_allowed", "message": "POST required"}
-            if "receive" in lower:
-                if game.get("received"): return 409, {"error": "postcard_prize_already_claimed"}
-                ok, changes, error = self.game.economy._change_resources(profile, [{"type": 7, "id": 0, "param": 0, "count": 120}])
-                if not ok: return 409, {"error": error or "resource_update_failed"}
-                game["received"] = True; self._save(profile, state); return 200, {"resChange": changes, "sandbox": True}
-            cell_id = _int(payload.get("cellId", payload.get("cell_id", payload.get("id", 0))))
-            if cell_id <= 0: return 400, {"error": "invalid_cell_id"}
-            if cell_id not in game.setdefault("cells", []): game["cells"].append(cell_id); game["cells"].sort(); self._save(profile, state)
-            return 200, {"cellId": cell_id, "resChange": [], "sandbox": True}
+            return None
         if "clawcrane" in lower or "claw-crane" in lower:
             game = state.setdefault("clawCrane", {"draws": 0, "prizes": [], "bingo": []})
             if method == "GET": return 200, {"draws": _int(game.get("draws")), "prizes": list(game.get("prizes", [])), "bingo": list(game.get("bingo", [])), "sandbox": True}

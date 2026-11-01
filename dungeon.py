@@ -1480,13 +1480,38 @@ class LocalDungeons:
         own_actors = [{"id": int(actor_id), "uid": int(uid)} for actor_id, uid in zip(actor_ids, actor_uids) if int(actor_id or 0) > 0 and int(uid or 0) > 0]
         bots = self._team_ai_members(profile, dungeon_uid)
         members = [{"playerId": player_id, "name": str(profile.get("name", "本地玩家")), "isRobot": False, "ready": True, "actors": own_actors}, *bots]
+        # DungeonTeamPrepare reads the native ``actorInfo`` map, while the
+        # JSON compatibility callers use ``members``/``aiTeammates``.  Keep
+        # both views in sync so the single-player patch can reuse the native
+        # room window and balance screen.
+        actor_info = {}
+        for member in members:
+            actor_rows = []
+            for actor in member.get("actors", []):
+                actor_id = int(actor.get("id", 0) or 0)
+                actor_uid = int(actor.get("uid", 0) or 0)
+                if member.get("isRobot"):
+                    actor_rows.append(self._actor_dict(actor_id, actor_uid))
+                else:
+                    actor_rows.append(self._fight_actor(profile, actor_id, actor_uid))
+            actor_info[str(member["playerId"])] = {
+                "playerInfo": {
+                    "playerId": str(member["playerId"]),
+                    "name": str(member.get("name", "")),
+                    "level": int(member.get("level", profile.get("level", TEAM_DUNGEON_LEVEL_LIMIT)) or TEAM_DUNGEON_LEVEL_LIMIT),
+                },
+                "actors": actor_rows,
+            }
         return {
             "roomId": int(dungeon_uid),
             "dungeonUid": int(dungeon_uid),
             "dungeonId": int(dungeon_id),
+            "roomLevelLimit": int((STAGE_REWARD_ROWS.get(dungeon_id) or {}).get("difficultLevelLow", TEAM_DUNGEON_LEVEL_LIMIT) or TEAM_DUNGEON_LEVEL_LIMIT),
             "masterId": player_id,
             "memberList": [str(row["playerId"]) for row in members],
             "memberReadyState": {str(row["playerId"]): bool(row.get("ready", True)) for row in members},
+            "actorInfo": actor_info,
+            "allowFastJoin": False,
             "members": members,
             "aiTeammates": bots,
             "status": status,
@@ -1615,13 +1640,19 @@ class LocalDungeons:
             actor_uids = [int(value) for value in json.loads(row["actor_uids_json"] or "[]")]
         except (TypeError, ValueError):
             actor_uids = []
+        actor_ids = []
+        try:
+            state = self.game.systems._state(profile)
+            actor_ids = [int((actor_store.get(profile, state, uid) or {}).get("id", 0)) for uid in actor_uids]
+        except Exception:
+            actor_ids = [0 for _ in actor_uids]
         payload = {
             "dungeonUid": dungeon_uid, "dungeonId": dungeon_id, "mode": "team", "localAi": True,
             "balanced": True, "balanceTime": balance_time, "win": won, "firstFinish": won,
             "profits": reward_changes, "resChange": reward_changes, "expChange": [],
             "playerDamages": [{"playerId": str(profile.get("player_id", "local")), "damage": 1000 if won else 300},
                                *[{"playerId": bot["playerId"], "damage": 700 if won else 200} for bot in self._team_ai_members(profile, dungeon_uid)]],
-            "roomInfo": self._team_room(profile, dungeon_uid, dungeon_id, [], actor_uids, status="finished"),
+            "roomInfo": self._team_room(profile, dungeon_uid, dungeon_id, actor_ids, actor_uids, status="finished"),
             "balanceInfo": {"balanced": True, "win": won, "firstFinish": won, "balanceTime": balance_time, "profits": reward_changes, "resChange": reward_changes},
         }
         self._store_balance(profile, dungeon_uid, payload)

@@ -38,7 +38,9 @@ HEAD_PHOTOS = frozenset(int(row["id"]) for row in _client_rows("PlayerHeadPhoto"
 # effect parameters; the fee table is not present in the extracted client
 # tables, so the native contract uses the documented local rule below.
 SKILL_PROFITS = [r for r in _client_rows("ProfitDetail") if 101 <= int(r["id"]) <= 104]
-SKILL_DURATION = 43200
+# ProfitDetail rows 101–104 carry a five-hour duration in the recovered
+# client tables; use that value for both the slot projection and activation.
+SKILL_DURATION = 18000
 SKILL_SCORE_COST = 500
 SKILL_MAX_USE_COUNT = 1
 LOCAL_GUILD_BOT_COUNT = 5
@@ -630,8 +632,10 @@ class LocalGuild:
         guild.setdefault("voteInfo", {"inVote": False, "endTime": 0,
                                        "playersSupport": [], "playersKick": []})
         member = guild["members"].get(pid)
-        manager = (player["guildId"] == gid and member is not None and
-                   (member.get("type") in (1, 2) or str(guild["baseInfo"].get("president")) == pid))
+        in_guild = player["guildId"] == gid and member is not None
+        is_president = in_guild and str(guild["baseInfo"].get("president")) == pid
+        is_vice_president = in_guild and _int(member.get("type")) == 1
+        manager = is_president or is_vice_president
 
         # Guild administration uses the native verbs from the client.  The
         # local service keeps bot and player members in the same state map, so
@@ -668,10 +672,28 @@ class LocalGuild:
                         updates[field] = str(body[field]) if field == "qqGroup" else _int(body[field])
             if guild["baseInfo"]["score"] < cost:
                 raise GuildError("guild_score_insufficient")
+            # Native PATCH has no request nonce. A transport retry of an
+            # already-applied no-op must receive the same ApiGuild.result,
+            # including its original resource delta, without charging again.
+            if cost == 0 and guild.get("_lastPatchRequest") == dict(body):
+                cached = guild.get("_lastPatchResponse")
+                if isinstance(cached, dict):
+                    return 200, json.loads(json.dumps(cached, ensure_ascii=False))
             guild["baseInfo"].update(updates)
             guild["baseInfo"]["score"] -= cost
             self._notify_members(state, guild, notices, 26)
-            return 200, self._detail(guild, now=now)
+            # WidgetGuildEdit only consumes ApiGuild.result.baseInfo and
+            # resChange after PATCH. Keep the response at that native shape;
+            # members/skills are refreshed by their own bound GET routes.
+            changes = []
+            if cost:
+                changes.append({"baseRes": {"type": 17, "id": 0, "param": 0,
+                                             "count": int(guild["baseInfo"]["score"]),
+                                             "countDelta": -int(cost)}})
+            response = {"baseInfo": dict(guild["baseInfo"]), "resChange": changes}
+            guild["_lastPatchRequest"] = dict(body)
+            guild["_lastPatchResponse"] = json.loads(json.dumps(response, ensure_ascii=False))
+            return 200, response
 
         if action == "group/unlink/" and method == "POST":
             if not manager:
@@ -693,7 +715,7 @@ class LocalGuild:
                          "joinWx": False, "resetQq": False, "resetWx": False}
 
         if action == "president/" and method == "POST":
-            if not manager:
+            if not is_president:
                 raise GuildError("guild_manager_required", 403)
             target = str(body.get("newPresident", ""))
             if target not in guild["members"]:
@@ -720,7 +742,7 @@ class LocalGuild:
             return 200, guild["baseInfo"]
 
         if action == "vice-president/" and method == "PUT":
-            if not manager:
+            if not is_president:
                 raise GuildError("guild_manager_required", 403)
             target = str(body.get("playerId", ""))
             if target not in guild["members"]:
@@ -728,6 +750,8 @@ class LocalGuild:
             if target == str(guild["baseInfo"].get("president")):
                 raise GuildError("guild_president_cannot_be_vice", 409)
             vice = [str(v) for v in guild["baseInfo"].get("vicePresident", []) if str(v) in guild["members"]]
+            if target not in vice and len(vice) >= _int(RULES.get("viceCount"), 3):
+                raise GuildError("guild_vice_president_full", 409)
             if target not in vice:
                 vice.append(target)
             guild["baseInfo"]["vicePresident"] = vice
@@ -740,7 +764,7 @@ class LocalGuild:
 
         vice_match = re.fullmatch(r"vice-president/([^/]+)/", action)
         if vice_match and method == "DELETE":
-            if not manager:
+            if not is_president:
                 raise GuildError("guild_manager_required", 403)
             target = vice_match.group(1)
             if target == str(guild["baseInfo"].get("president")):
@@ -798,6 +822,8 @@ class LocalGuild:
                 raise GuildError("cannot_kick_president", 409)
             if target not in guild["members"]:
                 raise GuildError("guild_member_not_found", 404)
+            if is_vice_president and _int(guild["members"][target].get("type")) != 0:
+                raise GuildError("guild_vice_kick_forbidden", 403)
             guild["members"].pop(target, None)
             guild["botIds"] = [value for value in guild["botIds"] if value != target]
             guild["baseInfo"]["vicePresident"] = [value for value in guild["baseInfo"].get("vicePresident", []) if str(value) != target]
@@ -830,6 +856,9 @@ class LocalGuild:
                 target_state["data"].update(guildId=gid, type=0, joinTime=now,
                                              pendingGuildId=[], invitedGuildId=[])
                 notices.append(({"account_id": target_state["accountId"], "player_id": requested}, 25, []))
+                # The pending-list view is cached by the client and only
+                # refreshes on GuildPendingMemberChange (PushType 29).
+                self._notify_members(state, guild, notices, 29)
                 return 200, guild["baseInfo"]
             if requested != pid:
                 raise GuildError("guild_self_join_only", 403)

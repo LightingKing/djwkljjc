@@ -71,7 +71,11 @@ def run_smoke() -> dict[str, Any]:
     with tempfile.TemporaryDirectory(prefix="ljjc-playability-") as temp:
         root = Path(temp)
         accounts = LocalAccounts(root / "accounts")
-        game = LocalGame(root / "game", accounts)
+        # Keep this deterministic battle smoke inside an open race cycle.
+        # 2026-11-02 10:00 Beijing is Monday, after the 06:00 opening.
+        # Boundary and closed-period behavior is covered by test_race_client.
+        smoke_now = 1793584800
+        game = LocalGame(root / "game", accounts, clock=lambda: smoke_now)
         account, auth = _guest(accounts)
         race_evidence: dict[str, Any] = {}
 
@@ -271,7 +275,7 @@ def run_smoke() -> dict[str, Any]:
         step("realtime_race_pvp", realtime)
 
         def persistence():
-            restarted = LocalGame(root / "game", accounts)
+            restarted = LocalGame(root / "game", accounts, clock=lambda: smoke_now)
             status, base = restarted.handle_http("GET", "/fci/baseinfo/", authorization=auth)
             require(status, path="restart baseinfo")
             status, chat = restarted.handle_http("GET", "/fci/chat", authorization=auth)

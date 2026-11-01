@@ -291,21 +291,21 @@ class GuildClientTests(unittest.TestCase):
         self.assertEqual([row["type"] for row in skills], [3, 8, 8, 8])
         for row in skills:
             self.assert_message("ApiGuildSkill.result", row)
-            self.assertEqual(row["time"], 43200)
+            self.assertEqual(row["time"], 18000)
             self.assertEqual((row["startTime"], row["endTime"], row["maxUseCount"], row["scoreCost"]), (0, 0, 1, 500))
         self.earn_guild_score(gid)
         request = message_factory.GetMessageClass(self.game._pool.FindMessageTypeByName("ApiGuildSkill"))(id=101, use_count=1)
         status, result = self.call("POST", f"/fci/guild/{gid}/skill/", request.SerializeToString())
         self.assertEqual(status, 200)
         self.assertEqual(result["guildSkillInfo"]["id"], 101)
-        self.assertEqual(result["guildSkillInfo"]["endTime"] - result["guildSkillInfo"]["startTime"], 43200)
+        self.assertEqual(result["guildSkillInfo"]["endTime"] - result["guildSkillInfo"]["startTime"], 18000)
         self.assertEqual(result["baseInfo"]["score"], 0)
         self.assertEqual(result["profit"]["id"], 101)
         self.assert_message("ApiGuildSkill.post", result)
         self.assertEqual(self.guild.active_profit_rules(self.profile)[0]["dungeonType"], [2])
         self.assertEqual(self.call("POST", f"/fci/guild/{gid}/skill/", request.SerializeToString()),
                          (409, {"error": "guild_skill_opened_before"}))
-        self.now[0] += 43200
+        self.now[0] += 18000
         self.assertEqual(self.call("GET", f"/fci/guild/{gid}/skill/")[1][0]["startTime"], 0)
         self.assertEqual(self.guild.active_profits(self.profile), [])
 
@@ -375,6 +375,8 @@ class GuildClientTests(unittest.TestCase):
         pid = member["player_id"]
         status, detail = self.call("PATCH", f"/fci/guild/{gid}/", {"billboard": "欢迎"})
         self.assertEqual((status, detail["baseInfo"]["billboard"], detail["baseInfo"]["icon"]), (200, "欢迎", "2"))
+        self.assertEqual(set(detail), {"baseInfo", "resChange"})
+        self.assert_message("ApiGuild.result", detail)
         status, invited = self.native("PUT", f"/fci/guild/{gid}/invited-members/", {"playerId": pid}, message="ApiGuildMemberInvite")
         self.assertEqual((status, invited["playerId"]), (200, pid))
         self.assertEqual(self.native("GET", f"/fci/guild/{gid}/invited-members/")[1][0]["playerId"], pid)

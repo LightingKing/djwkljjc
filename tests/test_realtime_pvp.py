@@ -27,14 +27,18 @@ class LocalRealtimePvpTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         root = Path(self.temp.name)
         self.accounts = LocalAccounts(root / "accounts")
-        self.game = LocalGame(root / "game", self.accounts, clock=lambda: 1793332800, initial_level=26)
+        self.now = [1793332800]
+        self.game = LocalGame(root / "game", self.accounts, clock=lambda: self.now[0], initial_level=26)
         self.account, self.auth = self.guest(self.accounts)
 
     def tearDown(self):
         self.temp.cleanup()
 
     def call(self, method: str, path: str, payload: dict | None = None):
-        body = json.dumps(payload).encode() if payload is not None else None
+        if isinstance(payload, (bytes, bytearray, str)):
+            body = payload
+        else:
+            body = json.dumps(payload).encode() if payload is not None else None
         return self.game.handle_http(method, path, body, "application/json", self.auth)
 
     def test_race_uses_native_room_and_rejects_retired_simulation(self):
@@ -51,16 +55,37 @@ class LocalRealtimePvpTests(unittest.TestCase):
     def test_burstlink_bootstrap_and_auto_balance(self):
         status, info = self.call("GET", "/fci/BurstLinkPvpInfo/")
         self.assertEqual(status, 200)
-        self.assertEqual((info["mode"], info["tickets"]), ("burst", 1))
-        status, created = self.call("POST", "/fci/burstlink/join", {})
+        self.assertEqual((info["mode"], info["tickets"], info["maxTickets"], info["dungeonId"]), ("burst", 2, 10, 4001))
+        status, joined = self.call("POST", "/fci/BurstLinkPvpInfo/", {})
         self.assertEqual(status, 200)
-        match = created["match"]
-        self.assertEqual((match["mode"], match["rounds"], len(match["participants"])), ("burst", 5, 3))
-        status, settled = self.call("POST", f"/fci/burstlink/match/{match['matchId']}/balance", {})
+        self.assertEqual(joined["resChange"][0]["baseRes"]["id"], 80003)
+        status, created = self.call("POST", "/match/BurstLinkPVPMatch", b"")
         self.assertEqual(status, 200)
-        self.assertIn("reward", settled["settlement"])
-        status, exhausted = self.call("POST", "/fci/burstlink/join", {})
-        self.assertEqual((status, exhausted["error"]), (409, "ticket_exhausted"))
+        self.assertTrue(created["localFight"] and created["dungeonInfo"]["dungeonType"] == 8)
+        uid = created["dungeonInfo"]["dungeonUid"]
+        active = self.game._types["FightActiveData"](dungeonType=8, stageID=4001, gameRound=5, winTeam=2)
+        status, _ = self.call("PATCH", f"/fci/dungeon/{uid}/active/", active.SerializeToString())
+        self.assertEqual(status, 200)
+        status, settled = self.call("POST", "/fci/BurstLinkDunBalance/", b"{}")
+        self.assertEqual((status, settled["isWin"]), (200, False))
+
+    def test_weekly_burst_tickets_are_two_with_a_ten_ticket_cap(self):
+        status, info = self.call("GET", "/fci/BurstLinkPvpInfo/")
+        self.assertEqual(status, 200)
+        self.assertEqual((info["tickets"], info["maxTickets"]), (2, 10))
+        self.now = [1793931600]  # 2026-11-06 02:20 UTC, Friday 10:20 Beijing (next Beijing week)
+        status, next_info = self.call("GET", "/fci/BurstLinkPvpInfo/")
+        self.assertEqual(status, 200)
+        self.assertEqual(next_info["tickets"], 4)
+
+    def test_race_closed_period_returns_activity_notify_instead_of_keyerror(self):
+        self.now = [1793584800]  # 2026-11-02 02:00 UTC, Monday 10:00 Beijing (open)
+        self.assertEqual(self.call("GET", "/fci/RacePVPInfo")[0], 200)
+        self.now = [1793656800]  # 2026-11-02 22:00 UTC, Tuesday 06:00 Beijing (still open)
+        self.now = [1793822400]  # 2026-11-04 20:00 UTC, Thursday 04:00 Beijing (closed gap)
+        status, info = self.call("GET", "/fci/RacePVPInfo")
+        self.assertEqual(status, 200)
+        self.assertEqual(info["state"], 1)
 
 
 if __name__ == "__main__":
