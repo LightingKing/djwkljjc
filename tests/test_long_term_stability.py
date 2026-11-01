@@ -215,9 +215,9 @@ class LongTermStabilityTests(unittest.TestCase):
         at_week = schedule.snapshot(anchor.timestamp() + 7 * 86400)
         at_cycle = schedule.snapshot(anchor.timestamp() + 28 * 86400)
         self.assertEqual(at_start["cycleDay"], 0)
-        self.assertEqual({item["id"] for item in at_start["active"]}, {"sign-in", "shop"})
-        self.assertEqual({item["id"] for item in at_week["active"]}, {"sign-in", "shop", "sandbox-gacha"})
-        self.assertEqual({item["id"] for item in at_cycle["active"]}, {"sign-in", "shop"})
+        self.assertEqual({item["id"] for item in at_start["active"]}, {"sign-in", "shop", "diff-actor-inherit"})
+        self.assertEqual({item["id"] for item in at_week["active"]}, {"sign-in", "shop", "sandbox-gacha", "diff-actor-inherit"})
+        self.assertEqual({item["id"] for item in at_cycle["active"]}, {"sign-in", "shop", "diff-actor-inherit"})
 
 
 if __name__ == "__main__":

@@ -53,11 +53,11 @@ class M8AcceptanceTests(unittest.TestCase):
         self.assertEqual(first, second)
         self.assertEqual(
             {item["id"] for item in schedule.snapshot(anchor + timedelta(days=7))["active"]},
-            {"shop", "sandbox-gacha", "sign-in"},
+            {"shop", "sandbox-gacha", "sign-in", "diff-actor-inherit"},
         )
         self.assertEqual(
             {item["id"] for item in schedule.snapshot(anchor + timedelta(days=21))["active"]},
-            {"shop", "sign-in"},
+            {"shop", "sign-in", "diff-actor-inherit"},
         )
         for day in range(28):
             self.assertIn("sign-in", {item["id"] for item in schedule.snapshot(anchor + timedelta(days=day))["active"]})

@@ -150,7 +150,13 @@ class BattleRewardTests(unittest.TestCase):
         gains = _gains(balance)
         self.assertEqual(gains[(7, 0)], 1270)
         self.assertEqual(gains[(11, 30001)], 1)
-        self.assertEqual(gains[(11, STAGE_MATERIAL_POOL[(8 - 1) % len(STAGE_MATERIAL_POOL)])], 1)
+        # Seasonal 1016/2001/2002/2003 drops are routed through the welfare
+        # ledger, where their per-cycle caps apply; the generic chapter pool
+        # must not bypass that ledger.  One seasonal token is still paid by
+        # the welfare source for this normal stage.
+        seasonal = {rid: gains.get((11, rid), 0) for rid in (1016, 2001, 2002, 2003)}
+        self.assertGreaterEqual(seasonal[1016], 1)
+        self.assertEqual(sum(seasonal[rid] for rid in (2001, 2002, 2003)), 1)
         self.assertEqual(gains[(1, 0)], 6)
         self.assertEqual(len([change for change in balance["resChange"] if "equip" in change]), 1)
         self.assertTrue(balance["firstFinish"])
