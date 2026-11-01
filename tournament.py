@@ -326,7 +326,7 @@ class LocalTournament:
                 return 200, self._run(profile, lambda c, s, n: self._dungeon_balance(profile, s, n))
             if route == "/fci/tournament/dungeonquit":
                 if method != "POST": return 405, {"error": "method_not_allowed"}
-                return 200, self._run(profile, lambda c, s, n: self._dungeon_quit(s))
+                return 200, self._run(profile, lambda c, s, n: self._dungeon_quit(s, n))
             if route == "/fci/tournament/winreward":
                 if method != "POST": return 405, {"error": "method_not_allowed"}
                 payload = self._request("winreward", body); response = {"resChange": [], "asyncPvpRecord": {}}
@@ -348,7 +348,7 @@ class LocalTournament:
                 return 200, self._run(profile, lambda c, s, n: self._enter(profile, s, payload))
             if route == "/fci/tournament/quit":
                 if method != "POST": return 405, {"error": "method_not_allowed"}
-                return 200, self._run(profile, lambda c, s, n: self._dungeon_quit(s))
+                return 200, self._run(profile, lambda c, s, n: self._dungeon_quit(s, n))
             if route == "/fci/tournament/balance":
                 if method != "POST": return 405, {"error": "method_not_allowed"}
                 return 200, {"resChange": []}
@@ -423,12 +423,21 @@ class LocalTournament:
         if not run or _int(run.get("uid")) != uid: raise TournamentError("tournament_run_not_found", 404)
         if run.get("balanced") or not run.get("active"): raise TournamentError("tournament_run_closed")
         # SceneFight sends winTeam=0 when the player exits/pauses before a
-        # side has won.  Proto3 omits that zero field, so require a gameRound
-        # marker for the omitted-zero native form; an entirely empty or
-        # incomplete message remains a malformed request.
-        win_value = payload.get("winTeam", payload.get("win_team"))
-        if win_value is None and "gameRound" not in payload and "game_round" not in payload:
+        # side has won. Proto3 omits both zero-valued fields, so a native
+        # FightActiveData containing the non-zero dungeon/stage identity is
+        # still a valid first-round pause even when gameRound and winTeam are
+        # absent from the decoded mapping. An entirely empty message remains
+        # malformed because it has no valid dungeon/stage identity.
+        if "dungeonType" not in payload and "dungeon_type" not in payload:
             raise TournamentError("tournament_result_required", 400)
+        if "stageID" not in payload and "stage_id" not in payload:
+            raise TournamentError("tournament_result_required", 400)
+        win_value = payload.get("winTeam", payload.get("win_team"))
+        if win_value is None:
+            win_value = 0
+            payload["winTeam"] = 0
+        if "gameRound" not in payload and "game_round" not in payload:
+            payload["gameRound"] = 0
         if _int(win_value) not in (0, 1, 2):
             raise TournamentError("tournament_result_required", 400)
         if _int(payload.get("dungeonType"), 3) != 3 or _int(payload.get("stageID"), TOURNAMENT_DUNGEON_ID) != TOURNAMENT_DUNGEON_ID:
@@ -459,16 +468,32 @@ class LocalTournament:
         return response
 
     @staticmethod
-    def _dungeon_quit(state):
+    def _dungeon_quit(state, now):
         if not state.get("run"): raise TournamentError("tournament_run_not_found", 404)
         run = state["run"]
         if run.get("balanced"):
             return {"result": True}
-        # Keep the run balanceable: the native pause/quit path is equivalent
-        # to uploading FightActiveData(winTeam=0), followed by dungeonbalance.
-        if not run.get("snapshot"):
-            run["snapshot"] = {"dungeonType": 3, "stageID": TOURNAMENT_DUNGEON_ID,
-                                "gameRound": 0, "winTeam": 0}
+        # A direct quit is the native abandon path. Close the run now so a
+        # subsequent opponent/refresh is not blocked by a stale active UID.
+        # If an active result was already uploaded, retain that result; an
+        # otherwise unreported quit is a loss and is made idempotent through
+        # the cached balance response used by dungeonbalance.
+        snapshot = run.get("snapshot") or {}
+        win = _int(snapshot.get("winTeam", snapshot.get("win_team"))) == 1
+        run.update(active=False, balanced=True, win=win)
+        for target in state.get("targets", []):
+            if target.get("uid") == run.get("target_uid"):
+                target["isWin"] = win
+                break
+        if win:
+            state["wins"] = min(TARGET_COUNT, _int(state.get("wins")) + 1)
+        else:
+            state["losses"] = _int(state.get("losses")) + 1
+        run["response"] = {
+            "balanceInfo": {"balanced": True, "balanceTime": now, "win": win,
+                            "targetsDone": [], "resChange": [], "profits": []},
+            "dieNum": _int(state.get("losses")), "winNum": _int(state.get("wins")),
+        }
         return {"result": True}
 
 

@@ -125,17 +125,29 @@ class TournamentBoundaryTests(unittest.TestCase):
         for method, path, payload, status in [
             ("POST", "/fci/tournament/dungeonbalance/", {"activityType": 5}, 409),
             ("PATCH", active_path, b"null", 400),
-            ("PATCH", active_path, self.wire("FightActiveData", dungeonType=3, stageID=4001), 400),
             ("PATCH", active_path, self.wire("FightActiveData", dungeonType=1, stageID=4001, winTeam=1), 400),
             ("PATCH", active_path, self.wire("FightActiveData", dungeonType=3, stageID=1, winTeam=1), 400),
         ]:
             with self.subTest(path=path, payload=payload):
                 self.assertEqual(self.game_call(method, path, payload)[0], status)
                 self.assertEqual(self.saved_rows(), before)
+        # Proto3 omits gameRound=0 and winTeam=0.  The native pause payload
+        # still carries the dungeon/stage identity and must be accepted as a
+        # loss snapshot rather than rejected as an incomplete result.
+        self.assertEqual(self.game_call("PATCH", active_path, self.wire(
+            "FightActiveData", dungeonType=3, stageID=4001))[0], 200)
+        status, first_balance = self.game_call("POST", "/fci/tournament/dungeonbalance/", {"activityType": 5})
+        self.assertEqual((status, first_balance["balanceInfo"]["win"], first_balance["dieNum"]), (200, False, 1))
+        targets = self.game_call("GET", f"/fci/tournament/enter/5/{TOURNAMENT_ID}")[1]["asyncPvpTargetInfo"]
+        status, entered = self.game_call("POST", "/fci/tournament/dungeonenter/", self.wire(
+            "ApiTournamentDungeonEnter", tournament_id=TOURNAMENT_ID, activity_type=5,
+            target_uid=targets[1]["uid"]))
+        self.assertEqual(status, 200)
+        active_path = f"/fci/tournamentdungeon/{entered['dungeonUid']}/active/"
         self.assertEqual(self.game_call("PATCH", active_path, self.wire(
             "FightActiveData", dungeonType=3, stageID=4001, gameRound=4, winTeam=2))[0], 200)
         status, balance = self.game_call("POST", "/fci/tournament/dungeonbalance/", {"activityType": 5})
-        self.assertEqual((status, balance["balanceInfo"]["win"], balance["winNum"], balance["dieNum"]), (200, False, 0, 1))
+        self.assertEqual((status, balance["balanceInfo"]["win"], balance["winNum"], balance["dieNum"]), (200, False, 0, 2))
         self.assertEqual(self.game._profile(self.account)["resources"], initial_resources)
         next_body = self.wire("ApiTournamentDungeonEnter", tournament_id=TOURNAMENT_ID, activity_type=5,
                               target_uid=targets[1]["uid"])
@@ -144,7 +156,7 @@ class TournamentBoundaryTests(unittest.TestCase):
         self.assertNotEqual(entered["dungeonUid"], next_run["dungeonUid"])
         self.assertEqual(self.game_call("POST", "/fci/tournament/dungeonquit/", {"activityType": 5})[0], 200)
         status, quit_balance = self.game_call("POST", "/fci/tournament/dungeonbalance/", {"activityType": 5})
-        self.assertEqual((status, quit_balance["balanceInfo"]["win"], quit_balance["dieNum"]), (200, False, 2))
+        self.assertEqual((status, quit_balance["balanceInfo"]["win"], quit_balance["dieNum"]), (200, False, 3))
 
     def test_pause_zero_result_closes_as_loss_and_cross_reset_run_can_balance(self):
         now = [self.game._now()]
@@ -183,6 +195,27 @@ class TournamentBoundaryTests(unittest.TestCase):
         self.assertNotEqual(first["dungeonUid"], second["dungeonUid"])
         status, result = self.call("POST", "/fci/tournament/dungeonbalance/", {"activityType": 5})
         self.assertEqual((status, result.get("error")), (409, "tournament_snapshot_required"))
+
+    def test_direct_quit_closes_run_and_releases_opponent_and_refresh(self):
+        targets = self.call("GET", f"/fci/tournament/enter/5/{TOURNAMENT_ID}")[1]["asyncPvpTargetInfo"]
+        first = self.call("POST", "/fci/tournament/dungeonenter/", {
+            "tournamentId": TOURNAMENT_ID, "activityType": 5,
+            "target_uid": targets[0]["uid"]})[1]
+        self.assertEqual(self.call("POST", "/fci/tournament/dungeonquit/", {"activityType": 5})[0], 200)
+        # Quit settles an unreported run as an idempotent loss.  The old UID
+        # must no longer block entering another opponent or refreshing it.
+        status, balance = self.call("POST", "/fci/tournament/dungeonbalance/", {"activityType": 5})
+        self.assertEqual((status, balance["balanceInfo"]["win"]), (200, False))
+        status, second = self.call("POST", "/fci/tournament/dungeonenter/", {
+            "tournamentId": TOURNAMENT_ID, "activityType": 5,
+            "target_uid": targets[1]["uid"]})
+        self.assertEqual(status, 200)
+        self.assertNotEqual(first["dungeonUid"], second["dungeonUid"])
+        self.assertEqual(self.call("POST", "/fci/tournament/dungeonquit/", {"activityType": 5})[0], 200)
+        mail = send_mail(self.game, self.profile, "Arena direct quit", "Refresh ticket", [{"type": 11, "id": 80001, "count": 1}])
+        self.assertEqual(self.game_call("PATCH", f"/fci/mail/{mail['id']}", {"attachmentsGot": True})[0], 200)
+        status, refreshed = self.call("POST", "/fci/asyncpvpmatch/", {"index": 1})
+        self.assertEqual((status, refreshed["index"]), (200, 1))
 
     def test_refresh_is_zero_based_consumes_item_and_caps_at_three(self):
         mail = send_mail(self.game, self.profile, "Arena test fixture", "Refresh tickets", [{"type": 11, "id": 80001, "count": 3}])
