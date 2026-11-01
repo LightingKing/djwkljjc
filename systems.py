@@ -20,6 +20,7 @@ from typing import Any, Mapping, Optional
 from urllib.parse import parse_qs, urlsplit
 
 from google.protobuf import message_factory
+from google.protobuf.message import DecodeError
 
 
 Body = bytes | bytearray | str | None
@@ -61,6 +62,9 @@ def _client_table_rows(name: str) -> list[dict[str, Any]]:
 # Client GachaType (pools 1 normal, 2 periodic, 5 chips, 6 friendship) and
 # GachaActorPool (actor weights), exported by tools/export_client_tables.py.
 GACHA_TYPES: dict[int, dict[str, Any]] = {int(row["id"]): row for row in _client_table_rows("GachaType") if row.get("id")}
+GACHA_LIMITED: dict[int, dict[str, Any]] = {
+    int(row["activityId"]): row for row in _client_table_rows("ActivityGachaLimited") if row.get("activityId")
+}
 GACHA_POOL: list[tuple[int, int]] = [
     (int(row["actorId"]), int(row.get("weight", 0) or 0))
     for row in _client_table_rows("GachaActorPool")
@@ -100,6 +104,11 @@ ACTOR_STAR_PROMOTIONS: dict[tuple[int, int], dict[str, Any]] = {
     for row in _client_table_rows("ActorAttrStarPromotion")
     if row.get("actorId") and row.get("star")
 }
+ACTOR_SKILL_ROWS = {int(row["skillId"]): row for row in _client_table_rows("ActorSkill") if row.get("skillId")}
+ACTOR_SKILL_LIMITS = {(int(row["actorId"]), int(row["star"])): row.get("maxLevel", [])
+                      for row in _client_table_rows("ActorSkillMaxLevel")}
+SKILL_LEVEL_COSTS = {(int(row["costIndex"]), int(row.get("level", 0))): row.get("cost", [])
+                    for row in _client_table_rows("SkillLevelup")}
 
 
 def _misc_int(key: str, default: int) -> int:
@@ -1248,26 +1257,74 @@ class LocalSystems:
 
         if "skill" in lower and ("learn" in lower or "learning" in lower or lower.endswith("/skill")):
             skill_id = self._first_int(payload, "skillId", "skill_id", default=0)
-            if not skill_id:
-                skill_id = 1001001 + len(actor.get("skills", {}))
             skills = actor.setdefault("skills", {})
-            key = str(skill_id)
             if method == "GET":
                 return 200, {"actorId": actor_id, "skills": [{"id": _int(k), **(v if isinstance(v, Mapping) else {"level": _int(v, 1), "read": False})} for k, v in skills.items()]}
             if method != "POST": return 405, {"error": "method_not_allowed", "message": "POST required"}
-            if key in skills: return 409, {"error": "skill_already_learned"}
-            ok, changes, error = self._change_resources(profile, [{"type": 7, "id": 0, "param": 0, "count": -100}])
-            if not ok: return 409, {"error": error or "insufficient_resource", "required": 100}
-            skills[key] = {"level": 1, "read": False}; self._save(profile, state)
-            # Theme activity task 60007 (TaskType_ActorSkillLevelUpMTimes)
-            # is fed by the same trusted skill-learning action.
-            self._record_task(profile, "TaskType_ActorSkillLevelUpMTimes")
-            try:
-                result = self._message("ApiActorSkillLearnning.post"); result.new_skill.id = skill_id; result.new_skill.level = 1
-                for change in self._dynamic(changes):
-                    item = result.res_change.add(); item.base_res.type = change["type"]; item.base_res.id = change["id"]; item.base_res.param = change["param"]; item.base_res.count = change["count"]; item.base_res.count_delta = change["countDelta"]
+            if not payload and isinstance(body, (bytes, bytearray)):
+                try:
+                    request = self._message("ApiActorSkillLearnning")
+                    request.ParseFromString(bytes(body))
+                    skill_id = int(request.skill_id)
+                except (ValueError, TypeError, AttributeError, DecodeError):
+                    return 400, {"error": "invalid_skill_request"}
+            config = ACTOR_SKILL_ROWS.get(skill_id, {})
+            display = _int(config.get("displayIndex"))
+            if (_int(config.get("actorId")) != actor_id or display <= 0
+                    or config.get("isLink") or not config.get("costIndex")):
+                return 400, {"error": "actor_skill_not_found"}
+            # The UI shows unstored skills at level 1 and posts this SAME route
+            # for every upgrade. Shadow variants share one displayed level.
+            group = [row for row in ACTOR_SKILL_ROWS.values()
+                     if _int(row.get("actorId")) == actor_id and _int(row.get("displayIndex")) == display
+                     and not row.get("isLink")]
+            default = group[0]
+            if default.get("isPassive"):
+                unlock_star = next((int(row["star"]) for row in ACTOR_STAR_PROMOTIONS.values()
+                                    if _int(row.get("unlockSkillId")) == _int(default["skillId"])), 0)
+                if _int(actor.get("star"), 1) < unlock_star:
+                    return 409, {"error": "actor_skill_star_limit"}
+            value = skills.get(str(default["skillId"]), {})
+            current = max(1, _int(value.get("level"), 1) if isinstance(value, Mapping) else _int(value, 1))
+            limits = ACTOR_SKILL_LIMITS.get((actor_id, _int(actor.get("star"), 1)), [])
+            if display > len(limits) or current >= _int(limits[display - 1]):
+                return 409, {"error": "actor_skill_star_limit"}
+            costs = SKILL_LEVEL_COSTS.get((_int(default.get("costIndex")), current + 1))
+            if costs is None:
+                return 409, {"error": "actor_skill_level_max"}
+            item_costs, resource_costs = {}, []
+            for cost in costs:
+                amount = _int(cost.get("count"))
+                if amount <= 0:
+                    continue
+                if _int(cost.get("type")) == _RES_ITEM:
+                    rid = _int(cost.get("id"))
+                    item_costs[rid] = item_costs.get(rid, 0) + amount
+                else:
+                    resource_costs.append(dict(cost, count=-amount))
+            if any(self._items_owned(state, rid) < count for rid, count in item_costs.items()):
+                return 409, {"error": "insufficient_item"}
+            # Payment, inventory, skill state and the complete response are one
+            # unit: storage/projection failure must not charge a failed click.
+            with self.game.atomic_mutation():
+                ok, changes, error = self._change_resources(profile, resource_costs)
+                if not ok:
+                    return 409, {"error": error or "insufficient_resource"}
+                changes = self._dynamic(changes) + self._items_take(state, item_costs)
+                for row in group:
+                    skills[str(row["skillId"])] = {"level": current + 1, "read": False}
+                self._save(profile, state)
+                self._record_task(profile, "TaskType_ActorSkillLevelUpMTimes")
+                result = self._message("ApiActorSkillLearnning.post")
+                result.new_skill.id, result.new_skill.level = skill_id, current + 1
+                for change in changes:
+                    item = result.res_change.add().base_res
+                    item.type, item.id, item.param = change["type"], change["id"], change["param"]
+                    item.count, item.count_delta = change["count"], change["countDelta"]
+                # Actorskilldetail consumes only resChange, not newSkill. Return
+                # the updated full actor so the next click uses the new level.
+                result.res_change.add().actor.CopyFrom(self._st_actor(actor, profile, state))
                 return 200, result
-            except Exception: return 200, {"skill": skills[key], "resChange": self._dynamic(changes)}
 
         if "skill" in lower and "read" in lower:
             skill_id = self._first_int(payload, "skillId", "skill_id", "id", default=0)
@@ -2195,7 +2252,7 @@ class LocalSystems:
         return result
 
     def _gacha_pool(self, state: dict[str, Any], pool_id: int, now: int) -> dict[str, Any]:
-        """Per-pool gacha counters; the daily count resets at 06:00 UTC."""
+        """Per-pool gacha counters; the daily count resets at 06:00 Beijing."""
 
         pools = state.setdefault("gachaPools", {})
         pool = pools.setdefault(str(pool_id), {"total": 0, "today": 0, "day": 0, "nextFree": 0, "firstTenDone": False})
@@ -2207,21 +2264,71 @@ class LocalSystems:
             # A new account's daily free draw is available at once; the client
             # only treats 0 < nextFreeGachaTime <= now as free (IsFreeGacha).
             pool["nextFree"] = int(now) - 1
+        self._gacha_init_pity(pool, config, [row for row in state.get("gacha_records", [])
+                                           if _int(row.get("pool")) == pool_id])
         return pool
 
-    def _gacha_info_row(self, pool_id: int, pool: Mapping[str, Any]) -> dict[str, Any]:
+    @staticmethod
+    def _gacha_init_pity(counter: dict[str, Any], config: Mapping[str, Any], history: list) -> None:
+        # Upgrade existing all-green histories without resetting earned pity.
+        for key, quality, limit in (("purpleMisses", 3, _int(config.get("actorDropCount"))),
+                                    ("orangeMisses", 4, _int(config.get("notGetOrangeMax")))):
+            if key in counter or not limit:
+                continue
+            misses = max(0, _int(counter.get("total")))
+            for distance, row in enumerate(reversed(history)):
+                if _int(row.get("quality")) >= quality:
+                    misses = distance
+                    break
+            counter[key] = min(misses, limit - 1)
+
+    def _gacha_open_activities(self, profile: Mapping[str, Any], now: int) -> list[int]:
+        status, rows = self.game.events._activity_list("GET")
+        if status != 200:
+            return []
+        weekday = policy_for(self.game).local_datetime(now).isoweekday()
+        return sorted({_int(row.get("activityId")) for row in rows
+                       if _int(row.get("type")) == 4 and _int(row.get("activityId")) in GACHA_LIMITED
+                       and _int(row.get("timestampStart")) <= now
+                       and (not _int(row.get("timestampEnd")) or now < _int(row.get("timestampEnd")))
+                       and (not row.get("weekdays") or weekday in row["weekdays"])
+                       and _int(profile.get("level"), 1) >= _int(row.get("levelLimit"))})
+
+    @staticmethod
+    def _gacha_activity_row(activity_id: int, counter: Mapping[str, Any], config: Mapping[str, Any]) -> dict[str, int]:
+        interval = _int(config.get("actorDropCount"))
+        return {"activityId": activity_id,
+                "nextGetPurpleCount": max(1, interval - _int(counter.get("purpleMisses"))) if interval else 0,
+                "curDropActivityActor": _int(counter.get("curDropActivityActor")),
+                "preDropActivityActor": _int(counter.get("preDropActivityActor")),
+                "getActivityActorCount": _int(counter.get("getActivityActorCount"))}
+
+    def _gacha_info_row(self, pool_id: int, pool: dict[str, Any], activity_ids: list[int] = ()) -> dict[str, Any]:
         config = GACHA_TYPES.get(pool_id, {})
-        drop_count = int(config.get("actorDropCount", 0) or 0)
+        if pool_id == 2:
+            activities = pool.setdefault("activities", {})
+            activity_info = [self._gacha_activity_row(aid, activities.setdefault(str(aid), {}), config)
+                             for aid in activity_ids]
+        else:
+            activity_info = [self._gacha_activity_row(0, pool, config)] if pool_id == 1 else []
         return {
             "id": pool_id,
             "gachaCountToday": int(pool.get("today", 0)),
             "nextFreeGachaTime": int(pool.get("nextFree", 0) or 0) if config.get("gachaFreeInterval") else 0,
-            "nextGetPurpleCount": (drop_count - int(pool.get("total", 0)) % drop_count) if drop_count else 0,
-            "activityInfo": [],
+            "nextGetPurpleCount": self._gacha_activity_row(0, pool, config)["nextGetPurpleCount"],
+            "activityInfo": activity_info,
             "actorRecord": [],
         }
 
     def _gacha(self, method: str, route: str, body: Body, profile: Mapping[str, Any], state: dict[str, Any]) -> Optional[Response]:
+        if not route.lower().startswith(("/fci/gacha", "/fci/card/gacha")):
+            return None
+        # Currency, tickets, characters and pity must commit together even if
+        # saving state or projecting the native response fails.
+        with self.game.atomic_mutation():
+            return self._gacha_transaction(method, route, body, profile, state)
+
+    def _gacha_transaction(self, method: str, route: str, body: Body, profile: Mapping[str, Any], state: dict[str, Any]) -> Optional[Response]:
         """Gacha pools (fci/gachainfo/) and draws (fci/gachatrade/).
 
         Pools, costs, the daily free interval, the 10-draw purple counter and
@@ -2232,8 +2339,8 @@ class LocalSystems:
         dropIdForce FirstGacha_01..10, forced tutorial step 5); 2018 guides
         record that it guarantees Leafa (actor 2108).  Its other nine actors
         were server-only and are drawn here as distinct pool actors.
-        Duplicates convert to that actor's shards (resource type 15) because
-        local actors are keyed by actor id (no duplicate actor instances).
+        Every draw creates a distinct uid.  Quality uses ActorStarRandom way 5;
+        recovered purple/orange parameters enforce the displayed hard pity.
         """
 
         lower = route.lower()
@@ -2241,7 +2348,9 @@ class LocalSystems:
         if lower in {"/fci/gachainfo", "/fci/gachainfo/"}:
             if method != "GET":
                 return 405, {"error": "method_not_allowed", "message": "GET required"}
-            rows = [self._gacha_info_row(pool_id, self._gacha_pool(state, pool_id, now)) for pool_id in sorted(GACHA_TYPES)]
+            activity_ids = self._gacha_open_activities(profile, now)
+            rows = [self._gacha_info_row(pool_id, self._gacha_pool(state, pool_id, now), activity_ids)
+                    for pool_id in sorted(GACHA_TYPES)]
             self._save(profile, state)
             return 200, rows
         if not (lower.startswith("/fci/gacha") or lower.startswith("/fci/card/gacha")):
@@ -2255,6 +2364,16 @@ class LocalSystems:
         if config is None or not GACHA_POOL:
             return 404, {"error": "unknown_gacha", "id": pool_id}
         pool = self._gacha_pool(state, pool_id, now)
+        activity_id = _int(payload.get("activityId", getattr(msg, "activity_id", 0) if msg else 0))
+        if pool_id == 2:
+            if activity_id not in self._gacha_open_activities(profile, now):
+                return 409, {"error": "activity_not_open"}
+            counter = pool.setdefault("activities", {}).setdefault(str(activity_id), {})
+            self._gacha_init_pity(counter, config, [])
+        elif activity_id:
+            return 400, {"error": "invalid_gacha_activity"}
+        else:
+            counter = pool
         # Window_Gacha.DoGacha: pools 1/2 send {id, activityId?, count,
         # cinematic, gachaFree} and never a cost (the server splits tickets
         # then GachaType.costSub 迷子); GachaChips (5) sends the chosen chips
@@ -2360,28 +2479,73 @@ class LocalSystems:
             changes.extend(self._dynamic(paid))
         changes.extend(self._items_take(state, item_costs))
 
-        rng = random.Random((_int(profile.get("account_id")) * 1_000_003) ^ (int(pool.get("total", 0)) * 7919) ^ pool_id)
+        rng = getattr(self, "_rng", None) or random.Random(
+            (_int(profile.get("account_id")) * 1_000_003) ^ (int(pool.get("total", 0)) * 7919) ^ pool_id)
         owned = {int(record["id"]) for record in actor_store.ordered(profile, state)}
         drawn: list[int] = []
         if first_ten:
             # Leafa is guaranteed; the rest are distinct actors not yet owned.
-            if LEAFA_ACTOR_ID not in owned:
-                drawn.append(LEAFA_ACTOR_ID)
+            drawn.append(LEAFA_ACTOR_ID)
             candidates = [(aid, w) for aid, w in GACHA_POOL if aid not in owned and aid != LEAFA_ACTOR_ID]
             while len(drawn) < times and candidates:
                 pick = rng.choices([aid for aid, _ in candidates], weights=[w for _, w in candidates])[0]
                 drawn.append(pick)
                 candidates = [(aid, w) for aid, w in candidates if aid != pick]
-        else:
-            drawn = rng.choices([aid for aid, _ in GACHA_POOL], weights=[w for _, w in GACHA_POOL], k=times)
+        # Veteran accounts may already own the whole pool before their first
+        # ten-pull.  Always deliver every paid draw, including duplicate uids.
+        if len(drawn) < times:
+            drawn.extend(rng.choices([aid for aid, _ in GACHA_POOL], weights=[w for _, w in GACHA_POOL], k=times - len(drawn)))
 
         # Every draw is a separate character instance (copies are allowed;
         # the client keys characters by uid and offers decomposition).
-        new_instances = [self.new_actor(profile, state, actor_id) for actor_id in drawn]
+        limited = GACHA_LIMITED.get(activity_id, {}) if pool_id == 2 else {}
+        featured = (limited.get("dropResInfo") or [{}])[0]
+        featured_id = _int(featured.get("dropRes", {}).get("id"))
+        featured_limit = _int(limited.get("dropActorCount"))
+        counter["preDropActivityActor"] = _int(counter.get("curDropActivityActor"))
+        new_instances = []
+        for actor_id in drawn:
+            way = 6 if pool_id == 6 else 5
+            # Some original actors omit way 5/6 even though the exported
+            # local actor pool includes them.  Apply the same pool's original
+            # quality weights from actor 1001 rather than silently stay green.
+            selected = {"id": actor_id if (way, actor_id) in ACTOR_STAR_RANDOM else 1001, "quality": 1}
+            self._apply_star_random(selected, way, rng)
+            selected["id"] = actor_id
+            purple_limit = _int(config.get("actorDropCount"))
+            orange_limit = _int(config.get("notGetOrangeMax"))
+            if purple_limit and _int(counter.get("purpleMisses")) + 1 >= purple_limit and selected["quality"] < 3:
+                self._apply_star_random(selected, _int(config.get("purpleActorParam"), 101), rng)
+            if orange_limit and _int(counter.get("orangeMisses")) + 1 >= orange_limit:
+                self._apply_star_random(selected, _int(config.get("orangeActorParam"), 102), rng)
+            if featured_id:
+                progress = _int(counter.get("curDropActivityActor"))
+                # The native UI switches from countdown to "already obtained"
+                # after the first featured actor.  Its 91-pull floor is once
+                # per activity, and later copies use the original probability.
+                probability = (_int(config.get("limitOrangeProbability")) if selected["quality"] == 4
+                               else _int(featured.get("dropActorProbability")))
+                force_featured = not _int(counter.get("getActivityActorCount")) and progress + 1 >= featured_limit
+                if force_featured or rng.randrange(10000) < probability:
+                    selected["id"] = featured_id
+                    if selected["quality"] < 3:
+                        self._apply_star_random(selected, _int(featured.get("dropRes", {}).get("param"), 101), rng)
+                    counter["getActivityActorCount"] = _int(counter.get("getActivityActorCount")) + 1
+                    counter["curDropActivityActor"] = featured_limit
+                else:
+                    counter["curDropActivityActor"] = min(featured_limit, progress + 1)
+            quality = _int(selected["quality"], 1)
+            # Resolve quality before new_actor seeds quality-many talents.
+            new_instances.append(self.new_actor(profile, state, selected["id"], way=1000 + quality))
+            counter["purpleMisses"] = 0 if quality >= 3 else _int(counter.get("purpleMisses")) + 1
+            counter["orangeMisses"] = 0 if quality >= 4 else _int(counter.get("orangeMisses")) + 1
+            if counter is not pool:
+                counter["total"] = _int(counter.get("total")) + 1
         first_order = int(pool.get("total", 0)) + 1
         records = state.setdefault("gacha_records", [])
-        for order, actor_id in enumerate(drawn, start=first_order):
-            records.append({"id": actor_id, "quality": 1, "time": now, "pool": pool_id, "order": order})
+        for order, actor in enumerate(new_instances, start=first_order):
+            records.append({"id": actor["id"], "quality": actor["quality"], "time": now,
+                            "pool": pool_id, "activityId": activity_id, "order": order})
         pool["total"] = int(pool.get("total", 0)) + len(drawn)
         pool["today"] = int(pool.get("today", 0)) + len(drawn)
         if first_ten:
@@ -2410,15 +2574,21 @@ class LocalSystems:
                 # DBH.UpdateActors adds a character only for countDelta > 0.
                 entry.count_delta = 1
                 entry.is_new = entry.is_new_card = True
-        for order, actor_id in enumerate(drawn, start=first_order):
+        for order, actor in enumerate(new_instances, start=first_order):
             record = result.actor_record.add()
-            record.id = actor_id
-            record.quality = 1
+            record.id = actor["id"]
+            record.quality = actor["quality"]
             record.time_order = order
         info = self._gacha_info_row(pool_id, pool)
         result.gacha_count_today = info["gachaCountToday"]
         result.next_free_gacha_time = info["nextFreeGachaTime"]
-        result.next_get_purple_count = info["nextGetPurpleCount"]
+        activity = self._gacha_activity_row(activity_id, counter, config)
+        result.next_get_purple_count = activity["nextGetPurpleCount"]
+        result.activity_info.activity_id = activity_id
+        result.activity_info.next_get_purple_count = activity["nextGetPurpleCount"]
+        result.activity_info.cur_drop_activity_actor = activity["curDropActivityActor"]
+        result.activity_info.pre_drop_activity_actor = activity["preDropActivityActor"]
+        result.activity_info.get_activity_actor_count = activity["getActivityActorCount"]
         return 200, result
 
     def _mail(self, method: str, route: str, body: Body, profile: Mapping[str, Any], state: dict[str, Any]) -> Optional[Response]:
@@ -2660,6 +2830,11 @@ class LocalSystems:
         lower = route.lower()
         if not (lower.startswith("/fci/guild") or lower.startswith("/fci/guild-dungeon-record")):
             return None
+        # The historical sandbox accepted a caller-supplied score as a win.
+        # Native guild-dungeon combat is a separate, unimplemented mode; never
+        # expose that fake settlement or emit progress-reward push 87 for it.
+        if "/dungeon" in lower or lower.startswith("/fci/guild-dungeon"):
+            return 404, {"error": "guild_dungeon_not_implemented"}
         guild = state.get("guild")
         if lower in {"/fci/guild/recommend", "/fci/guild/recommend/", "/fci/guild/search", "/fci/guild/search/"}:
             if method != "GET":

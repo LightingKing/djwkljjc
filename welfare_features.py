@@ -16,6 +16,7 @@ from typing import Any, Mapping, Optional
 from urllib.parse import urlsplit
 
 from economy import _client_rows
+from local_mailbox import send_mail
 from server.core.reset import policy_for
 
 try:
@@ -32,6 +33,9 @@ CHIP_POSITIONS = {int(row["dungeonId"]): int(row["chipExchangePlayerPos"])
                   for row in _client_rows("DungeonReward") if row.get("chipExchangePlayerPos")}
 ACTOR_CHIPS = {int(row["id"]) for row in _client_rows("ItemInfo") if int(row.get("funcType", 0)) == 3}
 WELFARE_ACTIVITY_TYPES = (16, 26, 43, 44, 48)
+# Independent local supply for the 25 Seal cells. The APK's 750-candy
+# battle-drop cap remains unchanged and can still fund all 30 jigsaw cells.
+SEAL_LOCAL_SUPPLY_COUNT = 25
 JIGSAW_REWARDS = {
     0: [{"type": 11, "id": 31014, "count": 1}],
     5: [{"type": 11, "id": 60001, "count": 1}, {"type": 7, "id": 0, "count": 50000}],
@@ -262,6 +266,20 @@ class LocalWelfareFeatures:
         return ok, changes, error
 
     # ------------------------------- seal (5x5; 12 local-policy rewards)
+    def _seal_supply(self, profile, state):
+        seal = state["welfare"]["seal"]
+        if seal.get("supplyMailId"):
+            return
+        mail = send_mail(
+            self.game, profile, "印章活动补给", "本期印章活动补给：25个糖果，可用于点亮印章。每期可领取一次。",
+            [{"type": 11, "id": 1016, "count": SEAL_LOCAL_SUPPLY_COUNT}],
+            expire_days=28, now=self._now())
+        # The enclosing HTTP transaction commits the mail and marker together.
+        # Do not add this separate local source to earnedMaterials: that
+        # counter tracks the original 750-candy battle supply.
+        seal["supplyMailId"] = mail["id"]
+        self._save(profile, state)
+
     def _seal(self, method: str, route: str, body: Body, profile: Mapping[str, Any], state: dict[str, Any]) -> Response:
         data = state["welfare"]["seal"]
         cells = {int(v) for v in data.get("cells", []) if _int(v) > 0}
@@ -306,6 +324,7 @@ class LocalWelfareFeatures:
                 result.reward_id = reward_id; self._append_changes(result, changes); return 200, result
             return 200, {"rewardId": reward_id, "resChange": changes}
         if method != "GET": return 405, {"error": "method_not_allowed"}
+        self._seal_supply(profile, state)
         cell_info = [{"info": {"cellId": i, "cost": {"type": 11, "id": 1016, "count": 1}}, "fill": i in cells} for i in range(1, 26)]
         reward_info = []
         for i in range(1, 13):

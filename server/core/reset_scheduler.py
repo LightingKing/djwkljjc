@@ -24,6 +24,7 @@ class ResetScheduler:
         self._stop = threading.Event()
         self._thread = None
         self._tick_lock = threading.Lock()
+        self._social_checked_at = {}
         self.last_error = None
         with self.game._lock, closing(game._connect()) as connection, connection:
             connection.execute('''CREATE TABLE IF NOT EXISTS local_reset_dispatch (
@@ -33,20 +34,29 @@ class ResetScheduler:
     def tick(self) -> int:
         with self._tick_lock:
             account_ids = sorted({value for service in self.services for value in service.account_ids()})
+            self._social_checked_at = {key: value for key, value in self._social_checked_at.items()
+                                       if key in account_ids}
             processed = 0
             self.last_error = None
             for account_id in account_ids:
                 try:
-                    # Social login/world-chat ticks are driven by the push
-                    # connection.  The calendar worker must only settle
-                    # persisted reset boundaries; running social.tick every
-                    # second held the game lock and replayed the full social
-                    # scan for every connected account.
                     processed += bool(self._settle(account_id))
+                    self._tick_social(account_id)
                 except Exception:
                     self.last_error = 'reset_failed'
                     log.exception('calendar settlement failed for account %s', account_id)
             return processed
+
+    def _tick_social(self, account_id):
+        """Poll connected accounts at the bot interval, not every second."""
+        social = self.game.social
+        now = self.game._now()
+        previous = self._social_checked_at.get(account_id)
+        if previous is not None and now - previous < social.WORLD_BOT_INTERVAL:
+            return
+        with self.game._lock:
+            social.tick(self.game._profile({'accountId': account_id}), refresh_applications=False)
+        self._social_checked_at[account_id] = now
 
     def _settle(self, account_id):
         game = self.game

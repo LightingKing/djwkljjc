@@ -2,7 +2,8 @@
 param(
     [Parameter(Mandatory=$true)][string]$CodeDirectory,
     [switch]$CheckOnly,
-    [string]$BackupDirectory
+    [string]$BackupDirectory,
+    [string]$CandidateDirectory = 'I:/workspace/mobilegame/runtime/remediation-20261031/candidate'
 )
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
@@ -42,7 +43,7 @@ $plan = [ordered]@{
     checkOnly = [bool]$CheckOnly
 }
 if ($CheckOnly) {
-    & $pythonExecutable $releaseTools verify-artifacts
+    & $pythonExecutable $releaseTools --code-directory $codeDirectory --candidate-directory $CandidateDirectory verify-artifacts
     if ($LASTEXITCODE -ne 0) { throw 'Candidate artifact verification failed.' }
     $plan | ConvertTo-Json -Depth 6
     return
@@ -52,9 +53,9 @@ if ($listeners.Count -gt 0) {
         (($listeners | ForEach-Object { "$($_.LocalPort)/PID=$($_.OwningProcess)" }) -join ', '))
 }
 if (-not $BackupDirectory) { throw 'Provide -BackupDirectory from release_tools.py backup-state.' }
-& $pythonExecutable $releaseTools verify-backup $BackupDirectory
+& $pythonExecutable $releaseTools --code-directory $codeDirectory --candidate-directory $CandidateDirectory verify-backup $BackupDirectory
 if ($LASTEXITCODE -ne 0) { throw 'Final state backup verification failed.' }
-& $pythonExecutable $releaseTools verify-artifacts --staged
+& $pythonExecutable $releaseTools --code-directory $codeDirectory --candidate-directory $CandidateDirectory verify-artifacts --staged
 if ($LASTEXITCODE -ne 0) { throw 'Stage the verified candidate ZIP and manifest before starting.' }
 
 # Fixed arguments have no quotes or trailing backslashes. Quote every argument

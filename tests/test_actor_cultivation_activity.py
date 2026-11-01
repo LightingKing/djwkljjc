@@ -20,6 +20,7 @@ from accounts import LocalAccounts
 from cultivation import LocalCultivation, REWARDS, TASKS, task_available
 from game import LocalGame
 from grants import grant_rewards
+from local_mailbox import send_mail
 from cultivation_flow_helpers import prepare_novel_collection
 import test_systems
 
@@ -84,6 +85,19 @@ class ActorCultivationActivityTests(unittest.TestCase):
 
     def upgrade(self):
         return self.call("POST", "/fci/actor-cultivation/53001/upgrade-vip/", b"null")
+
+    def fund_via_mail(self, resources):
+        mail = send_mail(self.game, self.profile, "Cultivation QA", "Isolated test funding", resources)
+        status, result = self.game.handle_http(
+            "PATCH", f'/fci/mail/{mail["id"]}', b'{"attachmentsGot":true}',
+            "application/json", self.auth)
+        self.assertEqual(status, 200, result)
+        self.profile = self.game._profile(self.account)
+
+    def activate_vip(self):
+        self.fund_via_mail([{"type": 27, "count": 1280}])
+        status, result = self.upgrade()
+        self.assertEqual(status, 200, result)
 
     def test_eligibility_and_wire_task_definition(self):
         self.assertEqual(self.module.snapshot(self.profile), [])
@@ -164,6 +178,7 @@ class ActorCultivationActivityTests(unittest.TestCase):
 
     def test_exact_event_matching_preserves_specific_objective(self):
         self.own()
+        self.activate_vip()
         self.select_daily(53022)
         self.module.record(self.profile, "ActorP0TalentM", param=1502)
         self.assertEqual(self.claim(53022)[0], 200)
@@ -172,6 +187,7 @@ class ActorCultivationActivityTests(unittest.TestCase):
 
     def test_daily_reset_restart_and_clock_rollback_preserve_claims_and_cap(self):
         self.own(locked=True)
+        self.activate_vip()
         self.select_daily(53020, 53023)
         self.claim(53023)
         self.module.record(self.profile, 76, param=2)
@@ -201,10 +217,10 @@ class ActorCultivationActivityTests(unittest.TestCase):
 
     def test_vip_uses_paid_balance_and_rejects_duplicate(self):
         self.own()
-        self.game.economy._change_resources(self.profile, [{"type": 5, "count": 5000}])
+        self.fund_via_mail([{"type": 5, "count": 5000}])
         self.assertEqual(self.upgrade()[0], 409)
         self.assertFalse(self.info()["vip"])
-        self.game.economy._change_resources(self.profile, [{"type": 27, "count": 1500}])
+        self.fund_via_mail([{"type": 27, "count": 1500}])
         status, result = self.upgrade()
         self.assertEqual(status, 200, result)
         self.assertTrue(result["info"]["vip"])
@@ -214,7 +230,7 @@ class ActorCultivationActivityTests(unittest.TestCase):
 
     def test_vip_concurrency_charges_once(self):
         self.own()
-        self.game.economy._change_resources(self.profile, [{"type": 27, "count": 3000}])
+        self.fund_via_mail([{"type": 27, "count": 3000}])
         with ThreadPoolExecutor(max_workers=2) as executor:
             replies = list(executor.map(lambda _: self.upgrade(), range(2)))
         self.assertEqual(sorted(status for status, _ in replies), [200, 409])
@@ -231,14 +247,14 @@ class ActorCultivationActivityTests(unittest.TestCase):
         expected = sum(r["count"] for progress in (3, 6) for r in REWARDS[(53001, progress)]["reward"])
         self.assertEqual(self.game.systems._state(self.profile)["items"]["10004"]["count"], expected)
         self.assertEqual(self.reward(3)[0], 409)
-        self.game.economy._change_resources(self.profile, [{"type": 27, "count": 1280}])
+        self.fund_via_mail([{"type": 27, "count": 1280}])
         self.assertEqual(self.upgrade()[0], 200)
         self.assertEqual(self.reward(6, vip=True)[0], 200)
         self.assertEqual((self.info()["progressReward"], self.info()["progressRewardVip"]), (6, 6))
 
     def test_completion_grants_avatar_skin_and_remaining_vip_before_artwork(self):
         self.own()
-        self.game.economy._change_resources(self.profile, [{"type": 27, "count": 1280}])
+        self.fund_via_mail([{"type": 27, "count": 1280}])
         self.assertEqual(self.upgrade()[0], 200)
         self.seed_progress(100, 70)
         status, result = self.reward(100)
@@ -265,7 +281,7 @@ class ActorCultivationActivityTests(unittest.TestCase):
 
     def test_failed_vip_does_not_charge_or_notify(self):
         self.own()
-        self.game.economy._change_resources(self.profile, [{"type": 27, "count": 1280}])
+        self.fund_via_mail([{"type": 27, "count": 1280}])
         notified = []
         self.module.notifier = lambda profile, payload: notified.append(payload)
         with patch.object(self.module, "_save", side_effect=RuntimeError("write failed")):
@@ -295,6 +311,7 @@ class ActorCultivationActivityTests(unittest.TestCase):
 
     def test_supported_task_sources_can_finish_without_arbitrary_progress(self):
         uid = self.own(level=52, locked=True)
+        self.activate_vip()
         all_daily = [tid for tid, task in TASKS.items()
                      if tid < 54000 and task.get("refreshAfterGot")]
         self.select_daily(*all_daily)

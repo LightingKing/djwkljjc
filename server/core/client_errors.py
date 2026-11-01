@@ -70,6 +70,14 @@ def client_error_reply(status: int, payload: dict) -> tuple[int, dict]:
         return 509, {"notify": {"code": "Error_DungeonNotActive"}}
     if lower in {"dungeon_balance_not_implemented", "resource_update_failed", "invalid_request"}:
         return 509, {"notify": {"code": "Error_RequestFailed"}}
+    if lower in {"actor_skill_not_found", "invalid_skill_request"}:
+        return 509, {"notify": {"code": "Error_ActorSkillNotFound"}}
+    if lower in {"actor_skill_star_limit", "actor_skill_level_max", "skill_already_learned"}:
+        return 509, {"notify": {"code": "Error_ActorSkillLearnFailed"}}
+    if lower == "cultivation_vip_required":
+        return 509, {"notify": {"code": "Error_YouAreNotVip"}}
+    if lower == "purchase_token_expired":
+        return 509, {"notify": {"code": "Error_RequestFailed"}}
     # All keys below are used by the shipped Lua, and need no format arguments.
     if reason.startswith(("Error_", "WindowLogin_")):
         code = reason
@@ -90,5 +98,7 @@ def client_error_reply(status: int, payload: dict) -> tuple[int, dict]:
     elif status >= 500:
         code = "Error_DbError"
     else:
-        code = "Window_SaveFail"
+        # Window_SaveFail means "failed to save image" in the actual client.
+        # It must never be used as the fallback for a game operation.
+        code = "Error_RequestFailed"
     return (507 if status >= 500 else 509), {"notify": {"code": code}}

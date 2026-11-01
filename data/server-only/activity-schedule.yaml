@@ -53,6 +53,17 @@ permanentActivities:
     category: 1   # ActivityCategory_WeeklyActivity
     timeType: 1   # ActivityTimeType_Forever -> menu row "Window_OpenForever"
   entries:
+    # Original ActivityGachaLimited/GachaAd rows.  Dates were server-only;
+    # the local schedule keeps all three original selections available.
+    - id: limited-gacha-4001
+      type: 4
+      activityId: 4001
+    - id: limited-gacha-4002
+      type: 4
+      activityId: 4002
+    - id: limited-gacha-4003
+      type: 4
+      activityId: 4003
     - id: collection-2001
       type: 2            # CollectionDungeon -> ActivityStageChoose2 (UnlockWindow 7, Lv10; forced tutorial 14/15)
       activityId: 2001   # ActivityDungeon 2001 (dungeons 52101-52110, multipleActivityId 2101)

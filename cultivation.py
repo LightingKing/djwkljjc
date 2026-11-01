@@ -76,6 +76,11 @@ def _int(value, default=0):
         return default
 
 
+def task_vip_only(task):
+    """Local fallback grouping: the exported table has no VIP-only field."""
+    return _int(task.get("actorCultivationRewardProgress")) >= 2
+
+
 class CultivationError(Exception):
     def __init__(self, status, code):
         self.status, self.code = status, code
@@ -164,8 +169,8 @@ class LocalCultivation:
         ).digest()[:8], "big")
         rng = random.Random(seed)
         rng.shuffle(candidates)
-        vip = [row for row in candidates if _int(row[1].get("actorCultivationRewardProgress")) >= 2]
-        normal = [row for row in candidates if _int(row[1].get("actorCultivationRewardProgress")) < 2]
+        vip = [row for row in candidates if task_vip_only(row[1])]
+        normal = [row for row in candidates if not task_vip_only(row[1])]
         chosen = normal[: max(0, DAILY_DRAW_COUNT - 2)] + vip[:2]
         if len(chosen) < DAILY_DRAW_COUNT:
             chosen += [row for row in candidates if row not in chosen][:DAILY_DRAW_COUNT - len(chosen)]
@@ -261,11 +266,10 @@ class LocalCultivation:
                 "dailyRefresh": False,
                 **task, "actorCultivationActivityId": info["activityId"], "dailyRefresh": daily,
             }
-            # The APK marks the higher-value (two-point) rows as VIP-only.
-            # This is the only stable grouping signal present in the exported
-            # table; keep it in the wire descriptor so the client hides those
-            # rows until the track is upgraded.
-            vip_only = _int(task.get("actorCultivationRewardProgress")) >= 2
+            # Local fallback, not an APK VIP flag: the exported table lacks
+            # the original grouping. Keep client visibility and server claim
+            # authorization consistent with the documented two-point policy.
+            vip_only = task_vip_only(task)
             rows.append({"id": tid, "progress": entry["progress"], "isDone": entry["progress"] >= task["maxProgress"],
                          "rewardGot": False, "endTime": 0, "dailyRefresh": daily, "actorCultivationVipOnly": vip_only,
                          "actorCultivationActivityId": info["activityId"],
@@ -442,6 +446,8 @@ class LocalCultivation:
             raise CultivationError(409, "cultivation_task_already_claimed")
         if entry["progress"] < task["maxProgress"]:
             raise CultivationError(409, "cultivation_task_incomplete")
+        if task_vip_only(task) and not info["vip"]:
+            raise CultivationError(409, "cultivation_vip_required")
         config = CONFIG[info["activityId"]]
         progress = min(task["actorCultivationRewardProgress"], config["maxProgress"] - info["progress"])
         if task.get("refreshAfterGot"):

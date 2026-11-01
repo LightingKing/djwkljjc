@@ -1,0 +1,39 @@
+[
+  {
+    "source": "I:\\workspace\\mobilegame\\analysis\\lua-decompiled\\window__auth__auth.lua",
+    "destination": "sources/auth-v11.lua",
+    "sha256": "75aa2c2099c0fd3c93a53a15f68350e9c2d312b423142476d173f96e303ecd58",
+    "previousPatchedSource": "sources/auth-v9.lua",
+    "patchedSha256": "698b0b01bde4062292d048419f8076995602659fee31260a92644a94818998a9",
+    "reason": "Restore the original phone/email classifiers and ApiAuthInfo request outside explicit local loopback servers; retain local password account creation and v9 error handling only for the offline path."
+  },
+  {
+    "source": "I:\\workspace\\mobilegame\\analysis\\lua-decompiled\\manager__iaphandler.lua",
+    "destination": "sources/iaphandler-v11.lua",
+    "sha256": "3a8fb25a775af364605dd52677142eb030f650d64ec26d817ce84b51486ac0ba",
+    "previousPatchedSource": "sources/iaphandler.lua",
+    "patchedSha256": "b2ad615854c4a1330a6efd1256b093c164396ef7754fb8db790745c5c4a232d6",
+    "reason": "Restore the original remote-product, SDK refresh/purchase, and Midas proxy/sync branches outside explicit local loopback servers; retain existing local order/delivery path on offline servers."
+  },
+  {
+    "source": "I:\\workspace\\mobilegame\\analysis\\lua-decompiled\\window__welfare2__wlfpostcard.lua",
+    "destination": "sources/wlfpostcard-v11.lua",
+    "sha256": "1bcbe0473b9ffef794ad5665ad5bf96d57e07fd1b7461fd06f44aa9ce2783f8c",
+    "patchedSha256": "980bcc0cc516f2a636fc10cd361a653c2b881aedc5a0bb9110e23d78602efe21",
+    "reason": "Hide the initially active, uninitialized detail page before showing the postcard overview; retain default request error display."
+  },
+  {
+    "source": "I:\\workspace\\mobilegame\\analysis\\lua-decompiled\\window__welfare2__wlfdecrepittransport.lua",
+    "destination": "sources/wlfdecrepittransport-v11.lua",
+    "sha256": "2abe8f3c328b8d9c7168f73dc34e2a5225359893b05c5af7ebea634059e102c8",
+    "patchedSha256": "81916dc33a4efd7de759e67a3fb5e171070b2f946e3426aad0eded8802133b9d",
+    "reason": "Initialize the lazily instantiated Welfare2 tab from the original DiffActorInherit whitelist and refresh owned source actors before selection."
+  },
+  {
+    "source": "I:\\workspace\\mobilegame\\analysis\\lua-decompiled\\window__welfare2__wlfconditionreward.lua",
+    "destination": "sources/wlfconditionreward-v11.lua",
+    "sha256": "17f92849627af2a6821b5c13ab9648ccb00d5bf1809b49be99b7346d1e5799d9",
+    "patchedSha256": "249803ec6c40ee87467db83ed28a9520d923baf8175cf1836344b4a1ff627f3f",
+    "reason": "Assign the existing original ture_love artwork omitted from the prefab; retrieve missing reward qualification before opening the native selector."
+  }
+]

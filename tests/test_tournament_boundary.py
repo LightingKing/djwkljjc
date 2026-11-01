@@ -95,6 +95,7 @@ class TournamentBoundaryTests(unittest.TestCase):
         self.assertTrue(reward["resChange"])
         task_rows = {row["id"]: row for row in self.game.tasks.snapshot(self.profile)["tasks"]}
         self.assertEqual(task_rows[12]["progress"], 1)
+        self.assertEqual(task_rows[1208]["progress"], 1)
         self.assertEqual(self.call("POST", "/fci/tournament/winreward/", {"tournamentId": TOURNAMENT_ID, "activityType": 5, "winNum": 1})[0], 409)
         record = self.call("GET", "/fci/asyncpvprecord/")[1]
         self.assertEqual(record["todayMaxWinNum"], 1)

@@ -662,9 +662,11 @@ class LocalEvents:
             if self._continuous_tick(state):
                 self._save(profile, state)
             presents = self.game.profile_features.pending_role_presents(profile)
+            _status, activity_signin = self._activity_signin("GET", "/fci/activity-signin/32001", profile)
             return {
                 "continuousLoginResult": _message_to_dict(self._continuous_message(state)),
                 "signinResult": _message_to_dict(self._signin_message(state, self._date(signin=True))),
+                "activitySigninGet": _message_to_dict(activity_signin),
                 "rolePresentRedpoint": {"presents": presents},
             }
 

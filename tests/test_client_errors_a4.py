@@ -32,9 +32,10 @@ class ClientErrorA4Tests(unittest.TestCase):
 
     def test_opaque_bad_request_remains_safe_and_structured(self):
         self.assert_notify(400, {"error": "invalid_request"}, "Error_RequestFailed")
-        # Preserve the existing generic fallback for malformed routes without
-        # inventing a business message that the client might mistranslate.
-        self.assert_notify(400, {"error": "opaque_failure"}, "Window_SaveFail")
+        # Window_SaveFail is an image-export error, unrelated to this request.
+        self.assert_notify(400, {"error": "opaque_failure"}, "Error_RequestFailed")
+        self.assert_notify(409, {"error": "actor_skill_star_limit"}, "Error_ActorSkillLearnFailed")
+        self.assert_notify(400, {"error": "actor_skill_not_found"}, "Error_ActorSkillNotFound")
 
     def test_guild_role_present_and_unknown_task_errors_use_client_keys(self):
         self.assert_notify(403, {"error": "guild_permission_denied"}, "Error_GuildHaveNoPermission")

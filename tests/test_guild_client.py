@@ -254,7 +254,10 @@ class GuildClientTests(unittest.TestCase):
         restored = LocalGuild(reboot)
         self.assertEqual(restored.player_data(self.profile)["guildId"], 1)
         self.assertTrue(any(kind == 25 for _, kind, _ in self.pushes))
-        self.assertEqual(self.call("GET", "/fci/guild/1/record/")[1], [])
+        records = self.call("GET", "/fci/guild/1/record/")[1]
+        self.assertEqual(records, [{"content": "新成员已加入公会。", "time": self.now[0]}])
+        self.assert_message("ApiGuildRecord.result", records[0])
+        self.assertEqual(self.call("GET", "/fci/guild/1/record/", module=restored)[1], records)
         self.assertEqual(self.call("GET", "/fci/guild/1/skill/")[1], detail["skills"])
         self.assert_message("DbGuildData.VoteInfo", self.call("GET", "/fci/guild/1/vote/")[1])
 

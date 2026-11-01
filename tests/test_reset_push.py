@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 
 from accounts import LocalAccounts
 from game import LocalGame
@@ -109,6 +110,38 @@ class ResetPushTests(unittest.TestCase):
         self.assertIn(88, self.push_types())
         self.assertIn(74, self.push_types())
         self.assertEqual(self.connections[1].messages, [])
+
+    def test_online_world_messages_run_once_a_minute_for_connected_accounts(self):
+        with patch.object(self.game.social, 'tick', wraps=self.game.social.tick) as social_tick:
+            for _ in range(59):
+                self.now += 1
+                self.scheduler.tick()
+            self.assertEqual(social_tick.call_count, 0)
+            self.clear()
+            self.now += 1
+            self.scheduler.tick()
+            self.assertEqual(social_tick.call_count, 1)
+            for connection in self.connections:
+                self.assertEqual([name for name, _ in connection.messages], ['WorldMessage'])
+            self.clear()
+            restarted = ResetScheduler(self.game, self.services)
+            restarted.tick()
+            self.assertTrue(all(not connection.messages for connection in self.connections))
+            self.now -= 60
+            restarted.tick()
+            self.assertTrue(all(not connection.messages for connection in self.connections))
+            for service, connection in zip(self.services, self.connections):
+                service.unregister(connection)
+            self.now += 120
+            before = social_tick.call_count
+            self.scheduler.tick()
+            self.assertEqual(social_tick.call_count, before)
+            for service, connection in zip(self.services, self.connections):
+                service.register(connection, self.account)
+            self.scheduler.tick()
+            self.assertEqual(social_tick.call_count, before + 1)
+            for connection in self.connections:
+                self.assertEqual([name for name, _ in connection.messages], ['WorldMessage'])
 
 
 if __name__ == '__main__':

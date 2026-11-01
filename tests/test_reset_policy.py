@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from contextlib import closing
+import copy
 from datetime import datetime, timezone
 import json
 from pathlib import Path
@@ -12,7 +13,7 @@ from accounts import LocalAccounts
 from game import LocalGame
 from server.core.clock import ServerClock
 from server.core.reset import ResetPolicy
-from server.core.reset_migration import migrate_reset_policy
+from server.core.reset_migration import LEGACY, _convert, migrate_reset_policy
 from server.core.activity_schedule import ActivitySchedule
 from mall import window_start
 import test_systems
@@ -23,6 +24,49 @@ def ts(value):
 
 
 class ResetPolicyTests(unittest.TestCase):
+    def test_legacy_labels_do_not_depend_on_migration_time(self):
+        claimed = ts("2026-11-01T21:59:59Z")
+        old_day = LEGACY.day_index(claimed)
+        fixtures = {
+            "local_tasks": {"day": old_day, "loginDay": old_day, "week": LEGACY.week_index(claimed)},
+            "activity_mode_state": {"dailyRefresh": {"80001": old_day},
+                                    "weeklyRefresh": {"80003": LEGACY.week_index(claimed)}},
+            "local_social_state": {"relationPoint": {"day": old_day}},
+            "local_event_state": {"signin_date": "2026-11-01", "continuous_date": "2026-11-01",
+                                  "activity_signins": {"32001": {"date": "2026-11-01"}},
+                                  "everyday_window": f"46001:{ts('2026-10-30T06:00:00Z')}",
+                                  "everyday_signins": [1, 2, 3]},
+            "local_profile_features": {"share": {"weekKey": claimed // (7 * 86400)}},
+            "local_realtime_pvp_state": {"race": {"day": "2026-11-02"}},
+        }
+        policy = ResetPolicy()
+        for table, fixture in fixtures.items():
+            converted = []
+            for migrated_at in (claimed, claimed + 1, ts("2026-11-02T05:59:59Z"), ts("2026-11-04T08:00:00Z")):
+                state = copy.deepcopy(fixture)
+                _convert(table, state, migrated_at, policy)
+                converted.append(state)
+            with self.subTest(table=table):
+                self.assertTrue(all(value == converted[0] for value in converted))
+        tasks = copy.deepcopy(fixtures["local_tasks"])
+        _convert("local_tasks", tasks, claimed + 1, policy)
+        self.assertLess(tasks["day"], policy.day_index(claimed + 1))
+        self.assertLess(tasks["week"], policy.week_index(claimed + 1))
+        events = copy.deepcopy(fixtures["local_event_state"])
+        _convert("local_event_state", events, claimed + 1, policy)
+        self.assertEqual(events["everyday_migrated_dates"], ["2026-10-30", "2026-10-31", "2026-11-01"])
+        self.assertLess(events["signin_date"], policy.day_key(claimed + 1, signin=True))
+
+    def test_legacy_free_draw_deadline_uses_draw_time_on_both_sides_of_reset(self):
+        policy = ResetPolicy()
+        boundary = ts("2026-11-01T22:00:00Z")
+        for claimed, expected in ((boundary - 1, boundary), (boundary + 1, boundary + 86400)):
+            with self.subTest(claimed=claimed):
+                state = {"gachaPools": {"1": {"day": LEGACY.day_index(claimed),
+                                              "nextFree": claimed + 86400}}}
+                _convert("local_system_state", state, boundary + 30, policy)
+                self.assertEqual(state["gachaPools"]["1"]["nextFree"], expected)
+
     def test_local_day_week_and_month_boundaries_leave_epoch_unchanged(self):
         policy = ResetPolicy()
         before = ts("2026-11-01T21:59:59Z")
@@ -160,13 +204,54 @@ class ResetIntegrationTests(unittest.TestCase):
         self.assertEqual(converted["actors"], state["actors"])
         self.assertEqual(self.game._profile(self.account)["resources"], assets)
         self.assertEqual(converted["gachaPools"]["1"]["today"], 3)
-        self.assertEqual(converted["gachaPools"]["1"]["nextFree"], self.game.reset_policy.next_boundary(self.now[0]))
-        self.assertEqual(self.game.tasks._state(self.profile)["day"], self.game.reset_policy.day_index(self.now[0]))
+        # The draw happened before Beijing 06:00, so this boundary is due.
+        # Rebasing using migration time used to postpone it by another day.
+        self.assertEqual(converted["gachaPools"]["1"]["nextFree"], self.now[0])
+        self.assertEqual(self.game.tasks._state(self.profile)["day"], self.game.reset_policy.day_index(self.now[0] - 1))
         migrate_reset_policy(self.game)
         self.assertEqual(self.game.systems._state(self.profile), converted)
         self.assertEqual(self.game.tasks._state(self.profile)["activePoint"], 37)
         restarted = LocalGame(self.root, self.accounts, clock=lambda: self.now[0], unified_store_path="local.sqlite3")
         self.assertEqual(restarted.systems._state(self.profile), converted)
+        self.assertEqual(restarted.tasks.snapshot(self.profile)["activePoint"], 0)
+        body = json.dumps({"id": 1, "gachaFree": True}).encode()
+        self.assertEqual(restarted.handle_http("POST", "/fci/gachatrade/", body, "application/json", self.auth)[0], 200)
+        self.assertEqual(restarted.handle_http("POST", "/fci/gachatrade/", body, "application/json", self.auth)[0], 409)
+
+    def test_migration_policy_checks_only_calendar_fields_and_never_reconverts(self):
+        state = self.game.tasks._state(self.profile)
+        with closing(self.game._connect()) as connection, connection:
+            recorded = json.loads(connection.execute("SELECT policy_json FROM local_reset_policy_migrations").fetchone()[0])
+            recorded["future_metadata"] = "does not affect reset periods"
+            connection.execute("UPDATE local_reset_policy_migrations SET policy_json = ?", (json.dumps(recorded),))
+        self.now[0] += 86400
+        migrate_reset_policy(self.game)
+        self.assertEqual(self.game.tasks._state(self.profile), state)
+        with closing(self.game._connect()) as connection, connection:
+            recorded["daily_refresh"] = "07:00:00"
+            connection.execute("UPDATE local_reset_policy_migrations SET policy_json = ?", (json.dumps(recorded),))
+        with self.assertRaisesRegex(ValueError, "explicit new migration"):
+            migrate_reset_policy(self.game)
+        self.assertEqual(self.game.tasks._state(self.profile), state)
+
+    def test_migration_uses_resource_purchase_timestamp_and_preserves_amounts(self):
+        before_reset = ts("2026-11-01T21:59:59Z")
+        after_reset = before_reset + 2
+        self.now[0] = after_reset + 60
+        with closing(self.game.economy._connect()) as connection, connection:
+            connection.execute("INSERT OR REPLACE INTO economy_profiles "
+                               "(account_id,shop_json,pending_json,purchases_json,updated_at) VALUES(?,?,?,?,?)",
+                               (self.profile["account_id"], "[]", "{}", json.dumps({"resBuy": {
+                                   "1:0": {"dayKey": "2026-11-01", "startTime": before_reset, "attendTimes": 2},
+                                   "2:0": {"dayKey": "2026-11-01", "startTime": after_reset, "attendTimes": 3},
+                               }}), self.now[0]))
+            connection.execute("DELETE FROM local_reset_policy_migrations")
+        migrate_reset_policy(self.game)
+        with closing(self.game.economy._connect()) as connection:
+            purchases = json.loads(connection.execute("SELECT purchases_json FROM economy_profiles WHERE account_id=?",
+                                                      (self.profile["account_id"],)).fetchone()[0])["resBuy"]
+        self.assertEqual(purchases["1:0"], {"dayKey": "2026-11-01", "startTime": before_reset, "attendTimes": 2})
+        self.assertEqual(purchases["2:0"], {"dayKey": "2026-11-02", "startTime": after_reset, "attendTimes": 3})
 
     def test_free_draw_refreshes_at_six_not_twenty_four_hours_after_drawing(self):
         body = json.dumps({"id": 1, "gachaFree": True}).encode()

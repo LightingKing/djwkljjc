@@ -30,10 +30,13 @@ class LocalSystemsMaintenanceTests(unittest.TestCase):
         return game.handle_http(method, path, body, "application/json", token)
 
     def test_actor_and_equipment_costs_locks_and_persist(self):
+        from local_mailbox import send_mail
+        from systems import ACTOR_STAR_PROMOTIONS
+
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             accounts = LocalAccounts(root / "accounts")
-            game = LocalGame(root / "game", accounts)
+            game = LocalGame(root / "game", accounts, initial_level=30)
             account, token = self._guest(accounts)
             profile_before = game._profile(account)
             gold_before = next(x["count"] for x in profile_before["resources"] if x["type"] == 7)
@@ -47,18 +50,23 @@ class LocalSystemsMaintenanceTests(unittest.TestCase):
 
             status, _ = self._call(game, token, "POST", "/fci/actor/1001/setactorlock/", {"isLock": True})
             self.assertEqual(status, 200)
-            status, _ = self._call(game, token, "POST", "/fci/actor/1001/skill/learn/", {"skillId": 1001001})
+            rewards = [{"type": 11, "id": 10004, "count": 20}, {"type": 11, "id": 40001, "count": 1}]
+            rewards.extend(ACTOR_STAR_PROMOTIONS[(1001, 2)]["starCost"])
+            mail = send_mail(game, game._profile(account), "maintenance QA", "isolated materials", rewards)
+            status, _ = self._call(game, token, "PATCH", f'/fci/mail/{mail["id"]}', {"attachmentsGot": True})
             self.assertEqual(status, 200)
-            status, _ = self._call(game, token, "POST", "/fci/actor/1001/starlevelup/", {})
+            status, _ = self._call(game, token, "POST", "/fci/actor/1/levelupgrade/",
+                                   {"foodRes": [{"type": 11, "id": 10004, "count": 20}]})
+            self.assertEqual(status, 200)
+            status, _ = self._call(game, token, "POST", "/fci/actor/1/starupgrade/", {})
+            self.assertEqual(status, 200)
+            status, _ = self._call(game, token, "POST", "/fci/actor/1/skilllearnning/", {"skillId": 1001002})
             self.assertEqual(status, 200)
 
             # Enhance needs a real owned item plus food (a never-granted uid
             # such as 20001 is 404): grant equipment 20000 and material 40001.
             profile = game._profile(account)
             equip_uid = equipment.grant_equipment(game, profile, 20000)["equip"]["uid"]
-            state = game.systems._state(profile)
-            state.setdefault("items", {})["40001"] = {"id": 40001, "count": 1}
-            game.systems._save(profile, state)
             status, _ = self._call(
                 game, token, "POST", f"/fci/equip/{equip_uid}/enhance/",
                 {"foodRes": [{"type": 11, "id": 40001, "count": 1}]},
@@ -72,9 +80,10 @@ class LocalSystemsMaintenanceTests(unittest.TestCase):
             restarted = LocalGame(root / "game", accounts)
             status, actor = self._call(restarted, token, "GET", "/fci/actor/1001/")
             self.assertEqual(status, 200)
-            self.assertEqual(actor.result.level, 2)
+            self.assertEqual(actor.result.level, 27)
+            self.assertEqual(actor.result.star, 2)
             self.assertTrue(actor.result.is_lock)
-            self.assertTrue(any(skill.id == 1001001 for skill in actor.result.skills))
+            self.assertTrue(any(skill.id == 1001002 and skill.level == 2 for skill in actor.result.skills))
 
     def test_items_resources_and_cultivation_are_atomic_and_persistent(self):
         with tempfile.TemporaryDirectory() as temp:

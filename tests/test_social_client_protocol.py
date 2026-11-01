@@ -34,7 +34,8 @@ class SocialClientProtocolTests(unittest.TestCase):
 
     def call(self, method, path, payload=None, *, game=None):
         body = payload if isinstance(payload, bytes) else json.dumps(payload).encode() if payload is not None else None
-        return (game or self.game).handle_http(method, path, body, "application/json", self.auth)
+        content_type = "application/wireformat" if isinstance(payload, bytes) else "application/json"
+        return (game or self.game).handle_http(method, path, body, content_type, self.auth)
 
     def wire(self, name, **fields):
         return message_factory.GetMessageClass(self.game._pool.FindMessageTypeByName(name))(**fields).SerializeToString()
@@ -117,6 +118,13 @@ class SocialClientProtocolTests(unittest.TestCase):
         friend_ids = [row["playerId"] for row in self.call("GET", "/fci/friendlist")[1]]
         self.assertIn(ids[0], friend_ids)
         self.assertNotIn(ids[1], friend_ids)
+        # A stale accept for a rejected application must not create a ghost
+        # friend, including after reconnecting to the persisted application list.
+        self.base.clear()
+        self.assertEqual(self.call("POST", "/fci/applylist",
+            self.wire("ApiRelationApplyList", target_id=ids[1], is_agree=True))[0], 200)
+        self.assertNotIn(ids[1], [row["playerId"] for row in self.call("GET", "/fci/friendlist")[1]])
+        self.assertFalse(any(kind == 35 for kind, _ in self.base))
 
     def test_applications_exclude_friends_blocklist_limit_and_clock_rollback(self):
         self.call("GET", "/fci/applylist")
@@ -138,7 +146,12 @@ class SocialClientProtocolTests(unittest.TestCase):
         payload = self.wire("ApiChat", channel=1, content="world", world_sub_channel=1)
         self.assertEqual(self.call("POST", "/fci/chat", payload)[0], 403)
         self.level(12)
-        self.assertEqual(self.call("POST", "/fci/chat", payload), (200, {}))
+        status, sent = self.call("POST", "/fci/chat/", payload)
+        self.assertEqual(status, 200)
+        self.assertEqual((sent["content"], sent["senderId"], sent["channel"], sent["subChannelId"]),
+                         ("world", self.profile["player_id"], 1, 1))
+        world_cls = message_factory.GetMessageClass(self.game._pool.FindMessageTypeByName("WorldMessage"))
+        self.assertEqual(json_format.ParseDict(sent, world_cls()).content, "world")
         self.assertEqual(self.messages[-1][0], "WorldMessage")
         self.assertEqual(self.messages[-1][1]["time"], self.now[0])
         self.assertEqual(self.messages[-1][1]["subChannelId"], 1)
@@ -158,8 +171,17 @@ class SocialClientProtocolTests(unittest.TestCase):
     def test_private_reply_base24_and_persisted_cooldown(self):
         self.level(12)
         payload = {"channel": 3, "content": "hello", "targetId": "local-bot-001"}
-        self.assertEqual(self.call("POST", "/fci/chat", payload), (200, {}))
-        self.assertEqual(self.base[-1], (24, ("local-bot-001", self.game.social.bots.get("local-bot-001")["name"], "收到，一起加油！", str(self.now[0]))))
+        native = self.wire("ApiChat", channel=3, content="hello", target_id="local-bot-001")
+        self.assertEqual(self.call("POST", "/fci/chat/", native), (200, {"newContent": "hello"}))
+        private_pushes = [row for row in self.base if row[0] == 24]
+        self.assertEqual(private_pushes, [(24, ("local-bot-001", self.game.social.bots.get("local-bot-001")["name"],
+                                               "收到，一起加油！", str(self.now[0])))])
+        # The response is the sender's own text; every base24 sender is the
+        # peer. ChatUtil therefore cannot create PrivateMsg/<our playerId>.
+        self.assertNotIn(self.profile["player_id"], [row[1][0] for row in private_pushes])
+        saved = self.game.social._state(self.profile)["channelMessages"][-2:]
+        self.assertEqual([(row["senderId"], row["content"]) for row in saved],
+                         [(self.profile["player_id"], "hello"), ("local-bot-001", "收到，一起加油！")])
         self.assertEqual(self.call("POST", "/fci/chat", payload, game=self.make_game())[0], 429)
         self.now[0] += 1
         self.assertEqual(self.call("POST", "/fci/chat", payload)[0], 200)

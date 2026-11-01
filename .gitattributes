@@ -1,0 +1,4 @@
+# Keep the new cumulative patch's recorded source digests identical on checkout.
+client-patch/hot-update/sources/*-v11.lua text eol=lf
+client-patch/hot-update/source-origins-v11.json text eol=lf
+client-patch/hot-update/modules-v11.json text eol=lf

@@ -416,7 +416,7 @@ class FixtureServerTests(unittest.TestCase):
         self.assertEqual(status, 509)
         status, body = self.request('POST', '/ClickGame/', b'not-lz4', {'Content-Encoding':'lz4'})
         self.assertEqual(status, 509)
-        self.assertEqual(json.loads(body), {"notify": {"code": "Window_SaveFail"}})
+        self.assertEqual(json.loads(body), {"notify": {"code": "Error_RequestFailed"}})
 
     def test_role_notepad_query_survives_real_http_dispatch(self) -> None:
         from game import LocalGame
@@ -445,10 +445,10 @@ class FixtureServerTests(unittest.TestCase):
                 self.assertEqual([record["roleId"] for record in records], expected)
         status, body = self.request("GET", "/fci/RoleNotePad/?uids=7,3,1", headers=headers)
         self.assertEqual(status, 509)
-        self.assertEqual(json.loads(body), {"notify": {"code": "Window_SaveFail"}})
+        self.assertEqual(json.loads(body), {"notify": {"code": "Error_RequestFailed"}})
         status, body = self.request("GET", "/fci/RoleNotePad/?uids=", headers=headers)
         self.assertEqual(status, 509)
-        self.assertEqual(json.loads(body), {"notify": {"code": "Window_SaveFail"}})
+        self.assertEqual(json.loads(body), {"notify": {"code": "Error_RequestFailed"}})
         status, body = self.request("HEAD", "/fci/RoleNotePad/?uids=7", headers=headers)
         self.assertEqual((status, body), (200, b""))
 

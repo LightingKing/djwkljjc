@@ -273,22 +273,18 @@ class LocalSystemsTests(unittest.TestCase):
             self.assertEqual(assist_claim["request"]["status"], "claimed")
 
             status, cleared = game.handle_http("POST", "/fci/guild/dungeon/settle", b'{"stage":2,"score":250}', "application/json", auth)
-            self.assertEqual(status, 200)
-            self.assertEqual(cleared["result"]["totalScore"], 250)
+            self.assertEqual((status, cleared["error"]), (404, "guild_dungeon_not_implemented"))
             status, first_keyed = game.handle_http("POST", "/fci/guild/dungeon/settle", b'{"stage":3,"score":40,"requestId":"guild-run-1"}', "application/json", auth)
-            self.assertEqual(status, 200)
+            self.assertEqual(status, 404)
             status, repeated_keyed = game.handle_http("POST", "/fci/guild/dungeon/settle", b'{"stage":3,"score":40,"requestId":"guild-run-1"}', "application/json", auth)
-            self.assertEqual(status, 200)
-            self.assertTrue(repeated_keyed["duplicate"])
-            self.assertEqual(repeated_keyed["result"]["totalScore"], first_keyed["result"]["totalScore"])
+            self.assertEqual((status, repeated_keyed), (404, first_keyed))
             restarted = LocalGame(root / "game", accounts)
             status, detail = restarted.handle_http("GET", "/fci/guild/summary", authorization=auth)
             self.assertEqual(status, 200)
             self.assertEqual(detail["guild"]["president"], "local-bot-002")
-            self.assertEqual(detail["records"][-1]["type"], "dungeon_clear")
+            self.assertNotIn("dungeon_clear", [record["type"] for record in detail["records"]])
             status, records = restarted.handle_http("GET", "/fci/guild-dungeon-record/", authorization=auth)
-            self.assertEqual(status, 200)
-            self.assertEqual(records["dungeonRecords"][-1]["stage"], 3)
+            self.assertEqual((status, records["error"]), (404, "guild_dungeon_not_implemented"))
 
     def test_player_profile_level_background_collections_and_signboard_persist(self):
         with tempfile.TemporaryDirectory() as temp:

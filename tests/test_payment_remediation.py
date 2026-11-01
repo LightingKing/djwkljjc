@@ -18,6 +18,7 @@ sys.path.insert(0, str(ROOT / "tests"))
 
 from accounts import LocalAccounts
 from game import LocalGame
+import mall as mall_module
 import test_systems
 
 GEM60 = "com.tencent.fcicv.Gem60.android"
@@ -72,6 +73,89 @@ class PaymentRemediationTests(unittest.TestCase):
 
     def restart(self):
         self.game = LocalGame(self.root / "game", self.accounts, clock=lambda: self.now[0])
+
+    def test_pending_checkouts_are_bounded_and_expire_with_audit_records(self):
+        with patch.object(mall_module, "MAX_PENDING_ORDERS", 3):
+            tokens = [self.touch(GEM60) for _ in range(5)]
+            state = self.game.mall._state(self.profile())
+            self.assertEqual(set(state["pending"]), set(tokens[-3:]))
+            orders = self.game.mall.orders(self.profile())
+            self.assertEqual(len(orders), 5)
+            self.assertEqual(sum(row["status"] == "superseded" for row in orders), 2)
+            self.assertEqual(self.deliver(tokens[0]), (409, {"error": "purchase_token_expired"}))
+            before = copy.deepcopy(self.profile()["resources"])
+            self.now[0] += mall_module.PENDING_ORDER_TTL
+            self.assertEqual(self.deliver(tokens[-1]), (409, {"error": "purchase_token_expired"}))
+            self.assertEqual(self.game.mall._state(self.profile())["pending"], {})
+            self.assertEqual(sum(row["status"] == "expired" for row in self.game.mall.orders(self.profile())), 3)
+            self.assertEqual(self.profile()["resources"], before)
+            self.restart()
+            self.assertEqual(self.deliver(tokens[-1])[0], 409)
+            self.assertEqual(self.deliver(self.touch(GEM60))[0], 200)
+
+    def test_delivered_token_index_survives_both_json_cache_limits_and_restart(self):
+        with patch.object(mall_module, "MAX_DELIVERED_REPLIES", 1), \
+             patch.object(mall_module, "MAX_DELIVERED_TOKENS", 2):
+            purchases = [self.buy(GEM60) for _ in range(4)]
+            state = self.game.mall._state(self.profile())
+            self.assertEqual((len(state["delivered"]), len(state["deliveredTokens"])), (1, 2))
+            token, original = purchases[0]
+            self.assertNotIn(token, state["deliveredTokens"])
+            before = copy.deepcopy(self.profile()["resources"])
+            self.restart()
+            status, replay = self.native("/fci/purchasedelevery/", "ApiPurchaseDelevery",
+                                         product_id=GEM60, trade_data=token)
+            self.assertEqual((status, replay["transactionId"], replay["resChange"]),
+                             (200, original["transactionId"], []))
+            self.assertEqual(self.profile()["resources"], before)
+
+    def test_legacy_full_replies_are_indexed_before_cache_trim(self):
+        # Migration fixture: these are actual completed orders from the old
+        # format, which stored full replies but no durable token markers.
+        purchases = [self.buy(GEM60) for _ in range(3)]
+        state = self.game.mall._state(self.profile())
+        state.pop("deliveredTokens", None)
+        self.game.mall._save(self.profile(), state)
+        with closing(self.game._connect()) as connection, connection:
+            connection.execute("DELETE FROM local_mall_receipts WHERE account_id=?",
+                               (self.profile()["account_id"],))
+        with patch.object(mall_module, "MAX_DELIVERED_REPLIES", 1):
+            self.restart()
+        token, original = purchases[0]
+        self.assertNotIn(token, self.game.mall._state(self.profile())["delivered"])
+        before = copy.deepcopy(self.profile()["resources"])
+        status, replay = self.deliver(token)
+        self.assertEqual((status, replay["transactionId"], replay["resChange"]),
+                         (200, original["transactionId"], []))
+        self.assertEqual(self.profile()["resources"], before)
+
+    def test_receipt_index_rejects_other_accounts_and_guessed_order_tokens(self):
+        token, reply = self.buy(GEM60)
+        other, auth = test_systems.LocalSystemsTests._guest(self.accounts)
+        other_profile = self.game._profile(other)
+        self.assertNotEqual(self.profile()["account_id"], other_profile["account_id"])
+        other_before = copy.deepcopy(other_profile["resources"])
+        self.assertIsNone(self.game.mall.handle_http("POST", "/fci/purchasedelevery/",
+                         json.dumps({"tradeData": token}).encode(), other_profile))
+        self.assertEqual(self.game._profile(other)["resources"], other_before)
+        self.assertIsNone(self.deliver("local-sandbox:" + reply["transactionId"]))
+        self.assertIsNone(self.deliver(token + "forged"))
+
+    def test_legacy_order_without_token_evidence_is_not_reconstructed(self):
+        token, reply = self.buy(GEM60)
+        state = self.game.mall._state(self.profile())
+        state["delivered"].clear()
+        state["deliveredTokens"].clear()
+        self.game.mall._save(self.profile(), state)
+        with closing(self.game._connect()) as connection, connection:
+            connection.execute("DELETE FROM local_mall_receipts WHERE account_id=?",
+                               (self.profile()["account_id"],))
+        self.restart()
+        self.assertTrue(any(row["order_id"] == reply["transactionId"]
+                            for row in self.game.mall.orders(self.profile())))
+        before = copy.deepcopy(self.profile()["resources"])
+        self.assertIsNone(self.deliver(token))
+        self.assertEqual(self.profile()["resources"], before)
 
     def test_first_bonus_replaces_promotion_and_survives_restart(self):
         token, reply = self.buy(GEM1280)
@@ -236,6 +320,7 @@ class PaymentRemediationTests(unittest.TestCase):
                 self.assertEqual(self.profile()["resources"], before_resources)
                 self.assertEqual(self.game.systems._state(self.profile()), before_systems)
                 self.assertEqual(self.game.mall._state(self.profile()), before_mall)
+                self.assertIsNone(self.game.mall._receipt(self.profile(), token))
                 self.assertEqual(pushed, [])
                 self.assertEqual(self.deliver(token)[0], 200)
 

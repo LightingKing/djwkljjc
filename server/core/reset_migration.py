@@ -1,14 +1,14 @@
 """One-time, transactional conversion of legacy UTC reset markers.
 
 Balances, inventories, characters and historical order timestamps are never
-rewritten.  A current legacy period remains consumed in the current new
-period; older markers retain the number of missed periods.  Each database
-records the policy version in the same commit as its converted markers.
+rewritten. Period labels are converted at their original boundary, never at
+the server restart time. Legacy labels without a claim timestamp may allow
+one extra reset; they must not consume a later Beijing day. Already-migrated
+databases are not converted a second time.
 """
 from __future__ import annotations
 
 from contextlib import closing
-from dataclasses import asdict
 from datetime import date, datetime, timedelta, timezone
 import json
 from pathlib import Path
@@ -20,18 +20,28 @@ VERSION = 1
 LEGACY = ResetPolicy(utc_offset_seconds=0)
 TABLES = ("local_tasks", "local_system_state", "activity_mode_state", "local_social_state",
           "local_realtime_pvp_state", "local_profile_features", "local_event_state")
+POLICY_FIELDS = ("utc_offset_seconds", "daily_refresh", "signin_refresh", "week_start")
 
 
-def _integer(record, key, old, new):
+def _integer(record, key, policy, *, weekly=False, epoch_week=False):
     value = record.get(key)
     if value is None or value == "" or value == 0:
         return
-    record[key] = int(value) + new - old
+    if epoch_week:
+        stamp = int(value) * 7 * 86400
+    elif weekly:
+        stamp = LEGACY.day_start_from_index(int(value) * 7 - 3)
+    else:
+        stamp = LEGACY.day_start_from_index(int(value))
+    record[key] = policy.week_index(stamp) if weekly or epoch_week else policy.day_index(stamp)
 
 
-def _date(record, key, old, new):
+def _date(record, key, policy, *, signin=False, legacy_offset=21600, claimed_at=None):
     value = record.get(key)
     if not value:
+        return
+    if claimed_at:
+        record[key] = policy.day_key(int(claimed_at), signin=signin)
         return
     try:
         stamp = date.fromisoformat(str(value))
@@ -40,43 +50,51 @@ def _date(record, key, old, new):
         if not str(value).lstrip("-").isdigit():
             raise ValueError("invalid persisted reset date: " + str(value))
         stamp = date(1970, 1, 1) + timedelta(days=int(value))
-    record[key] = (stamp + (date.fromisoformat(new) - date.fromisoformat(old))).isoformat()
+    epoch = int(datetime.combine(stamp, datetime.min.time(), timezone.utc).timestamp()) + legacy_offset
+    record[key] = policy.day_key(epoch, signin=signin)
 
 
 def _convert(table, state, now, policy):
-    old_day, new_day = LEGACY.day_index(now), policy.day_index(now)
-    old_week, new_week = LEGACY.week_index(now), policy.week_index(now)
     if table == "local_tasks":
         for key in ("day", "loginDay"):
-            _integer(state, key, old_day, new_day)
-        _integer(state, "week", old_week, new_week)
+            _integer(state, key, policy)
+        _integer(state, "week", policy, weekly=True)
     elif table == "local_system_state":
-        for pool in state.get("gachaPools", {}).values():
-            _integer(pool, "day", old_day, new_day)
-            if int(pool.get("nextFree", 0) or 0) > now:
-                pool["nextFree"] = policy.next_boundary(now)
-        _integer(state.get("favourGiftDaily", {}), "day", old_day, new_day)
+        from systems import GACHA_TYPES
+        for pool_id, pool in state.get("gachaPools", {}).items():
+            _integer(pool, "day", policy)
+            next_free = int(pool.get("nextFree", 0) or 0)
+            interval = int(GACHA_TYPES.get(int(pool_id), {}).get("gachaFreeInterval", 0) or 0)
+            if next_free > now and interval > 0:
+                # Legacy free draws used draw_time + interval. Recover that
+                # timestamp so a restart after 06:00 does not postpone a due draw.
+                pool["nextFree"] = policy.next_boundary(next_free - interval)
+        _integer(state.get("favourGiftDaily", {}), "day", policy)
     elif table == "activity_mode_state":
         marks = state.get("dailyRefresh", {})
         for key in marks:
-            _integer(marks, key, old_day, new_day)
+            _integer(marks, key, policy)
+        marks = state.get("weeklyRefresh", {})
+        for key in marks:
+            _integer(marks, key, policy, weekly=True)
         for key in ("material", "tower", "deploy", "triggered"):
-            _integer(state.get(key, {}), "day", old_day, new_day)
+            _integer(state.get(key, {}), "day", policy)
     elif table == "local_social_state":
-        _integer(state.get("relationPoint", {}), "day", old_day, new_day)
+        _integer(state.get("relationPoint", {}), "day", policy)
     elif table == "local_realtime_pvp_state":
-        old = datetime.fromtimestamp(now + 6 * 3600, timezone.utc).date().isoformat()
         for mode in ("race", "burst"):
-            _date(state.get(mode, {}), "day", old, policy.day_key(now))
+            # The old key was date(now + 6h), so its labelled day began at
+            # 18:00 UTC on the preceding calendar date.
+            _date(state.get(mode, {}), "day", policy, legacy_offset=-21600)
     elif table == "local_profile_features":
-        _integer(state.get("share", {}), "weekKey", now // (7 * 86400), new_week)
+        _integer(state.get("share", {}), "weekKey", policy, epoch_week=True)
     elif table == "local_event_state":
         for key in ("signin_date", "everyday_date"):
-            _date(state, key, LEGACY.day_key(now), policy.day_key(now, signin=True))
+            _date(state, key, policy, signin=True)
         for key in ("continuous_date", "web_signin_date"):
-            _date(state, key, LEGACY.day_key(now), policy.day_key(now))
+            _date(state, key, policy)
         for entry in state.get("activity_signins", {}).values():
-            _date(entry, "date", LEGACY.day_key(now), policy.day_key(now, signin=True))
+            _date(entry, "date", policy, signin=True)
         # Rebase the active 46 calendar by actual calendar dates.  Unlike the
         # old rotation, subsequent windows are always a full ten days.
         window = state.get("everyday_window")
@@ -84,11 +102,9 @@ def _convert(table, state, now, policy):
             activity, old_start = str(window).rsplit(":", 1)
             old_start = int(old_start)
             claimed_dates = set()
-            delta = date.fromisoformat(policy.day_key(now, signin=True)) - date.fromisoformat(LEGACY.day_key(now))
             for day in state.get("everyday_signins", []):
-                # A legacy 06:00 UTC calendar labelled this UTC date as its day.
-                label = datetime.fromtimestamp(old_start + (int(day) - 1) * 86400, timezone.utc).date()
-                claimed_dates.add((label + delta).isoformat())
+                boundary = old_start + (int(day) - 1) * 86400
+                claimed_dates.add(policy.day_key(boundary, signin=True))
             # The schedule is attached after LocalGame construction.  Defer
             # mapping calendar dates into its window until the first request.
             state["everyday_migrated_dates"] = sorted(claimed_dates)
@@ -96,7 +112,8 @@ def _convert(table, state, now, policy):
 
 def migrate_reset_policy(game) -> None:
     policy, now = game.reset_policy, game._now()
-    signature = json.dumps(asdict(policy), sort_keys=True, separators=(",", ":"))
+    signature_fields = {field: getattr(policy, field) for field in POLICY_FIELDS}
+    signature = json.dumps(signature_fields, sort_keys=True, separators=(",", ":"))
     paths = {Path(game.db_path).resolve(), Path(game.economy.db_path).resolve()}
     with game._lock:
         for path in sorted(paths):
@@ -109,7 +126,8 @@ def migrate_reset_policy(game) -> None:
                     recorded = connection.execute("SELECT policy_json FROM local_reset_policy_migrations WHERE version = ?",
                                                   (VERSION,)).fetchone()
                     if recorded is not None:
-                        if recorded[0] != signature:
+                        old_signature = json.loads(recorded[0])
+                        if {field: old_signature.get(field) for field in POLICY_FIELDS} != signature_fields:
                             raise ValueError("reset policy changed after migration; an explicit new migration is required")
                         connection.rollback()
                         continue
@@ -130,7 +148,7 @@ def migrate_reset_policy(game) -> None:
                         for row in connection.execute("SELECT account_id, shop_json, purchases_json FROM economy_profiles").fetchall():
                             shops, purchases = json.loads(row["shop_json"]), json.loads(row["purchases_json"])
                             for record in purchases.get("resBuy", {}).values():
-                                _date(record, "dayKey", LEGACY.day_key(now), policy.day_key(now))
+                                _date(record, "dayKey", policy, claimed_at=record.get("startTime"))
                             for shop in shops:
                                 base = bases.get(int(shop.get("shopId", 0))) if isinstance(shop, dict) else None
                                 if base is not None:

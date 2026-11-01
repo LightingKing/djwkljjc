@@ -57,6 +57,8 @@ class ClientErrorLocalizationTests(unittest.TestCase):
             (400, "opaque_failure"), (401, "invalid_access_token"),
             (401, "invalid_credentials"), (404, "unknown_account"),
             (409, "level_too_low"),
+            (400, "actor_skill_not_found"), (409, "actor_skill_star_limit"),
+            (409, "cultivation_vip_required"), (409, "purchase_token_expired"),
         )
         emitted = {
             client_error_reply(status, {"error": reason})[1]["notify"]["code"]

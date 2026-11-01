@@ -294,25 +294,17 @@ class LocalGuild:
     def _resources(self, conn, profile, changes, now):
         """Canonical economy/bag stores, joined to the guild transaction.
 
-        grant_rewards/_change_resources open their own connections, so calling
-        them here would split commits (and deadlock after BEGIN IMMEDIATE).
-        This narrow adapter uses economy's resource normalization and the same
-        bag schema, returning the identical STResourceDynamic contract.
+        LocalGame's borrowed connections share the active transaction.  Base
+        resources must use economy's total/paid currency coupling; only bag
+        items need the guild adapter.  A later guild failure rolls both back.
         """
-        row = conn.execute("SELECT resources_json FROM game_profiles WHERE account_id=?", (profile["account_id"],)).fetchone()
-        if row is None:
-            raise GuildError("profile_not_found", 404)
-        resources = self.game.economy._resources({"resources": json.loads(row["resources_json"])})
-        index = {}
-        for res in resources:
-            key = (res["type"], res["id"], res["param"])
-            index[key] = index.get(key, 0) + res["count"]
         bag = self._system_state(conn, profile)
         deltas = {}
         for res in changes:
             key = (_int(res.get("type")), _int(res.get("id")), _int(res.get("param")))
             deltas[key] = deltas.get(key, 0) + _int(res.get("count"))
         result = []
+        base_changes = []
         for (kind, rid, param), amount in deltas.items():
             if kind == 11:
                 item = bag.setdefault("items", {}).setdefault(str(rid), {"count": 0})
@@ -322,15 +314,24 @@ class LocalGuild:
                 item["count"] = value
                 if amount > 0:
                     item.update(gotTime=now, isNew=True)
+                result.append({"baseRes": {"type": kind, "id": rid, "param": param,
+                                           "count": value, "countDelta": amount}})
             else:
-                value = index.get((kind, rid, param), 0) + amount
-                if value < 0:
-                    raise GuildError("insufficient_resource")
-                index[kind, rid, param] = value
-            result.append({"baseRes": {"type": kind, "id": rid, "param": param,
-                                       "count": value, "countDelta": amount}})
-        conn.execute("UPDATE game_profiles SET resources_json=?,updated_at=? WHERE account_id=?",
-                     (_dump([{"type": k[0], "id": k[1], "param": k[2], "count": v} for k, v in index.items()]), now, profile["account_id"]))
+                base_changes.append({"type": kind, "id": rid, "param": param, "count": amount})
+        ok, changed, error = self.game.economy._change_resources(profile, base_changes)
+        if not ok:
+            raise GuildError(error or "insufficient_resource", 404 if error == "profile_not_found" else 409)
+        result.extend({"baseRes": row} for row in changed)
+        # Idempotent donation replay explicitly returns current balances with
+        # zero deltas even though the canonical ledger omits unchanged rows.
+        present = {(row["type"], row["id"], row["param"]) for row in changed}
+        fresh = conn.execute("SELECT resources_json FROM game_profiles WHERE account_id=?", (profile["account_id"],)).fetchone()
+        balances = {(row["type"], row.get("id", 0), row.get("param", 0)): row["count"]
+                    for row in json.loads(fresh["resources_json"])}
+        for row in base_changes:
+            key = (row["type"], row["id"], row["param"])
+            if key not in present:
+                result.append({"baseRes": dict(row, count=balances.get(key, 0), countDelta=0)})
         conn.execute("INSERT INTO local_system_state(account_id,state_json,updated_at) VALUES(?,?,?) "
                      "ON CONFLICT(account_id) DO UPDATE SET state_json=excluded.state_json,updated_at=excluded.updated_at",
                      (profile["account_id"], _dump(bag), now))
@@ -398,6 +399,18 @@ class LocalGuild:
             if owner:
                 for kind in types:
                     notices.append(({"account_id": owner["accountId"], "player_id": pid}, kind, []))
+
+    @staticmethod
+    def _record_event(state, guild, notices, now, content):
+        """Native ApiGuildRecord.result rows and matching committed pushes."""
+        records = guild.setdefault("records", [])
+        records.append({"content": str(content), "time": int(now)})
+        del records[:-100]
+        for pid in guild["members"]:
+            owner = state["players"].get(pid)
+            if owner:
+                target = {"account_id": owner["accountId"], "player_id": pid}
+                notices.extend(((target, 31, [str(content)]), (target, 54, [])))
 
     def _refresh_votes(self, state, now, notices):
         for guild in state["guilds"].values():
@@ -596,6 +609,8 @@ class LocalGuild:
             invited_guild = state["guilds"].get(str(declined_id))
             if invited_guild:
                 invited_guild.get("invitedMembers", {}).pop(pid, None)
+                self._notify_members(state, invited_guild, notices, 53)
+            notices.append((profile, 28, []))
             return 200, {}
         if route == "/fci/guild/" and method == "POST":
             if player["guildId"]:
@@ -618,6 +633,7 @@ class LocalGuild:
             guild = self._new_guild(gid, name, now, profile, body)
             state["guilds"][str(gid)] = guild
             player.update(guildId=gid, type=2, joinTime=now, pendingGuildId=[], invitedGuildId=[])
+            self._record_event(state, guild, notices, now, "公会创建成功。")
             notices.extend([(profile, 25, []), (profile, 26, []), (profile, 1, [])])
             return 200, self._detail(guild, changes, now)
         match = re.fullmatch(r"/fci/guild/(\d+)/(.*)", route)
@@ -682,6 +698,8 @@ class LocalGuild:
             guild["baseInfo"].update(updates)
             guild["baseInfo"]["score"] -= cost
             self._notify_members(state, guild, notices, 26)
+            if updates or cost:
+                self._record_event(state, guild, notices, now, "公会资料已更新。")
             # WidgetGuildEdit only consumes ApiGuild.result.baseInfo and
             # resChange after PATCH. Keep the response at that native shape;
             # members/skills are refreshed by their own bound GET routes.
@@ -739,6 +757,8 @@ class LocalGuild:
                 self._notify_members(state, guild, notices, 57)
             if target == pid:
                 player["type"] = 2
+            self._notify_members(state, guild, notices, 25, 26, 27)
+            self._record_event(state, guild, notices, now, "公会会长已移交。")
             return 200, guild["baseInfo"]
 
         if action == "vice-president/" and method == "PUT":
@@ -760,6 +780,8 @@ class LocalGuild:
             if target_state:
                 target_state["data"]["type"] = 1
                 notices.append(({"account_id": target_state["accountId"], "player_id": target}, 25, []))
+            self._notify_members(state, guild, notices, 26, 27)
+            self._record_event(state, guild, notices, now, "公会副会长已任命。")
             return 200, guild["baseInfo"]
 
         vice_match = re.fullmatch(r"vice-president/([^/]+)/", action)
@@ -776,6 +798,8 @@ class LocalGuild:
             if target_state and target_state["data"]["guildId"] == gid:
                 target_state["data"]["type"] = 0
                 notices.append(({"account_id": target_state["accountId"], "player_id": target}, 25, []))
+            self._notify_members(state, guild, notices, 26, 27)
+            self._record_event(state, guild, notices, now, "公会副会长职务已解除。")
             return 200, guild["baseInfo"]
 
         invite_match = action == "invited-members/"
@@ -800,6 +824,8 @@ class LocalGuild:
             invited["data"].setdefault("invitedGuildId", [])
             if gid not in invited["data"]["invitedGuildId"]:
                 invited["data"]["invitedGuildId"].append(gid)
+            notices.append(({"account_id": int(row["account_id"]), "player_id": target}, 28, []))
+            self._notify_members(state, guild, notices, 53)
             return 200, member
 
         pending_match = re.fullmatch(r"pending-members(?:/([^/]+))?/", action)
@@ -811,6 +837,7 @@ class LocalGuild:
                 guild["pendingMembers"].pop(target, None)
             else:
                 guild["pendingMembers"].clear()
+            self._notify_members(state, guild, notices, 29)
             return 200, self._detail(guild, now=now)
 
         member_match = re.fullmatch(r"members/([^/]+)/", action)
@@ -832,6 +859,8 @@ class LocalGuild:
             if target_state:
                 target_state["data"].update(guildId=0, type=0, lastQuitTime=now)
                 notices.append(({"account_id": target_state["accountId"], "player_id": target}, 25, []))
+            self._notify_members(state, guild, notices, 26, 27)
+            self._record_event(state, guild, notices, now, "一名成员已被移出公会。")
             return 200, guild["baseInfo"]
         if method == "GET" and action in ("", "members/"):
             return 200, self._detail(guild, now=now) if action == "" else list(guild["members"].values())
@@ -858,7 +887,8 @@ class LocalGuild:
                 notices.append(({"account_id": target_state["accountId"], "player_id": requested}, 25, []))
                 # The pending-list view is cached by the client and only
                 # refreshes on GuildPendingMemberChange (PushType 29).
-                self._notify_members(state, guild, notices, 29)
+                self._notify_members(state, guild, notices, 26, 27, 29)
+                self._record_event(state, guild, notices, now, "新成员已通过申请加入公会。")
                 return 200, guild["baseInfo"]
             if requested != pid:
                 raise GuildError("guild_self_join_only", 403)
@@ -878,6 +908,7 @@ class LocalGuild:
                 if gid not in player["pendingGuildId"]:
                     player["pendingGuildId"].append(gid)
                 notices.append((profile, 25, []))
+                self._notify_members(state, guild, notices, 29)
                 return 200, {}
             if action == "members/" and pid not in guild["invitedMembers"]:
                 raise GuildError("guild_invitation_required", 403)
@@ -886,7 +917,9 @@ class LocalGuild:
             guild["pendingMembers"].pop(pid, None)
             guild["invitedMembers"].pop(pid, None)
             player.update(guildId=gid, type=0, joinTime=now, pendingGuildId=[], invitedGuildId=[])
-            notices.extend([(profile, 25, []), (profile, 26, []), (profile, 27, [])])
+            notices.extend([(profile, 25, []), (profile, 28, [])])
+            self._notify_members(state, guild, notices, 26, 27, 29, 53)
+            self._record_event(state, guild, notices, now, "新成员已加入公会。")
             return 200, {}
         if action == "members/quit/" and method == "POST" and not player["guildId"] and player["lastQuitTime"]:
             if str(body.get("playerId", "")) != pid:
@@ -913,6 +946,8 @@ class LocalGuild:
                 del state["guilds"][str(gid)]
             player.update(guildId=0, type=0, lastQuitTime=now, quitCount=player["quitCount"] + 1)
             notices.append((profile, 25, []))
+            self._notify_members(state, guild, notices, 26, 27)
+            self._record_event(state, guild, notices, now, "一名成员已退出公会。")
             return 200, dict(player)
         if action == "skill/":
             if method == "GET":
@@ -940,6 +975,7 @@ class LocalGuild:
                 start, end = now, now + SKILL_DURATION
                 active = {"startTime": start, "endTime": end, "useCount": use_count}
                 skills[str(skill_id)] = active
+                self._record_event(state, guild, notices, now, "公会技能已开启。")
                 info = next(item for item in self._skills(guild, now) if item["id"] == skill_id)
                 profit = {"id": skill_id, "type": _int(row.get("type")), "add": _int(row.get("add")),
                           "startTime": start, "endTime": end}
@@ -956,7 +992,7 @@ class LocalGuild:
         if method == "GET" and action == "invited-members/":
             return 200, list(guild["invitedMembers"].values())
         if method == "GET" and action == "record/":
-            return 200, []
+            return 200, list(guild.get("records", []))
         if method == "GET" and action == "vote/":
             return 200, guild["voteInfo"]
         if method == "POST" and action == "vote/":

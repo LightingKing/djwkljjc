@@ -152,12 +152,12 @@ class CultivationRouteTests(unittest.TestCase):
 
     def test_periodic_pool_ignores_pool_one_free_flag(self):
         self._give(i60002=1)
-        status, result = self._call("POST", "/fci/gachatrade/", {"id": 2, "count": 1, "gachaFree": True})
+        status, result = self._call("POST", "/fci/gachatrade/", {"id": 2, "activityId": 4001, "count": 1, "gachaFree": True})
         self.assertEqual(status, 200, result)
         self.assertEqual(len(result.actor_record), 1)
         self.assertEqual(self._item(60002), 0)
         self._set_resource(5, 100)
-        self.assertEqual(self._call("POST", "/fci/gachatrade/", {"id": 2, "count": 1})[0], 409)
+        self.assertEqual(self._call("POST", "/fci/gachatrade/", {"id": 2, "activityId": 4001, "count": 1})[0], 409)
 
     def test_chips_pool_spends_selected_chips(self):
         self._give(i20001=25)

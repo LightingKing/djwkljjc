@@ -1,6 +1,7 @@
 """Real HTTP routes, native requests and typed pushes for cultivation hooks."""
 from __future__ import annotations
 
+import copy
 import json
 from pathlib import Path
 import sys
@@ -17,6 +18,7 @@ sys.path.insert(0, str(ROOT / "tests"))
 from accounts import LocalAccounts
 from game import LocalGame
 from grants import grant_rewards
+from local_mailbox import send_mail
 from push import _one, _parse_fields
 from server.core.notifications import wire_game_notifications
 from server.core.push_service import PushService
@@ -102,6 +104,15 @@ class CultivationIntegrationTests(unittest.TestCase):
     def grant(self, rid, count):
         grant_rewards(self.game, self.profile(), [{"type": 11, "id": rid, "count": count}])
 
+    def fund_via_mail(self, count=1280):
+        mail = send_mail(self.game, self.profile(), "Cultivation QA", "Isolated test funding",
+                         [{"type": 27, "count": count}])
+        self.ok("PATCH", f'/fci/mail/{mail["id"]}', {"attachmentsGot": True})
+
+    def activate_vip(self, aid=53001):
+        self.fund_via_mail()
+        return self.ok("POST", f"/fci/actor-cultivation/{aid}/upgrade-vip/", b"null")
+
     def item(self, rid):
         return self.game.systems._state(self.profile())["items"].get(str(rid), {}).get("count", 0)
 
@@ -132,6 +143,7 @@ class CultivationIntegrationTests(unittest.TestCase):
         json_task = self.task(53020)
         self.assertEqual(json_task["progress"], 1)
         self.assertEqual(json_task["actorCultivationRewardProgress"], 2)
+        self.assertTrue(json_task["actorCultivationVipOnly"])
         for key in ("activePoint", "extraActivePoint", "gotoId", "preTaskId"):
             self.assertEqual(json_task["res"][key], 0)
         self.assertEqual(self.task(54020)["progress"], 0)
@@ -159,13 +171,21 @@ class CultivationIntegrationTests(unittest.TestCase):
                            if name == "ActorCultivationInfoMessage"]
         self.assertTrue(activity_pushes)
         self.assertTrue(any(info.activity_id == 53001 for info in activity_pushes[-1].info))
+        before_state = copy.deepcopy(self.game.cultivation._state(self.profile()))
+        before_resources = copy.deepcopy(self.profile()["resources"])
+        status, error = self.call("POST", "/fci/task/53020/reward-actor-cultivation/", b"null")
+        self.assertEqual((status, error["error"]), (409, "cultivation_vip_required"))
+        self.assertEqual(self.game.cultivation._state(self.profile()), before_state)
+        self.assertEqual(self.profile()["resources"], before_resources)
+        upgraded = self.activate_vip()
+        self.assertTrue(upgraded["info"]["vip"])
+        self.assertEqual(upgraded["info"]["progress"], 0)
         claimed = self.ok("POST", "/fci/task/53020/reward-actor-cultivation/", b"null")
         self.assertEqual(claimed["progress"], 2)
         self.assertEqual(self.call("POST", "/fci/task/53020/reward-actor-cultivation/", b"null")[0], 409)
 
     def test_native_empty_table_vip_and_read_marker_accept_json_null(self):
-        profile = self.profile()
-        self.game.economy._change_resources(profile, [{"type": 27, "count": 1280}])
+        self.fund_via_mail()
         before = {r["type"]: r["count"] for r in self.profile()["resources"] if r["type"] in (5, 27)}
         result = self.ok("POST", "/fci/actor-cultivation/53001/upgrade-vip/?source=welfare", b"null")
         self.assertTrue(result["info"]["vip"])
@@ -200,6 +220,7 @@ class CultivationIntegrationTests(unittest.TestCase):
         self.assertTrue({53024, 54024}.isdisjoint(ids))
 
     def test_talent_reset_only_paid_success_advances_matching_actor_task(self):
+        self.activate_vip()
         self.select_daily(53022, 54022)
         self.assertEqual(self.task(53022)["progress"], 0)
         status, error = self.call("POST", "/fci/talent/reset/", {"actorUid": self.actor, "talentPos": 1})

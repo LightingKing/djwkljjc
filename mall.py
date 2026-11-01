@@ -33,6 +33,7 @@ from server.core.reset import DEFAULT_RESET_POLICY, ResetPolicy, policy_for
 
 import json
 import copy
+import hashlib
 import re
 import secrets
 import time
@@ -86,6 +87,10 @@ MALL_ACTIVITY_START = 1704067200  # 2024-01-01T00:00:00Z
 # compact token marker preserves idempotent retries after a reply is trimmed.
 MAX_DELIVERED_REPLIES = 128
 MAX_DELIVERED_TOKENS = 1024
+# Local, unpaid sandbox checkout attempts expire after a day. Keep at most
+# 64 active attempts per account; their audit orders and token hashes remain.
+MAX_PENDING_ORDERS = 64
+PENDING_ORDER_TTL = _DAY
 
 
 def _int(value: Any, default: int = 0) -> int:
@@ -269,10 +274,78 @@ class LocalMall:
                 )
                 """
             )
+            connection.execute("CREATE TABLE IF NOT EXISTS local_mall_receipts ("
+                               "account_id INTEGER NOT NULL, token_sha256 TEXT NOT NULL, "
+                               "transaction_id TEXT NOT NULL, product_id TEXT NOT NULL, "
+                               "channel INTEGER NOT NULL, status TEXT NOT NULL, "
+                               "recorded_at INTEGER NOT NULL, "
+                               "PRIMARY KEY(account_id, token_sha256))")
+            # Persist actual legacy token evidence before trimming any JSON
+            # cache. Order IDs alone cannot prove possession of an old token.
+            for row in connection.execute("SELECT account_id, state_json FROM local_mall_state").fetchall():
+                try:
+                    state = json.loads(row["state_json"])
+                except (ValueError, TypeError):
+                    continue
+                if not isinstance(state, dict):
+                    continue
+                for key, limit in (("delivered", MAX_DELIVERED_REPLIES),
+                                   ("deliveredTokens", MAX_DELIVERED_TOKENS)):
+                    entries = state.get(key)
+                    if not isinstance(entries, dict):
+                        continue
+                    for token, reply in entries.items():
+                        if isinstance(reply, Mapping) and str(token).startswith("local-sandbox:"):
+                            self._index_receipt(connection, row["account_id"], token, reply)
+                    while len(entries) > limit:
+                        entries.pop(next(iter(entries)))
+                encoded = json.dumps(state, separators=(",", ":"))
+                if encoded != row["state_json"]:
+                    connection.execute("UPDATE local_mall_state SET state_json=? WHERE account_id=?",
+                                       (encoded, row["account_id"]))
 
     # ------------------------------------------------------------- plumbing
     def _now(self) -> int:
         return int(self._clock())
+
+    def _index_receipt(self, connection, account_id, token, reply, status="delivered"):
+        connection.execute(
+            "INSERT INTO local_mall_receipts VALUES (?,?,?,?,?,?,?) "
+            "ON CONFLICT(account_id, token_sha256) DO NOTHING",
+            (int(account_id), hashlib.sha256(token.encode("utf-8")).hexdigest(),
+             str(reply.get("transactionId", reply.get("orderId", ""))),
+             str(reply.get("productId", "")), _int(reply.get("channel")), status, self._now()))
+
+    def _receipt(self, profile, token):
+        with closing(self.game._connect()) as connection:
+            row = connection.execute(
+                "SELECT transaction_id, product_id, channel, status FROM local_mall_receipts "
+                "WHERE account_id=? AND token_sha256=?",
+                (int(profile["account_id"]), hashlib.sha256(token.encode("utf-8")).hexdigest())).fetchone()
+        return dict(row) if row is not None else None
+
+    def _prune_pending(self, profile, state, *, reserve=0):
+        pending = state["pending"]
+        expired = [token for token, order in pending.items()
+                   if not isinstance(order, Mapping)
+                   or self._now() - _int(order.get("createdAt")) >= PENDING_ORDER_TTL]
+        remaining = sorted((token for token in pending if token not in expired),
+                           key=lambda token: _int(pending[token].get("createdAt")))
+        excess = max(0, len(remaining) - max(0, MAX_PENDING_ORDERS - reserve))
+        cancelled = remaining[:excess]
+        if not expired and not cancelled:
+            return
+        with closing(self.game._connect()) as connection, connection:
+            for token in expired + cancelled:
+                order = pending.pop(token)
+                if not isinstance(order, Mapping):
+                    order = {}
+                status = "expired" if token in expired else "superseded"
+                self._index_receipt(connection, profile["account_id"], token, order, status)
+                connection.execute("UPDATE local_mall_orders SET status=? "
+                                   "WHERE order_id=? AND account_id=? AND status='pending'",
+                                   (status, str(order.get("orderId", "")), int(profile["account_id"])))
+        self._save(profile, state)
 
     def _state(self, profile: Mapping[str, Any]) -> dict[str, Any]:
         account_id = int(profile["account_id"])
@@ -685,6 +758,7 @@ class LocalMall:
         if limit and self._effective(state["purchase"].get(product_id), self._product_interval(product_id),
                                      self._now()) >= limit:
             raise MallError(409, "purchase_limit_reached")
+        self._prune_pending(profile, state, reserve=1)
         token = "local-sandbox:" + secrets.token_urlsafe(18)
         order_id = "iap-" + secrets.token_hex(8)
         # ``count`` from the client is the product's 迷子 amount (presetCount),
@@ -718,9 +792,12 @@ class LocalMall:
             "channel": _int(reply.get("channel")),
         }
 
-    def _remember_delivery(self, state: dict[str, Any], token: str, reply: Mapping[str, Any]) -> None:
+    def _remember_delivery(self, state: dict[str, Any], token: str, reply: Mapping[str, Any], *, profile=None) -> None:
         """Store a bounded full reply plus a compact idempotency marker."""
 
+        if profile is not None:
+            with closing(self.game._connect()) as connection, connection:
+                self._index_receipt(connection, profile["account_id"], token, reply)
         delivered = state.setdefault("delivered", {})
         markers = state.setdefault("deliveredTokens", {})
         delivered[token] = dict(reply)
@@ -739,6 +816,7 @@ class LocalMall:
 
         request = self._request(body, "ApiPurchaseDelevery")
         state = self._state(profile)
+        self._prune_pending(profile, state)
         token = ""
         for key in ("tradeData", "trade_data", "transactionReceipt", "transactionId", "orderId"):
             candidate = str(request.get(key) or "")
@@ -754,6 +832,13 @@ class LocalMall:
                                                     self._product_interval(str(done.get('productId'))), self._now())
                 return 200, reply
             marker = state.get("deliveredTokens", {}).get(token)
+            if not isinstance(marker, Mapping):
+                receipt = self._receipt(profile, token)
+                if receipt is not None:
+                    if receipt["status"] != "delivered":
+                        return 409, {"error": "purchase_token_expired"}
+                    marker = {"transactionId": receipt["transaction_id"],
+                              "productId": receipt["product_id"], "channel": receipt["channel"]}
             if isinstance(marker, Mapping):
                 # The full response was evicted, but the token marker still
                 # proves this order was delivered. Return a replay-safe
@@ -803,7 +888,7 @@ class LocalMall:
             "channel": _int(request.get("channel"), _int(pending.get("channel"))),
             "productId": product_id, "buyCount": buy_count, "resChange": res_change, "sandbox": True,
         }
-        self._remember_delivery(state, token, reply)
+        self._remember_delivery(state, token, reply, profile=profile)
         self._save(profile, state)
         self._order(str(pending.get("orderId") or token), profile, kind="iap", status="delivered",
                     product_id=product_id, price=float(product.get("price") or 0), currency="CNY_SANDBOX",

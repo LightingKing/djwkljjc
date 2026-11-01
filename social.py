@@ -300,11 +300,12 @@ class LocalSocial:
         state["worldBotAt"] = max(now, _int(previous, now))
         return message
 
-    def tick(self, profile, *, connected=False):
+    def tick(self, profile, *, connected=False, refresh_applications=True):
         """Call on login with connected=True, then normally for online players."""
         with self._lock, self._process_lock():
             state = self._state(profile)
-            self._applications(profile, state)
+            if refresh_applications:
+                self._applications(profile, state)
             message = self._world_bot(profile, state, force=connected)
             if message:
                 self._save(profile, state)
@@ -933,18 +934,23 @@ class LocalSocial:
             if response:
                 self._message_push(profile, "WorldMessage", response)
         else:
-            # The native chat window appends messages from the base push
-            # stream.  The old local path only sent the bot reply for private
-            # and guild channels, leaving the sender's own message invisible
-            # until a reconnect.  Echo both entries in wire order; the bot
-            # reply remains second so existing clients render the conversation
-            # naturally.
+            # ChatRoom.PostDataRespAdapter appends the sender's private
+            # message under the requested target using result.newContent.
+            # Base24 is inbound-only: ChatUtil indexes it by senderId, so
+            # echoing ourselves there creates a conversation with ourselves.
+            # Guild messages have no response adapter and still need an echo.
             push_type = 24 if channel == 3 else 30
-            self._base_push(profile, push_type,
-                            entry["senderId"], entry["sender"], entry["content"], entry["time"])
+            if channel == 5:
+                self._base_push(profile, push_type,
+                                entry["senderId"], entry["sender"], entry["content"], entry["time"])
             if response:
                 self._base_push(profile, push_type,
                                 response["senderId"], response["sender"], response["content"], response["time"])
+        if channel == 3:
+            return 200, {"newContent": content}
+        if channel == 1:
+            # The native world-chat adapter appends this response directly.
+            return 200, entry
         return 200, {}
 
     def _chat(self, method: str, route: str, path: str, body: Body, profile: Mapping[str, Any], state: dict[str, Any]) -> Optional[Response]:

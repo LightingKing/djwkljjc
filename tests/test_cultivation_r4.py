@@ -52,6 +52,55 @@ class CultivationRound4Tests(unittest.TestCase):
         self.assertTrue(second)
         self.assertNotEqual(first, second)
 
+    def test_non_vip_reaches_100_from_normal_daily_draws(self):
+        """Use the persisted draw and trusted wins; never seed task progress."""
+        def call(method, path, body=None):
+            status, result = self.game.handle_http(method, path, body, "application/json", self.auth)
+            self.assertEqual(status, 200, result)
+            return result
+
+        claimed_ids = []
+        total = 0
+        for day in range(17):
+            daily = [row for row in call("GET", "/fci/task/")["tasks"]
+                     if row.get("actorCultivationActivityId") == 53001 and row.get("dailyRefresh")]
+            self.assertEqual(len(daily), 8)
+            ordinary = [row for row in daily if not row["actorCultivationVipOnly"]]
+            self.assertEqual(len(ordinary), 6)
+            self.assertTrue(all(row["actorCultivationRewardProgress"] == 1 for row in ordinary))
+            # Feed the same trusted settlement hook used by dungeon balance.
+            # Combat statistics satisfy the selected skill/kill objectives;
+            # all task claims still use the client's native HTTP request.
+            for dungeon_type, count in ((2, 5), (5, 5), (3, 1), (9, 2), (13, 2)):
+                for _ in range(count):
+                    self.module.on_battle_win(
+                        self.profile, 8, actor_ids=[1502], dungeon_type=dungeon_type,
+                        activity_type=51, activity_id=51002,
+                        stats={"skillCounts": {1: 1, 2: 1, 3: 1},
+                               "skillEnemyCounts": {(1502, 2): 3},
+                               "enemyDeadInfo": [{"id": 15020001, "seat": 1}],
+                               "lastKillSkill": 1})
+            complete = {row["id"]: row for row in call("GET", "/fci/task/")["tasks"]}
+            self.assertTrue(all(complete[row["id"]]["isDone"] for row in ordinary))
+            for row in ordinary:
+                result = call("POST", f'/fci/task/{row["id"]}/reward-actor-cultivation/', b"null")
+                total = result["progress"]
+                claimed_ids.append(row["id"])
+                self.assertFalse(result["vip"])
+                self.assertLessEqual(result["progressDaily"], 6)
+                if total == 100:
+                    break
+            if total == 100:
+                break
+            self.now[0] += 86400
+        self.assertEqual(total, 100)
+        self.assertEqual(len(claimed_ids), 100)
+        self.assertEqual(day, 16)
+        result = call("POST", "/fci/actor-cultivation/progress-reward/",
+                      json.dumps({"activityId": 53001, "progress": 100, "vip": False}).encode())
+        self.assertEqual(result["info"]["progressReward"], 100)
+        self.assertFalse(result["info"]["vip"])
+
     def test_battle_telemetry_advances_only_matching_objectives(self):
         self.module.snapshot(self.profile)
         state = self.module._state(self.profile)
