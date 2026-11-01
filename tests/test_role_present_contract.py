@@ -58,6 +58,18 @@ class RolePresentContractTests(unittest.TestCase):
                 self.assertEqual(self.request('POST', path, json.dumps({'roleId': role_id}).encode())[0], 509)
             self.assertEqual(self.game.systems._state(self.game._profile(self.account))['items'], before)
 
+    def test_daily_account_cap_is_three_present_claims(self):
+        rows = [
+            {"presentId": role_id, "roleId": role_id, "presentType": 1,
+             "rewards": [{"type": 11, "id": 20001, "count": 5}]}
+            for role_id in (1001, 1002, 1003, 1004)
+        ]
+        with patch.object(self.game.profile_features, 'pending_role_presents', return_value=rows):
+            statuses = [self.request('POST', f'/fci/RolePresent/{role_id}', b'null')[0]
+                        for role_id in (1001, 1002, 1003, 1004)]
+        self.assertEqual(statuses[:3], [200, 200, 200])
+        self.assertEqual(statuses[3], 509)
+
 
 class LoginAndMatchContractTests(unittest.TestCase):
     setUp = native_http.NativeHttpTests.setUp

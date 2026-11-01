@@ -21,6 +21,11 @@ cycle:
       dayStart: 7
       dayEnd: 21
       activityType: 25
+    - id: diff-actor-inherit
+      dayStart: 0
+      dayEnd: 28
+      activityType: 33
+      activityId: 33001
 management:
   adminEndpoint: /__local__/admin/activity-schedule
   canAdjustAnchor: true

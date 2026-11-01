@@ -36,6 +36,12 @@ class ClientErrorA4Tests(unittest.TestCase):
         # inventing a business message that the client might mistranslate.
         self.assert_notify(400, {"error": "opaque_failure"}, "Window_SaveFail")
 
+    def test_guild_role_present_and_unknown_task_errors_use_client_keys(self):
+        self.assert_notify(403, {"error": "guild_permission_denied"}, "Error_GuildHaveNoPermission")
+        self.assert_notify(404, {"error": "member_not_found"}, "Error_GuildNotFound")
+        self.assert_notify(409, {"error": "role_present_daily_limit"}, "Error_PresentNotFound")
+        self.assert_notify(404, {"error": "unknown_task_route"}, "Error_TaskNotFound")
+
     def test_real_http_egress_keeps_business_notify_and_token_401(self):
         class FakeGame:
             def handle_http(self, method, path, body, content_type, authorization):

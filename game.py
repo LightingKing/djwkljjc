@@ -1492,11 +1492,23 @@ class LocalGame:
                     chosen = next((row for row in eligible if row['presentId'] == present_id), None)
                     if chosen is None:
                         return 409, {'error': 'role_present_not_available'}
+                    # Misc.rolePresentMaxNum is the account-wide daily cap,
+                    # separate from the per-role once-per-day marker.
+                    day = self.reset_policy.day_index(self._now())
+                    feature_state = self.profile_features._state(profile)
+                    claims = feature_state.setdefault('rolePresents', {})
+                    daily_cap = 3
+                    try:
+                        from economy import _client_rows
+                        daily_cap = max(0, int(_client_rows('Misc')[0].get('rolePresentMaxNum', daily_cap)))
+                    except (IndexError, KeyError, TypeError, ValueError):
+                        pass
+                    claimed_today = sum(1 for key in claims if str(key).startswith(f'{day}:'))
+                    if claimed_today >= daily_cap:
+                        return 409, {'error': 'role_present_daily_limit', 'limit': daily_cap}
                     from grants import grant_rewards
                     changes = grant_rewards(self, profile, chosen['rewards'])
-                    feature_state = self.profile_features._state(profile)
-                    day = self.reset_policy.day_index(self._now())
-                    feature_state.setdefault('rolePresents', {})[f'{day}:{chosen["roleId"]}'] = self._now()
+                    claims[f'{day}:{chosen["roleId"]}'] = self._now()
                     self.profile_features._save(profile, feature_state)
                     return 200, {'presents': chosen, 'resChange': changes}
             guild_result = self.guild.handle_http(method, path, body, profile)

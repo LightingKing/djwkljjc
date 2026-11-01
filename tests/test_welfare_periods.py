@@ -160,19 +160,37 @@ class WelfarePeriodsTests(unittest.TestCase):
         self.assertEqual((self.item(1016), self.item(2001)), (1, 1))
         self.now[0] = self.game.reset_policy.next_boundary(self.now[0])
         self.battle(2)
-        self.assertEqual((self.item(1016), self.item(2001)), (3, 2))
+        # Postcard material now rotates through the three client items; the
+        # first run is 2001 and the next run is 2002.
+        self.assertEqual((self.item(1016), self.item(2001), self.item(2002)), (3, 1, 1))
         self.battle(52201, material=True)
-        self.assertEqual((self.item(1016), self.item(2001)), (7, 4))
+        self.assertEqual((self.item(1016), self.item(2001), self.item(2002), self.item(2003)), (7, 1, 1, 1))
+
+    def test_team_dungeon_grants_eight_candies_without_postcard_material(self):
+        before = (self.item(1016), self.item(2001), self.item(2002), self.item(2003))
+        changes = self.game.welfare.grant_battle_materials(
+            self.profile, 7011, dungeon_type=10, runs=1,
+        )
+        self.assertTrue(any(
+            row.get("baseRes", {}).get("id") == 1016
+            and row.get("baseRes", {}).get("countDelta") == 8
+            for row in changes
+        ))
+        self.assertEqual((self.item(1016), self.item(2001), self.item(2002), self.item(2003)),
+                         (before[0] + 8, *before[1:]))
 
     def test_material_source_caps_survive_real_spending_and_period_resets(self):
         # Native repeated material runs reach the recorded seasonal limit.
         for _ in range(66):
             self.battle(52201, material=True, multi=3)
-        self.assertEqual((self.item(1016), self.item(2001)), (775, 72))
+        # The first activity run is a single clear (multi-power is unlocked
+        # only after the first finish), so 66 requests produce 196 postcard
+        # drops: 66/65/65 in the persistent round-robin.
+        self.assertEqual((self.item(1016), self.item(2001), self.item(2002), self.item(2003)), (750, 66, 65, 65))
         self.native("POST", "/fci/seal/fill/1/", b"null")
         self.battle(52201, material=True, multi=3)
         self.battle(1)  # The old generic chapter pool must not bypass 2001's cap.
-        self.assertEqual((self.item(1016), self.item(2001)), (774, 72))
+        self.assertEqual((self.item(1016), self.item(2001)), (749, 67))
         end = self.game.welfare.cycle_window()["end"]
         self.now[0] = end
         self.assertFalse(self.native("GET", "/fci/seal/")[1]["cellInfo"][0]["fill"])
@@ -180,7 +198,7 @@ class WelfarePeriodsTests(unittest.TestCase):
         self.assertEqual(self.native("GET", "/fci/JigsawPuzzle/")[1]["lightenCell"], [])
         # The next source replenishes only headroom, keeping saved inventory.
         self.battle(1)
-        self.assertEqual(self.item(1016), 775)
+        self.assertEqual(self.item(1016), 750)
         self.now[0] -= 86400
         self.assertFalse(self.native("GET", "/fci/seal/")[1]["cellInfo"][0]["fill"])
 

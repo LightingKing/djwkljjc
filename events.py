@@ -1040,7 +1040,9 @@ class LocalEvents:
                     box = row.get("inBox") or {}; actor_id = int(box.get("id", 0) or 0)
                     if int(box.get("type", 0) or 0) == 15 and actor_id not in seen:
                         seen.add(actor_id); choices.append(actor_id)
-                if not 0 <= index < min(57, len(choices)):
+                # ManualBox is the source of truth.  Do not retain the old
+                # hard-coded 57-row limit when the client table changes.
+                if not 0 <= index < len(choices):
                     return 400, {"error": "invalid_manual_box_index"}
                 from grants import grant_rewards
                 changes = grant_rewards(self.game, profile, [{"type": 15, "id": choices[index], "count": 1, "param": 1002}])
@@ -1222,7 +1224,7 @@ class LocalEvents:
                 day.timestamp_start = 6 * 3600
                 day.timestamp_end = 24 * 3600
             welfare = getattr(self.game, "welfare", None)
-            if welfare is not None and entry["type"] in (16, 26, 44, 48):
+            if welfare is not None and entry["type"] in (16, 26, 43, 44, 48):
                 window = welfare.cycle_window(now)
                 activity.timestamp_preheat = window["start"]
                 activity.timestamp_start = window["start"]

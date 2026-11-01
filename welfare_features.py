@@ -31,7 +31,7 @@ CHIP_MODIFY_LIMIT = int(_client_rows("Misc")[0]["chipExchangeMaxModifyCount"])
 CHIP_POSITIONS = {int(row["dungeonId"]): int(row["chipExchangePlayerPos"])
                   for row in _client_rows("DungeonReward") if row.get("chipExchangePlayerPos")}
 ACTOR_CHIPS = {int(row["id"]) for row in _client_rows("ItemInfo") if int(row.get("funcType", 0)) == 3}
-WELFARE_ACTIVITY_TYPES = (16, 26, 44, 48)
+WELFARE_ACTIVITY_TYPES = (16, 26, 43, 44, 48)
 JIGSAW_REWARDS = {
     0: [{"type": 11, "id": 31014, "count": 1}],
     5: [{"type": 11, "id": 60001, "count": 1}, {"type": 7, "id": 0, "count": 50000}],
@@ -137,7 +137,17 @@ class LocalWelfareFeatures:
             welfare["earnedMaterials"] = {
                 "1016": _int(items.get("1016", {}).get("count")) + len(welfare["seal"]["cells"]) + 25 * len(welfare["jigsaw"]["cells"]),
                 "2001": _int(items.get("2001", {}).get("count")) + len(welfare["postcard"]["cells"]),
+                "2002": _int(items.get("2002", {}).get("count")),
+                "2003": _int(items.get("2003", {}).get("count")),
+                "postcardDropIndex": 0,
             }
+        else:
+            earned = welfare["earnedMaterials"]
+            items = self.game.systems._state(profile).get("items", {})
+            earned.setdefault("2001", _int(items.get("2001", {}).get("count")) + len(welfare["postcard"]["cells"]))
+            earned.setdefault("2002", _int(items.get("2002", {}).get("count")))
+            earned.setdefault("2003", _int(items.get("2003", {}).get("count")))
+            earned.setdefault("postcardDropIndex", 0)
         self._save(profile, state)
         return state
 
@@ -148,7 +158,7 @@ class LocalWelfareFeatures:
         # its source is ChapterNormal. Seasonal tokens now come only from
         # grant_battle_materials so that pool cannot bypass the event cap.
         result = [dict(row) for row in rewards
-                  if not (_int(row.get("type")) == 11 and _int(row.get("id")) in (1016, 2001))]
+                  if not (_int(row.get("type")) == 11 and _int(row.get("id")) in (1016, 2001, 2002, 2003))]
         if position is None:
             return result
         state = self._state(profile)
@@ -164,7 +174,7 @@ class LocalWelfareFeatures:
 
     def grant_battle_materials(self, profile, dungeon_id, *, dungeon_type, runs=1):
         """Finite seasonal drops, called only after a real won battle."""
-        if int(dungeon_type) not in (2, 5):
+        if int(dungeon_type) not in (2, 5, 10):
             return []
         with self.game.atomic_mutation():
             state = self._state(profile)
@@ -172,15 +182,41 @@ class LocalWelfareFeatures:
             policy = policy_for(self.game)
             # The event weekend begins Friday 06:00, not Friday midnight.
             day = policy.local_datetime(policy.period_start(self._now())).isoweekday()
-            candy = (2 if int(dungeon_type) == 5 or int(dungeon_id) in CHIP_POSITIONS else 1)
-            candy *= 2 if day in (5, 6, 7) else 1
-            postcard = 2 if int(dungeon_type) == 5 else 1
+            if int(dungeon_type) == 10:
+                # Team-dungeon's reviewed local rule is eight seasonal
+                # candies per successful run; it does not award postcards.
+                candy = 8
+                postcard = 0
+            else:
+                candy = (2 if int(dungeon_type) == 5 or int(dungeon_id) in CHIP_POSITIONS else 1)
+                candy *= 2 if day in (5, 6, 7) else 1
+                # Every successful source run gives one postcard material.
+                # The material activity's doubled candy payout is independent
+                # of this drop; using two here made a three-run sweep award
+                # twice the client-visible postcard amount and bypassed the
+                # per-cycle 2001/2002/2003 caps.
+                postcard = 1
             rewards = []
-            for rid, count, cap in ((1016, candy, 775), (2001, postcard, 72)):
-                amount = min(max(0, cap - _int(earned.get(str(rid)))), count * max(1, int(runs)))
-                if amount:
-                    rewards.append({"type": 11, "id": rid, "count": amount})
-                    earned[str(rid)] = _int(earned.get(str(rid))) + amount
+            amount = min(max(0, 750 - _int(earned.get("1016"))), candy * max(1, int(runs)))
+            if amount:
+                rewards.append({"type": 11, "id": 1016, "count": amount})
+                earned["1016"] = _int(earned.get("1016")) + amount
+            # The source table for postcard drops is unavailable.  Use a
+            # stable round-robin among its three material choices and retain
+            # the cursor so retries cannot alter the result.
+            postcard_caps = {2001: 72, 2002: 2000, 2003: 1500}
+            if postcard:
+                cursor = _int(earned.get("postcardDropIndex"))
+                total = postcard * max(1, int(runs))
+                counts = {2001: 0, 2002: 0, 2003: 0}
+                for offset in range(total):
+                    rid = (2001, 2002, 2003)[(cursor + offset) % 3]
+                    if _int(earned.get(str(rid))) < postcard_caps[rid]:
+                        earned[str(rid)] = _int(earned.get(str(rid))) + 1
+                        counts[rid] += 1
+                earned["postcardDropIndex"] = cursor + total
+                rewards.extend({"type": 11, "id": rid, "count": count}
+                                for rid, count in counts.items() if count)
             changes = grant_rewards(self.game, profile, rewards)
             self._save(profile, state)
             return changes

@@ -185,7 +185,7 @@ class PermanentActivityEntryTests(unittest.TestCase):
         self.assertTrue(PERMANENT_TYPES <= {row["type"] for row in rows})
         # The section does not disturb the rotating phases.
         phases = {phase["id"] for phase in self.game.activity_schedule.activities()}
-        self.assertEqual(phases, {"sign-in", "shop", "sandbox-gacha"})
+        self.assertEqual(phases, {"sign-in", "shop", "sandbox-gacha", "diff-actor-inherit"})
         anchor = next(row for row in rows if row["type"] == 17)["timestampStart"]
         self.assertEqual(anchor, ANCHOR)
 

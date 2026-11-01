@@ -52,6 +52,20 @@ def client_error_reply(status: int, payload: dict) -> tuple[int, dict]:
                  "not_enough_triggered_ticket", "race_ticket_exhausted", "ticket_exhausted",
                  "gacha_chips_not_enough", "team_dungeon_ticket_not_enough"}:
         return 509, {"notify": {"code": "Error_ItemNumNotEnough"}}
+    if lower in {"role_present_not_available", "role_present_daily_limit",
+                 "role_present_already_claimed"}:
+        return 509, {"notify": {"code": "Error_PresentNotFound"}}
+    if lower in {"guild_forbidden", "guild_permission_denied", "guild_no_permission",
+                 "guild_have_no_permission", "only_guild_admin", "not_guild_member",
+                 "guild_not_member"} or (status == 403 and "guild" in lower):
+        return 509, {"notify": {"code": "Error_GuildHaveNoPermission"}}
+    if lower in {"guild_not_found", "local_bot_not_found", "member_not_found",
+                 "vote_not_found", "support_request_not_found", "guild_target_not_found"} or (
+                 status == 404 and ("guild" in lower or "member" in lower or "vote" in lower or "support" in lower)):
+        return 509, {"notify": {"code": "Error_GuildNotFound"}}
+    if lower in {"unknown_task_route", "unknown_active_point_type", "unknown_active_point",
+                 "unknown_week_active_point", "unknown_extra_active_point", "task_unknown"}:
+        return 509, {"notify": {"code": "Error_TaskNotFound"}}
     if lower in {"dungeon_not_active", "race_dungeon_closed", "battle_not_finished"}:
         return 509, {"notify": {"code": "Error_DungeonNotActive"}}
     if lower in {"dungeon_balance_not_implemented", "resource_update_failed", "invalid_request"}:
