@@ -832,10 +832,13 @@ class LocalActivityModes:
         # Skill use records are emitted in TeamStatistic.inputList.  Keep a
         # tolerant parser because replay tools also provide dict payloads.
         skill_counts = {}
+        skill_enemy_counts = {}
         for item in getattr(own, "inputList", []) or []:
             aid = _int(getattr(item, "actorID", 0)); skill = _int(getattr(item, "useCard", 0) or getattr(item, "useSCard", 0))
             if aid and skill:
                 skill_counts[skill] = skill_counts.get(skill, 0) + 1
+                targets = len(getattr(item, "cardList", []) or [])
+                skill_enemy_counts[(aid, skill)] = max(skill_enemy_counts.get((aid, skill), 0), targets)
         return {"linkSkills": len(own.linkIdList), "bigSkills": len(own.bigSkillList),
                 "kills": len(enemy.deadInfo) if enemy is not None else 0,
                 "recordHpList": list(getattr(own, "recordHpList", []) or []),
@@ -843,7 +846,8 @@ class LocalActivityModes:
                 "enemyDeadInfo": plain_dead(getattr(enemy, "deadInfo", [])) if enemy is not None else [],
                 "ownBuffKindList": list(getattr(own, "buffKindList", []) or []),
                 "enemyBuffKindList": list(getattr(enemy, "buffKindList", []) or []) if enemy is not None else [],
-                "actorSeats": actor_seats, "skillCounts": skill_counts}
+                "actorSeats": actor_seats, "skillCounts": skill_counts,
+                "skillEnemyCounts": skill_enemy_counts}
 
     def _targets_done(self, dungeon_id: int, active: Any, won: bool) -> list[int]:
         """Star targets met (Logic/Target/TargetLogic.checkTarget); a win

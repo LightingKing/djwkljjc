@@ -3019,6 +3019,14 @@ class LocalDungeons:
         def plain_dead(values):
             return [{"id": _int(getattr(v, "id", 0)), "seat": _int(getattr(v, "seat", 0)),
                      "kind": _int(getattr(v, "kind", 0))} for v in (values or [])]
+        skill_counts, skill_enemy_counts = {}, {}
+        for item in getattr(own, "inputList", []) or []:
+            actor_id = _int(getattr(item, "actorID", 0))
+            skill_id = _int(getattr(item, "useCard", 0) or getattr(item, "useSCard", 0))
+            if actor_id and skill_id:
+                skill_counts[skill_id] = skill_counts.get(skill_id, 0) + 1
+                targets = len(getattr(item, "cardList", []) or [])
+                skill_enemy_counts[(actor_id, skill_id)] = max(skill_enemy_counts.get((actor_id, skill_id), 0), targets)
         return {
             "linkSkills": len(own.linkIdList),
             "bigSkills": len(own.bigSkillList),
@@ -3030,6 +3038,8 @@ class LocalDungeons:
             "ownBuffKindList": list(getattr(own, "buffKindList", []) or []),
             "enemyBuffKindList": list(getattr(enemy, "buffKindList", []) or []) if enemy is not None else [],
             "actorSeats": actor_seats,
+            "skillCounts": skill_counts,
+            "skillEnemyCounts": skill_enemy_counts,
         }
 
     @staticmethod

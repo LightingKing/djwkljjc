@@ -16,7 +16,9 @@ progress. ``endTime`` is the completion time, not an invented expiry date.
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
+import random
 import re
 from contextlib import closing, contextmanager
 from pathlib import Path
@@ -62,6 +64,7 @@ def task_available(task):
 # IDs are 53001 and 53002; these identifiers must not be conflated.
 TASK_ACTIVITY = {tid: (53001 if tid < 54000 else 53002) for tid in TASKS}
 ROLE_BY_ACTOR = {1502: 2, 1514: 14}
+DAILY_DRAW_COUNT = 8
 INFO_FIELDS = ("activityId", "actorId", "progress", "progressDaily", "progressReward",
                "progressRewardVip", "vip", "startTime", "endTime", "new", "showEnd")
 
@@ -108,7 +111,11 @@ class LocalCultivation:
         with closing(self.game._connect()) as connection:
             row = connection.execute("SELECT state_json FROM local_cultivation WHERE account_id = ?",
                                      (int(profile["account_id"]),)).fetchone()
-        return json.loads(row["state_json"]) if row else {"activities": {}, "tasks": {}, "day": None}
+        if row:
+            state = json.loads(row["state_json"])
+            state.setdefault("dailySelection", {})
+            return state
+        return {"activities": {}, "tasks": {}, "day": None, "dailySelection": {}}
 
     def _save(self, profile, state):
         with closing(self.game._connect()) as connection, connection:
@@ -124,6 +131,47 @@ class LocalCultivation:
                 if record["id"] == config["actorId"] and _int(record.get("quality")) >= config["actorQualityMin"]:
                     result.setdefault(aid, []).append(record)
         return result
+
+    @staticmethod
+    def _daily_task_level_ok(task, records, notepads):
+        """Apply the level gates encoded by the exported task families."""
+
+        goal, params = _int(task.get("goalType")), task.get("taskParam") or []
+        if goal == 58:
+            return max((_int(record.get("level")) for record in records), default=0) >= _int(task.get("maxProgress"))
+        if goal == 83:
+            role_id = _int(params[0]) if params else 0
+            return _int((notepads.get(role_id) or {}).get("favourLevel")) >= _int(task.get("maxProgress"))
+        return True
+
+    def _daily_selection(self, profile, state, aid, records, notepads, day):
+        """Return and persist a stable per-account daily draw for ``aid``."""
+
+        selections = state.setdefault("dailySelection", {})
+        key = str(aid)
+        existing = selections.get(key)
+        if isinstance(existing, list) and existing:
+            return {_int(value) for value in existing}
+        actor_id = _int(CONFIG[aid].get("actorId"))
+        candidates = [
+            (tid, task) for tid, task in TASKS.items()
+            if TASK_ACTIVITY[tid] == aid and task_available(task)
+            and task.get("refreshAfterGot")
+            and self._daily_task_level_ok(task, records, notepads)
+        ]
+        seed = int.from_bytes(hashlib.sha256(
+            f"{int(profile['account_id'])}:{int(day)}:{int(aid)}:{actor_id}".encode("ascii")
+        ).digest()[:8], "big")
+        rng = random.Random(seed)
+        rng.shuffle(candidates)
+        vip = [row for row in candidates if _int(row[1].get("actorCultivationRewardProgress")) >= 2]
+        normal = [row for row in candidates if _int(row[1].get("actorCultivationRewardProgress")) < 2]
+        chosen = normal[: max(0, DAILY_DRAW_COUNT - 2)] + vip[:2]
+        if len(chosen) < DAILY_DRAW_COUNT:
+            chosen += [row for row in candidates if row not in chosen][:DAILY_DRAW_COUNT - len(chosen)]
+        selected = sorted({_int(tid) for tid, _ in chosen})
+        selections[key] = selected
+        return set(selected)
 
     def _sync(self, profile, state):
         system = self.game.systems._state(profile)
@@ -144,8 +192,10 @@ class LocalCultivation:
             if state.get("day") is not None:
                 for info in state.get("activities", {}).values():
                     info["progressDaily"] = 0
+            state["dailySelection"] = {}
             state["day"] = day
         for aid, records in owned.items():
+            selected_daily = self._daily_selection(profile, state, aid, records, notepads, day)
             info = state["activities"].setdefault(str(aid), {
                 "activityId": aid, "actorId": CONFIG[aid]["actorId"], "progress": 0, "progressDaily": 0,
                 "progressReward": 0, "progressRewardVip": 0, "vip": False, "startTime": now,
@@ -154,6 +204,8 @@ class LocalCultivation:
                 continue
             for tid, task in TASKS.items():
                 if TASK_ACTIVITY[tid] != aid or not task_available(task):
+                    continue
+                if task.get("refreshAfterGot") and tid not in selected_daily:
                     continue
                 entry = state["tasks"].setdefault(str(tid), {"progress": 0, "rewardGot": False})
                 if entry["rewardGot"]:
@@ -191,7 +243,9 @@ class LocalCultivation:
             info = state["activities"].get(str(TASK_ACTIVITY[tid]))
             entry = state["tasks"].get(str(tid))
             daily = bool(task.get("refreshAfterGot"))
+            selected = set(_int(value) for value in (state.get("dailySelection", {}).get(str(TASK_ACTIVITY[tid]), []) or []))
             if (not task_available(task) or not info or not entry or entry["rewardGot"] or info["progress"] >= CONFIG[info["activityId"]]["maxProgress"]
+                    or daily and tid not in selected
                     or daily and info["progressDaily"] >= CONFIG[info["activityId"]]["dailyTaskMaxProgress"]):
                 continue
             # TaskUtil keeps a supplied res instead of loading the client table.
@@ -299,9 +353,16 @@ class LocalCultivation:
             own_buffs = list(stats.get("ownBuffKindList") or [])
             hp_list = list(stats.get("recordHpList") or [])
             actor_seats = { _int(k): _int(v) for k, v in (stats.get("actorSeats") or {}).items() }
-            skill_counts = { _int(k): _int(v) for k, v in (stats.get("skillCounts") or {}).items() }
-            skill_enemy_counts = {tuple(map(_int, k if isinstance(k, (list, tuple)) else [k])): _int(v)
-                                  for k, v in (stats.get("skillEnemyCounts") or {}).items()}
+            skill_counts = {_int(k): _int(v) for k, v in (stats.get("skillCounts") or {}).items()}
+            skill_enemy_counts = {}
+            for key, value in (stats.get("skillEnemyCounts") or {}).items():
+                if isinstance(key, str):
+                    key = tuple(_int(part) for part in key.replace(";", ",").split(",") if part.strip())
+                elif isinstance(key, (list, tuple)):
+                    key = tuple(_int(part) for part in key)
+                else:
+                    key = (_int(key),)
+                skill_enemy_counts[key] = _int(value)
 
             def actor_hp(actor_id, threshold):
                 seat = actor_seats.get(actor_id)
@@ -343,6 +404,7 @@ class LocalCultivation:
                            or goal == 84 and actor in deployed and bool(enemy_buffs)
                            or goal == 85 and actor in deployed and bool(own_buffs)
                            or goal == 86 and actor in deployed and len(params) > 1 and bool(enemy_dead)
+                           and (_int(stats.get("lastKillSkill"), _int(params[1])) == _int(params[1]))
                            or goal == 87 and actor in deployed and len(params) > 2 and bool(enemy_dead)
                            and _int((enemy_dead[0].get("seat") if isinstance(enemy_dead[0], Mapping) else getattr(enemy_dead[0], "seat", 0))) == _int(params[2])
                            or goal == 88 and actor in deployed and len(params) > 2 and (
@@ -369,7 +431,13 @@ class LocalCultivation:
             raise CultivationError(404, "unknown_cultivation_task")
         task = TASKS[tid]
         info = self._require(state, owned, TASK_ACTIVITY[tid])
-        entry = state["tasks"][str(tid)]
+        if task.get("refreshAfterGot"):
+            selected = {_int(value) for value in (state.get("dailySelection", {}).get(str(TASK_ACTIVITY[tid]), []) or [])}
+            if tid not in selected:
+                raise CultivationError(409, "cultivation_task_unavailable")
+        entry = state["tasks"].get(str(tid))
+        if entry is None:
+            raise CultivationError(409, "cultivation_task_unavailable")
         if entry["rewardGot"]:
             raise CultivationError(409, "cultivation_task_already_claimed")
         if entry["progress"] < task["maxProgress"]:
