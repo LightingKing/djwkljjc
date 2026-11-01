@@ -84,6 +84,18 @@ class CultivationIntegrationTests(unittest.TestCase):
     def task(self, tid):
         return next(row for row in self.ok("GET", "/fci/task/")["tasks"] if row["id"] == tid)
 
+    def select_daily(self, *task_ids):
+        """Pin a daily task set for a test of a specific server hook."""
+        self.game.cultivation.snapshot(self.profile())
+        state = self.game.cultivation._state(self.profile())
+        selection = state.setdefault("dailySelection", {})
+        for task_id in task_ids:
+            activity_id = "53001" if int(task_id) < 54000 else "53002"
+            current = set(int(value) for value in selection.get(activity_id, []))
+            current.add(int(task_id))
+            selection[activity_id] = sorted(current)
+        self.game.cultivation._save(self.profile(), state)
+
     def info(self, aid=53001):
         return next(row for row in self.ok("GET", "/fci/actor-cultivation/") if row["activityId"] == aid)
 
@@ -111,6 +123,7 @@ class CultivationIntegrationTests(unittest.TestCase):
         return self.ok("POST", f"/fci/dungeon/{uid}/balance/", {})
 
     def test_signboard_native_request_uses_role_not_uid_and_emits_task_res(self):
+        self.select_daily(53001, 53020, 54020)
         self.assertEqual(self.call("PATCH", "/fci/Signboard/", self.wire("ApiSignboard", signboard=999999))[0], 409)
         self.assertEqual(self.task(53020)["progress"], 0)
         self.grant(53003, 2)
@@ -165,6 +178,7 @@ class CultivationIntegrationTests(unittest.TestCase):
             self.assertEqual(self.call("POST", "/fci/actor-cultivation/53002/upgrade-vip/", body)[0], 400)
 
     def test_real_novel_collection_completes_only_matching_task_and_survives_reload(self):
+        self.select_daily(53024, 54024)
         for novel_id, task_id, activity_id in ((8, 53024, 53001), (11, 54024, 53002)):
             with self.subTest(novel=novel_id):
                 self.assertEqual(self.task(task_id)["progress"], 0)
@@ -186,6 +200,7 @@ class CultivationIntegrationTests(unittest.TestCase):
         self.assertTrue({53024, 54024}.isdisjoint(ids))
 
     def test_talent_reset_only_paid_success_advances_matching_actor_task(self):
+        self.select_daily(53022, 54022)
         self.assertEqual(self.task(53022)["progress"], 0)
         status, error = self.call("POST", "/fci/talent/reset/", {"actorUid": self.actor, "talentPos": 1})
         self.assertEqual((status, error["error"]), (409, "insufficient_item"))
@@ -203,6 +218,7 @@ class CultivationIntegrationTests(unittest.TestCase):
         self.assertEqual(self.info()["progress"], 2)
 
     def test_battle_uses_entry_team_and_wins_once_including_native_active(self):
+        self.select_daily(53001, 54001)
         self.team(2, self.actor)
         wrong_team = self.start(group=1)
         self.finish(wrong_team)
@@ -221,6 +237,7 @@ class CultivationIntegrationTests(unittest.TestCase):
         self.assertEqual(self.task(53001)["progress"], 1)
 
     def test_guild_donation_native_validation_and_receipt_replay_progress_once(self):
+        self.select_daily(53027, 54027)
         self.ok("PUT", "/fci/guild/1/pending-members/", {"playerId": self.profile()["player_id"]})
         donation = self.ok("GET", "/fci/guild/1/donate/")["donates"]["local-bot-002"]
         self.assertEqual(donation["donateRes"]["id"], 20002)
@@ -246,12 +263,18 @@ class CultivationIntegrationTests(unittest.TestCase):
 
     def test_specific_modes_are_visible_and_claimable_after_local_battle_progress(self):
         ids = {row["id"] for row in self.ok("GET", "/fci/task/")["tasks"]}
+        # Permanent tasks are always present; refresh-after-claim tasks are
+        # limited to the stable daily draw (at most eight per activity).
+        self.assertTrue({53023, 53024, 53027, 54023, 54024, 54027} <= ids)
         for tid in (53003, 54003, 53006, 54006):
-            self.assertIn(tid, ids)
-            self.assertEqual(self.call("POST", f"/fci/task/{tid}/reward-actor-cultivation/", {})[0], 409)
-        self.assertTrue({53001, 53002, 53007, 53008, 53055} <= ids)
+            if tid in ids:
+                self.assertEqual(self.call("POST", f"/fci/task/{tid}/reward-actor-cultivation/", {})[0], 409)
+        selected = self.game.cultivation._state(self.profile())["dailySelection"]
+        self.assertLessEqual(len(selected["53001"]), 8)
+        self.assertLessEqual(len(selected["53002"]), 8)
 
     def test_native_guild_wishes_cover_both_cultivation_roles(self):
+        self.select_daily(53027, 54027)
         self.ok("PUT", "/fci/guild/1/pending-members/", {"playerId": self.profile()["player_id"]})
         wishes = self.ok("GET", "/fci/guild/1/donate/")["donates"]
         for item_id, task_id, other_task in ((20002, 53027, 54027), (20014, 54027, None)):

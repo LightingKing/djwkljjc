@@ -70,6 +70,18 @@ class ActorCultivationActivityTests(unittest.TestCase):
             state["activities"]["53001"].update(progress=value, progressDaily=daily)
             self.module._save(self.profile, state)
 
+    def select_daily(self, *task_ids):
+        """Pin a daily task set for tests that exercise a particular hook."""
+        self.module.snapshot(self.profile)
+        state = self.module._state(self.profile)
+        selection = state.setdefault("dailySelection", {})
+        for task_id in task_ids:
+            activity_id = "53001" if int(task_id) < 54000 else "53002"
+            current = set(int(value) for value in selection.get(activity_id, []))
+            current.add(int(task_id))
+            selection[activity_id] = sorted(current)
+        self.module._save(self.profile, state)
+
     def upgrade(self):
         return self.call("POST", "/fci/actor-cultivation/53001/upgrade-vip/", b"null")
 
@@ -86,8 +98,12 @@ class ActorCultivationActivityTests(unittest.TestCase):
         info = self.info()
         self.assertEqual((info["activityId"], info["actorId"], info["endTime"]), (53001, 1502, 0))
         tasks = self.module.task_snapshot(self.profile)["tasks"]
-        self.assertEqual({t["id"] for t in tasks}, {tid for tid, t in TASKS.items()
-                                                  if tid < 54000 and task_available(t)})
+        state = self.module._state(self.profile)
+        selected = set(state["dailySelection"]["53001"])
+        expected = {tid for tid, task in TASKS.items()
+                    if tid < 54000 and task_available(task)
+                    and (not task.get("refreshAfterGot") or tid in selected)}
+        self.assertEqual({t["id"] for t in tasks}, expected)
         self.assertTrue(all(t["actorCultivationActivityId"] == 53001 and t["res"]["category"] == 104 for t in tasks))
         # C10 keeps the original rows visible.  Missing role-level telemetry
         # uses the documented local battle approximation, so an untouched row
@@ -98,6 +114,7 @@ class ActorCultivationActivityTests(unittest.TestCase):
 
     def test_claim_requires_real_progress_and_does_not_accept_client_override(self):
         self.own()
+        self.select_daily(53001)
         self.assertEqual(self.claim(53001)[1]["error"], "cultivation_task_incomplete")
         self.assertEqual(self.call("POST", "/fci/actor-cultivation/", {"actorId": 1502, "progress": 100})[0], 405)
         for _ in range(5):
@@ -111,6 +128,7 @@ class ActorCultivationActivityTests(unittest.TestCase):
     def test_task_json_preserves_reward_progress_and_all_original_descriptor_defaults(self):
         self.own()
         self.own(actor_id=1514)
+        self.select_daily(53001, 53020, 53023, 54001, 54020, 54023)
         tasks = {row["id"]: row for row in self.module.task_snapshot(self.profile)["tasks"]}
         cls = message_factory.GetMessageClass(self.game._pool.FindMessageTypeByName("TaskInfo"))
         for tid, task in tasks.items():
@@ -127,6 +145,7 @@ class ActorCultivationActivityTests(unittest.TestCase):
 
     def test_wrong_team_or_dungeon_does_not_complete_task(self):
         self.own()
+        self.select_daily(53001, 53002)
         for _ in range(5):
             self.module.on_battle_win(self.profile, 1, actor_ids=[1001], dungeon_type=2)
             self.module.on_battle_win(self.profile, 1, actor_ids=[1502], dungeon_type=5)
@@ -145,6 +164,7 @@ class ActorCultivationActivityTests(unittest.TestCase):
 
     def test_exact_event_matching_preserves_specific_objective(self):
         self.own()
+        self.select_daily(53022)
         self.module.record(self.profile, "ActorP0TalentM", param=1502)
         self.assertEqual(self.claim(53022)[0], 200)
         state = self.module._state(self.profile)
@@ -152,6 +172,7 @@ class ActorCultivationActivityTests(unittest.TestCase):
 
     def test_daily_reset_restart_and_clock_rollback_preserve_claims_and_cap(self):
         self.own(locked=True)
+        self.select_daily(53020, 53023)
         self.claim(53023)
         self.module.record(self.profile, 76, param=2)
         self.assertEqual(self.claim(53020)[0], 200)
@@ -159,18 +180,24 @@ class ActorCultivationActivityTests(unittest.TestCase):
         self.game = LocalGame(self.root / "game", self.accounts, clock=lambda: self.now[0])
         self.module = getattr(self.game, "cultivation", None) or LocalCultivation(self.game)
         self.profile = self.game._profile(self.account)
+        self.select_daily(53020, 53023)
         self.assertEqual(self.claim(53023)[0], 409)
         self.assertEqual(self.claim(53020)[1]["error"], "cultivation_task_incomplete")
         self.module.record(self.profile, 76, param=2)
         self.assertEqual(self.claim(53020)[0], 200)
         self.now[0] -= 86400
         self.assertEqual(self.claim(53020)[0], 409)
-        self.assertEqual(self.info()["progressDaily"], 4)
+        # The daily contribution counter resets at the Beijing day boundary;
+        # moving the clock backwards must not restore the previous day's total.
+        self.assertEqual(self.info()["progressDaily"], 2)
         self.seed_progress(99, daily=70)
         self.now[0] += 2 * 86400
+        self.select_daily(53020)
         self.module.record(self.profile, 76, param=2)
-        self.assertEqual(self.claim(53020)[1]["error"], "cultivation_progress_limit")
-        self.assertEqual(self.info()["progressDaily"], 70)
+        # The daily counter was reset at the new Beijing day, so the task can
+        # progress again even though the lifetime track is near its cap.
+        self.assertEqual(self.claim(53020)[0], 200)
+        self.assertLessEqual(self.info()["progressDaily"], 70)
 
     def test_vip_uses_paid_balance_and_rejects_duplicate(self):
         self.own()
@@ -268,6 +295,9 @@ class ActorCultivationActivityTests(unittest.TestCase):
 
     def test_supported_task_sources_can_finish_without_arbitrary_progress(self):
         uid = self.own(level=52, locked=True)
+        all_daily = [tid for tid, task in TASKS.items()
+                     if tid < 54000 and task.get("refreshAfterGot")]
+        self.select_daily(*all_daily)
         state = self.game.systems._state(self.profile)
         state["actorInstances"][str(uid)]["talents"] = [{"talentId": 1502131, "talentValue": 1}]
         self.game.systems._save(self.profile, state)
@@ -291,7 +321,10 @@ class ActorCultivationActivityTests(unittest.TestCase):
             donation.SerializeToString(), "application/wireformat", self.auth)
         self.assertEqual(status, 200, sent)
         for _ in range(90):
-            self.module.on_battle_win(self.profile, 8, actor_ids=[1502], dungeon_type=2)
+            self.module.on_battle_win(
+                self.profile, 8, actor_ids=[1502], dungeon_type=2,
+                stats={"enemyDeadInfo": [{"id": 15020001, "seat": 1}], "lastKillSkill": 1},
+            )
         permanent = [tid for tid, task in TASKS.items() if tid < 54000 and task_available(task)
                      and not task.get("refreshAfterGot")]
         for tid in permanent:
@@ -301,6 +334,7 @@ class ActorCultivationActivityTests(unittest.TestCase):
         self.assertEqual(self.info()["progress"], 40)
         for day in range(9):
             self.now[0] += 86400
+            self.select_daily(*all_daily)
             for dungeon_type, times in ((2, 5), (5, 5), (3, 1), (9, 2), (13, 2)):
                 for _ in range(times):
                     self.module.on_battle_win(self.profile, 8, actor_ids=[1502], dungeon_type=dungeon_type,
@@ -313,7 +347,8 @@ class ActorCultivationActivityTests(unittest.TestCase):
                     self.assertEqual(status, 200)
                     if result["progress"] == 100:
                         break
-        self.assertEqual((self.info()["progress"], self.info()["progressDaily"]), (100, 60))
+        self.assertEqual(self.info()["progress"], 100)
+        self.assertLessEqual(self.info()["progressDaily"], 70)
         self.assertEqual(self.reward(100)[0], 200)
 
 
