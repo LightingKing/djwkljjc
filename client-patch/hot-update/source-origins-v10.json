@@ -1,0 +1,37 @@
+[
+  {
+    "source": "I:/workspace/mobilegame/analysis/lua-decompiled/window__burstlinkactorgroup__burstlinkactorgroup.lua",
+    "destination": "sources/burstlinkactorgroup-v10.lua",
+    "sha256": "ce924f21dff575963e7e17a097d039f47d98cf61e2df05710478f0b97a5787bb",
+    "patchedSha256": "d16b4dbf243b5034f3e195361e1fc9807a147471151d2608f5a48003414afa20",
+    "reason": "D2: identify local BurstLink rooms from the native dungeon type/empty FightService URL, enter the stock local Fight scene, and deduplicate HTTP and ScMatchNtf delivery"
+  },
+  {
+    "source": "I:/workspace/mobilegame/analysis/lua-decompiled/scene__scenefight.lua",
+    "destination": "sources/scenefight-v10.lua",
+    "sha256": "e985d94afa6b0b77613c53bfafe6ce283bf94c2ce7519855ed0fc89dcd46c8f2",
+    "patchedSha256": "a47555470062d587e66f563ce1cf1573a12665261ee5336c1f5b845e80009d8e",
+    "reason": "D2/D3: route local BurstLink and TeamPve fights through REST active/balance while retaining FightService listeners for remote rooms"
+  },
+  {
+    "source": "I:/workspace/mobilegame/analysis/lua-decompiled/logic__helplogic.lua",
+    "destination": "sources/helplogic-v10.lua",
+    "sha256": "23e7c5cc0c031dbd06170caf9294105f87682d3bade41acefdb61a06486e4885",
+    "patchedSha256": "ea7e7207f7a016f48e4df12eedfb79732a843b5955c865e546bc018ca8ca1886",
+    "reason": "D2/D3: keep network mode available for remote rooms and allow the local fight mode switch to select HTTP settlement"
+  },
+  {
+    "source": "I:/workspace/mobilegame/analysis/lua-decompiled/common__dungeonutil.lua",
+    "destination": "sources/dungeonutil-v10.lua",
+    "sha256": "c3cc9f70e45667b3cc9de30b2104206b860d3449682c20364f28a96a18983f2d",
+    "patchedSha256": "f57ec830da55e8e495018ee18a0547feae5c6bd65855bede00b2aa0df87a9492",
+    "reason": "D2/D3: use REST active snapshots before local BurstLink/TeamPve balance, while retaining remote leave flows"
+  },
+  {
+    "source": "I:/workspace/mobilegame/analysis/lua-decompiled/window__fightpausewithmorecontent__fightpausewithmorecontent.lua",
+    "destination": "sources/fightpausewithmorecontent-v10.lua",
+    "sha256": "da4a1f3c37d41d8cf4187628ebb452d272631eadf04463dd942979bcb0206013",
+    "patchedSha256": "d428c64ab3ba8eceddd1cc5ed21212cc207c39096f3939b598b957963684d34f",
+    "reason": "D2/D3: send local BurstLink/TeamPve exits through HTTP settlement and preserve the FightService leave path for remote rooms"
+  }
+]
