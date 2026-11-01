@@ -812,12 +812,38 @@ class LocalActivityModes:
         return _int(selected.get(mode_key), default) if mode_key in selected else default
 
     @staticmethod
-    def _battle_stats(active: Any) -> dict[str, int]:
+    def _battle_stats(active: Any) -> dict[str, Any]:
         _, _, own, enemy = _team_statistics(active)
         if own is None:
             return {}
+        own_team, enemy_team, _, _ = _team_statistics(active)
+        actor_seats = {}
+        if own_team is not None:
+            for player in getattr(own_team, "playerList", []) or []:
+                for actor in getattr(player, "actorList", []) or []:
+                    info = getattr(actor, "actorInfo", None)
+                    actor_id = _int(getattr(info, "id", 0)) if info is not None else 0
+                    seat = _int(getattr(actor, "baseSeat", 0) or getattr(actor, "seat", 0))
+                    if actor_id and seat:
+                        actor_seats[actor_id] = seat
+        def plain_dead(values):
+            return [{"id": _int(getattr(v, "id", 0)), "seat": _int(getattr(v, "seat", 0)),
+                     "kind": _int(getattr(v, "kind", 0))} for v in (values or [])]
+        # Skill use records are emitted in TeamStatistic.inputList.  Keep a
+        # tolerant parser because replay tools also provide dict payloads.
+        skill_counts = {}
+        for item in getattr(own, "inputList", []) or []:
+            aid = _int(getattr(item, "actorID", 0)); skill = _int(getattr(item, "useCard", 0) or getattr(item, "useSCard", 0))
+            if aid and skill:
+                skill_counts[skill] = skill_counts.get(skill, 0) + 1
         return {"linkSkills": len(own.linkIdList), "bigSkills": len(own.bigSkillList),
-                "kills": len(enemy.deadInfo) if enemy is not None else 0}
+                "kills": len(enemy.deadInfo) if enemy is not None else 0,
+                "recordHpList": list(getattr(own, "recordHpList", []) or []),
+                "ownDeadInfo": plain_dead(getattr(own, "deadInfo", [])),
+                "enemyDeadInfo": plain_dead(getattr(enemy, "deadInfo", [])) if enemy is not None else [],
+                "ownBuffKindList": list(getattr(own, "buffKindList", []) or []),
+                "enemyBuffKindList": list(getattr(enemy, "buffKindList", []) or []) if enemy is not None else [],
+                "actorSeats": actor_seats, "skillCounts": skill_counts}
 
     def _targets_done(self, dungeon_id: int, active: Any, won: bool) -> list[int]:
         """Star targets met (Logic/Target/TargetLogic.checkTarget); a win

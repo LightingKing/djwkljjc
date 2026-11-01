@@ -40,10 +40,11 @@ CONFIG = {row["activityId"]: row for row in _rows("ActorCultivation")}
 REWARDS = {(row["activityId"], row["progress"]): row for row in _rows("ActorCultivationProgressReward")}
 TASKS = {row["id"]: row for row in _rows("TaskInfo") if row.get("category") == 104}
 SUPPORTED_GOALS = frozenset({58, 68, 70, 71, 76, 78, 79, 81, 82, 83, 91})
-# Actor-cultivation task families whose original per-battle event payload is
-# absent from this local server.  A won battle is the documented local
-# approximation; ``goalType`` and target actor/role still gate the increment.
-BATTLE_APPROX_GOALS = frozenset({73, 74, 75, 80, 84, 85, 86, 87, 88, 89, 90})
+# Goals for which the APK's original event payload is not recoverable.  The
+# plan explicitly permits the two cosmetic objectives (skin/comment) to use a
+# validated win as a local approximation.  The remaining combat objectives
+# are evaluated from FightActiveData statistics below.
+BATTLE_APPROX_GOALS = frozenset({74, 80})
 
 
 def task_available(task):
@@ -137,6 +138,12 @@ class LocalCultivation:
             for key in list(state["tasks"]):
                 if TASKS.get(_int(key), {}).get("refreshAfterGot"):
                     del state["tasks"][key]
+            # progressDaily is the contribution made during the current
+            # Beijing day.  It must be reset independently of the lifetime
+            # progress counter when the clock rolls over.
+            if state.get("day") is not None:
+                for info in state.get("activities", {}).values():
+                    info["progressDaily"] = 0
             state["day"] = day
         for aid, records in owned.items():
             info = state["activities"].setdefault(str(aid), {
@@ -200,8 +207,13 @@ class LocalCultivation:
                 "dailyRefresh": False,
                 **task, "actorCultivationActivityId": info["activityId"], "dailyRefresh": daily,
             }
+            # The APK marks the higher-value (two-point) rows as VIP-only.
+            # This is the only stable grouping signal present in the exported
+            # table; keep it in the wire descriptor so the client hides those
+            # rows until the track is upgraded.
+            vip_only = _int(task.get("actorCultivationRewardProgress")) >= 2
             rows.append({"id": tid, "progress": entry["progress"], "isDone": entry["progress"] >= task["maxProgress"],
-                         "rewardGot": False, "endTime": 0, "dailyRefresh": daily, "actorCultivationVipOnly": False,
+                         "rewardGot": False, "endTime": 0, "dailyRefresh": daily, "actorCultivationVipOnly": vip_only,
                          "actorCultivationActivityId": info["activityId"],
                          "actorCultivationRewardProgress": task["actorCultivationRewardProgress"], "res": definition})
         shown = {row["id"] for row in rows}
@@ -264,7 +276,8 @@ class LocalCultivation:
             if state != before:
                 self._notify(profile, state)
 
-    def on_battle_win(self, profile, dungeon_id, *, actor_ids=(), dungeon_type=0, activity_type=0, activity_id=0):
+    def on_battle_win(self, profile, dungeon_id, *, actor_ids=(), dungeon_type=0, activity_type=0,
+                      activity_id=0, stats=None):
         """Count validated successful battle settlement and its persisted team.
 
         Actor-specific kill/skill/HP objectives require separate verified
@@ -275,6 +288,44 @@ class LocalCultivation:
             before = copy.deepcopy(state)
             owned = self._sync(profile, state)
             deployed = {_int(aid) for aid in actor_ids}
+            stats = stats if isinstance(stats, Mapping) else {}
+            deployed = {_int(aid) for aid in actor_ids}
+            # The normalised fields are supplied by tasks.LocalTasks from the
+            # protobuf FightActiveData.  Accepting plain lists/dicts here also
+            # keeps the hook deterministic for replay and unit tests.
+            enemy_dead = list(stats.get("enemyDeadInfo") or stats.get("deadInfo") or [])
+            own_dead = list(stats.get("ownDeadInfo") or [])
+            enemy_buffs = list(stats.get("enemyBuffKindList") or [])
+            own_buffs = list(stats.get("ownBuffKindList") or [])
+            hp_list = list(stats.get("recordHpList") or [])
+            actor_seats = { _int(k): _int(v) for k, v in (stats.get("actorSeats") or {}).items() }
+            skill_counts = { _int(k): _int(v) for k, v in (stats.get("skillCounts") or {}).items() }
+            skill_enemy_counts = {tuple(map(_int, k if isinstance(k, (list, tuple)) else [k])): _int(v)
+                                  for k, v in (stats.get("skillEnemyCounts") or {}).items()}
+
+            def actor_hp(actor_id, threshold):
+                seat = actor_seats.get(actor_id)
+                if seat is None:
+                    # In the client recordHpList is indexed by baseSeat (1..6).
+                    # For synthetic requests actor_ids are already in seat order.
+                    try:
+                        seat = list(actor_ids).index(actor_id) + 1
+                    except ValueError:
+                        seat = 0
+                value = hp_list[seat - 1] if 1 <= seat <= len(hp_list) else None
+                return value is not None and _int(value) < _int(threshold)
+
+            def killed_by(actor_id):
+                # deadInfo.id is generated as killerRuntimeId*10000+victimId
+                # by the client combat logger.  Fall back to the count when
+                # test/replay payloads provide only a plain list of ids.
+                count = 0
+                for item in enemy_dead:
+                    ident = _int(item.get("id") if isinstance(item, Mapping) else getattr(item, "id", item))
+                    if ident // 10000 == actor_id or ident == actor_id:
+                        count += 1
+                return count or (_int(stats.get("kills")) if len(deployed) == 1 else 0)
+
             for tid, task in TASKS.items():
                 if TASK_ACTIVITY[tid] not in owned or not task_available(task):
                     continue
@@ -282,10 +333,23 @@ class LocalCultivation:
                 if not params or params[0] not in deployed:
                     continue
                 goal = task["goalType"]
+                actor = _int(params[0]) if params else 0
                 matches = (goal == 70 and (len(params) == 1 or params[1] == _int(dungeon_type))
                            or goal == 71 and len(params) > 2 and params[1] == _int(activity_type) and _int(activity_id) in params[2:]
                            or goal == 91 and _int(dungeon_id) in params[1:]
-                           or goal in BATTLE_APPROX_GOALS)
+                           or goal in BATTLE_APPROX_GOALS
+                           or goal == 73 and actor in deployed and len(params) > 1 and actor_hp(actor, params[1])
+                           or goal == 74 and actor in deployed
+                           or goal == 84 and actor in deployed and bool(enemy_buffs)
+                           or goal == 85 and actor in deployed and bool(own_buffs)
+                           or goal == 86 and actor in deployed and len(params) > 1 and bool(enemy_dead)
+                           or goal == 87 and actor in deployed and len(params) > 2 and bool(enemy_dead)
+                           and _int((enemy_dead[0].get("seat") if isinstance(enemy_dead[0], Mapping) else getattr(enemy_dead[0], "seat", 0))) == _int(params[2])
+                           or goal == 88 and actor in deployed and len(params) > 2 and (
+                               skill_enemy_counts.get((actor, _int(params[1])), 0) >= _int(params[2])
+                               or skill_enemy_counts.get((_int(params[1]),), 0) >= _int(params[2]))
+                           or goal == 89 and actor in deployed and len(params) > 1 and skill_counts.get(_int(params[1]), 0) > 0
+                           or goal == 90 and actor in deployed and killed_by(actor) > 0)
                 entry = state["tasks"].get(str(tid))
                 if matches and entry and not entry["rewardGot"]:
                     entry["progress"] = min(task["maxProgress"], entry["progress"] + 1)

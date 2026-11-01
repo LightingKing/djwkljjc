@@ -88,6 +88,7 @@ ACTOR_ID_P0_BIG_SKILL_M_TIMES = 16
 POWER_COST_M = 17
 ACTIVITY_P0_DUN_P1_M_TIMES = 18
 KILL_ACTOR_ID_P0_M_TIMES = 19
+BALANCE_PN_DUNGEON_M_TIMES_ACTOR_P0 = 67
 TOWER_P0_FLOOR_M = 22
 TOURNAMENT_JOIN_M_TIMES = 23
 BALANCE_DUNGEON_PN_M_TIMES = 34
@@ -603,6 +604,13 @@ class LocalTasks:
             if mode == "activity" or dungeon_id in ACTIVITY_DUNGEON_RANGE:
                 changed += self._advance(state, ACTIVITY_P0_DUN_P1_M_TIMES, 1,
                                          match=lambda p: not p or p[0] == 0 or dungeon_id in p)
+            # Category-102 theme tasks 60002-60005 use the original
+            # actor/stage goal (67).  Their params contain the stage ids and,
+            # for some rows, actor ids; matching the completed stage here is
+            # the same criterion the client applies to its battle result.
+            if mode in ("activity", "normal", "story", None) or dungeon_id in ACTIVITY_DUNGEON_RANGE:
+                changed += self._advance(state, BALANCE_PN_DUNGEON_M_TIMES_ACTOR_P0, 1,
+                                         match=lambda p: not p or dungeon_id in p)
             if mode == "tower":
                 changed += self._advance(state, TOWER_P0_FLOOR_M, 1,
                                          match=lambda p: not p or p[0] == 0 or tower_floor >= p[0])
@@ -623,7 +631,8 @@ class LocalTasks:
                          if (record := actors.get(profile, system, uid)) is not None]
             cultivation.on_battle_win(profile, dungeon_id, actor_ids=actor_ids,
                                       dungeon_type=dungeon_type, activity_type=activity_type,
-                                      activity_id=activity_id)
+                                      activity_id=activity_id,
+                                      stats={**dict(stats), "actorIds": actor_ids})
         return self._run(profile, mutate)
 
     def record(self, profile: Mapping[str, Any], goal: int | str, amount: int = 1, *,
@@ -642,8 +651,19 @@ class LocalTasks:
         def match(params: list[int]) -> bool:
             return not params or params[0] == 0 or (param is not None and _int(param) in params)
 
-        return self._run(profile, lambda state: self._advance(state, goal_type, _int(amount), match=match,
-                                                              value=None if value is None else _int(value)))
+        changed = self._run(profile, lambda state: self._advance(state, goal_type, _int(amount), match=match,
+                                                                  value=None if value is None else _int(value)))
+        # Actor-cultivation owns category-104 state separately from the
+        # generic task table.  Mirror trusted events into that store so
+        # deployment, skill, talent and favour hooks advance both views.
+        cultivation = getattr(self.game, "cultivation", None)
+        if cultivation is not None:
+            try:
+                cultivation.record(profile, goal_type, amount=_int(amount), param=param,
+                                   value=None if value is None else _int(value))
+            except Exception:
+                _log.debug("cultivation task hook failed", exc_info=True)
+        return changed
 
     # ------------------------------------------------------------- payloads
     def _task_target_done(self, profile: Mapping[str, Any]) -> list[int]:

@@ -1259,6 +1259,9 @@ class LocalSystems:
             ok, changes, error = self._change_resources(profile, [{"type": 7, "id": 0, "param": 0, "count": -100}])
             if not ok: return 409, {"error": error or "insufficient_resource", "required": 100}
             skills[key] = {"level": 1, "read": False}; self._save(profile, state)
+            # Theme activity task 60007 (TaskType_ActorSkillLevelUpMTimes)
+            # is fed by the same trusted skill-learning action.
+            self._record_task(profile, "TaskType_ActorSkillLevelUpMTimes")
             try:
                 result = self._message("ApiActorSkillLearnning.post"); result.new_skill.id = skill_id; result.new_skill.level = 1
                 for change in self._dynamic(changes):
@@ -3390,9 +3393,10 @@ class LocalSystems:
         active = {_int(row.get("activityId")) for row in schedule.snapshot(self._now()).get("active", [])}
         return any(_int(row.get("actorId")) == _int(source.get("id"))
                    and _int(target.get("id")) in [_int(value) for value in row.get("targetId", [])]
-                   # Activity 33001 is the client's permanent whitelist row;
-                   # it is absent from the dated phase list by design.
-                   and (_int(row.get("activityId")) in active or _int(row.get("activityId")) == 33001)
+                   # The client whitelist row (activity 33001) still has to be
+                   # enabled by the server schedule.  Keeping the activity id
+                   # in the exported table is not itself an activation flag.
+                   and _int(row.get("activityId")) in active
                    for row in DIFF_ACTOR_INHERIT)
 
     @staticmethod
@@ -3822,6 +3826,9 @@ class LocalSystems:
         record["talentResetPos"], record["talentResetInfo"] = pos, session
         record["talentResetTimes"] = _int(record.get("talentResetTimes")) + 1
         self._save(profile, state)
+        # Category-102 task 60010 is the daily talent-reset objective.  Keep
+        # the generic task table in sync with the cultivation-specific hook.
+        self._record_task(profile, "TaskType_TalenResetMTimes")
         cultivation = getattr(self.game, "cultivation", None)
         if cultivation is not None:
             cultivation.record(profile, 78, param=_int(record.get("id")))

@@ -2999,17 +2999,37 @@ class LocalDungeons:
         return done
 
     @staticmethod
-    def _battle_stats(active: Any) -> dict[str, int]:
+    def _battle_stats(active: Any) -> dict[str, Any]:
         """Task counters from the fight statistics (tasks.on_battle_win)."""
 
         own, enemy = LocalDungeons._team_statistics(active)
         if own is None:
             return {}
+        actor_seats = {}
+        teams = list(getattr(active, "teamList", []) or []) if active is not None else []
+        own_team = next((team for team in teams if _int(getattr(team, "team", 0)) == 1), None)
+        if own_team is not None:
+            for player in getattr(own_team, "playerList", []) or []:
+                for actor in getattr(player, "actorList", []) or []:
+                    info = getattr(actor, "actorInfo", None)
+                    actor_id = _int(getattr(info, "id", 0)) if info is not None else 0
+                    seat = _int(getattr(actor, "baseSeat", 0) or getattr(actor, "seat", 0))
+                    if actor_id and seat:
+                        actor_seats[actor_id] = seat
+        def plain_dead(values):
+            return [{"id": _int(getattr(v, "id", 0)), "seat": _int(getattr(v, "seat", 0)),
+                     "kind": _int(getattr(v, "kind", 0))} for v in (values or [])]
         return {
             "linkSkills": len(own.linkIdList),
             "bigSkills": len(own.bigSkillList),
             "kills": len(enemy.deadInfo) if enemy is not None else 0,
             "rounds": int(own.gameRound),
+            "recordHpList": list(getattr(own, "recordHpList", []) or []),
+            "ownDeadInfo": plain_dead(getattr(own, "deadInfo", [])),
+            "enemyDeadInfo": plain_dead(getattr(enemy, "deadInfo", [])) if enemy is not None else [],
+            "ownBuffKindList": list(getattr(own, "buffKindList", []) or []),
+            "enemyBuffKindList": list(getattr(enemy, "buffKindList", []) or []) if enemy is not None else [],
+            "actorSeats": actor_seats,
         }
 
     @staticmethod
