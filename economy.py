@@ -562,12 +562,16 @@ class LocalEconomy:
         "local.sandbox.1980": {"price": 198.0, "count": 1980},
         "local.sandbox.3280": {"price": 328.0, "count": 3280},
         "local.sandbox.6480": {"price": 648.0, "count": 6480},
+        "local.sandbox.64800": {"price": 6480.0, "count": 64800},
+        "local.sandbox.648000": {"price": 64800.0, "count": 648000},
         "local_60": {"price": 6.0, "count": 60},
         "local_300": {"price": 30.0, "count": 300},
         "local_980": {"price": 98.0, "count": 980},
         "local_1980": {"price": 198.0, "count": 1980},
         "local_3280": {"price": 328.0, "count": 3280},
         "local_6480": {"price": 648.0, "count": 6480},
+        "local_64800": {"price": 6480.0, "count": 64800},
+        "local_648000": {"price": 64800.0, "count": 648000},
     }
 
     # ``Mall`` is a separate cash/gift shop from the player ``Shop``.  The
@@ -1671,7 +1675,7 @@ class LocalEconomy:
             # snapshot.  Accept only a finite set of familiar denomination
             # suffixes and still require the one-time sandbox token below;
             # this does not turn arbitrary IDs into arbitrary currency.
-            match = re.search(r"(?:^|[^0-9])(60|300|980|1980|3280|6480)(?:$|[^0-9])", product_id)
+            match = re.search(r"(?:^|[^0-9])(60|300|980|1980|3280|648000|64800|6480)(?:$|[^0-9])", product_id)
             if match:
                 count = int(match.group(1))
                 product = {"price": count / 10.0, "count": count}

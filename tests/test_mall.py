@@ -25,6 +25,8 @@ TABLES = ROOT / "data" / "client-tables"
 IAP_SOURCE = ROOT.parents[1] / "analysis" / "lua-decompiled" / "manager__iaphandler.lua"
 GEM60 = "com.tencent.fcicv.Gem60.android"
 GEM1280 = "com.tencent.fcicv.Gem1280.android"
+GEM64800 = "com.tencent.fcicv.Gem64800.android"
+GEM648000 = "com.tencent.fcicv.Gem648000.android"
 
 
 def _table(name):
@@ -40,8 +42,8 @@ class MallCatalogTests(unittest.TestCase):
         self.assertEqual([r.get("limitLv", 0) for r in catalog.page(1)], [0, 10, 20, 30, 40, 50, 55, 60])
         # 迷子充值: IAPHandler.GetProducts (platform 12 = android_midas, showInShop, by price).
         shop = catalog.shop_products(12)
-        self.assertEqual([r["count"] for r in shop], [60, 300, 680, 1280, 3280, 6480])
-        self.assertEqual([r["price"] for r in shop], [6.0, 30.0, 68.0, 128.0, 328.0, 648.0])
+        self.assertEqual([r["count"] for r in shop], [60, 300, 680, 1280, 3280, 6480, 64800, 648000])
+        self.assertEqual([r["price"] for r in shop], [6.0, 30.0, 68.0, 128.0, 328.0, 648.0, 6480.0, 64800.0])
 
     def test_event_gift_activities_cover_distinct_packs(self):
         catalog = MallCatalog()
@@ -158,6 +160,12 @@ class LocalMallTests(unittest.TestCase):
         self.assertEqual((self.balance(5), self.balance(27)), (2560, 1280))
         self.recharge(GEM1280)
         self.assertEqual((self.balance(5), self.balance(27)), (2560 + 1280 + 120, 2560))
+
+    def test_large_recharge_tiers_deliver_the_declared_amounts(self):
+        self.recharge(GEM64800)
+        self.assertEqual((self.balance(5), self.balance(27)), (129600, 64800))
+        self.recharge(GEM648000)
+        self.assertEqual((self.balance(5), self.balance(27)), (1425600, 712800))
 
     def test_goods_product_delivers_its_contents(self):
         _, delivered = self.recharge("com.tencent.fcicv.re10.android")  # 1 RMB pack, limit 1 forever
