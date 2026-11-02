@@ -7,7 +7,7 @@
     "http://192.168.1.22:19080",
     "http://192.168.1.22:19082"
   ],
-  "reproduction": "v13 copies the verified v12 LAN sources and adds the two local Android recharge rows in iaphandler-v13.lua; all bytes are hashed below.",
+  "reproduction": "v14 carries the verified LAN sources, restores level synchronization after reconnect, and exposes the native Present task chain; all bytes are hashed below.",
   "modules": [
     {
       "source": "sources/login.lua",
@@ -205,16 +205,16 @@
       "source": "sources/taskpresent-v14.lua",
       "destination": "sources/taskpresent-v14.lua",
       "target": "assetbundle/data/lua/window/taskpresent/taskpresent",
-      "sha256": "1ea7f74e27d09d7d321023900faa25150cee79cc37ceec485652bb3d9fa0a931",
-      "patchedSha256": "1ea7f74e27d09d7d321023900faa25150cee79cc37ceec485652bb3d9fa0a931",
+      "sha256": "f44ae543deb502d8056ac65cfe2fc97352e66bdff88f2234ffe0bcc441a14459",
+      "patchedSha256": "f44ae543deb502d8056ac65cfe2fc97352e66bdff88f2234ffe0bcc441a14459",
       "replacements": []
     },
     {
       "source": "sources/widgettaskpresenthint-v14.lua",
       "destination": "sources/widgettaskpresenthint-v14.lua",
       "target": "assetbundle/data/lua/window/taskpresent/widgettaskpresenthint",
-      "sha256": "bb5284036ef0cde49d64b8b40f3b0cd4be186387c2182f16aae639f8aaa30938",
-      "patchedSha256": "bb5284036ef0cde49d64b8b40f3b0cd4be186387c2182f16aae639f8aaa30938",
+      "sha256": "e54164a1cf9a256c7064ef038f5d8372646bbb46ba40f81b0fb0ff5de5f95820",
+      "patchedSha256": "e54164a1cf9a256c7064ef038f5d8372646bbb46ba40f81b0fb0ff5de5f95820",
       "replacements": []
     }
   ]
