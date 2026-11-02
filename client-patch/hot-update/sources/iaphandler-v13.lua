@@ -78,19 +78,16 @@ function Start()
   m_products = PB.all("PurchaseInfo"):where(function(_, p)
     return p.platform == m_platform
   end):toarray()
-  -- The signed APK may report either the Android-Midas row (12) or the
-  -- legacy local row (11), depending on the build's embedded ConstConfig.
-  -- Both are valid on the LAN checkout path.  Gate only on the local server
-  -- so the extra Android products are present in either configuration.
-  if IsLocalAccountServer() then
-    m_products = AppendLocalRechargeProducts(m_products)
-  end
+  -- This module is shipped only in the LAN hot-update.  The signed APK has
+  -- shipped with both platform 11 and 12 values in different builds, and
+  -- Restifizer can expose either a loopback or a rewritten authority.  Keep
+  -- the local tiers in the adapter unconditionally so the list cannot lose
+  -- them during bootstrap just because that enum or URL differs.
+  m_products = AppendLocalRechargeProducts(m_products)
   m_payProducts = PB.all("PurchaseInfo"):where(function(_, p)
     return p.platform == m_platform and p.showInShop == true
   end):toarray()
-  if IsLocalAccountServer() then
-    m_payProducts = AppendLocalRechargeProducts(m_payProducts)
-  end
+  m_payProducts = AppendLocalRechargeProducts(m_payProducts)
   table.sort(m_payProducts, function(a, b)
     if a.price < b.price then
       return true
