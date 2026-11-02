@@ -12,9 +12,9 @@ plain-JSON shape that function reads and the claim endpoints of
 * ``GET  /fci/week-activepoint/``         -> ``{weekActivePoint, rewardGot}``
 * ``POST /fci/week-activepoint/reward/``  -> ``{resChange, rewardGot}`` (body ``{weekActivePoint}``)
 
-Only TaskInfo categories 1 (Routine, daily) and 2 (Main, chained through
-``preTaskId``) are offered; every other category is listed in
-``disableCategory`` so the client hides its tab.  Daily tasks, the daily
+TaskInfo categories 1 (Routine, daily), 2 (Main), and 100 (Present, the
+permanent S-character selection chain) are offered; every other category is
+listed in ``disableCategory`` so the client hides its tab.  Daily tasks, the daily
 active points and the milestone claims reset at 06:00 Beijing (the bucket the
 rest of the local server uses); the weekly active points reset on Monday
 06:00 Beijing.  Rewards are paid from the client's own TaskInfo /
@@ -68,11 +68,15 @@ _DESCRIPTOR = _ROOT / "data" / "descriptor_set.pb"
 # TaskCategory enum (descriptor_set.pb).
 CATEGORY_ROUTINE = 1
 CATEGORY_MAIN = 2
+CATEGORY_PRESENT = 100
 CATEGORY_ACTIVITY = 102
 CATEGORY_RANDOM = 104
 # Category 104 is owned by LocalCultivation, which has actor-specific
 # progress and daily random selection.  Keep it out of the generic task store.
-OWNED_CATEGORIES = (CATEGORY_ROUTINE, CATEGORY_MAIN, CATEGORY_ACTIVITY)
+# Present is the native "choose an S character" chain (TaskPresent).  It is
+# still transported in the ordinary TaskInfo envelope; the client-side
+# TaskUtil.Categorize moves category 100 into fci/presentTasks.
+OWNED_CATEGORIES = (CATEGORY_ROUTINE, CATEGORY_MAIN, CATEGORY_PRESENT, CATEGORY_ACTIVITY)
 # Deadline/Repeat/Newbie/Challenge/Favour have no local source yet; listing
 # them in ``disableCategory`` hides their tabs (TaskUtil.CheckCategory).
 DISABLED_CATEGORIES = [3, 4, 5, 6, 7]
@@ -178,6 +182,7 @@ TASKS: dict[int, dict[str, Any]] = {
 ROUTINE_IDS = tuple(sorted(tid for tid, task in TASKS.items() if task["category"] == CATEGORY_ROUTINE))
 MAIN_IDS = tuple(sorted(tid for tid, task in TASKS.items() if task["category"] == CATEGORY_MAIN))
 ACTIVITY_IDS = tuple(sorted(tid for tid, task in TASKS.items() if task["category"] == CATEGORY_ACTIVITY))
+PRESENT_IDS = tuple(sorted(tid for tid, task in TASKS.items() if task["category"] == CATEGORY_PRESENT))
 RANDOM_IDS = tuple(sorted(tid for tid, task in TASKS.items() if task["category"] == CATEGORY_RANDOM))
 ACTIVE_POINT_REWARDS: dict[int, list[dict[str, int]]] = {
     _int(row.get("targetActivePoint")): _rewards(row.get("reward"))
@@ -410,6 +415,15 @@ class LocalTasks:
             if tid not in HIDDEN_TASK_IDS:
                 yield TASKS[tid]
         for tid in MAIN_IDS:
+            task = TASKS[tid]
+            pre = task["preTaskId"]
+            if not pre or (tasks.get(str(pre)) or {}).get("rewardGot"):
+                yield task
+        # The S-character present chain is a permanent, ordered chain.  The
+        # first task is offered at login and each successor unlocks only after
+        # its predecessor has been claimed, matching TaskUtil's special
+        # category handling.
+        for tid in PRESENT_IDS:
             task = TASKS[tid]
             pre = task["preTaskId"]
             if not pre or (tasks.get(str(pre)) or {}).get("rewardGot"):
@@ -706,7 +720,7 @@ class LocalTasks:
         return {
             "tasks": rows + extra.get('tasks', []),
             # Make the owned categories authoritative when the client merges.
-            "delTasks": [tid for tid in ROUTINE_IDS + MAIN_IDS + ACTIVITY_IDS + RANDOM_IDS if tid not in shown] + extra.get('delTasks', []),
+            "delTasks": [tid for tid in ROUTINE_IDS + MAIN_IDS + PRESENT_IDS + ACTIVITY_IDS + RANDOM_IDS if tid not in shown] + extra.get('delTasks', []),
             "disableCategory": list(DISABLED_CATEGORIES),
             "activePoint": _int(state["activePoint"]),
             "activePointRewardGot": [_int(v) for v in state["activePointRewardGot"]],

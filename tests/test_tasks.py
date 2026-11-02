@@ -97,6 +97,26 @@ class LocalTasksTests(unittest.TestCase):
         self.assertTrue(self._task(self._get(), 1)["rewardGot"])
         self.assertFalse(self._task(self._get(), 2)["isDone"])  # 18-23h window
 
+    def test_present_chain_is_sent_and_claiming_advances_successor(self) -> None:
+        payload = self._get()
+        first = self._task(payload, 3001)
+        self.assertIsNotNone(first)
+        self.assertFalse(first["isDone"])
+        # Present task 3001 is "clear stage 8" and is recordBeforeGot.  A
+        # real battle hook completes it; hand-written task state is not used.
+        self.tasks.on_battle_win(self.profile, 8, 0, mode="story")
+        first = self._task(self._get(), 3001)
+        self.assertEqual((first["progress"], first["isDone"]), (1, True))
+        status, result = self._post("/fci/task/3001/reward/")
+        self.assertEqual(status, 200)
+        self.assertTrue(result["resChange"])
+        # The completed task is removed and the dependent task becomes the
+        # sole present row, preserving the client's special-category order.
+        payload = self._get()
+        self.assertIsNone(self._task(payload, 3001))
+        self.assertIsNotNone(self._task(payload, 3002))
+        self.assertFalse(self._task(payload, 3002)["isDone"])
+
     def test_win_five_battles_completes_and_pays(self) -> None:
         self._get()
         for _ in range(4):
@@ -200,9 +220,10 @@ class LocalTasksTests(unittest.TestCase):
         self.tasks.on_battle_win(self.profile, 8, 6)
         self.assertEqual(self._post("/fci/task/1103/reward/")[0], 200)
         self.assertTrue(self._task(self._get(), 1104)["isDone"])
-        # Other categories and telemetry stay with their existing handlers.
+        # Present is now a first-class native task category; the telemetry
+        # endpoint remains owned by the game systems handler.
         self.assertIsNone(self.tasks.handle_http("POST", "/fci/task/target-done-add/", b"{}", self.profile))
-        self.assertIsNone(self.tasks.handle_http("POST", "/fci/task/3001/reward/", None, self.profile))
+        self.assertEqual(self.tasks.handle_http("POST", "/fci/task/3001/reward/", None, self.profile)[0], 200)
         self.assertEqual(self.tasks.record(self.profile, "DeployDoneM", 3), [8, 1205, 60014])  # daily + main + activity
 
 
