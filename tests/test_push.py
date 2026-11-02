@@ -236,6 +236,55 @@ class PushTransportTests(unittest.TestCase):
                 client_sock.close()
                 server_sock.close()
 
+    def test_reconnect_resumes_client_server_sequence_before_handshake(self):
+        """A reconnect must continue at the sequence the client last saw."""
+
+        with tempfile.TemporaryDirectory() as state:
+            accounts = LocalAccounts(state)
+            token, open_id = _make_guest_account(accounts)
+            server_sock, client_sock, thread, result = self._start(accounts, [])
+            try:
+                self.assertIn(b"101 Switching Protocols", self._read_upgrade(client_sock))
+                # The original client persists m_scSequence and sends the
+                # high-water mark in the reconnect envelope and CsConnect.
+                resume = 260
+                connect_data = b"".join(
+                    (
+                        _wire_string(2, token),
+                        _varint_field(3, 0),
+                        _varint_field(4, 0),
+                        _varint_field(5, resume),
+                        _wire_string(6, open_id),
+                    )
+                )
+                connect = _encode_cs_message(
+                    261, resume, _encode_message("CsConnect", connect_data)
+                )
+                client_sock.sendall(_masked_frame(0x2, connect))
+                opcode, response = _server_frame(client_sock)
+                self.assertEqual(opcode, 0x2)
+                seq, ack, message_type, data, _ = _decode_envelope(response, "ScMessage")
+                self.assertEqual((seq, ack, message_type), (resume, 261, "ScConnect"))
+                fields = {number: value[-1][1] for number, value in __import__("push")._parse_fields(data).items()}
+                self.assertEqual(fields[4], 261)
+                self.assertEqual(fields[5], resume)
+
+                heartbeat = _encode_cs_message(
+                    262, resume, _encode_message("CsHeartbeat", _varint_field(1, 123456))
+                )
+                client_sock.sendall(_masked_frame(0x2, heartbeat))
+                _, response = _server_frame(client_sock)
+                seq, ack, message_type, _, _ = _decode_envelope(response, "ScMessage")
+                self.assertEqual((seq, ack, message_type), (resume + 1, 262, "ScHeartbeat"))
+                client_sock.sendall(_masked_frame(0x8, b"\x03\xe8"))
+                _server_frame(client_sock)
+                thread.join(1)
+                self.assertFalse(thread.is_alive())
+                self.assertEqual(result[0]["reason"], "peer_close")
+            finally:
+                client_sock.close()
+                server_sock.close()
+
     def test_rpc_fallback_keeps_handshake_messages_on_dedicated_paths(self):
         # The generic local acknowledgement is intentionally unavailable for
         # the three handshake messages; those paths must continue to perform
