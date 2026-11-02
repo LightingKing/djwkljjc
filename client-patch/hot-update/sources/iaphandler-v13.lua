@@ -69,13 +69,17 @@ function Start()
   m_products = PB.all("PurchaseInfo"):where(function(_, p)
     return p.platform == m_platform
   end):toarray()
-  if IsLocalAccountServer() and m_platform == 12 then
+  -- The signed APK may report either the Android-Midas row (12) or the
+  -- legacy local row (11), depending on the build's embedded ConstConfig.
+  -- Both are valid on the LAN checkout path.  Gate only on the local server
+  -- so the extra Android products are present in either configuration.
+  if IsLocalAccountServer() then
     m_products = AppendLocalRechargeProducts(m_products)
   end
   m_payProducts = PB.all("PurchaseInfo"):where(function(_, p)
     return p.platform == m_platform and p.showInShop == true
   end):toarray()
-  if IsLocalAccountServer() and m_platform == 12 then
+  if IsLocalAccountServer() then
     m_payProducts = AppendLocalRechargeProducts(m_payProducts)
   end
   table.sort(m_payProducts, function(a, b)
