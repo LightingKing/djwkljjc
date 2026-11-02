@@ -46,16 +46,21 @@ function IsLocalAccountServer()
   if type(url) ~= "string" then
     return false
   end
-  url = string.lower(url):gsub("/$", "")
-  return url == "http://127.0.0.1:19080" or url == "http://127.0.0.1:19081"
-      or url == "http://127.0.0.1:19082"
-      or url == "http://localhost:19080" or url == "http://localhost:19081"
-      or url == "http://localhost:19082"
-      or url == "https://127.0.0.1:19102" or url == "https://127.0.0.1:19103"
-      or url == "https://127.0.0.1:19104"
-      or url == "https://localhost:19102" or url == "https://localhost:19103"
-      or url == "https://localhost:19104"
-      or url == "http://192.168.1.22:19080" or url == "http://192.168.1.22:19082"
+  url = string.lower(url)
+  -- Restifizer may expose the configured endpoint with a trailing slash or
+  -- an API path.  Compare the authority instead of the whole URL so the
+  -- local checkout remains enabled for both the reverse-mapped (19080) and
+  -- host service (19082/19104) forms.
+  local authority = url:match("^https?://([^/]+)") or url
+  return authority == "127.0.0.1:19080" or authority == "127.0.0.1:19081"
+      or authority == "127.0.0.1:19082"
+      or authority == "localhost:19080" or authority == "localhost:19081"
+      or authority == "localhost:19082"
+      or authority == "127.0.0.1:19102" or authority == "127.0.0.1:19103"
+      or authority == "127.0.0.1:19104"
+      or authority == "localhost:19102" or authority == "localhost:19103"
+      or authority == "localhost:19104"
+      or authority == "192.168.1.22:19080" or authority == "192.168.1.22:19082"
 end
 
 function SetIAPInterface(iap)
