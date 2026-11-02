@@ -1122,26 +1122,18 @@ class LocalDungeons:
         if int(uid or 0) <= 0 or int(actor_id or 0) <= 0:
             return {}
         systems = getattr(self.game, "systems", None)
-        record = actor_store.get(profile, systems._state(profile), uid) if systems is not None else None
+        state = systems._state(profile) if systems is not None else None
+        record = actor_store.get(profile, state, uid) if state is not None else None
         if record is None or not hasattr(self.game, "_append_local_actor"):
             return self._actor_dict(actor_id, uid)
         from google.protobuf import json_format
 
-        container = self.game._types["DBGamePlayer.Actors"]()
-        self.game._append_local_actor(
-            container, int(record["id"]), int(record["uid"]), int(record["uid"]) - 1,
-            level=int(record.get("level", 1) or 1), star=int(record.get("star", 1) or 1),
-            quality=int(record.get("quality") or actor_store.base_quality(int(record["id"]))),
-            exp=int(record.get("exp", 0) or 0), skill_levels=record.get("skills"),
-        )
-        actor = container.player_actors[-1]
+        # WU.SyncActorAttr replaces FightActorInfo wholesale. Reuse the same
+        # complete projection as growth replies so battle initialization gets
+        # talentInfo as well as current levels, skills and worn equipment.
+        actor = systems._st_actor(record, profile, state)
         actor.is_new = False
         actor.is_new_card = False
-        try:
-            # Fight with the worn 藏品's stats and suit effects.
-            equipment.apply_worn_equipment(actor, profile, systems._state(profile))
-        except Exception:
-            pass
         try:
             return json_format.MessageToDict(actor, always_print_fields_with_no_presence=True)
         except TypeError:  # older protobuf
@@ -1653,12 +1645,24 @@ class LocalDungeons:
             actor_ids = [int((actor_store.get(profile, state, uid) or {}).get("id", 0)) for uid in actor_uids]
         except Exception:
             actor_ids = [0 for _ in actor_uids]
+        # UseCardLogic/HelpLogic record each attacker's outgoing damage in
+        # its own team's damageList. totalDamage instead counts damage taken
+        # by that team and cannot attribute output to individual players.
+        # DungeonBalanceTeam reads damages[playerId], so return the native
+        # map and leave unreported AI statistics absent rather than inventing
+        # values for members that did not have a recorded contribution.
+        own_team = next((team for team in getattr(active, "teamList", [])
+                         if int(team.team) == 1), None)
+        player_damages = {
+            str(item.playerId): max(0, int(item.damage))
+            for item in (own_team.statistic.damageList if own_team is not None else [])
+            if item.playerId
+        }
         payload = {
             "dungeonUid": dungeon_uid, "dungeonId": dungeon_id, "mode": "team", "localAi": True,
             "balanced": True, "balanceTime": balance_time, "win": won, "firstFinish": won,
             "profits": reward_changes, "resChange": reward_changes, "expChange": [],
-            "playerDamages": [{"playerId": str(profile.get("player_id", "local")), "damage": 1000 if won else 300},
-                               *[{"playerId": bot["playerId"], "damage": 700 if won else 200} for bot in self._team_ai_members(profile, dungeon_uid)]],
+            "playerDamages": player_damages,
             "roomInfo": self._team_room(profile, dungeon_uid, dungeon_id, actor_ids, actor_uids, status="finished"),
             "balanceInfo": {"balanced": True, "win": won, "firstFinish": won, "balanceTime": balance_time, "profits": reward_changes, "resChange": reward_changes},
         }
