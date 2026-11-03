@@ -80,5 +80,26 @@ class ActivityMiscRemediationTests(unittest.TestCase):
             (509, {"notify": {"code": "Error_ActivityNotStart"}}),
         )
 
+    def test_theme_extra_active_point_resets_at_the_next_activity_cycle(self):
+        first = self.game.tasks.record_extra_active_point(self.profile, 20, point_type=1)
+        self.assertEqual(first["extraActivePoint"], 20)
+        season = self.game.tasks._state(self.profile)["extraActivePoint"]["1"]["season"]
+        self.now[0] = ANCHOR + 28 * 86400 + 3600
+        second = self.game.tasks.extra_active_point_snapshot(self.profile, point_type=1)
+        self.assertEqual(second["extraActivePoint"], 0)
+        state = self.game.tasks._state(self.profile)
+        self.assertGreater(state["extraActivePoint"]["1"]["season"], season)
+        self.assertEqual(state["extraActivePoint"]["1"]["rewardGot"], [])
+
+    def test_redpoint_bootstrap_contains_welfare_results(self):
+        status, payload = self.game.handle_http("GET", "/fci/redpoint/data", None, "application/json", self.auth)
+        self.assertEqual(status, 200)
+        self.assertIn("sealResult", payload)
+        self.assertIn("sealFlagResult", payload)
+        self.assertIn("postcardResult", payload)
+        self.assertTrue(payload["sealResult"]["newOpenFlag"])
+        self.assertTrue(payload["sealFlagResult"]["newOpenFlag"])
+        self.assertTrue(payload["postcardResult"]["isFirstEnter"])
+
 if __name__ == "__main__":
     unittest.main()

@@ -448,6 +448,52 @@ class DeployTests(ModeTestBase):
         self.assertEqual(reset["accomplishNum"], 0)
         self.assertIn(started[0][0], [m["id"] for m in reset["missionInfo"] if m["startTimestamp"]])
 
+    def test_deploy_attend_rejects_actor_outside_role_conditions(self):
+        """DeployMission.roleCon must be enforced at attend time.
+
+        Mission 1 accepts roles 101 and 16.  The default guest actor is role 1,
+        so a forged request must not start it merely because needRoleNum is 2
+        (the old handler only counted selected roles and ignored roleCon).
+        """
+        profile = self.profile()
+        state = self.modes._state(profile)
+        state["deploy"] = {
+            "day": self.modes._day(),
+            "missions": [{"id": 1, "roleid": [], "status": 0, "startTimestamp": 0, "endTimestamp": 0}],
+            "accomplishNum": 0,
+        }
+        self.modes._save(profile, state)
+        status, reply = self.call("POST", "/fci/deploy/deploymissionattend/", {"id": 1, "actorUid": [1, 2]})
+        self.assertEqual(status, 409)
+        self.assertEqual(reply["error"], "deploy_roles_invalid")
+
+    def test_unknown_balance_uid_is_dungeon_not_active(self):
+        for prefix in ("activity-dungeon", "gold-dungeon", "tower-dungeon", "triggered-dungeon"):
+            with self.subTest(prefix=prefix):
+                result = self.call("POST", f"/fci/{prefix}/99999999999999/balance/", {})
+                self.assertEqual(result, (409, {"error": "dungeon_not_active"}))
+
+        # Material and gold scenes PATCH/POST through the shared dungeon path
+        # after entering.  A missing local-mode UID must use the same native
+        # error rather than falling through to the chapter handler (501/404).
+        self.assertEqual(
+            self.call("POST", "/fci/dungeon/99999999999999/balance/", {}),
+            (409, {"error": "dungeon_not_active"}),
+        )
+
+    def test_closed_gold_run_without_cached_balance_returns_two_zero_deltas(self):
+        status, entered = self.call("POST", "/fci/gold-dungeon/", {"selectActorGroupId": 1})
+        self.assertEqual(status, 200, entered)
+        uid = entered["dungeonUid"]
+        # Simulate a legacy closed row whose settlement payload was lost.
+        with closing(self.game._connect()) as connection, connection:
+            connection.execute("UPDATE activity_mode_runs SET status='closed', balance_json=NULL WHERE dungeon_uid=?", (uid,))
+        status, result = self.call("POST", f"/fci/gold-dungeon/{uid}/balance/", {})
+        self.assertEqual(status, 200)
+        gold = [change["baseRes"] for change in result["resChange"] if "baseRes" in change and change["baseRes"]["type"] == 7]
+        self.assertEqual(len(gold), 2)
+        self.assertEqual([entry["countDelta"] for entry in gold], [0, 0])
+
 
 class TriggeredEventTests(ModeTestBase):
     level = 40
@@ -517,6 +563,21 @@ class TriggeredEventTests(ModeTestBase):
         self.assertEqual(result["eventInfo"]["eventId"], 8003)
         self.assertEqual(self.ok("GET", "/fci/triggered-event/")["eventInfo"][0]["eventKey"],
                          result["eventInfo"]["eventKey"])
+
+    def test_series_zero_passive_pool_does_not_fall_into_other_series(self):
+        # Series 0 uses pool ids 32/34/...; an explicit series filter is
+        # required because pool ids 232/332/... have the same level ladder.
+        import activity_modes as modes_module
+        original = modes_module.TRIGGERED_POOLS
+        try:
+            modes_module.TRIGGERED_POOLS = {
+                232: {"poolId": 232, "level": 32, "event": [{"type": 1, "id": 8001, "probability": 1}]},
+                32: {"poolId": 32, "level": 32, "event": [{"type": 1, "id": 8101, "probability": 1}]},
+            }
+            picked = self.modes._pool_for(32, active=False, series=0)
+            self.assertEqual(picked["poolId"], 32)
+        finally:
+            modes_module.TRIGGERED_POOLS = original
 
 
 if __name__ == "__main__":

@@ -478,6 +478,16 @@ class LocalActivityModes:
                     cached = None
                 if isinstance(cached, dict):
                     return 200, cached
+            # The native gold balance window always indexes the first two
+            # ``baseRes`` entries as base and kill gold.  A legacy row can be
+            # closed without a cached payload (for example after a process
+            # restart between the terminal update and the response write), so
+            # preserve those two zero-delta entries on the idempotent retry.
+            if run.get("mode") == "gold":
+                current = self._resource_count(profile, RES_GOLD)
+                zero = [{"baseRes": {"type": RES_GOLD, "id": 0, "param": 0,
+                                      "count": current, "countDelta": 0}}] * 2
+                return 200, self._result(profile, won=False, res_change=zero, killCount=0)
             return 200, self._result(profile, won=False)
         active = self._decode_active(run.get("active_data"))
         won = self._won(active, body)
@@ -913,6 +923,8 @@ class LocalActivityModes:
         if len(sub) == 2 and sub[1] == "active" and method in {"PATCH", "POST", "PUT"}:
             return self._store_active(profile, uid, body)
         if len(sub) == 2 and sub[1] == "balance" and method == "POST":
+            if self._run(profile, uid) is None:
+                return 409, {"error": "dungeon_not_active"}
             return self._balance(profile, uid, body)
         return None
 
@@ -921,7 +933,12 @@ class LocalActivityModes:
         """fci/dungeon/{uid}/... for this module's uids only (WeekActivity/Gold
         PATCH active there; DU.Restart DELETEs there)."""
 
-        if not sub or not sub[0].isdigit() or int(sub[0]) <= UID_BASE or self._run(profile, int(sub[0])) is None:
+        if not sub or not sub[0].isdigit() or int(sub[0]) <= UID_BASE:
+            return None
+        uid = int(sub[0])
+        if self._run(profile, uid) is None:
+            if len(sub) == 2 and sub[1] == "balance" and method == "POST":
+                return 409, {"error": "dungeon_not_active"}
             return None
         return self._run_routes(method, sub, body, profile)
 
@@ -1589,20 +1606,39 @@ class LocalActivityModes:
         if sum(1 for m in deploy["missions"] if _int(m.get("startTimestamp"))) >= cap:
             return 409, {"error": "deploy_count_limit", "missionCount": cap}
         actors = self.game.systems._state(profile)
+        selected_uids = _ints(request.get("actorUid"))
+        # The client sends actor UIDs, while DeployMission.roleCon contains
+        # role IDs.  Resolve each UID against the account's actor store and
+        # reject unknown/duplicate selections before checking the conditions.
+        if not selected_uids or len(selected_uids) != len(set(selected_uids)):
+            return 409, {"error": "deploy_roles_invalid"}
         roles = []
-        for uid in _ints(request.get("actorUid")):
+        for uid in selected_uids:
             record = actor_store.get(profile, actors, uid)
             role = ACTOR_ROLE.get(int(record["id"]), 0) if record is not None else 0
-            if role and role not in roles:
-                roles.append(role)
+            if not role or role in roles:
+                return 409, {"error": "deploy_roles_invalid"}
+            roles.append(role)
+        conditions = row.get("roleCon") or []
+        allowed_roles: set[int] = set()
+        unrestricted = False
+        for condition in conditions:
+            kind = _int(condition.get("type"))
+            if kind == 0:
+                unrestricted = True
+                break
+            if kind == 1:
+                allowed_roles.update(self._role_params(condition))
+        matching_roles = roles if unrestricted else [role for role in roles if role in allowed_roles]
         busy = {role for m in deploy["missions"] if _int(m.get("startTimestamp")) for role in _ints(m.get("roleid"))}
-        if len(roles) < max(1, _int(row.get("needRoleNum"), 1)) or busy & set(roles):
+        if len(matching_roles) < max(1, _int(row.get("needRoleNum"), 1)) or busy & set(matching_roles):
             return 409, {"error": "deploy_roles_invalid"}
         paid = self._pay(profile, _costs(row, "cost"))
         if paid is None:
             return 409, {"error": "insufficient_resource", "resChange": []}
         now = self._now()
-        mission.update(roleid=roles, status=1, startTimestamp=now, endTimestamp=now + max(0, _int(row.get("time"))))
+        mission.update(roleid=matching_roles, status=1, startTimestamp=now,
+                      endTimestamp=now + max(0, _int(row.get("time"))))
         self._save(profile, state)
         return 200, {"attendResult": True, "isPlayStory": False, "resChange": paid}
 
@@ -1718,13 +1754,15 @@ class LocalActivityModes:
         return 0
 
     @staticmethod
-    def _pool_for(level: int, *, active: bool, series: int = 0, ticket: int = 0) -> Optional[Mapping[str, Any]]:
+    def _pool_for(level: int, *, active: bool, series: Optional[int] = None, ticket: int = 0,
+                  exact_pool: int = 0) -> Optional[Mapping[str, Any]]:
         """Highest-level pool of a family (poolId // 100) the player reached."""
 
         candidates = [
             pool for pool_id, pool in TRIGGERED_POOLS.items()
             if bool(pool.get("isActive")) == active and 0 < _int(pool.get("level")) <= level
-            and (not series or pool_id // 100 == series) and (not ticket or _int(pool.get("ticketId")) == ticket)
+            and ((pool_id == exact_pool) if exact_pool else (series is None or pool_id // 100 == series))
+            and (not ticket or _int(pool.get("ticketId")) == ticket)
         ]
         return max(candidates, key=lambda pool: _int(pool.get("level")), default=None)
 
@@ -1746,7 +1784,11 @@ class LocalActivityModes:
         Returns the new EventInfo for balance ``eventInfo`` or None."""
 
         pool_id = _int((DUNGEON_REWARD.get(int(dungeon_id)) or {}).get("triggeredEventPool"))
-        pool = self._pool_for(max(1, _int(profile.get("level"), 1)), active=False, series=pool_id // 100) if pool_id else None
+        # Passive DungeonReward rows in series 0 carry their exact pool id
+        # (32, 34, ...).  They must not fall through to the level-matched
+        # 2xx/3xx families, which happen to share the same ladder.
+        pool = self._pool_for(max(1, _int(profile.get("level"), 1)), active=False,
+                              series=pool_id // 100, exact_pool=pool_id if pool_id < 100 else 0) if pool_id else None
         if pool is None:
             return None
         state = self._state(profile)
