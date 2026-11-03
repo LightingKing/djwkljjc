@@ -493,7 +493,7 @@ class LocalGuild:
             return [{"id": row["id"], "type": row["type"], "add": row["add"],
                      "startTime": row["startTime"], "endTime": row["endTime"]}
                     for row in self._skills(guild, now) if row["endTime"] > now]
-        return self._run(profile, read)
+        return self._run(profile, read) + self.game.guild_dungeons.active_profits(profile)
 
     def active_profit_rules(self, profile):
         """Return active effect filters for battle reward integration."""
@@ -507,7 +507,7 @@ class LocalGuild:
                      "isRatio": bool(row.get("isRatio")), "dungeonType": list(row.get("dungeonType") or []),
                      "resType": _int(row.get("resType")), "funcType": _int(row.get("funcType"))}
                     for row in SKILL_PROFITS if _int(row.get("id")) in active]
-        return self._run(profile, read)
+        return self._run(profile, read) + self.game.guild_dungeons.active_profit_rules(profile)
 
     def _request(self, body, type_name):
         raw = body.encode() if isinstance(body, str) else bytes(body or b"")

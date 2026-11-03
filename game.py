@@ -1260,6 +1260,8 @@ class LocalGame:
         now_ms = self._now() * 1000
         self.mall.settle_month_card(profile)
         profile = self._profile(account)
+        self.hidden_challenge.settle_due(profile)
+        self.guild_dungeons.settle_due(profile)
         self.guild.player_data(profile)
         self.cultivation.sync(profile)
         messages: list[Message] = []
@@ -1495,6 +1497,8 @@ class LocalGame:
             profile = self._profile(account)
             self.mall.settle_month_card(profile)
             profile = self._profile(account)
+            self.hidden_challenge.settle_due(profile)
+            self.guild_dungeons.settle_due(profile)
             economy_profile = dict(profile)
             economy_profile["account"] = account
             for feature in (self.hidden_events, self.gacha_score_shop, self.hidden_challenge, self.guild_dungeons):
@@ -1644,6 +1648,8 @@ class LocalGame:
         profile = self._profile(account)
         self.mall.settle_month_card(profile)
         profile = self._profile(account)
+        self.hidden_challenge.settle_due(profile)
+        self.guild_dungeons.settle_due(profile)
         economy_profile = dict(profile)
         economy_profile["account"] = account
         guild_result = self.guild.handle_http(method, path, body, profile)
