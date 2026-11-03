@@ -7,7 +7,7 @@
     "http://192.168.1.22:19080",
     "http://192.168.1.22:19082"
   ],
-  "reproduction": "SHA256 values describe the exact source bytes used by build.py. For changed modules, read source as UTF-8 with universal newlines; apply each exact replacement once; encode UTF-8 with LF. Unchanged modules use the original source bytes.",
+  "reproduction": "LAN and formal manifests use the shared sources/iaphandler-local.lua adapter; exact bytes are hashed below.",
   "modules": [
     {
       "source": "sources/login.lua",
@@ -35,21 +35,12 @@
       ]
     },
     {
-      "source": "sources/iaphandler-v11.lua",
-      "destination": "sources/iaphandler-lan.lua",
+      "source": "sources/iaphandler-local.lua",
+      "destination": "sources/iaphandler-local.lua",
       "target": "assetbundle/data/lua/manager/iaphandler",
-      "sha256": "b2ad615854c4a1330a6efd1256b093c164396ef7754fb8db790745c5c4a232d6",
-      "patchedSha256": "6f46c32922313fd5303de574921f5e5311b49be24994f3306b1b81b7145e2363",
-      "replacements": [
-        {
-          "old": "-- The offline account/checkout adapters apply only to our explicit loopback\n-- services. Other endpoints retain the native account and platform-IAP paths.",
-          "new": "-- Local account/checkout adapters apply only to explicit loopback services\n-- and the production/rehearsal LAN endpoints. Other servers retain native SDK paths."
-        },
-        {
-          "old": "      or url == \"https://localhost:19102\" or url == \"https://localhost:19103\"\n",
-          "new": "      or url == \"https://localhost:19102\" or url == \"https://localhost:19103\"\n      or url == \"http://192.168.1.22:19080\" or url == \"http://192.168.1.22:19082\"\n"
-        }
-      ]
+      "sha256": "00e9ba849120a4c635f7496e26425cc31c57d3cc6baf0d9243988a86a9e3271d",
+      "patchedSha256": "00e9ba849120a4c635f7496e26425cc31c57d3cc6baf0d9243988a86a9e3271d",
+      "replacements": []
     },
     {
       "source": "sources/actorutil.lua",

@@ -13,7 +13,7 @@
       "originalSha256": "08ee811367d6ca80896da4c11ec753f1908a7584043b32730c9c492bcfde911b"
     },
     {
-      "source": "sources/iaphandler-lan.lua",
+      "source": "sources/iaphandler-local.lua",
       "target": "assetbundle/data/lua/manager/iaphandler",
       "originalSha256": "0e84d01f67546752cb1f01e476f946bdc59c2851b8afb65b14ff72b35426e021"
     },

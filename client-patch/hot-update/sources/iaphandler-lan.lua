@@ -7,6 +7,36 @@ local m_activityInfo = {}
 local m_payProducts, m_productIds
 local m_bReset = false
 
+-- The APK's PurchaseInfo table stops at 6480迷子. Keep the extra local
+-- denominations in the LAN adapter so the signed client can render and buy
+-- them without changing the embedded table or touching any platform SDK.
+local function AppendLocalRechargeProducts(products)
+  local existing = {}
+  for _, product in ipairs(products) do
+    existing[product.productId] = true
+  end
+  local additions = {
+    {
+      productName = "64800迷子", showInShop = true, purchaseRes = {},
+      productPicture = "purchase_diamond_06",
+      productId = "com.tencent.fcicv.Gem64800.android", channels = {5},
+      price = 6480.0, platform = 12, count = 64800, ratio = 0,
+    },
+    {
+      productName = "648000迷子", showInShop = true, purchaseRes = {},
+      productPicture = "purchase_diamond_06",
+      productId = "com.tencent.fcicv.Gem648000.android", channels = {5},
+      price = 64800.0, platform = 12, count = 648000, ratio = 0,
+    },
+  }
+  for _, product in ipairs(additions) do
+    if not existing[product.productId] then
+      table.insert(products, product)
+    end
+  end
+  return products
+end
+
 -- Local account/checkout adapters apply only to explicit loopback services
 -- and the production/rehearsal LAN endpoints. Other servers retain native SDK paths.
 function IsLocalAccountServer()
@@ -16,12 +46,33 @@ function IsLocalAccountServer()
   if type(url) ~= "string" then
     return false
   end
-  url = string.lower(url):gsub("/$", "")
-  return url == "http://127.0.0.1:19080" or url == "http://127.0.0.1:19081"
-      or url == "http://localhost:19080" or url == "http://localhost:19081"
-      or url == "https://127.0.0.1:19102" or url == "https://127.0.0.1:19103"
-      or url == "https://localhost:19102" or url == "https://localhost:19103"
-      or url == "http://192.168.1.22:19080" or url == "http://192.168.1.22:19082"
+  url = string.lower(url)
+  local authority = url:match("^https?://([^/?#]+)")
+  if authority == nil or authority:find("@", 1, true) ~= nil then
+    return false
+  end
+  local host, port = authority:match("^([^:]+):(%d+)$")
+  if host == nil then
+    return false
+  end
+  local servicePort = tonumber(port)
+  if servicePort ~= 19080 and servicePort ~= 19081 and servicePort ~= 19082
+      and servicePort ~= 19102 and servicePort ~= 19103 and servicePort ~= 19104 then
+    return false
+  end
+  if host == "localhost" then
+    return true
+  end
+  local first, second, third, fourth = host:match("^(%d+)%.(%d+)%.(%d+)%.(%d+)$")
+  if first == nil then
+    return false
+  end
+  first, second, third, fourth = tonumber(first), tonumber(second), tonumber(third), tonumber(fourth)
+  if first > 255 or second > 255 or third > 255 or fourth > 255 then
+    return false
+  end
+  return first == 127 or first == 10 or (first == 172 and second >= 16 and second <= 31)
+      or (first == 192 and second == 168)
 end
 
 function SetIAPInterface(iap)
@@ -39,9 +90,16 @@ function Start()
   m_products = PB.all("PurchaseInfo"):where(function(_, p)
     return p.platform == m_platform
   end):toarray()
+  -- This module is shipped only in the LAN hot-update.  The signed APK has
+  -- shipped with both platform 11 and 12 values in different builds, and
+  -- Restifizer can expose either a loopback or a rewritten authority.  Keep
+  -- the local tiers in the adapter unconditionally so the list cannot lose
+  -- them during bootstrap just because that enum or URL differs.
+  m_products = AppendLocalRechargeProducts(m_products)
   m_payProducts = PB.all("PurchaseInfo"):where(function(_, p)
     return p.platform == m_platform and p.showInShop == true
   end):toarray()
+  m_payProducts = AppendLocalRechargeProducts(m_payProducts)
   table.sort(m_payProducts, function(a, b)
     if a.price < b.price then
       return true

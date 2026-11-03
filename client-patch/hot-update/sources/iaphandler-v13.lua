@@ -47,20 +47,32 @@ function IsLocalAccountServer()
     return false
   end
   url = string.lower(url)
-  -- Restifizer may expose the configured endpoint with a trailing slash or
-  -- an API path.  Compare the authority instead of the whole URL so the
-  -- local checkout remains enabled for both the reverse-mapped (19080) and
-  -- host service (19082/19104) forms.
-  local authority = url:match("^https?://([^/]+)") or url
-  return authority == "127.0.0.1:19080" or authority == "127.0.0.1:19081"
-      or authority == "127.0.0.1:19082"
-      or authority == "localhost:19080" or authority == "localhost:19081"
-      or authority == "localhost:19082"
-      or authority == "127.0.0.1:19102" or authority == "127.0.0.1:19103"
-      or authority == "127.0.0.1:19104"
-      or authority == "localhost:19102" or authority == "localhost:19103"
-      or authority == "localhost:19104"
-      or authority == "192.168.1.22:19080" or authority == "192.168.1.22:19082"
+  local authority = url:match("^https?://([^/?#]+)")
+  if authority == nil or authority:find("@", 1, true) ~= nil then
+    return false
+  end
+  local host, port = authority:match("^([^:]+):(%d+)$")
+  if host == nil then
+    return false
+  end
+  local servicePort = tonumber(port)
+  if servicePort ~= 19080 and servicePort ~= 19081 and servicePort ~= 19082
+      and servicePort ~= 19102 and servicePort ~= 19103 and servicePort ~= 19104 then
+    return false
+  end
+  if host == "localhost" then
+    return true
+  end
+  local first, second, third, fourth = host:match("^(%d+)%.(%d+)%.(%d+)%.(%d+)$")
+  if first == nil then
+    return false
+  end
+  first, second, third, fourth = tonumber(first), tonumber(second), tonumber(third), tonumber(fourth)
+  if first > 255 or second > 255 or third > 255 or fourth > 255 then
+    return false
+  end
+  return first == 127 or first == 10 or (first == 172 and second >= 16 and second <= 31)
+      or (first == 192 and second == 168)
 end
 
 function SetIAPInterface(iap)

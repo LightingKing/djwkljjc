@@ -7,7 +7,7 @@
     "http://192.168.1.22:19080",
     "http://192.168.1.22:19082"
   ],
-  "reproduction": "v13 copies the verified v12 LAN sources and adds the two local Android recharge rows in iaphandler-v13.lua; all bytes are hashed below.",
+  "reproduction": "LAN and formal manifests use the shared sources/iaphandler-local.lua adapter; exact bytes are hashed below.",
   "modules": [
     {
       "source": "sources/login.lua",
@@ -26,11 +26,11 @@
       "replacements": []
     },
     {
-      "source": "sources/iaphandler-lan.lua",
-      "destination": "sources/iaphandler-v13.lua",
+      "source": "sources/iaphandler-local.lua",
+      "destination": "sources/iaphandler-local.lua",
       "target": "assetbundle/data/lua/manager/iaphandler",
-      "sha256": "6f46c32922313fd5303de574921f5e5311b49be24994f3306b1b81b7145e2363",
-      "patchedSha256": "4a0e941e3e16bb733f938415b2560a15f46fa2b5ac156aef7d8f8a0f5ca26c7b",
+      "sha256": "00e9ba849120a4c635f7496e26425cc31c57d3cc6baf0d9243988a86a9e3271d",
+      "patchedSha256": "00e9ba849120a4c635f7496e26425cc31c57d3cc6baf0d9243988a86a9e3271d",
       "replacements": []
     },
     {

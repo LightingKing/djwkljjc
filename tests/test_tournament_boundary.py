@@ -218,6 +218,32 @@ class TournamentBoundaryTests(unittest.TestCase):
         status, refreshed = self.call("POST", "/fci/asyncpvpmatch/", {"index": 1})
         self.assertEqual((status, refreshed["index"]), (200, 1))
 
+    def test_reported_win_then_quit_records_tasks_and_activity_once(self):
+        """A native quit can follow a successful upload when balance was lost."""
+        self.game_call("POST", "/fci/tournament/enter/", self.wire(
+            "ApiTournamentEnter", tournament_id=TOURNAMENT_ID, activity_type=5))
+        target = self.game_call("GET", f"/fci/tournament/enter/5/{TOURNAMENT_ID}")[1]["asyncPvpTargetInfo"][0]
+        entered = self.game_call("POST", "/fci/tournament/dungeonenter/", self.wire(
+            "ApiTournamentDungeonEnter", tournament_id=TOURNAMENT_ID, activity_type=5,
+            target_uid=target["uid"]))[1]
+        active_path = f"/fci/tournamentdungeon/{entered['dungeonUid']}/active/"
+        self.assertEqual(self.game_call("PATCH", active_path, self.wire(
+            "FightActiveData", dungeonType=3, stageID=4001, gameRound=3, winTeam=1))[0], 200)
+
+        self.assertEqual(self.game_call("POST", "/fci/tournament/dungeonquit/", self.wire(
+            "ApiTournamentDungeonQuit", activity_type=5))[0], 200)
+        rows = {row["id"]: row for row in self.game.tasks.snapshot(self.profile)["tasks"]}
+        self.assertEqual(rows[1208]["progress"], 1)
+        self.assertEqual(rows[60011]["progress"], 1)
+
+        before = self.saved_rows()
+        status, balance = self.game_call("POST", "/fci/tournament/dungeonbalance/", self.wire(
+            "ApiTournamentDungeonBalance", activity_type=5))
+        self.assertEqual((status, balance["balanceInfo"]["win"], balance["winNum"]), (200, True, 1))
+        self.assertEqual(self.saved_rows(), before)
+        rows_after = {row["id"]: row for row in self.game.tasks.snapshot(self.profile)["tasks"]}
+        self.assertEqual((rows_after[1208]["progress"], rows_after[60011]["progress"]), (1, 1))
+
     def test_refresh_is_zero_based_consumes_item_and_caps_at_three(self):
         mail = send_mail(self.game, self.profile, "Arena test fixture", "Refresh tickets", [{"type": 11, "id": 80001, "count": 3}])
         self.assertEqual(self.game_call("PATCH", f"/fci/mail/{mail['id']}", {"attachmentsGot": True})[0], 200)

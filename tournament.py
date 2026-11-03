@@ -326,7 +326,7 @@ class LocalTournament:
                 return 200, self._run(profile, lambda c, s, n: self._dungeon_balance(profile, s, n))
             if route == "/fci/tournament/dungeonquit":
                 if method != "POST": return 405, {"error": "method_not_allowed"}
-                return 200, self._run(profile, lambda c, s, n: self._dungeon_quit(s, n))
+                return 200, self._run(profile, lambda c, s, n: self._dungeon_quit(profile, s, n))
             if route == "/fci/tournament/winreward":
                 if method != "POST": return 405, {"error": "method_not_allowed"}
                 payload = self._request("winreward", body); response = {"resChange": [], "asyncPvpRecord": {}}
@@ -348,7 +348,7 @@ class LocalTournament:
                 return 200, self._run(profile, lambda c, s, n: self._enter(profile, s, payload))
             if route == "/fci/tournament/quit":
                 if method != "POST": return 405, {"error": "method_not_allowed"}
-                return 200, self._run(profile, lambda c, s, n: self._dungeon_quit(s, n))
+                return 200, self._run(profile, lambda c, s, n: self._dungeon_quit(profile, s, n))
             if route == "/fci/tournament/balance":
                 if method != "POST": return 405, {"error": "method_not_allowed"}
                 return 200, {"resChange": []}
@@ -467,8 +467,7 @@ class LocalTournament:
         if win: self.game.after_commit(lambda: self._after_win(profile, state))
         return response
 
-    @staticmethod
-    def _dungeon_quit(state, now):
+    def _dungeon_quit(self, profile, state, now):
         if not state.get("run"): raise TournamentError("tournament_run_not_found", 404)
         run = state["run"]
         if run.get("balanced"):
@@ -494,6 +493,11 @@ class LocalTournament:
                             "targetsDone": [], "resChange": [], "profits": []},
             "dieNum": _int(state.get("losses")), "winNum": _int(state.get("wins")),
         }
+        # A successful active snapshot may be followed by a native quit when
+        # the balance response was lost. Treat that path like normal balance
+        # so task and actor-cultivation progress is recorded once.
+        if win:
+            self.game.after_commit(lambda: self._after_win(profile, state))
         return {"result": True}
 
 

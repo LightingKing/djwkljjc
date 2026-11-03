@@ -39,7 +39,10 @@ class ClientPatchLanTests(unittest.TestCase):
             "http://accounts.example.invalid@192.168.1.22:19080",
             "https://accounts.example.invalid", "", None, 19080,
         )
-        for source in ("auth-lan.lua", "iaphandler-lan.lua"):
+        # The account adapter retains the LAN manifest's historical fixed
+        # endpoint contract. IAP checkout is covered by the host/port policy
+        # regression below and is shared with the v13 adapter.
+        for source in ("auth-lan.lua",):
             for endpoint in accepted:
                 for normalized in (endpoint, endpoint.upper() + "/"):
                     with self.subTest(source=source, endpoint=normalized):
@@ -50,6 +53,33 @@ class ClientPatchLanTests(unittest.TestCase):
                     lua = self.runtime(source, endpoint)
                     self.assertFalse(lua.globals().IsLocalAccountServer())
             lua.execute("CS.Restifizer=nil; assert(not IsLocalAccountServer())")
+
+    def test_local_checkout_accepts_private_hosts_on_service_ports_without_fixed_lan_ip(self):
+        accepted = (
+            "http://10.23.4.7:19080/api",
+            "http://172.16.8.9:19082/",
+            "https://172.31.255.254:19104/fci",
+            "http://192.168.50.7:19081",
+            "http://127.0.0.2:19103",
+            "http://localhost:19080/path",
+        )
+        rejected = (
+            "http://8.8.8.8:19080",
+            "http://192.169.1.22:19080",
+            "http://10.23.4.7:18080",
+            "http://172.16.8.9:19105",
+            "http://192.168.50.7:19080.evil",
+            "http://192.168.50.7:19080@accounts.example.invalid",
+            "http://accounts.example.invalid@192.168.50.7:19080",
+            "ftp://192.168.50.7:19080",
+        )
+        for source in ("iaphandler-lan.lua", "iaphandler-v13.lua"):
+            for endpoint in accepted:
+                with self.subTest(source=source, endpoint=endpoint):
+                    self.assertTrue(self.runtime(source, endpoint).globals().IsLocalAccountServer())
+            for endpoint in rejected:
+                with self.subTest(source=source, endpoint=endpoint):
+                    self.assertFalse(self.runtime(source, endpoint).globals().IsLocalAccountServer())
 
     def test_lan_login_uses_password_contract_and_account_then_auth_requests(self):
         for endpoint in LAN_ENDPOINTS:
@@ -96,7 +126,7 @@ class ClientPatchLanTests(unittest.TestCase):
                 """)
 
     def test_unlisted_lan_and_remote_servers_keep_native_auth_and_checkout(self):
-        for endpoint in ("http://192.168.1.23:19080", "https://accounts.example.invalid"):
+        for endpoint in ("http://192.168.1.23:19083", "https://accounts.example.invalid"):
             with self.subTest(endpoint=endpoint):
                 lua = self.runtime("auth-lan.lua", endpoint)
                 lua.execute("""
@@ -149,7 +179,9 @@ class ClientPatchLanTests(unittest.TestCase):
         for previous, current, origin in zip(old["modules"], new["modules"], origins["modules"]):
             self.assertEqual(previous["target"], current["target"])
             self.assertEqual(previous["originalSha256"], current["originalSha256"])
-            self.assertEqual(origin["source"], previous["source"])
+            expected_source = ("sources/iaphandler-local.lua"
+                               if current["target"].endswith("/iaphandler") else previous["source"])
+            self.assertEqual(origin["source"], expected_source)
             self.assertEqual(origin["destination"], current["source"])
             self.assertEqual(origin["target"], current["target"])
             source = (PATCH / origin["source"]).read_bytes()
@@ -165,7 +197,7 @@ class ClientPatchLanTests(unittest.TestCase):
                 changed.append(current["source"])
             else:
                 self.assertEqual(source, output)
-        self.assertEqual(changed, ["sources/auth-lan.lua", "sources/iaphandler-lan.lua"])
+        self.assertEqual(changed, ["sources/auth-lan.lua"])
 
     def test_native_version_filter_offers_v12_to_fresh_or_v11_clients_only(self):
         for endpoint in LAN_ENDPOINTS:
@@ -179,7 +211,7 @@ class ClientPatchLanTests(unittest.TestCase):
             self.assertEqual(select_patch_manifest(manifest, "2.0.4.59162.12")["history"], [])
 
     def test_lan_iap_source_includes_large_local_recharge_tiers(self):
-        source = (PATCH / "sources" / "iaphandler-v13.lua").read_text(encoding="utf-8")
+        source = (PATCH / "sources" / "iaphandler-local.lua").read_text(encoding="utf-8")
         self.assertIn('com.tencent.fcicv.Gem64800.android', source)
         self.assertIn('com.tencent.fcicv.Gem648000.android', source)
         self.assertIn('AppendLocalRechargeProducts', source)
@@ -192,7 +224,7 @@ class ClientPatchLanTests(unittest.TestCase):
         self.assertEqual(len(candidate["modules"]), len(base["modules"]))
         by_target = {item["target"]: item for item in candidate["modules"]}
         iap = by_target["assetbundle/data/lua/manager/iaphandler"]
-        self.assertEqual(iap["source"], "sources/iaphandler-v13.lua")
+        self.assertEqual(iap["source"], "sources/iaphandler-local.lua")
         self.assertEqual(iap["originalSha256"], next(item["originalSha256"] for item in base["modules"]
                                                         if item["target"] == iap["target"]))
         origins = json.loads((PATCH / "source-origins-v13.json").read_text(encoding="utf-8"))
