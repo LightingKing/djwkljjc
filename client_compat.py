@@ -43,13 +43,9 @@ def _resource(value: Any) -> dict[str, int]:
 _STATIC: dict[str, Any] = {
     # Window_City bulletin button reads response.activities.
     "/fci/webactivity": {"activities": []},
-    # PushService/SceneFight store these maps as received.
-    "/fci/event-dungeon/record": {},
     # ApiDeployMission.get: no deploy mission row exists locally (the typed
     # reply carried one empty entry the client rendered as a mission).
     "/fci/deploy/mission": {"missionInfo": [], "accomplishNum": 0},
-    # Only read while a CultivationPvP activity is open.
-    "/fci/challenge-mode/reward": {"scoreRecord": {}, "rewardRecords": []},
 }
 
 

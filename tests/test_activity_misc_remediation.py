@@ -48,12 +48,18 @@ class ActivityMiscRemediationTests(unittest.TestCase):
                 self.assertEqual(by_id[activity_id]["timestampEnd"], expected_end)
                 self.assertEqual(by_id[activity_id]["timestampClose"], expected_end)
 
-    def test_guild_dungeon_is_a_native_not_open_notify(self):
+    def test_guild_dungeon_rejects_legacy_scores_and_requires_membership(self):
         status, payload = self.game.handle_http(
             "POST", "/fci/guild/dungeon/settle", b"{}", "application/json", self.auth
         )
         self.assertEqual(status, 404)
-        self.assertEqual(client_error_reply(status, payload), (509, {"notify": {"code": "Error_ActivityNotStart"}}))
+        self.assertEqual(payload, {"error": "invalid_request"})
+        self.assertEqual(client_error_reply(status, payload), (509, {"notify": {"code": "Error_RequestFailed"}}))
+        status, payload = self.game.handle_http(
+            "POST", "/fci/guild-dungeon/", b'{"dungeonId":6101}', "application/json", self.auth
+        )
+        self.assertEqual((status, payload), (403, {"error": "guild_not_member"}))
+        self.assertEqual(client_error_reply(status, payload), (509, {"notify": {"code": "Error_GuildHaveNoPermission"}}))
 
     def test_limited_gacha_without_pool_id_is_rejected(self):
         status, payload = self.game.handle_http(

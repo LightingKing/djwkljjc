@@ -2027,7 +2027,8 @@ class LocalSystems:
                 # A consumed stack still has a binding: return zero so ItemChange
                 # can clear it instead of leaving the stale client count intact.
                 return {"id": item_id, "count": _int(value.get("count")),
-                        "gotTime": _int(value.get("gotTime")), "isNew": bool(value.get("isNew", False))}
+                        "gotTime": _int(value.get("gotTime")), "isNew": bool(value.get("isNew", False)),
+                        "historyGetCount": _int(value.get("historyGetCount"))}
             tail = lower.rstrip("/").rsplit("/", 1)[-1]
             if tail != "item":
                 if not tail.isdecimal() or int(tail) <= 0:
@@ -2051,6 +2052,7 @@ class LocalSystems:
                 result.result.count = _int(value.get("count"))
                 result.result.got_time = _int(value.get("gotTime"))
                 result.result.is_new = bool(value.get("isNew", False))
+                result.result.history_get_count = _int(value.get("historyGetCount"))
                 return 200, result
             except Exception:
                 return 200, {"id": item_id, "count": _int(value.get("count")), "sandbox": True}
@@ -2061,7 +2063,8 @@ class LocalSystems:
             if ("playeritem" in lower or lower in {"/fci/item", "/fci/item/"}) and method == "GET":
                 result = []
                 for key, value in items.items():
-                    if _int(value.get("count")) > 0: result.append({"id": _int(key), "count": _int(value.get("count")), "gotTime": _int(value.get("gotTime")), "isNew": bool(value.get("isNew", True))})
+                    if _int(value.get("count")) > 0 or _int(value.get("historyGetCount")) > 0:
+                        result.append({"id": _int(key), "count": _int(value.get("count")), "gotTime": _int(value.get("gotTime")), "isNew": bool(value.get("isNew", True)), "historyGetCount": _int(value.get("historyGetCount"))})
                 return 200, {"items": result}
             if "sell" in lower:
                 if method != "POST": return 405, {"error": "method_not_allowed", "message": "POST required"}
@@ -2876,11 +2879,11 @@ class LocalSystems:
         lower = route.lower()
         if not (lower.startswith("/fci/guild") or lower.startswith("/fci/guild-dungeon-record")):
             return None
-        # The historical sandbox accepted a caller-supplied score as a win.
-        # Native guild-dungeon combat is a separate, unimplemented mode; never
-        # expose that fake settlement or emit progress-reward push 87 for it.
+        # Native combat owns its terminal reports and reward ledger. Historical
+        # tool-only routes cannot turn a caller-supplied score into a win.
         if "/dungeon" in lower or lower.startswith("/fci/guild-dungeon"):
-            return 404, {"error": "guild_dungeon_not_implemented"}
+            native = self.game.guild_dungeons.handle_http(method, route, body, profile)
+            return native if native is not None else (404, {"error": "invalid_request"})
         guild = state.get("guild")
         if lower in {"/fci/guild/recommend", "/fci/guild/recommend/", "/fci/guild/search", "/fci/guild/search/"}:
             if method != "GET":
@@ -3057,37 +3060,6 @@ class LocalSystems:
             self._save(profile, state)
             return 200, {"ok": True, "request": found, "actorId": _int(found.get("actorId")), "sandbox": True}
 
-        if lower in {"/fci/guild/dungeon", "/fci/guild/dungeon/enter", "/fci/guild/dungeon/settle", "/fci/guild-dungeon/", "/fci/guild-dungeon"}:
-            dungeon = guild["dungeon"]
-            if method == "GET":
-                return 200, {"guildId": _int(guild.get("id"), 1), "stage": _int(dungeon.get("stage"), 1), "score": _int(dungeon.get("score")), "attempts": _int(dungeon.get("attempts")), "history": list(dungeon.get("history", [])), "sandbox": True}
-            if method != "POST": return 405, {"error": "method_not_allowed", "message": "GET or POST required"}
-            request = _json(body)
-            request_key = str(request.get("requestId", request.get("request_id", request.get("idempotencyKey", ""))) or "").strip()[:128]
-            if request_key:
-                previous = next(
-                    (item for item in guild["dungeon"].get("history", [])
-                     if isinstance(item, Mapping) and str(item.get("requestId", "")) == request_key),
-                    None,
-                )
-                if isinstance(previous, Mapping):
-                    return 200, {"ok": True, "duplicate": True, "result": dict(previous), "sandbox": True}
-            stage = max(1, min(_int(request.get("stage", dungeon.get("stage", 1)), 1), 100))
-            score = max(0, min(_int(request.get("score", 100), 100), 100000))
-            dungeon["stage"] = max(_int(dungeon.get("stage"), 1), stage)
-            dungeon["score"] = _int(dungeon.get("score")) + score
-            dungeon["attempts"] = _int(dungeon.get("attempts")) + 1
-            result = {"stage": stage, "score": score, "totalScore": _int(dungeon.get("score")), "attempt": _int(dungeon.get("attempts")), "finished": True, "time": self._now()}
-            if request_key:
-                result["requestId"] = request_key
-            dungeon.setdefault("history", []).append(result); del dungeon["history"][:-50]
-            self._guild_record(guild, {"type": "dungeon_clear", "stage": stage, "score": score, "time": self._now()})
-            self._save(profile, state)
-            return 200, {"ok": True, "result": result, "sandbox": True}
-
-        if lower in {"/fci/guild-dungeon-record", "/fci/guild-dungeon-record/"}:
-            if method != "GET": return 405, {"error": "method_not_allowed", "message": "GET required"}
-            return 200, {"dungeonRecords": list(guild["dungeon"].get("history", [])), "score": _int(guild["dungeon"].get("score")), "sandbox": True}
         if "donat" in lower:
             if method != "POST": return 405, {"error": "method_not_allowed", "message": "POST required"}
             amount = max(1, _int(_json(body).get("amount", _json(body).get("count", 100)), 100))

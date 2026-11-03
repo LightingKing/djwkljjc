@@ -1,0 +1,151 @@
+{
+  "appVersion": "2.0.4.59162.0",
+  "patchVersion": 21,
+  "modules": [
+    {
+      "source": "sources/login.lua",
+      "target": "assetbundle/data/lua/window/login/login",
+      "originalSha256": "7bb80bcd7dbede6d4be6027ea9936f165a62715ab1e7db4127d8406383a1d6c4"
+    },
+    {
+      "source": "sources/auth-lan.lua",
+      "target": "assetbundle/data/lua/window/auth/auth",
+      "originalSha256": "08ee811367d6ca80896da4c11ec753f1908a7584043b32730c9c492bcfde911b"
+    },
+    {
+      "source": "sources/iaphandler-local.lua",
+      "target": "assetbundle/data/lua/manager/iaphandler",
+      "originalSha256": "0e84d01f67546752cb1f01e476f946bdc59c2851b8afb65b14ff72b35426e021"
+    },
+    {
+      "source": "sources/actorutil.lua",
+      "target": "assetbundle/data/lua/common/actorutil",
+      "originalSha256": "e8040bfde750f4ac7b03fee3e6f931ee21e5837dfa9badb1ae166d7fcb8840f8"
+    },
+    {
+      "source": "sources/resourceexchange.lua",
+      "target": "assetbundle/data/lua/window/resourceexchange/resourceexchange",
+      "originalSha256": "f79f11ee0dc50c63b7fe6193e20e63a06e4b58e6d02b188b88a2015c284e41fe"
+    },
+    {
+      "source": "sources/restifizermanager-v14.lua",
+      "target": "assetbundle/data/lua/manager/restifizermanager",
+      "originalSha256": "45ac8875b53019b2113617158cdad3d4c3621e6249c6ebabe2b49b922a45ae16"
+    },
+    {
+      "source": "sources/purchaseactivitygift.lua",
+      "target": "assetbundle/data/lua/window/purchase/purchaseactivitygift",
+      "originalSha256": "32bba995204364c3325a13680ee249fba692f23f93fc2492611bc5cef3352d23"
+    },
+    {
+      "source": "sources/purchasegiftitem.lua",
+      "target": "assetbundle/data/lua/window/purchase/purchasegiftitem",
+      "originalSha256": "e3e89964a8fe1efd8f4d506677a587d6ee36588c174d37ee638211b5704d63c2"
+    },
+    {
+      "source": "sources/purchasebuy.lua",
+      "target": "assetbundle/data/lua/window/purchasebuy/purchasebuy",
+      "originalSha256": "f8179408e3c39559f220f1d333b30bd0ba5771181a22b070dd7cb8d54b80acac"
+    },
+    {
+      "source": "sources/activity.lua",
+      "target": "assetbundle/data/lua/window/activity/activity",
+      "originalSha256": "9a3046436230bb9b51139e5d7ebde1df7d03316f79237571d49825a02c5d6936"
+    },
+    {
+      "source": "sources/windowutil.lua",
+      "target": "assetbundle/data/lua/common/windowutil",
+      "originalSha256": "7698c0454718a71750fead33e3ea6f8910bda47292a592795eea9ac194dce703"
+    },
+    {
+      "source": "sources/mazemain.lua",
+      "target": "assetbundle/data/lua/window/mazemain/mazemain",
+      "originalSha256": "9fa0c7d7c991cda44128cd3bcbab9af5f7d69154a84b5078f957ac6e835de747"
+    },
+    {
+      "source": "sources/dungeonbalancefailed.lua",
+      "target": "assetbundle/data/lua/window/dungeonbalancefailed/dungeonbalancefailed",
+      "originalSha256": "4a0ee5a51c5a00b112b7d8ce097825ffbb50e88a2e848703171b7c587342ab61"
+    },
+    {
+      "source": "sources/dungeonteam-local.lua",
+      "target": "assetbundle/data/lua/window/dungeonteam/dungeonteam",
+      "originalSha256": "48be3f25ed11127d592cdca8f228266ccd62eac444e80da883e324680adb7e48"
+    },
+    {
+      "source": "sources/dungeonteamprepare-local.lua",
+      "target": "assetbundle/data/lua/window/dungeonteamprepare/dungeonteamprepare",
+      "originalSha256": "6d2fb589d931c918fc387b948fd69f069c842dae1f256eeb138cddefe7e5c0ad"
+    },
+    {
+      "source": "sources/burstlinkactorgroup-v10.lua",
+      "target": "assetbundle/data/lua/window/burstlinkactorgroup/burstlinkactorgroup",
+      "originalSha256": "7acdc9f5cbf605f949986d2301746ce97bb05104661d90ac116401575ca9c7a5"
+    },
+    {
+      "source": "sources/scenefight-v10.lua",
+      "target": "assetbundle/data/lua/scene/scenefight",
+      "originalSha256": "09d67efd9cce1c0d29563fee4372e96109fb41bd27fe2f45ae5821e4cf237812"
+    },
+    {
+      "source": "sources/helplogic-v10.lua",
+      "target": "assetbundle/data/lua/logic/helplogic",
+      "originalSha256": "881047b7342ab5a41d618f0b3deca2b867d0ca40e5d90d4f179ba761ce5dfd11"
+    },
+    {
+      "source": "sources/dungeonutil-v10.lua",
+      "target": "assetbundle/data/lua/common/dungeonutil",
+      "originalSha256": "821bc4c4e2264c41e62cf230f3c3f63bd57569d030cd1703706f7a7a80020c0c"
+    },
+    {
+      "source": "sources/fightpausewithmorecontent-v10.lua",
+      "target": "assetbundle/data/lua/window/fightpausewithmorecontent/fightpausewithmorecontent",
+      "originalSha256": "2b9e4de4167022af786a1900cdb1132a75a2ecec94ef22352d339e5f4a3ed8b7"
+    },
+    {
+      "source": "sources/itemdetail-activitydrop.lua",
+      "target": "assetbundle/data/lua/window/itemdetail/itemdetail",
+      "originalSha256": "4c26b52a273f6d6193d9bbbe6e3879fb9e61561d852d93b2e26b3790a2f83b8c"
+    },
+    {
+      "source": "sources/wlfpostcard-v11.lua",
+      "target": "assetbundle/data/lua/window/welfare2/wlfpostcard",
+      "originalSha256": "9774a9ab3886341c45c35623375b19b18aa89f8ba4db66ffadca485bae205c78"
+    },
+    {
+      "source": "sources/wlfdecrepittransport-v11.lua",
+      "target": "assetbundle/data/lua/window/welfare2/wlfdecrepittransport",
+      "originalSha256": "e2c9d0e816f13f8c0dfd12f6eeb9e10e315a157c1cf004732ea52b0cd846a9ac"
+    },
+    {
+      "source": "sources/wlfconditionreward-v11.lua",
+      "target": "assetbundle/data/lua/window/welfare2/wlfconditionreward",
+      "originalSha256": "4fe77b3c0b8b4de744a7b768870eef6ea6818126664972feda22ff00e124a08e"
+    },
+    {
+      "source": "sources/taskpresent-v14.lua",
+      "target": "assetbundle/data/lua/window/taskpresent/taskpresent",
+      "originalSha256": "06be81fd398a2d1d02751f962562b2c6b8c3958ed43d35767ae45e2560124df1"
+    },
+    {
+      "source": "sources/widgettaskpresenthint-v14.lua",
+      "target": "assetbundle/data/lua/window/taskpresent/widgettaskpresenthint",
+      "originalSha256": "bb5284036ef0cde49d64b8b40f3b0cd4be186387c2182f16aae639f8aaa30938"
+    },
+    {
+      "source": "sources/gacha-open-all.lua",
+      "target": "assetbundle/data/lua/window/gacha/gacha",
+      "originalSha256": "09d26ff5482c66631fd301e330ce548df662c94a86182f76ba806dedaafb33d1"
+    },
+    {
+      "source": "sources/gachanormal-open-all.lua",
+      "target": "assetbundle/data/lua/window/gachanormal/gachanormal",
+      "originalSha256": "2757c5721909c7c1c31aca25b9984118bbb0d8a6b765394b655b7cafaa2d3706"
+    },
+    {
+      "source": "sources/gachaeventautumn-open-all.lua",
+      "target": "assetbundle/data/lua/window/gachaeventautumn/gachaeventautumn",
+      "originalSha256": "3a82776462c3c5a9db0f6cd7066e71c5f1d21021b9c9c0adc2e44b951eb7c731"
+    }
+  ]
+}
