@@ -1665,12 +1665,17 @@ class LocalDungeons:
         self._store_balance(profile, dungeon_uid, payload)
         return 200, payload
 
-    def _team_http(self, method: str, route: str, body: bytes | bytearray | str | None, profile: Mapping[str, Any]) -> Optional[Response]:
+    def _team_http(self, method: str, route: str, body: bytes | bytearray | str | None, profile: Mapping[str, Any], request_base_url: Optional[str] = None) -> Optional[Response]:
         route = route.rstrip("/").casefold()
         if "/teamdungeongroups" in route:
             return self._team_groups(profile) if method == "GET" else (405, {"error": "method_not_allowed"})
         if "/teamdungeonurl" in route:
-            return (200, {"url": "ws://127.0.0.1:19102/fci/teamdungeon/", "localAi": True}) if method == "GET" else (405, {"error": "method_not_allowed"})
+            if method != "GET":
+                return 405, {"error": "method_not_allowed"}
+            base = str(request_base_url or "http://localhost:19080").rstrip("/")
+            parsed = urlsplit(base)
+            scheme = "wss" if parsed.scheme.casefold() == "https" else "ws"
+            return 200, {"url": f"{scheme}://{parsed.netloc}/fci/teamdungeon/", "localAi": True}
         if "/teamdungeon" not in route:
             return None
         if route.endswith("/info") or route.endswith("/summary") or route == "/fci/teamdungeon":
@@ -3658,10 +3663,11 @@ class LocalDungeons:
         path: str,
         body: bytes | bytearray | str | None,
         profile: Mapping[str, Any],
+        request_base_url: Optional[str] = None,
     ) -> Optional[Response]:
         route = _route(path)
         method = method.upper()
-        team_result = self._team_http(method, route, body, profile)
+        team_result = self._team_http(method, route, body, profile, request_base_url=request_base_url)
         if team_result is not None:
             return team_result
         # The original client uses feature-specific GoldDungeon*/Tower*/Maze*

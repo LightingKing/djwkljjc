@@ -1424,6 +1424,7 @@ class LocalGame:
         body: Body = None,
         content_type: Optional[str] = None,
         authorization: Optional[str] = None,
+        request_base_url: Optional[str] = None,
     ) -> Optional[Response]:
         """Handle the smallest post-login HTTP profile surface.
 
@@ -1571,7 +1572,9 @@ class LocalGame:
             tutorial_result = self._tutorial_http(method, path, body, profile)
             if tutorial_result is not None:
                 return tutorial_result
-            dungeon_result = self.dungeons.handle_http(method, path, body, profile)
+            dungeon_result = self.dungeons.handle_http(
+                method, path, body, profile, request_base_url=request_base_url
+            )
             if dungeon_result is not None:
                 return dungeon_result
             result = handle_entering_http(method, path, profile)
@@ -1689,6 +1692,7 @@ class LocalGame:
         body: Body = None,
         content_type: Optional[str] = None,
         authorization: Optional[str] = None,
+        request_base_url: Optional[str] = None,
     ) -> Optional[Response]:
         """Serialize one authenticated dispatch across all local modules.
 
@@ -1704,7 +1708,10 @@ class LocalGame:
             path = re.sub(r"/{2,}", "/", route_path) + separator + query
             before = self._base_info_marker(method, authorization)
             result = unwrap_client_reply(
-                method, path, self._handle_http_unlocked(method, path, body, content_type, authorization)
+                method, path, self._handle_http_unlocked(
+                    method, path, body, content_type, authorization,
+                    request_base_url=request_base_url,
+                )
             )
             if result is not None and result[0] == 200 and method.upper() != 'GET' and authorization:
                 account, error = self._authorized(authorization)

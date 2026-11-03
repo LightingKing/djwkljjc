@@ -137,6 +137,38 @@ class FixtureServerTests(unittest.TestCase):
         self.assertIn(b"http://192.168.1.20:19080", body)
         self.assertNotIn(b"http://127.0.0.1:19080", body)
 
+    def test_request_host_selects_loopback_or_private_base_and_public_host_falls_back(self) -> None:
+        self.server.public_base_url = "http://192.168.1.22:%d" % self.server.server_port
+        for host, expected in (
+            ("127.0.0.1:0", "http://192.168.1.22:%d" % self.server.server_port),
+            ("127.0.0.1:%d" % self.server.server_port, "http://127.0.0.1:%d" % self.server.server_port),
+            ("192.168.50.7:%d" % self.server.server_port, "http://192.168.50.7:%d" % self.server.server_port),
+            ("8.8.8.8:%d" % self.server.server_port, "http://192.168.1.22:%d" % self.server.server_port),
+        ):
+            with self.subTest(host=host):
+                status, body = self.request("GET", "/pr2new_djwk.json", headers={"Host": host})
+                self.assertEqual(status, 200)
+                self.assertEqual(json.loads(body)["entries"][0]["dirServerUrls"], [expected])
+                status, body = self.request("GET", "/DirAccount/", headers={"Host": host})
+                self.assertEqual(status, 200)
+                payload = FixtureHandler._wire_json_payload(body)
+                self.assertEqual(payload["accountUrl"], expected)
+
+    def test_request_host_rewrites_team_dungeon_url_without_fixed_loopback(self) -> None:
+        from game import LocalGame
+        from test_systems import LocalSystemsTests
+
+        accounts = LocalAccounts(self.root / "state")
+        game = LocalGame(self.root / "game", accounts)
+        _account, auth = LocalSystemsTests._guest(accounts)
+        self.server.accounts, self.server.game = accounts, game
+        self.server.public_base_url = "http://192.168.1.22:%d" % self.server.server_port
+        headers = {"Authorization": auth, "Host": "192.168.50.7:%d" % self.server.server_port}
+        status, body = self.request("GET", "/fci/teamdungeonurl/", headers=headers)
+        self.assertEqual(status, 200)
+        payload = FixtureHandler._wire_json_payload(body)
+        self.assertEqual(payload["url"], "ws://192.168.50.7:%d/fci/teamdungeon/" % self.server.server_port)
+
     def test_dynamic_bootstrap_preserves_secure_websocket_scheme(self) -> None:
         self.server.public_base_url = "https://192.168.1.20:19443"
         directory = self.root / "dirsvr"
@@ -354,6 +386,26 @@ class FixtureServerTests(unittest.TestCase):
         status, body = self.request("GET", "/login")
         self.assertEqual(status, 501)
         self.assertEqual(json.loads(body)["error"], "route_not_implemented")
+
+    def test_health_exposes_tls_certificate_warning(self) -> None:
+        self.server.tls_certificate = {
+            "status": "warning",
+            "notAfter": "2027-01-25T05:22:20+00:00",
+            "daysRemaining": 10.0,
+            "warning": True,
+        }
+        status, body = self.request("GET", "/__local__/health")
+        self.assertEqual(status, 200)
+        payload = json.loads(body)
+        self.assertEqual(payload["status"], "warning")
+        self.assertTrue(payload["certificate"]["warning"])
+        response = self.server.dispatch_contract(
+            "GET", "/health/", {"method": "GET", "path": "/health/", "host": "127.0.0.1"}
+        )
+        self.assertIsNotNone(response)
+        assert response is not None
+        self.assertEqual(response.status, 200)
+        self.assertEqual(response.payload["status"], "warning")
 
     def test_unexpected_http_handler_exception_returns_notify_and_safe_audit(self) -> None:
         class ExplodingGame:
