@@ -46,12 +46,21 @@ function IsLocalAccountServer()
   if type(url) ~= "string" then
     return false
   end
-  url = string.lower(url):gsub("/$", "")
-  return url == "http://127.0.0.1:19080" or url == "http://127.0.0.1:19081"
-      or url == "http://localhost:19080" or url == "http://localhost:19081"
-      or url == "https://127.0.0.1:19102" or url == "https://127.0.0.1:19103"
-      or url == "https://localhost:19102" or url == "https://localhost:19103"
-      or url == "http://192.168.1.22:19080" or url == "http://192.168.1.22:19082"
+  url = string.lower(url)
+  -- Restifizer may expose the configured endpoint with a trailing slash or
+  -- an API path.  Compare the authority instead of the whole URL so the
+  -- local checkout remains enabled for both the reverse-mapped (19080) and
+  -- host service (19082/19104) forms.
+  local authority = url:match("^https?://([^/]+)") or url
+  return authority == "127.0.0.1:19080" or authority == "127.0.0.1:19081"
+      or authority == "127.0.0.1:19082"
+      or authority == "localhost:19080" or authority == "localhost:19081"
+      or authority == "localhost:19082"
+      or authority == "127.0.0.1:19102" or authority == "127.0.0.1:19103"
+      or authority == "127.0.0.1:19104"
+      or authority == "localhost:19102" or authority == "localhost:19103"
+      or authority == "localhost:19104"
+      or authority == "192.168.1.22:19080" or authority == "192.168.1.22:19082"
 end
 
 function SetIAPInterface(iap)
@@ -69,15 +78,16 @@ function Start()
   m_products = PB.all("PurchaseInfo"):where(function(_, p)
     return p.platform == m_platform
   end):toarray()
-  if IsLocalAccountServer() and m_platform == 12 then
-    m_products = AppendLocalRechargeProducts(m_products)
-  end
+  -- This module is shipped only in the LAN hot-update.  The signed APK has
+  -- shipped with both platform 11 and 12 values in different builds, and
+  -- Restifizer can expose either a loopback or a rewritten authority.  Keep
+  -- the local tiers in the adapter unconditionally so the list cannot lose
+  -- them during bootstrap just because that enum or URL differs.
+  m_products = AppendLocalRechargeProducts(m_products)
   m_payProducts = PB.all("PurchaseInfo"):where(function(_, p)
     return p.platform == m_platform and p.showInShop == true
   end):toarray()
-  if IsLocalAccountServer() and m_platform == 12 then
-    m_payProducts = AppendLocalRechargeProducts(m_payProducts)
-  end
+  m_payProducts = AppendLocalRechargeProducts(m_payProducts)
   table.sort(m_payProducts, function(a, b)
     if a.price < b.price then
       return true

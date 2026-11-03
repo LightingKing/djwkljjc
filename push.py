@@ -460,6 +460,19 @@ class _Connection:
             token = _string(fields, 2)
             open_id = _string(fields, 6)
             session_id = _one(fields, 3, 0, 0)
+            # The client keeps the last server sequence across a WebSocket
+            # reconnect and sends it in both CsMessage.seq_sc_received and
+            # CsConnect.seq_sc_received.  Resume from that high-water mark
+            # before emitting ScConnect.  Starting at zero makes the client
+            # reject the handshake with ``Server sequence mismatch`` and then
+            # drops every later BaseInfoChange push, which leaves the city HUD
+            # on the old player level even though the battle settlement was
+            # persisted correctly.
+            client_server_sequence = max(
+                0,
+                int(seq_sc_received),
+                int(_one(fields, 5, 0, 0) or 0),
+            )
             if not token or not open_id or not isinstance(session_id, int):
                 raise PushProtocolError("incomplete_connect")
             account = self.accounts.verify_access_token(token)
@@ -470,6 +483,7 @@ class _Connection:
             self.authenticated = True
             if self.push_service is not None:
                 self.push_service.register(self, account)
+            self.server_sequence = max(self.server_sequence, client_server_sequence)
             self.send_sc(seq_cs, "ScConnect", _encode_connect(self.session_id, seq_cs, self.server_sequence))
             return True
 

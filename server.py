@@ -274,6 +274,8 @@ class FixtureServer(ThreadingHTTPServer):
         raw = str(host_header or "").strip()
         if not raw or "@" in raw or "/" in raw or any(ch in raw for ch in "\r\n"):
             return fallback
+        hostname: str | None = None
+        port: int | None = None
         try:
             parsed = urlsplit("//" + raw)
             hostname = parsed.hostname
