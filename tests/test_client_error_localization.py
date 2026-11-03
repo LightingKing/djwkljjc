@@ -15,6 +15,7 @@ import unittest
 
 from google.protobuf import descriptor_pb2
 
+from external_assets import external_path
 from server.core.client_errors import client_error_reply
 
 
@@ -38,7 +39,11 @@ def _error_message_box_keys() -> set[str]:
 
 def _lua_string_keys() -> set[str]:
     keys: set[str] = set()
-    for path in (ROOT.parent.parent / "analysis" / "lua-decompiled").rglob("*.lua"):
+    directory = external_path("LJJC_DECOMPILED_LUA", "analysis/lua-decompiled")
+    paths = list(directory.rglob("*.lua"))
+    if not paths:
+        raise unittest.SkipTest(f"external Lua fixtures unavailable: {directory}; set LJJC_DECOMPILED_LUA or LJJC_TEST_ASSET_ROOT")
+    for path in paths:
         text = path.read_text(encoding="utf-8", errors="ignore")
         keys.update(re.findall(r"(?:WU\.GetString|ShowHintText)\(\s*['\"]([^'\"]+)", text))
     return keys
@@ -47,7 +52,6 @@ def _lua_string_keys() -> set[str]:
 class ClientErrorLocalizationTests(unittest.TestCase):
     def test_all_server_error_keys_are_client_owned(self):
         enum_keys = _error_message_box_keys()
-        lua_keys = _lua_string_keys()
         # Exercise every branch that emits a fixed code.  This deliberately
         # uses the public adapter rather than copying its implementation.
         cases = (
@@ -64,7 +68,10 @@ class ClientErrorLocalizationTests(unittest.TestCase):
             client_error_reply(status, {"error": reason})[1]["notify"]["code"]
             for status, reason in cases
         }
-        missing = sorted(code for code in emitted if code not in enum_keys and code not in lua_keys)
+        missing = emitted - enum_keys
+        if missing:
+            missing -= _lua_string_keys()
+        missing = sorted(missing)
         self.assertEqual(missing, [], f"server emitted keys absent from client contracts: {missing}")
 
     def test_item_not_enough_contract_is_the_v9_enum_key(self):
