@@ -735,6 +735,7 @@ class LocalRealtimePvp:
     BURST_TICKET_ID = 80003
     BURST_MAX_WINS = 5
     BURST_MAX_LOSSES = 3
+    BURST_MIN_LEVEL = 28
 
     def __init__(self, game: Any, *, clock=None) -> None:
         self.game = game
@@ -1137,6 +1138,12 @@ class LocalRealtimePvp:
     def _native_match(self, profile: Mapping[str, Any], state: dict[str, Any]) -> Response:
         native = self._native(state)
         bucket = state["burst"]
+        if _int(profile.get("level"), 1) < self.BURST_MIN_LEVEL:
+            return 403, {"error": "burstlink_level_locked", "requiredLevel": self.BURST_MIN_LEVEL}
+        if not native.get("paid"):
+            return 409, {"error": "burstlink_not_registered"}
+        if int(bucket.get("wins", 0)) >= self.BURST_MAX_WINS or int(bucket.get("losses", 0)) >= self.BURST_MAX_LOSSES:
+            return 409, {"error": "burstlink_round_finished"}
         active = native.get("active")
         if isinstance(active, dict) and not active.get("balanced"):
             # A lost HTTP response or a reconnect can repeat the native
@@ -1170,18 +1177,10 @@ class LocalRealtimePvp:
         native["active"] = {"uid": int(uid), "createdAt": self._now(), "balanced": False,
                              "dungeon": dungeon, "win": None, "snapshot": None}
         native["lastBalanced"] = False
-        # The real client normally pays the type-18 RefreshPrice row before
-        # reaching the match URL.  Direct protocol callers (and recovery
-        # tools) may enter straight through /match; consume the canonical
-        # item-bag ticket only when the inventory did not move since the last
-        # state read.  Type 11 lives in LocalSystems, so passing it to the
-        # currency ledger would incorrectly return ``insufficient_resource``.
+        # The native client pays the type-18 RefreshPrice row at registration;
+        # matching subsequent battles in this round must never consume another
+        # ticket. Keep ``paid`` true until the round is claimed/reset.
         changes = []
-        if not self._native(state).get("paid"):
-            changes = self._consume_native_ticket(profile, state)
-            if changes is None:
-                return 409, {"error": "ticket_exhausted", "mode": "burst", "nextResetAt": self._next_reset()}
-        native["paid"] = False
         bucket["nativeMatch"] = match_no
         self._save(profile, state)
         self._publish_native_match(profile, dungeon)
@@ -1224,10 +1223,10 @@ class LocalRealtimePvp:
     def _native_claim(self, profile: Mapping[str, Any], state: dict[str, Any]) -> Response:
         native = self._native(state)
         bucket = state["burst"]
-        if int(bucket.get("wins", 0)) < self.BURST_MAX_WINS and int(bucket.get("losses", 0)) < self.BURST_MAX_LOSSES:
-            return 409, {"error": "burstlink_not_finished"}
         if native.get("received"):
             return 200, {"resChange": []}
+        if int(bucket.get("wins", 0)) < self.BURST_MAX_WINS and int(bucket.get("losses", 0)) < self.BURST_MAX_LOSSES:
+            return 409, {"error": "burstlink_not_finished"}
         total = max(0, min(self.BURST_MAX_WINS, int(bucket.get("wins", 0)))) * 100
         changes: list[dict[str, Any]] = []
         if total:
@@ -1235,8 +1234,14 @@ class LocalRealtimePvp:
             if not ok:
                 return 409, {"error": error or "resource_update_failed"}
         native["received"] = True
+        native["active"] = None
+        native["paid"] = False
+        native["lastBalanced"] = False
+        native["lastWin"] = False
+        bucket["wins"] = 0
+        bucket["losses"] = 0
         self._save(profile, state)
-        return 200, {"resChange": changes}
+        return 200, {"resChange": [row if "baseRes" in row else {"baseRes": dict(row)} for row in changes]}
 
     def _summary(self, mode: str, bucket: Mapping[str, Any]) -> dict[str, Any]:
         return {
@@ -1405,6 +1410,13 @@ class LocalRealtimePvp:
                     return 200, self._native_info(profile, state)
                 if method_upper == "POST":
                     native = self._native(state)
+                    if _int(profile.get("level"), 1) < self.BURST_MIN_LEVEL:
+                        return 403, {"error": "burstlink_level_locked", "requiredLevel": self.BURST_MIN_LEVEL}
+                    if native.get("received"):
+                        native.update({"received": False, "active": None, "lastBalanced": False, "lastWin": False,
+                                       "main": [], "assistant": [], "groups": {"1": {"members": []}}})
+                        state["burst"]["wins"] = 0
+                        state["burst"]["losses"] = 0
                     if native.get("paid"):
                         return 200, {"resChange": [], **self._native_info(profile, state)}
                     changes = self._consume_native_ticket(profile, state)

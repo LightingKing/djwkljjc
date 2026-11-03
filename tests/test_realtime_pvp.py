@@ -28,7 +28,7 @@ class LocalRealtimePvpTests(unittest.TestCase):
         root = Path(self.temp.name)
         self.accounts = LocalAccounts(root / "accounts")
         self.now = [1793332800]
-        self.game = LocalGame(root / "game", self.accounts, clock=lambda: self.now[0], initial_level=26)
+        self.game = LocalGame(root / "game", self.accounts, clock=lambda: self.now[0], initial_level=28)
         self.account, self.auth = self.guest(self.accounts)
 
     def tearDown(self):
