@@ -132,7 +132,10 @@ class RaceClientTests(unittest.TestCase):
         self.assertEqual((own["headPhoto"], own["socialPicture"]), (0, "local://player-picture"))
 
     def test_native_create_retry_and_score_from_enemy_received_damage(self):
-        run = self.enter()
+        # Exercise ordinary race explicitly; the default local schedule now
+        # also offers type 42, covered separately by test_open_gacha_race.
+        with patch.object(self.game.events, "_activity_list", return_value=(200, [])):
+            run = self.enter()
         self.assert_message("ApiRacePVPDungeon.result", run)
         self.assertEqual(run["baseInfo"]["dungeonType"], 7)
         self.assertEqual(run["baseInfo"]["activityType"], 20)

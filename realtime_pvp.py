@@ -77,7 +77,6 @@ class LocalRacePvp:
     # activity_modes owns 9e12; ordinary dungeons use current epoch ms (~1e12).
     UID_BASE = 8_000_000_000_000
     TICKET_ID = 80004
-    ACTIVITY_TYPE = 20
     # RacePVPStatus from descriptor_set.pb. Local matching/settlement happen
     # in the same transaction; the playable room is published in Fight.
     NONE, MATCH, FIGHT, SETTLE = 0, 1, 2, 3
@@ -536,7 +535,13 @@ class LocalRacePvp:
         with closing(self.game._connect()) as conn:
             uid = max(_int(conn.execute("SELECT MAX(dungeon_uid) FROM local_race_pvp_runs").fetchone()[0]), self.UID_BASE) + 1
         # Only fields declared by DbDungeon.BaseInfo are returned.
-        base = {"dungeonId": stage, "dungeonType": 7, "activityType": self.ACTIVITY_TYPE, "activityId": 0,
+        # Native RacePVP requests carry no activity id. Its window chooses the
+        # special theme from the open type-42 schedule, sharing the same room,
+        # tickets and reward ledger with ordinary race (window__racepvp:83-90).
+        from gacha_score_shop import active_activities
+        activities = active_activities(self.game, profile, 42)
+        activity_type, activity_id = (42, min(int(a["activityId"]) for a in activities)) if activities else (20, 0)
+        base = {"dungeonId": stage, "dungeonType": 7, "activityType": activity_type, "activityId": activity_id,
                 "actorUid": uids, "actorId": ids, "actors": actors, "createTime": now, "quitTime": 0,
                 "auraPlayerId": "", "auraActorId": 0, "auraStranger": False, "auraActorQuality": 0,
                 "towerFloor": 0, "eventKey": "", "medalId": 0, "reduceInfo": {}, "isChallengeMode": False,

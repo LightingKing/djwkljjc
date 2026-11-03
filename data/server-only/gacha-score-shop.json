@@ -1,0 +1,10 @@
+{
+  "provenance": "D / local: original shop inventory and prices are unavailable; permanent account-once collection rewards",
+  "activityId": 13001,
+  "pointRule": "Misc.gachaPointGenRation (1000) points per normal or limited draw while activity type 13 is open; scope is local policy",
+  "goods": [
+    {"goodId": 1300101, "cost": {"type": 23, "id": 0, "count": 100000, "param": 0}, "good": {"type": 15, "id": 1001, "count": 1, "param": 101}},
+    {"goodId": 1300102, "cost": {"type": 23, "id": 0, "count": 100000, "param": 0}, "good": {"type": 15, "id": 2001, "count": 1, "param": 101}},
+    {"goodId": 1300103, "cost": {"type": 23, "id": 0, "count": 50000, "param": 0}, "good": {"type": 29, "id": 100104, "count": 1, "param": 0}}
+  ]
+}

@@ -13,6 +13,7 @@ from server.core.reset import policy_for, period_due
 import json
 import hashlib
 import random
+from google.protobuf import json_format
 import time
 from contextlib import closing
 from pathlib import Path
@@ -64,6 +65,9 @@ def _client_table_rows(name: str) -> list[dict[str, Any]]:
 GACHA_TYPES: dict[int, dict[str, Any]] = {int(row["id"]): row for row in _client_table_rows("GachaType") if row.get("id")}
 GACHA_LIMITED: dict[int, dict[str, Any]] = {
     int(row["activityId"]): row for row in _client_table_rows("ActivityGachaLimited") if row.get("activityId")
+}
+GACHA_NORMAL_UP: dict[int, dict[str, Any]] = {
+    int(row["activityId"]): row for row in _client_table_rows("ActivityGachaNormalUp") if row.get("activityId")
 }
 GACHA_POOL: list[tuple[int, int]] = [
     (int(row["actorId"]), int(row.get("weight", 0) or 0))
@@ -2282,13 +2286,15 @@ class LocalSystems:
                     break
             counter[key] = min(misses, limit - 1)
 
-    def _gacha_open_activities(self, profile: Mapping[str, Any], now: int) -> list[int]:
+    def _gacha_open_activities(self, profile: Mapping[str, Any], now: int, pool_id: int = 2) -> list[int]:
         status, rows = self.game.events._activity_list("GET")
         if status != 200:
             return []
         weekday = policy_for(self.game).local_datetime(now).isoweekday()
+        table = GACHA_NORMAL_UP if pool_id == 1 else GACHA_LIMITED
+        activity_type = 14 if pool_id == 1 else 4
         return sorted({_int(row.get("activityId")) for row in rows
-                       if _int(row.get("type")) == 4 and _int(row.get("activityId")) in GACHA_LIMITED
+                       if _int(row.get("type")) == activity_type and _int(row.get("activityId")) in table
                        and _int(row.get("timestampStart")) <= now
                        and (not _int(row.get("timestampEnd")) or now < _int(row.get("timestampEnd")))
                        and (not row.get("weekdays") or weekday in row["weekdays"])
@@ -2305,10 +2311,12 @@ class LocalSystems:
 
     def _gacha_info_row(self, pool_id: int, pool: dict[str, Any], activity_ids: list[int] = ()) -> dict[str, Any]:
         config = GACHA_TYPES.get(pool_id, {})
-        if pool_id == 2:
+        if pool_id in (1, 2):
             activities = pool.setdefault("activities", {})
             activity_info = [self._gacha_activity_row(aid, activities.setdefault(str(aid), {}), config)
                              for aid in activity_ids]
+            if pool_id == 1:
+                activity_info.append(self._gacha_activity_row(0, pool, config))
         else:
             activity_info = [self._gacha_activity_row(0, pool, config)] if pool_id == 1 else []
         return {
@@ -2321,12 +2329,33 @@ class LocalSystems:
         }
 
     def _gacha(self, method: str, route: str, body: Body, profile: Mapping[str, Any], state: dict[str, Any]) -> Optional[Response]:
+        parsed = urlsplit(route)
+        route = parsed.path.rstrip("/")
         if not route.lower().startswith(("/fci/gacha", "/fci/card/gacha")):
             return None
         # Currency, tickets, characters and pity must commit together even if
         # saving state or projecting the native response fails.
         with self.game.atomic_mutation():
-            return self._gacha_transaction(method, route, body, profile, state)
+            payload = self._request_values(body)
+            query_id = parse_qs(parsed.query, keep_blank_values=True).get("localRequestId", [None])[0]
+            request_id = payload.get("requestId", query_id) if method == "POST" else None
+            if request_id is not None and (not isinstance(request_id, str) or not 1 <= len(request_id) <= 128):
+                return 400, {"error": "invalid_request"}
+            native = self._request(body, "ApiGachaTrade") if request_id and not payload else None
+            request_data = payload or (json_format.MessageToDict(native) if native is not None else {})
+            signature = json.dumps({k: v for k, v in request_data.items() if k != "requestId"}, sort_keys=True,
+                                   separators=(",", ":"))
+            receipt = state.get("gachaRequestReceipts", {}).get(request_id) if request_id else None
+            if receipt:
+                if receipt["request"] != signature:
+                    return 409, {"error": "invalid_request"}
+                return 200, json_format.ParseDict(receipt["result"], self._message("ApiGachaTrade.result"))
+            response = self._gacha_transaction(method, route, body, profile, state)
+            if request_id and response is not None and response[0] == 200 and hasattr(response[1], "actor_record"):
+                state.setdefault("gachaRequestReceipts", {})[request_id] = {
+                    "request": signature, "result": json_format.MessageToDict(response[1])}
+                self._save(profile, state)
+            return response
 
     def _gacha_transaction(self, method: str, route: str, body: Body, profile: Mapping[str, Any], state: dict[str, Any]) -> Optional[Response]:
         """Gacha pools (fci/gachainfo/) and draws (fci/gachatrade/).
@@ -2348,8 +2377,8 @@ class LocalSystems:
         if lower in {"/fci/gachainfo", "/fci/gachainfo/"}:
             if method != "GET":
                 return 405, {"error": "method_not_allowed", "message": "GET required"}
-            activity_ids = self._gacha_open_activities(profile, now)
-            rows = [self._gacha_info_row(pool_id, self._gacha_pool(state, pool_id, now), activity_ids)
+            rows = [self._gacha_info_row(pool_id, self._gacha_pool(state, pool_id, now),
+                                       self._gacha_open_activities(profile, now, pool_id))
                     for pool_id in sorted(GACHA_TYPES)]
             self._save(profile, state)
             return 200, rows
@@ -2370,8 +2399,8 @@ class LocalSystems:
             return 404, {"error": "unknown_gacha", "id": pool_id}
         pool = self._gacha_pool(state, pool_id, now)
         activity_id = _int(payload.get("activityId", getattr(msg, "activity_id", 0) if msg else 0))
-        if pool_id == 2:
-            if activity_id not in self._gacha_open_activities(profile, now):
+        if pool_id == 2 or (pool_id == 1 and activity_id):
+            if activity_id not in self._gacha_open_activities(profile, now, pool_id):
                 return 409, {"error": "activity_not_open"}
             counter = pool.setdefault("activities", {}).setdefault(str(activity_id), {})
             self._gacha_init_pity(counter, config, [])
@@ -2401,7 +2430,7 @@ class LocalSystems:
         # characters.  It is paid like any ten-pull (the tutorial grants the
         # 10 tickets via stage 2061's first clear); single/free draws are
         # never turned into a free ten-pull.
-        first_ten = pool_id == 1 and not pool.get("firstTenDone") and requested == 10
+        first_ten = pool_id == 1 and not activity_id and not pool.get("firstTenDone") and requested == 10
         free = flag_free and bool(config.get("gachaFreeInterval")) and requested <= 0 and not costs
         items = state.setdefault("items", {})
         item_costs: dict[int, int] = {}
@@ -2503,9 +2532,9 @@ class LocalSystems:
 
         # Every draw is a separate character instance (copies are allowed;
         # the client keys characters by uid and offers decomposition).
-        limited = GACHA_LIMITED.get(activity_id, {}) if pool_id == 2 else {}
+        limited = (GACHA_LIMITED if pool_id == 2 else GACHA_NORMAL_UP).get(activity_id, {}) if pool_id in (1, 2) else {}
         featured = (limited.get("dropResInfo") or [{}])[0]
-        featured_id = _int(featured.get("dropRes", {}).get("id"))
+        featured_id = _int(featured.get("dropRes", {}).get("id")) or _int(featured.get("dropActorId"))
         featured_limit = _int(limited.get("dropActorCount"))
         counter["preDropActivityActor"] = _int(counter.get("curDropActivityActor"))
         new_instances = []
@@ -2528,7 +2557,7 @@ class LocalSystems:
                 # The native UI switches from countdown to "already obtained"
                 # after the first featured actor.  Its 91-pull floor is once
                 # per activity, and later copies use the original probability.
-                probability = (_int(config.get("limitOrangeProbability")) if selected["quality"] == 4
+                probability = (_int(config.get("limitOrangeProbability")) if selected["quality"] == 4 and pool_id == 2
                                else _int(featured.get("dropActorProbability")))
                 force_featured = not _int(counter.get("getActivityActorCount")) and progress + 1 >= featured_limit
                 if force_featured or rng.randrange(10000) < probability:
@@ -2557,10 +2586,22 @@ class LocalSystems:
             pool["firstTenDone"] = True
         elif free:
             pool["nextFree"] = policy_for(self.game).next_boundary(now)
+        # Original scalar, local applicability policy: normal/limited draws
+        # earn points while the permanent point-shop activity is open.
+        from gacha_score_shop import active_activities
+        add_gacha_score = (_int(_MISC_ROW.get("gachaPointGenRation")) * len(drawn)
+                           if pool_id in (1, 2) and active_activities(self.game, profile, 13) else 0)
+        if add_gacha_score:
+            ok, earned, error = self._change_resources(profile, [{"type": _RES_GACHA_POINT, "id": 0,
+                                                                 "count": add_gacha_score, "param": 0}])
+            if not ok:
+                raise RuntimeError(error or "gacha point grant failed")
+            changes.extend(self._dynamic(earned))
         self._save(profile, state)
         self._record_task(profile, "TaskType_GachaP0MTimes", len(drawn), param=pool_id)
 
         result = self._message("ApiGachaTrade.result")
+        result.add_gacha_score = add_gacha_score
         result.info.id = pool_id
         result.info.time = now
         result.info.count = len(drawn)
@@ -4461,7 +4502,7 @@ class LocalSystems:
         # PATCH payloads for compatibility).
         for handler in (self._actor_group, self._flags_and_profit, self._cultivation, self._player_profile, self._actor_maintenance, self._equipment_maintenance, self._item_resource, self._medal_seal_cultivation,
                         self._gacha, self._actor, self._equip, self._mail, self._relation, self._guild):
-            result = handler(method, path if handler == self._item_resource else route, body, profile, state)
+            result = handler(method, path if handler in (self._item_resource, self._gacha) else route, body, profile, state)
             if result is not None:
                 return result
         result = self._task(method, route, body, profile, state)

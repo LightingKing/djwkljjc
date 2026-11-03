@@ -143,6 +143,11 @@ class LocalEventsTests(unittest.TestCase):
             game = LocalGame(root / "game", accounts)
             account = guest_account(accounts)
             profile = game._profile(account)
+            shop = game.gacha_score_shop.handle_http("GET", "/fci/gacha-shop/", None, profile)[1]
+            good = shop.goods[0]
+            game.economy._change_resources(profile, [{"type": 23, "id": 0, "count": good.cost.count, "param": 0}])
+            trade = game.systems._message("ApiGachaShopTrade")
+            trade.good_id = good.good_id
             cases = [
                 ("GET", "/fci/gachashop/", "ApiGachaShop.get"),
                 ("POST", "/fci/gachashoptrade/", "ApiGachaShopTrade.post"),
@@ -157,7 +162,8 @@ class LocalEventsTests(unittest.TestCase):
                     # Direct LocalEvents invocation avoids coupling this test
                     # to the account-token transport while still exercising
                     # the same dispatcher used by LocalGame.
-                    status, result = game.events.handle_http(method, path, b'{"id":1}', profile)
+                    body = trade.SerializeToString() if path == "/fci/gachashoptrade/" else b'{"id":1}'
+                    status, result = game.events.handle_http(method, path, body, profile)
                     self.assertEqual(status, 200)
                     self.assertEqual(result.DESCRIPTOR.full_name, descriptor)
 
@@ -177,18 +183,30 @@ class LocalEventsTests(unittest.TestCase):
             after_draw = next(item["count"] for item in game._profile(account)["resources"] if item["type"] == 7)
             self.assertEqual(after_draw, before)
 
+            shop = game.gacha_score_shop.handle_http("GET", "/fci/gacha-shop/", None, profile)[1]
+            good = shop.goods[0]
+            game.economy._change_resources(profile, [{"type": 23, "id": 0, "count": good.cost.count, "param": 0}])
+            request = game.systems._message("ApiGachaShopTrade")
+            request.good_id = good.good_id
             status, first = game.events.handle_http(
-                "POST", "/fci/gachashoptrade/", b'{"goodId":1}', profile
+                "POST", "/fci/gachashoptrade/", request.SerializeToString(), profile
             )
             self.assertEqual(status, 200)
             after_first = next(item["count"] for item in game._profile(account)["resources"] if item["type"] == 7)
+            self.assertEqual(after_first, before, "native point shop does not charge gold")
+            self.assertEqual(next(item["count"] for item in game._profile(account)["resources"] if item["type"] == 23), 0)
+            state_after_first = game.systems._state(profile)
+            self.assertTrue(first.res_change)
             status, repeat = game.events.handle_http(
-                "POST", "/fci/gachashoptrade/", b'{"goodId":1}', profile
+                "POST", "/fci/gachashoptrade/", request.SerializeToString(), profile
             )
             self.assertEqual(status, 200)
             self.assertEqual(repeat.DESCRIPTOR.full_name, first.DESCRIPTOR.full_name)
             after_repeat = next(item["count"] for item in game._profile(account)["resources"] if item["type"] == 7)
             self.assertEqual(after_repeat, after_first)
+            self.assertEqual(next(item["count"] for item in game._profile(account)["resources"] if item["type"] == 23), 0)
+            self.assertEqual(game.systems._state(profile), state_after_first)
+            self.assertFalse(repeat.res_change)
 
     def test_subscribe_toggle_is_typed_idempotent_and_persistent(self):
         with tempfile.TemporaryDirectory() as temp:
