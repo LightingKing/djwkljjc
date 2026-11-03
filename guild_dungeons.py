@@ -395,10 +395,14 @@ class LocalGuildDungeons:
         with self.game.atomic_mutation():
             now=self.game._now()
             with closing(self.game._connect()) as conn:
-                conn.execute('INSERT INTO local_hidden_guild_clock VALUES(1,?) '
-                             'ON CONFLICT(id) DO UPDATE SET max_seen=MAX(max_seen,excluded.max_seen)',(now,))
                 rows=conn.execute('SELECT guild_id,week,state_json FROM local_hidden_guild_state '
                                   'WHERE week+?<=? ORDER BY week,guild_id',(604800-21600,now)).fetchall()
+                rows=[row for row in rows if json.loads(row['state_json']).get('humanParticipants')]
+                if not rows:
+                    return
+                conn.execute('INSERT INTO local_hidden_guild_clock VALUES(1,?) '
+                             'ON CONFLICT(id) DO UPDATE SET max_seen=excluded.max_seen '
+                             'WHERE local_hidden_guild_clock.max_seen<excluded.max_seen',(now,))
             for row in rows:
                 state=json.loads(row['state_json']);before=json.dumps(state,sort_keys=True)
                 participants=state.get('humanParticipants',{})

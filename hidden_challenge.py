@@ -256,6 +256,8 @@ class LocalHiddenChallenge:
         """
         with self.game.atomic_mutation():
             state=self._state(profile);before=json.dumps(state,sort_keys=True)
+            if not state.get('runs') and not state.get('rankSeasons'):
+                return
             now=self.game._now();week=season_start(now)
             state['maxObservedWeek']=max(week,int(state.get('maxObservedWeek',week)))
             for key,cycle in state.get('rankSeasons',{}).items():
