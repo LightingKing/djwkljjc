@@ -109,3 +109,46 @@ shops:
         cost: [{type: 17, count: 400}]
         buyLimit: 1
         chance: 10
+
+  # Reopened event shops: native IDs/currencies from EventDungeon/DungeonReward.
+  # Goods, prices and daily one-purchase limits are local policy D. Each pool
+  # is offered in full; no free or paid manual refresh can reset its limits.
+  # Do not bump the shared catalogVersion: that would reset existing shops.
+  - shopId: 20
+    playerLevel: 1
+    refreshTimeInDay: "06:00:00"
+    refreshLimit: 0
+    refreshFree: 0
+    displayCost: [{type: 11, id: 2007}]
+    slots: [{pool: autumn, count: 3}]
+    pools:
+      autumn:
+        - {shopGoodId: 200001, good: {type: 11, id: 61001, count: 5}, cost: [{type: 11, id: 2007, count: 40}], buyLimit: 1, chance: 1}
+        - {shopGoodId: 200002, good: {type: 11, id: 10003, count: 5}, cost: [{type: 11, id: 2007, count: 20}], buyLimit: 1, chance: 1}
+        - {shopGoodId: 200003, good: {type: 11, id: 60001, count: 1}, cost: [{type: 11, id: 2007, count: 80}], buyLimit: 1, chance: 1}
+
+  - shopId: 21
+    playerLevel: 1
+    refreshTimeInDay: "06:00:00"
+    refreshLimit: 0
+    refreshFree: 0
+    displayCost: [{type: 11, id: 2008}]
+    slots: [{pool: carnival, count: 3}]
+    pools:
+      carnival:
+        - {shopGoodId: 210001, good: {type: 11, id: 10003, count: 5}, cost: [{type: 11, id: 2008, count: 20}], buyLimit: 1, chance: 1}
+        - {shopGoodId: 210002, good: {type: 11, id: 40003, count: 5}, cost: [{type: 11, id: 2008, count: 20}], buyLimit: 1, chance: 1}
+        - {shopGoodId: 210003, good: {type: 11, id: 60001, count: 1}, cost: [{type: 11, id: 2008, count: 80}], buyLimit: 1, chance: 1}
+
+  - shopId: 23
+    playerLevel: 1
+    refreshTimeInDay: "06:00:00"
+    refreshLimit: 0
+    refreshFree: 0
+    displayCost: [{type: 11, id: 2012}]
+    slots: [{pool: christmas, count: 3}]
+    pools:
+      christmas:
+        - {shopGoodId: 230001, good: {type: 11, id: 10003, count: 5}, cost: [{type: 11, id: 2012, count: 20}], buyLimit: 1, chance: 1}
+        - {shopGoodId: 230002, good: {type: 11, id: 40003, count: 5}, cost: [{type: 11, id: 2012, count: 20}], buyLimit: 1, chance: 1}
+        - {shopGoodId: 230003, good: {type: 11, id: 60001, count: 1}, cost: [{type: 11, id: 2012, count: 80}], buyLimit: 1, chance: 1}

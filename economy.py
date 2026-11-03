@@ -873,8 +873,20 @@ class LocalEconomy:
         ``grants.grant_rewards`` / ``equipment.grant_equipment`` afterwards.
         """
 
-        ledger = [dict(_st_resource(cost), count=-abs(_int(cost.get("count")))) for cost in costs
-                  if _int(cost.get("count"))]
+        item_costs: dict[int, int] = {}
+        ledger = []
+        for cost in costs:
+            value = _st_resource(cost)
+            if not value['count']:
+                continue
+            if value['type'] == RES_ITEM:
+                item_costs[value['id']] = item_costs.get(value['id'], 0) + abs(value['count'])
+            else:
+                ledger.append(dict(value, count=-abs(value['count'])))
+        bag_state = self.game.systems._state(profile) if item_costs else None
+        for item_id, count in item_costs.items():
+            if _int(bag_state.get('items', {}).get(str(item_id), {}).get('count')) < count:
+                return False, [], 'insufficient_resource'
         instances: list[dict[str, int]] = []
         for grant in grants:
             value = _st_resource(grant)
@@ -890,6 +902,13 @@ class LocalEconomy:
             if not ok:
                 return False, [], error or "insufficient_resource"
             changes.extend({"baseRes": dict(delta)} for delta in deltas)
+        if bag_state is not None:
+            for item_id, count in item_costs.items():
+                item = bag_state['items'][str(item_id)]
+                item['count'] = _int(item.get('count')) - count
+                changes.append({'baseRes': {'type': RES_ITEM, 'id': item_id, 'param': 0,
+                                            'count': item['count'], 'countDelta': -count}})
+            self.game.systems._save(profile, bag_state)
         if instances:
             try:
                 from .grants import grant_rewards
@@ -1034,6 +1053,14 @@ class LocalEconomy:
             return False
 
     def _shop_http(self, method: str, route: str, body: Body, account: Mapping[str, Any]) -> Optional[Response]:
+        # Cost, bag reward and durable shop limit must commit together. This
+        # boundary also covers direct compatibility calls and legacy stores.
+        if route.lower().startswith(('/fci/shop/', '/fci/shoptrade/')):
+            with self.game.atomic_mutation():
+                return self._shop_http_transaction(method, route, body, account)
+        return None
+
+    def _shop_http_transaction(self, method: str, route: str, body: Body, account: Mapping[str, Any]) -> Optional[Response]:
         lower = route.lower()
         parts = [part for part in lower.split("/") if part]
         is_list = lower == "/fci/shop/"

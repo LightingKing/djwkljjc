@@ -121,7 +121,7 @@ class ShopCatalogTests(unittest.TestCase):
         catalog = load_shop_catalog()
         shops = {spec["shopId"]: spec for spec in catalog["shops"]}
         # m_commonShopId = 1, m_EQUIP_SHOP_ID = 11, GuildShopId = 12.
-        self.assertEqual(list(shops), [1, 11, 12])
+        self.assertEqual(list(shops), [1, 11, 12, 20, 21, 23])
         self.assertTrue(shops[12]["baseInfo"]["guild"])
         items = {row["id"]: row for row in _client_rows("ItemInfo")}
         equips = {row["equipId"]: row for row in _client_rows("EquipInfo")}
@@ -132,8 +132,11 @@ class ShopCatalogTests(unittest.TestCase):
             for pool in spec["pools"].values():
                 for good in pool:
                     rows = items if good["good"]["type"] == 11 else equips
-                    # Goto 0 is windowName "Shop": the row says it is sold there.
-                    self.assertIn(0, rows[good["good"]["id"]].get("sources", []), good)
+                    # Existing shop goods retain Goto 0. Reopened autumn
+                    # shop 20 additionally supplies the native claw ticket
+                    # (Goto 25), with its local price recorded in shop.yaml.
+                    expected_source = 25 if spec['shopId'] == 20 and good['good']['id'] == 61001 else 0
+                    self.assertIn(expected_source, rows[good["good"]["id"]].get("sources", []), good)
                     self.assertTrue(good["cost"] and good["good"]["count"] > 0)
         # Every equip of the DropDisplayShop suits shown by Window_RuleShop
         # for the equip shop can be offered by shop 11.
@@ -166,7 +169,7 @@ class ShopRouteTests(unittest.TestCase):
             world = _World(Path(temp))
             status, shops = world.call("GET", "/fci/Shop/")
             self.assertEqual(status, 200)
-            self.assertEqual([shop["baseInfo"]["shopId"] for shop in shops], [1, 11, 12])
+            self.assertEqual([shop["baseInfo"]["shopId"] for shop in shops], [1, 11, 12, 20, 21, 23])
             for shop in shops:
                 base = shop["baseInfo"]
                 for key in ("playerLevel", "clientShow", "activity", "refreshLimit", "refreshFree",
@@ -177,7 +180,7 @@ class ShopRouteTests(unittest.TestCase):
                 self.assertGreater(shop["nextRefreshTime"], world.now[0])
                 self.assertTrue(shop["newShop"])
             # The refresh button exists only when nextRefreshCost is sent.
-            self.assertEqual([("nextRefreshCost" in shop) for shop in shops], [True, True, False])
+            self.assertEqual([("nextRefreshCost" in shop) for shop in shops], [True, True, False, False, False, False])
             self.assertEqual(shops[1]["baseInfo"]["displayCost"][0], {"type": 7, "id": 0, "count": 0, "param": 0})
 
             status, goods = world.call("GET", "/fci/Shop/1/Goods/")
@@ -194,7 +197,7 @@ class ShopRouteTests(unittest.TestCase):
             self.assertEqual((status, patched["newShop"]), (200, False))
             again = LocalGame(Path(temp) / "game", world.accounts, clock=world.clock.now)
             _status, shops = again.handle_http("GET", "/fci/Shop/", None, None, world.auth)
-            self.assertEqual([shop["newShop"] for shop in shops], [False, True, True])
+            self.assertEqual([shop["newShop"] for shop in shops], [False, True, True, True, True, True])
 
     def test_trade_buy_count_limit_bag_and_task_progress(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -272,7 +275,7 @@ class ShopRouteTests(unittest.TestCase):
             world.game.economy._state(world.account)
             world.game.economy._save_state(world.account, legacy)
             _status, shops = world.call("GET", "/fci/Shop/")
-            self.assertEqual(len(shops), 3)
+            self.assertEqual(len(shops), 6)
             _status, goods = world.call("GET", "/fci/Shop/1/Goods/")
             self.assertNotIn(10001, {good["shopGoodId"] for good in goods})
             self.assertEqual(len(goods), 8)
