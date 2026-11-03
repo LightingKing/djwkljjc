@@ -894,6 +894,10 @@ class LocalDungeons:
         self._initialize()
 
     def _connect(self) -> sqlite3.Connection:
+        transaction_connection = getattr(self.game, "transaction_connection", None)
+        borrowed = transaction_connection() if callable(transaction_connection) else None
+        if borrowed is not None:
+            return borrowed
         connection = sqlite3.connect(str(self.db_path), timeout=10)
         connection.row_factory = sqlite3.Row
         return connection
@@ -2340,9 +2344,8 @@ class LocalDungeons:
             "multiPower": int(getattr(message, "multi_power", 0)),
         }
         if bool(getattr(message, "is_challenge_mode", False)):
-            # Preserve the wire request's challenge flag for the local
-            # baseInfo/difficulty marker.
-            request["difficulty"] = "challenge"
+            request["isChallengeMode"] = True
+            request["reduceInfo"] = dict(getattr(message, "reduce_info", {}))
         return request
 
     def _assistant_quality(self, profile: Mapping[str, Any], player_id: str, actor_id: int) -> int:
@@ -2457,6 +2460,13 @@ class LocalDungeons:
 
     def _enter(self, profile: Mapping[str, Any], body: bytes | bytearray | str | None) -> Response:
         request = self._parse_enter_request(body)
+        if request.get("isChallengeMode") is True:
+            return self.game.hidden_challenge.enter(profile, request)
+        return self._enter_impl(profile, body)
+
+    def _enter_impl(self, profile: Mapping[str, Any], body: bytes | bytearray | str | None,
+                    *, cultivation: bool = False) -> Response:
+        request = self._parse_enter_request(body)
         raw_dungeon_id = request.get("dungeonId", request.get("dungeon_id"))
         if raw_dungeon_id is None:
             requested_mode = self._special_mode(request.get("mode", request.get("activity", request.get("activityType"))))
@@ -2510,9 +2520,9 @@ class LocalDungeons:
         with self._lock, closing(self._connect()) as connection, connection:
             existing = connection.execute(
                 "SELECT dungeon_uid, dungeon_id, actor_uids_json, created_at, difficulty, aura_json FROM local_dungeons "
-                "WHERE account_id = ? AND dungeon_id = ? AND difficulty IN (?, ?) AND status = 'active' LIMIT 1",
+                "WHERE account_id = ? AND dungeon_id = ? AND difficulty IN (?, ?) AND mode = ? AND status = 'active' LIMIT 1",
                 (int(profile["account_id"]), dungeon_id, difficulty,
-                 "challenge" if difficulty == "normal" else difficulty),
+                 "challenge" if difficulty == "normal" else difficulty, "cultivation" if cultivation else "story"),
             ).fetchone()
             if existing is not None:
                 # POST /fci/dungeon/ is retried by the client after a
@@ -2597,6 +2607,8 @@ class LocalDungeons:
                     json.dumps(aura, separators=(",", ":")) if aura else None,
                 ),
             )
+            if cultivation:
+                connection.execute("UPDATE local_dungeons SET mode = 'cultivation' WHERE dungeon_uid = ?", (dungeon_uid,))
         if aura and aura.get("playerId"):
             # Once per battle that used a support (a replayed POST of the same
             # run does not count again): relation points + friend cooldown.
@@ -2616,6 +2628,12 @@ class LocalDungeons:
         }
 
     def _close(self, profile: Mapping[str, Any], dungeon_uid: int) -> Response:
+        challenge = getattr(self.game, "hidden_challenge", None)
+        if challenge is not None and challenge.run_snapshot(profile, dungeon_uid):
+            return challenge.close(profile, dungeon_uid)
+        return self._close_impl(profile, dungeon_uid)
+
+    def _close_impl(self, profile: Mapping[str, Any], dungeon_uid: int) -> Response:
         with self._lock, closing(self._connect()) as connection, connection:
             row = connection.execute(
                 "SELECT account_id, status FROM local_dungeons WHERE dungeon_uid = ?",
@@ -3370,6 +3388,12 @@ class LocalDungeons:
         dungeon_uid: int,
         body: bytes | bytearray | str | Mapping[str, Any] | None = None,
     ) -> Response:
+        challenge = getattr(self.game, "hidden_challenge", None)
+        if challenge is not None and challenge.run_snapshot(profile, dungeon_uid):
+            return challenge.balance(profile, dungeon_uid, body)
+        return self._balance_impl(profile, dungeon_uid, body)
+
+    def _balance_impl(self, profile: Mapping[str, Any], dungeon_uid: int, body=None) -> Response:
         with self._lock, closing(self._connect()) as connection, connection:
             row = connection.execute(
                 "SELECT dungeon_id, status, active_data, balance_json, closed_at, mode, activity_id, floor, node, difficulty, stars, targets_json, actor_uids_json, multi_power FROM local_dungeons WHERE dungeon_uid = ? AND account_id = ?",
@@ -3394,7 +3418,7 @@ class LocalDungeons:
             if fallback is not None:
                 return fallback
             return 409, {"error": "dungeon_not_active", "status": row["status"]}
-        if row["mode"] and row["mode"] != "story":
+        if row["mode"] and row["mode"] not in {"story", "cultivation"}:
             # Special modes use the same terminal FightActiveData seam when
             # the client has a battle result.  A JSON ``{"win": true}``
             # body is also accepted by local tools for simple deterministic
@@ -3742,6 +3766,12 @@ class LocalDungeons:
         return self._decode_active_bytes(raw)
 
     def _active(self, profile: Mapping[str, Any], dungeon_uid: int, body: bytes | bytearray | str | None) -> Response:
+        challenge = getattr(self.game, "hidden_challenge", None)
+        if challenge is not None and challenge.run_snapshot(profile, dungeon_uid):
+            return challenge.active(profile, dungeon_uid, body)
+        return self._active_impl(profile, dungeon_uid, body)
+
+    def _active_impl(self, profile: Mapping[str, Any], dungeon_uid: int, body) -> Response:
         with self._lock, closing(self._connect()) as connection, connection:
             row = connection.execute(
                 "SELECT dungeon_id, status, mode FROM local_dungeons WHERE dungeon_uid = ? AND account_id = ?",
