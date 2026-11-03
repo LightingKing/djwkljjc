@@ -48,6 +48,21 @@ class AssetIndexRegressions(unittest.TestCase):
         skin = build_index(self.assets, self.config)["skins"][0]
         self.assertEqual(skin["status"], "missing")
 
+    def test_lua_nested_resource_does_not_overwrite_scene_id(self):
+        (self.config / "xlsx__collectionsscenes.lua").write_text('''
+local raw = { [1] = ProtobufI("CollectionsScenes", {
+    id = 31001, textureRes = "stage_bg_1",
+    reward = ProtobufI("STResource", {id = 999, textureRes = "wrong"}),
+    effectRes = "stage_bg_1"
+}) }
+''', encoding="utf-8")
+        self.asset("texture/background/stage_bg_1")
+        self.asset("effect/ui/stage_bg_1")
+        scene = build_index(self.assets, self.config)["scenes"][0]
+        self.assertEqual(scene["id"], 31001)
+        self.assertEqual(scene["fields"]["textureRes"], "stage_bg_1")
+        self.assertEqual(scene["status"], "complete")
+
     def test_nonexistent_actor_cannot_resolve_skin(self):
         self.table("ActorSkin", [{"id": 999999, "actorIds": [9999], "paletteIndexs": [1]}])
         skin = build_index(self.assets, self.config)["skins"][0]

@@ -30,6 +30,31 @@ def _json_rows(path: Path) -> list[dict[str, Any]]:
     return [dict(row) for row in rows if isinstance(row, Mapping)]
 
 
+def _lua_root_fields(block: str) -> Iterable[str]:
+    """Split only fields belonging to the outer record, ignoring nested commas."""
+    start, depth = 1, 1
+    in_string = escaped = False
+    for pos in range(1, len(block) - 1):
+        char = block[pos]
+        if in_string:
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == '"':
+                in_string = False
+        elif char == '"':
+            in_string = True
+        elif char in "{([":
+            depth += 1
+        elif char in "})]":
+            depth -= 1
+        elif char == "," and depth == 1:
+            yield block[start:pos].strip()
+            start = pos + 1
+    yield block[start:-1].strip()
+
+
 def _lua_rows(path: Path, table_name: str) -> list[dict[str, Any]]:
     """Extract stable scalar fields from decompiled ProtobufI records.
 
@@ -74,7 +99,11 @@ def _lua_rows(path: Path, table_name: str) -> list[dict[str, Any]]:
                     break
         block = text[start : end + 1]
         row: dict[str, Any] = {}
-        for key, raw in re.findall(r'(?m)\b([A-Za-z][A-Za-z0-9_]*)\s*=\s*("(?:\\.|[^"])*"|-?\d+(?:\.\d+)?)', block):
+        for field in _lua_root_fields(block):
+            scalar = re.fullmatch(r'([A-Za-z][A-Za-z0-9_]*)\s*=\s*("(?:\\.|[^"])*"|-?\d+(?:\.\d+)?)', field)
+            if scalar is None:
+                continue
+            key, raw = scalar.groups()
             if raw.startswith('"'):
                 try:
                     row[key] = json.loads(raw)
