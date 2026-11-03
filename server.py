@@ -285,6 +285,8 @@ class FixtureServer(ThreadingHTTPServer):
             address = ipaddress.ip_address(hostname)
         except (TypeError, ValueError):
             address = None
+        if not hostname:
+            return fallback
         if hostname.casefold().rstrip(".") == "localhost":
             allowed = True
         elif address is None:

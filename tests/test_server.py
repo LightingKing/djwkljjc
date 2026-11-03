@@ -106,6 +106,13 @@ class FixtureServerTests(unittest.TestCase):
             _validate_local_network_config("8.8.8.8", "https://8.8.8.8:443")
         _validate_local_network_config("192.168.1.20", "https://192.168.1.20:19443")
 
+    def test_malformed_host_header_falls_back_without_exception(self) -> None:
+        self.server.public_base_url = "http://192.168.1.20:19080"
+        self.assertEqual(
+            self.server.request_base_url("[malformed"),
+            "http://192.168.1.20:19080",
+        )
+
     def request(self, method: str, path: str, body: bytes | None = None, headers: dict[str, str] | None = None):
         connection = HTTPConnection("127.0.0.1", self.server.server_port, timeout=2)
         connection.request(method, path, body=body, headers=headers or {})
