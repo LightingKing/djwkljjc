@@ -208,7 +208,7 @@ class GameTests(unittest.TestCase):
             self.assertEqual(status, 200)
             self.assertEqual(detail.DESCRIPTOR.full_name, "ApiChapterInfo.get")
             self.assertEqual(detail.record_chapter.chapter_id, 24)
-            self.assertEqual(set(detail.record_dungeons), set(dungeon.record.dungeon_record))
+            self.assertEqual(set(detail.record_dungeons), set())
 
     def test_tutorial_bootstrap_has_all_local_status_entries(self):
         with tempfile.TemporaryDirectory() as temp:

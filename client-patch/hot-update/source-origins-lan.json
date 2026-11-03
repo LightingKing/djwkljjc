@@ -134,8 +134,8 @@
       "source": "sources/dungeonteamprepare-local.lua",
       "destination": "sources/dungeonteamprepare-local.lua",
       "target": "assetbundle/data/lua/window/dungeonteamprepare/dungeonteamprepare",
-      "sha256": "612ceebdbb8630e22e4424ce69377767399e2d9b818e132fdd81a26c567e45b5",
-      "patchedSha256": "612ceebdbb8630e22e4424ce69377767399e2d9b818e132fdd81a26c567e45b5",
+      "sha256": "fdc8502990f31d32beaac84f00a4f53af83a447867803e78cf7f550e1900a55b",
+      "patchedSha256": "fdc8502990f31d32beaac84f00a4f53af83a447867803e78cf7f550e1900a55b",
       "replacements": []
     },
     {

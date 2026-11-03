@@ -15,14 +15,14 @@ class CertificateExpiryTests(unittest.TestCase):
             self.skipTest(f"certificate fixture not available: {path}")
         result = inspect_certificate_expiry(path, now=datetime(2026, 11, 3, tzinfo=timezone.utc))
         self.assertEqual(result["status"], "ok")
-        self.assertEqual(result["notAfter"], "2027-01-25T05:22:20+00:00")
+        self.assertEqual(result["notAfter"], "2031-11-02T08:54:04+00:00")
         self.assertFalse(result["warning"])
 
     def test_expiry_warning_is_reported_before_thirty_days(self) -> None:
         path = Path(__file__).resolve().parents[3] / "analysis" / "ljjc-local" / "certs" / "server.pem"
         if not path.is_file():
             self.skipTest(f"certificate fixture not available: {path}")
-        result = inspect_certificate_expiry(path, now=datetime(2027, 1, 1, tzinfo=timezone.utc))
+        result = inspect_certificate_expiry(path, now=datetime(2031, 10, 10, tzinfo=timezone.utc))
         self.assertEqual(result["status"], "warning")
         self.assertTrue(result["warning"])
         self.assertLess(result["daysRemaining"], 30)

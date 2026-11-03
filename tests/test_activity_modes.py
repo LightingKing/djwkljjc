@@ -433,10 +433,20 @@ class DeployTests(ModeTestBase):
         for mission in missions:
             if not self.modes._mission_feasible(mission["id"], roles):
                 continue
-            free = [uid for uid in self.uids if not any(uid in s[1] for s in started)]
-            result = self.call("POST", "/fci/deploy/deploymissionattend/", {"id": mission["id"], "actorUid": free[:1]})
+            row = __import__("activity_modes").DEPLOY_MISSIONS[mission["id"]]
+            allowed = {role for condition in row.get("roleCon") or []
+                       if int(condition.get("type", 0) or 0) == 1
+                       for role in self.modes._role_params(condition)}
+            free = [uid for uid in self.uids
+                    if not any(uid in s[1] for s in started)
+                    and (__import__("activity_modes").ACTOR_ROLE.get(
+                        int(actor_store.get(self.profile(), self.game.systems._state(self.profile()), uid)["id"]), 0
+                    ) in allowed or not allowed)]
+            need = max(1, int(row.get("needRoleNum", 1) or 1))
+            selected = free[:need]
+            result = self.call("POST", "/fci/deploy/deploymissionattend/", {"id": mission["id"], "actorUid": selected})
             if result[0] == 200:
-                started.append((mission["id"], free[:1]))
+                started.append((mission["id"], selected))
             if len(started) == 2:
                 break
         self.assertEqual(len(started), 2)  # DeployCount[30] = 3 allows a third, roles permitting
