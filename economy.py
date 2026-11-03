@@ -1670,15 +1670,6 @@ class LocalEconomy:
 
     def _purchase_product(self, product_id: str) -> Optional[Dict[str, Any]]:
         product = self._PRODUCTS.get(product_id)
-        if product is None and product_id:
-            # The static client catalog is not present in the retired server
-            # snapshot.  Accept only a finite set of familiar denomination
-            # suffixes and still require the one-time sandbox token below;
-            # this does not turn arbitrary IDs into arbitrary currency.
-            match = re.search(r"(?:^|[^0-9])(60|300|980|1980|3280|648000|64800|6480)(?:$|[^0-9])", product_id)
-            if match:
-                count = int(match.group(1))
-                product = {"price": count / 10.0, "count": count}
         if product is None:
             return None
         return {"productId": product_id, **product}
@@ -1761,7 +1752,10 @@ class LocalEconomy:
         product = self._purchase_product(str(pending.get("productId", "")))
         if product is None:
             return 409, {"error": "pending_product_unavailable"}
-        quantity = _int(pending.get("count"), 1)
+        # One server-issued sandbox order is one fixed denomination.  The
+        # client count field is a protocol detail and must never multiply
+        # locally granted currency.
+        quantity = 1
         profile = self.game._profile(self._account_for_game(account))
         ok, changes, error = self._change_resources(
             profile,

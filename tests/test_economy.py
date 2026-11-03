@@ -329,6 +329,35 @@ class EconomyRoutesTests(unittest.TestCase):
             self.assertEqual(status, 402)
             self.assertEqual(duplicate["error"], "payment_verification_required")
 
+    def test_local_sandbox_product_ids_are_exact_and_count_cannot_multiply_currency(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            accounts = LocalAccounts(root / "accounts")
+            game = LocalGame(root / "game", accounts)
+            account, auth = self._guest(accounts)
+
+            status, refused = game.handle_http(
+                "POST", "/fci/purchasetouch", b'{"productId":"x.648000"}', "application/json", auth
+            )
+            self.assertEqual(status, 400)
+            self.assertEqual(refused["error"], "unknown_local_product")
+
+            status, touch = game.handle_http(
+                "POST", "/fci/purchasetouch",
+                b'{"productId":"local.sandbox.648000","count":10}',
+                "application/json", auth,
+            )
+            self.assertEqual(status, 200)
+            status, delivered = game.handle_http(
+                "POST", "/fci/purchasedelevery",
+                json.dumps({"tradeData": touch.trade_data}).encode(),
+                "application/json", auth,
+            )
+            self.assertEqual(status, 200)
+            paid = next(r["count"] for r in game._profile(account)["resources"] if r["type"] == 5)
+            self.assertEqual(paid, 648000)
+            self.assertEqual(delivered.transaction_id, touch.trade_data.removeprefix("local-sandbox:"))
+
     def test_legacy_recharge_routes_are_disabled_without_explicit_switch(self):
         """Old reward endpoints cannot mint currency in a normal game instance."""
         with tempfile.TemporaryDirectory() as temp:
