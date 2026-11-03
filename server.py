@@ -1980,7 +1980,10 @@ def serve(args: argparse.Namespace) -> None:
         context.set_servername_callback(tls_server._capture_sni)
         context.load_cert_chain(certfile=args.cert, keyfile=args.key)
         tls_server.tls_context = context
-        certificate_info = inspect_certificate_expiry(args.cert, now=server_clock.now())
+        certificate_info = inspect_certificate_expiry(
+            args.cert,
+            now=datetime.fromtimestamp(server_clock.now(), tz=timezone.utc),
+        )
         tls_server.tls_certificate = certificate_info
         if http_server is not None:
             http_server.tls_certificate = dict(certificate_info)
