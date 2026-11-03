@@ -273,7 +273,8 @@ class LocalWelfareFeatures:
         mail = send_mail(
             self.game, profile, "印章活动补给", "本期印章活动补给：25个糖果，可用于点亮印章。每期可领取一次。",
             [{"type": 11, "id": 1016, "count": SEAL_LOCAL_SUPPLY_COUNT}],
-            expire_days=28, now=self._now())
+            expire_days=None, now=self._now(),
+            expire_time=int(state["welfare"]["cycleEnd"]))
         # The enclosing HTTP transaction commits the mail and marker together.
         # Do not add this separate local source to earnedMaterials: that
         # counter tracks the original 750-candy battle supply.

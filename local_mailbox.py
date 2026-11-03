@@ -249,23 +249,31 @@ def send_mail(
     important: bool = False,
     start_time: Optional[int] = None,
     now: Optional[int] = None,
+    expire_time: Optional[int] = None,
 ) -> dict[str, Any]:
     """Deliver one mail to ``profile``'s mailbox; return the stored record.
 
     ``attachments`` are STResource-like rows (``{type,id,count,param}`` or
     resChange-style ``{"baseRes": {...}}``); empty counts are dropped.
     ``expire_days`` counts from delivery (or ``start_time``); ``None`` means no
-    practical expiry.  ``start_time`` (epoch seconds) delays visibility: the
+    practical expiry.  ``expire_time`` can supply an absolute expiry timestamp
+    when a mail belongs to a fixed event window.  ``start_time`` (epoch seconds) delays visibility: the
     client holds such mail until then (MailUtil.MailTimeCheck) and the server
     refuses to claim it early.  The mailbox keeps the newest ``MAX_MAILS``.
     """
 
     if expire_days is None:
         expire_days = NO_EXPIRY_DAYS
-    if _int(expire_days) <= 0:
+    if expire_time is None and _int(expire_days) <= 0:
         raise ValueError("expire_days must be positive (or None for no expiry)")
     now = _int(now if now is not None else _clock_of(game)())
     start = _int(start_time) if start_time else 0
+    if expire_time is not None:
+        expire_at = _int(expire_time)
+        if expire_at <= max(now, start):
+            raise ValueError("expire_time must be after delivery")
+    else:
+        expire_at = max(now, start) + _int(expire_days) * _DAY
     with game._lock:
         state = game.systems._state(profile)
         _normalise(state, now)
@@ -282,7 +290,7 @@ def send_mail(
             "attachmentsGot": False,
             "createTime": now,
             "startTime": start or now,
-            "expireTime": max(now, start) + _int(expire_days) * _DAY,
+            "expireTime": expire_at,
             "important": bool(important),
         }
         mails.append(record)

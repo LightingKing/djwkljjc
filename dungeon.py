@@ -1635,6 +1635,12 @@ class LocalDungeons:
         balance_time = int(self._clock())
         if not self._claim_terminal(profile, dungeon_uid, won=won, balance_time=balance_time):
             return 409, {"error": "team_dungeon_not_active"}
+        if won:
+            welfare = getattr(self.game, "welfare", None)
+            if welfare is not None and hasattr(welfare, "grant_battle_materials"):
+                reward_changes.extend(welfare.grant_battle_materials(
+                    profile, dungeon_id, dungeon_type=TEAM_DUNGEON_DUNGEON_TYPE,
+                ))
         try:
             actor_uids = [int(value) for value in json.loads(row["actor_uids_json"] or "[]")]
         except (TypeError, ValueError):

@@ -35,6 +35,10 @@ class TeamDungeonLocalTests(unittest.TestCase):
             body = json.dumps(payload).encode()
         return self.game.handle_http(method, path, body, content_type, self.auth)
 
+    def item(self, rid: int) -> int:
+        profile = self.game._profile(self.account)
+        return self.game.systems._state(profile).get("items", {}).get(str(rid), {}).get("count", 0)
+
     def test_groups_entry_ai_ticket_and_idempotent_balance(self):
         status, groups = self.call("GET", "/fci/teamdungeongroups/")
         self.assertEqual(status, 200)
@@ -61,9 +65,35 @@ class TeamDungeonLocalTests(unittest.TestCase):
         self.assertTrue(settled["win"])
         self.assertTrue(settled["localAi"])
         self.assertTrue(any(change["baseRes"]["id"] == 71501 for change in settled["resChange"]))
+        self.assertEqual(self.item(1016), 8)
         status, repeated = self.call("POST", f"/fci/teamdungeon/{uid}/balance", {})
         self.assertEqual(status, 200)
         self.assertEqual(repeated, settled)
+        self.assertEqual(self.item(1016), 8)
+
+    def test_team_dungeon_candy_respects_season_cap(self):
+        profile = self.game._profile(self.account)
+        state = self.game.welfare._state(profile)
+        state["welfare"]["earnedMaterials"]["1016"] = 746
+        self.game.welfare._save(profile, state)
+        status, entered = self.call("POST", "/fci/teamdungeon/enter/", {"dungeonId": 7011})
+        self.assertEqual(status, 200)
+        uid = entered["dungeonUid"]
+        active = self.game._types["FightActiveData"](
+            dungeonType=10, stageID=7011, gameRound=1, winTeam=1,
+        )
+        self.assertEqual(self.call(
+            "PATCH", f"/fci/teamdungeon/{uid}/active/",
+            active.SerializeToString(), "application/wireformat",
+        )[0], 200)
+        status, settled = self.call("POST", f"/fci/teamdungeon/{uid}/balance/", {})
+        self.assertEqual(status, 200)
+        self.assertEqual(self.item(1016), 4)
+        self.assertEqual(self.game.welfare._state(profile)["welfare"]["earnedMaterials"]["1016"], 750)
+        self.assertTrue(any(
+            change["baseRes"]["id"] == 1016 and change["baseRes"]["countDelta"] == 4
+            for change in settled["resChange"]
+        ))
 
     def test_balance_empty_body_requires_real_fight_active_data(self):
         status, entered = self.call("POST", "/fci/teamdungeon/enter/", {"dungeonId": 7011})
@@ -127,6 +157,7 @@ class TeamDungeonLocalTests(unittest.TestCase):
         self.assertEqual(status, 200)
         self.assertFalse(settled["win"])
         self.assertEqual(settled["playerDamages"], {player_id: 12345})
+        self.assertEqual(self.item(1016), 0)
 
     def test_damage_report_does_not_invent_missing_player_statistics(self):
         status, entered = self.call("POST", "/fci/teamdungeon/enter/", {"dungeonId": 7011})

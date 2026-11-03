@@ -123,8 +123,23 @@ class SealSupplyTests(unittest.TestCase):
         self.assertGreater(second, first)
         self.now[0] -= 86400
         self.native("GET", "/fci/seal/")
-        self.assertEqual([mail["id"] for mail in self.supply_mails()], [first, second])
+        self.assertEqual([mail["id"] for mail in self.supply_mails()], [second])
         self.assertEqual(self.item(1016), 0)  # mail attachment requires an explicit claim
+
+    def test_supply_mail_expires_at_cycle_end_before_next_cycle_claim(self):
+        cycle_end = self.game.welfare.cycle_window()["end"]
+        self.now[0] = cycle_end - 3600
+        self.native("GET", "/fci/seal/")
+        old = self.supply_mails()[0]
+        self.assertEqual(old["expireTime"], cycle_end)
+        self.now[0] = cycle_end + 1
+        result = self.native("PATCH", f'/fci/mail/{old["id"]}', {"attachmentsGot": True})
+        self.assertEqual(result["resChange"], [])
+        self.assertEqual(self.item(1016), 0)
+        self.native("GET", "/fci/seal/")
+        current = self.supply_mails()
+        self.assertEqual(len(current), 1)
+        self.assertGreater(current[0]["id"], old["id"])
 
     def test_failed_supply_marker_rolls_back_mail_and_push(self):
         notified = []
