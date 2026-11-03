@@ -199,14 +199,36 @@ class LocalSystemsMaintenanceTests(unittest.TestCase):
                 game, token, "GET", "/fci/actor/1001/unlockedactorskins/"
             )
             self.assertEqual((status, skins.DESCRIPTOR.full_name), (200, "ApiUnlockedActorSkins.result"))
+            # Skin 7 was an unconfigured placeholder. Buy original skin 100101
+            # through the visible native shop before exercising the equip route.
+            status, shop = self._call(game, token, "GET", "/fci/gacha-shop/")
+            self.assertEqual(status, 200)
+            good = next(item for item in shop.goods if item.good.type == 29 and item.good.id == 100101)
+            profile = game._profile(_account)
+            with game.atomic_mutation():
+                grant_rewards(game, profile, [{"type": good.cost.type, "id": good.cost.id,
+                                               "count": good.cost.count, "param": good.cost.param}])
+            request = game.systems._message("ApiGachaShopTrade")
+            request.good_id = good.good_id
+            status, purchased = game.handle_http(
+                "POST", "/fci/gacha-shop/trade/", request.SerializeToString(),
+                "application/wireformat", token,
+            )
+            self.assertEqual(status, 200)
+            self.assertEqual(purchased.DESCRIPTOR.full_name, "ApiGachaShopTrade.post")
+            self.assertTrue(any(change.HasField("base_res") and change.base_res.type == 29
+                                and change.base_res.id == 100101 and change.base_res.count_delta == 1
+                                for change in purchased.res_change))
+            self.assertEqual(game.systems._state(profile)["items"][str(good.cost.id)]["count"], 0)
             status, selected = self._call(
-                game, token, "POST", "/fci/actor/1001/skin/", {"skinId": 7}
+                game, token, "POST", "/fci/actor/1001/skin/", {"skinId": 100101}
             )
             self.assertEqual((status, selected.DESCRIPTOR.full_name), (200, "ApiActorSkin.result"))
+            self.assertEqual(selected.actor_skin, 100101)
             status, skins = self._call(
                 game, token, "GET", "/fci/actor/1001/unlockedactorskins/"
             )
-            self.assertEqual(list(skins.unlocked_skins), [7])
+            self.assertEqual(list(skins.unlocked_skins), [100101])
 
             status, equipped = self._call(
                 game, token, "POST", "/fci/equip/20001/equipon/", {"actorUid": 1001}
@@ -231,7 +253,7 @@ class LocalSystemsMaintenanceTests(unittest.TestCase):
                 restarted, token, "GET", "/fci/actor/1001/unlockedactorskins/"
             )
             self.assertEqual(status, 200)
-            self.assertEqual(list(persisted.unlocked_skins), [7])
+            self.assertEqual(list(persisted.unlocked_skins), [100101])
 
 
 if __name__ == "__main__":
