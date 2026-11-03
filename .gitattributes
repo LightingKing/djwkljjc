@@ -6,3 +6,10 @@ client-patch/hot-update/modules-v11.json text eol=lf
 client-patch/hot-update/sources/*-lan.lua text eol=lf
 client-patch/hot-update/source-origins-lan.json text eol=lf
 client-patch/hot-update/modules-lan.json text eol=lf
+
+# All cumulative patch sources and manifests are hashed byte-for-byte by the
+# reproducibility checks. Keep the checkout representation independent of the
+# host Git line-ending settings.
+client-patch/hot-update/sources/*.lua text eol=lf
+client-patch/hot-update/source-origins*.json text eol=lf
+client-patch/hot-update/modules*.json text eol=lf
