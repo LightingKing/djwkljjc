@@ -1,0 +1,10 @@
+# Pass explicitly as -ConfigFile to start-committed-release.ps1.
+# Wildcard binding retains 127.0.0.1 access to loopback-only management APIs.
+# The advertised IP must match the LAN APK and the separately built manifest.
+[server]
+bind_host = "0.0.0.0"
+public_base_url = "http://192.168.1.22:19080"
+http_port = 19080
+tls_port = 19102
+enable_tls = true
+legacy_tls = true

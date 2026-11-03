@@ -1,0 +1,9 @@
+# Only networking belongs here. The release launcher supplies the established
+# production state, fixtures, backup checks and patch manifest explicitly.
+[server]
+bind_host = "127.0.0.1"
+public_base_url = "http://127.0.0.1:19080"
+http_port = 19080
+tls_port = 19102
+enable_tls = true
+legacy_tls = true

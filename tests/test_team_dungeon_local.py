@@ -80,6 +80,73 @@ class TeamDungeonLocalTests(unittest.TestCase):
         self.assertEqual(status, 200)
         self.assertTrue(settled["balanceInfo"]["win"])
 
+    def test_damage_report_uses_client_player_attribution_and_is_cached(self):
+        status, entered = self.call("POST", "/fci/teamdungeon/enter/", {"dungeonId": 7011})
+        self.assertEqual(status, 200)
+        uid = entered["dungeonUid"]
+        player_id = self.game._profile(self.account)["player_id"]
+        bot_id = entered["roomInfo"]["aiTeammates"][0]["playerId"]
+        active = self.game._types["FightActiveData"](
+            dungeonType=10, stageID=7011, gameRound=4, winTeam=1,
+        )
+        # The client records outgoing damageList on the attacking team, but
+        # totalDamage on the receiving team. Team number, not list order,
+        # identifies our side. Reflected/DOT damage uses the same attribution.
+        enemy = active.teamList.add(team=2)
+        enemy.statistic.totalDamage = 99999
+        enemy.statistic.damageList.add(playerId="enemy", damage=750)
+        own = active.teamList.add(team=1)
+        own.statistic.totalDamage = 750
+        own.statistic.damageList.add(playerId=player_id, damage=4321)
+        own.statistic.damageList.add(playerId=bot_id, damage=987)
+        self.assertEqual(self.call(
+            "PATCH", f"/fci/dungeon/{uid}/active/",
+            active.SerializeToString(), "application/wireformat",
+        )[0], 200)
+        status, settled = self.call("POST", f"/fci/teamdungeon/{uid}/balance/", {})
+        self.assertEqual(status, 200)
+        # DungeonBalanceTeam indexes result.playerDamages by playerId.
+        self.assertEqual(settled["playerDamages"], {player_id: 4321, bot_id: 987})
+        self.assertEqual(self.call("POST", f"/fci/teamdungeon/{uid}/balance/", {}), (200, settled))
+
+    def test_defeat_damage_report_does_not_substitute_a_fixed_amount(self):
+        status, entered = self.call("POST", "/fci/teamdungeon/enter/", {"dungeonId": 7011})
+        self.assertEqual(status, 200)
+        uid = entered["dungeonUid"]
+        player_id = self.game._profile(self.account)["player_id"]
+        active = self.game._types["FightActiveData"](
+            dungeonType=10, stageID=7011, gameRound=3, winTeam=2,
+        )
+        own = active.teamList.add(team=1)
+        own.statistic.damageList.add(playerId=player_id, damage=12345)
+        self.assertEqual(self.call(
+            "PATCH", f"/fci/dungeon/{uid}/active/",
+            active.SerializeToString(), "application/wireformat",
+        )[0], 200)
+        status, settled = self.call("POST", f"/fci/teamdungeon/{uid}/balance/", {})
+        self.assertEqual(status, 200)
+        self.assertFalse(settled["win"])
+        self.assertEqual(settled["playerDamages"], {player_id: 12345})
+
+    def test_damage_report_does_not_invent_missing_player_statistics(self):
+        status, entered = self.call("POST", "/fci/teamdungeon/enter/", {"dungeonId": 7011})
+        self.assertEqual(status, 200)
+        uid = entered["dungeonUid"]
+        active = self.game._types["FightActiveData"](
+            dungeonType=10, stageID=7011, gameRound=1, winTeam=1,
+        )
+        # A team total alone cannot establish which player dealt the damage.
+        enemy = active.teamList.add(team=2)
+        enemy.statistic.totalDamage = 5000
+        enemy.statistic.damageList.add(playerId="enemy", damage=2000)
+        self.assertEqual(self.call(
+            "PATCH", f"/fci/dungeon/{uid}/active/",
+            active.SerializeToString(), "application/wireformat",
+        )[0], 200)
+        status, settled = self.call("POST", f"/fci/teamdungeon/{uid}/balance/", {})
+        self.assertEqual(status, 200)
+        self.assertEqual(settled["playerDamages"], {})
+
     def test_canonical_dungeon_balance_alias_and_ticket_gate(self):
         status, entered = self.call("POST", "/fci/teamdungeon/enter", {"dungeonId": 7011})
         self.assertEqual(status, 200)

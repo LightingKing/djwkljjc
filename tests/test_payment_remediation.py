@@ -172,7 +172,7 @@ class PaymentRemediationTests(unittest.TestCase):
         self.assertIsInstance(info["range_info"], list)
         ranks = {r["num"]: r for r in info["rank_info"]}
         ranges = {r["num"]: r for r in info["range_info"]}
-        self.assertEqual(set(ranks), {"60", "300", "680", "1280", "3280", "6480"})
+        self.assertEqual(set(ranks), {"60", "300", "680", "1280", "3280", "6480", "64800", "648000"})
         self.assertEqual(ranks["1280"]["send_ext"], "")
         self.assertNotEqual(ranks["60"]["send_ext"], "")
         self.assertEqual(ranges["1280"]["coin"][0]["send_num"], "120")

@@ -2,3 +2,7 @@
 client-patch/hot-update/sources/*-v11.lua text eol=lf
 client-patch/hot-update/source-origins-v11.json text eol=lf
 client-patch/hot-update/modules-v11.json text eol=lf
+# Keep LAN source bytes and their recorded build digests stable on checkout.
+client-patch/hot-update/sources/*-lan.lua text eol=lf
+client-patch/hot-update/source-origins-lan.json text eol=lf
+client-patch/hot-update/modules-lan.json text eol=lf

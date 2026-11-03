@@ -38,6 +38,7 @@ from server.core.reset import ResetPolicy
 from server.core.routes import RouteRegistry
 from server.core.backup import DailyBackupScheduler, backup_state, list_backups, prune_backups, restore_sqlite
 from server.core.crash_logs import CrashLogStore
+from server.core.certificates import inspect_certificate_expiry
 from server.core.activity_schedule import ActivitySchedule
 from server.core.push_service import PushService
 from server.core.notifications import wire_game_notifications
@@ -228,6 +229,10 @@ class FixtureServer(ThreadingHTTPServer):
         self._wire_task_push()
         wire_game_notifications(self.game, self.push_service)
         self.tls_context = tls_context
+        # Populated by ``serve`` after the TLS certificate is loaded.  Keeping
+        # this on each listener lets both HTTP and HTTPS health probes expose
+        # the same certificate state without reading key material per request.
+        self.tls_certificate: dict[str, Any] | None = None
         contracts_path = Path(__file__).resolve().parent / "contracts" / "api.yaml"
         try:
             self.route_registry = RouteRegistry.from_yaml(contracts_path)
@@ -1605,6 +1610,11 @@ document.querySelector('#refresh').addEventListener('click',load);load();
 
         if parsed.path == "/__local__/health":
             payload = {"status": "ok", "service": "ljjc-fixture-server", "build": "m3.7-admin", "tls": bool(self.server.tls)}
+            certificate = self.server.certificate_health()
+            if certificate is not None:
+                payload["certificate"] = certificate
+                if certificate.get("status") in {"warning", "expired", "error"}:
+                    payload["status"] = "warning"
             self._json_response(200, payload, send_body)
             self.server.audit_log.write(**base_record, status=200)
             return
@@ -1966,6 +1976,21 @@ def serve(args: argparse.Namespace) -> None:
         context.set_servername_callback(tls_server._capture_sni)
         context.load_cert_chain(certfile=args.cert, keyfile=args.key)
         tls_server.tls_context = context
+        certificate_info = inspect_certificate_expiry(args.cert, now=server_clock.now())
+        tls_server.tls_certificate = certificate_info
+        if http_server is not None:
+            http_server.tls_certificate = dict(certificate_info)
+        if certificate_info.get("status") in {"warning", "expired", "error"}:
+            logging.warning(
+                "TLS certificate health status=%s notAfter=%s daysRemaining=%s path=%s",
+                certificate_info.get("status"), certificate_info.get("notAfter"),
+                certificate_info.get("daysRemaining"), certificate_info.get("path"),
+            )
+        else:
+            logging.info(
+                "TLS certificate expires at %s (%s days remaining)",
+                certificate_info.get("notAfter"), certificate_info.get("daysRemaining"),
+            )
 
     for listener in (http_server, tls_server):
         if listener is not None:

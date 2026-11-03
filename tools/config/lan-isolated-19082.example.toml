@@ -1,0 +1,14 @@
+# ISOLATED PROBE ONLY: run server.py directly, not the production launcher.
+# Supply --state-dir I:/workspace/mobilegame/runtime/lan-validation-19082/state
+# and its own --fixture-root/--log under that same lan-validation-19082 root.
+# No listener is created by keeping this example in the repository.
+[server]
+bind_host = "0.0.0.0"
+public_base_url = "http://192.168.1.22:19082"
+http_port = 19082
+tls_port = 19104
+enable_tls = false
+legacy_tls = false
+unified_store_path = "I:/workspace/mobilegame/runtime/lan-validation-19082/state/local.sqlite3"
+backup_dir = "I:/workspace/mobilegame/runtime/lan-validation-19082/backups"
+auto_backup = false

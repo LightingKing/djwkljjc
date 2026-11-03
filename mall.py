@@ -143,6 +143,21 @@ class MallCatalog:
             product_id = str(row.get("productId") or "")
             if product_id:
                 self.products[product_id] = row
+        # Keep locally-added sandbox denominations outside the table whose
+        # provenance is the original APK.  The overlay is deliberately
+        # optional so a clean source checkout still has the original catalog,
+        # while local clients can receive the extra rows through the patch.
+        try:
+            overlay = json.loads((table_dir.parent / "local-sandbox-products.json").read_text(encoding="utf-8"))
+        except (OSError, ValueError, TypeError):
+            overlay = {}
+        if isinstance(overlay, Mapping) and overlay.get("provenance") == "local rule; not original APK data":
+            for row in overlay.get("products", []):
+                if not isinstance(row, Mapping):
+                    continue
+                product_id = str(row.get("productId") or "")
+                if product_id.startswith("com.tencent.fcicv.Gem") and product_id:
+                    self.products[product_id] = dict(row)
         self.delay_rewards: dict[int, list[dict[str, Any]]] = {
             _int(row.get("activityId")): [r for r in row.get("delayReward") or [] if isinstance(r, Mapping)]
             for row in _rows("DelayReward", table_dir)

@@ -1,0 +1,546 @@
+local WU, DB = require("Common/WindowUtil")()
+local PB = require("Common/PbHelper")
+local S = require("Common/Singleton"):Register(_ENV, "IAPHandler")
+local U = require("Common/Util")
+local m_iap, m_remotePrice, m_localPrice, m_timeout, m_platform, m_channel, m_products, m_mapProducts
+local m_activityInfo = {}
+local m_payProducts, m_productIds
+local m_bReset = false
+
+-- The APK's PurchaseInfo table stops at 6480迷子. Keep the extra local
+-- denominations in the LAN adapter so the signed client can render and buy
+-- them without changing the embedded table or touching any platform SDK.
+local function AppendLocalRechargeProducts(products)
+  local existing = {}
+  for _, product in ipairs(products) do
+    existing[product.productId] = true
+  end
+  local additions = {
+    {
+      productName = "64800迷子", showInShop = true, purchaseRes = {},
+      productPicture = "purchase_diamond_06",
+      productId = "com.tencent.fcicv.Gem64800.android", channels = {5},
+      price = 6480.0, platform = 12, count = 64800, ratio = 0,
+    },
+    {
+      productName = "648000迷子", showInShop = true, purchaseRes = {},
+      productPicture = "purchase_diamond_06",
+      productId = "com.tencent.fcicv.Gem648000.android", channels = {5},
+      price = 64800.0, platform = 12, count = 648000, ratio = 0,
+    },
+  }
+  for _, product in ipairs(additions) do
+    if not existing[product.productId] then
+      table.insert(products, product)
+    end
+  end
+  return products
+end
+
+-- Local account/checkout adapters apply only to explicit loopback services
+-- and the production/rehearsal LAN endpoints. Other servers retain native SDK paths.
+function IsLocalAccountServer()
+  local manager = CS.Restifizer and CS.Restifizer.RestifizerManager
+      and CS.Restifizer.RestifizerManager.Instance
+  local url = manager and manager.AccountServerUrl
+  if type(url) ~= "string" then
+    return false
+  end
+  url = string.lower(url):gsub("/$", "")
+  return url == "http://127.0.0.1:19080" or url == "http://127.0.0.1:19081"
+      or url == "http://localhost:19080" or url == "http://localhost:19081"
+      or url == "https://127.0.0.1:19102" or url == "https://127.0.0.1:19103"
+      or url == "https://localhost:19102" or url == "https://localhost:19103"
+      or url == "http://192.168.1.22:19080" or url == "http://192.168.1.22:19082"
+end
+
+function SetIAPInterface(iap)
+  m_iap = iap
+end
+
+function Start()
+  m_bReset = false
+  this:RegisterGameEvent("IAPRemoteProduct", OnIAPRemoteProduct)
+  this:RegisterGameEvent("IAPRemoteProductFailed", OnIAPRemoteProductFailed)
+  this:RegisterGameEvent("IAPPurchase", OnIAPPurchase)
+  this:RegisterGameEvent("IAPPurchaseFailed", OnIAPPurchaseFailed)
+  this:RegisterGameEvent("GetPurchaseActivityInfo", OnGetActivityInfo)
+  m_platform = CS.ResourceManager.Instance.ConstConfig.PurchasePlatform
+  m_products = PB.all("PurchaseInfo"):where(function(_, p)
+    return p.platform == m_platform
+  end):toarray()
+  if IsLocalAccountServer() and m_platform == 12 then
+    m_products = AppendLocalRechargeProducts(m_products)
+  end
+  m_payProducts = PB.all("PurchaseInfo"):where(function(_, p)
+    return p.platform == m_platform and p.showInShop == true
+  end):toarray()
+  if IsLocalAccountServer() and m_platform == 12 then
+    m_payProducts = AppendLocalRechargeProducts(m_payProducts)
+  end
+  table.sort(m_payProducts, function(a, b)
+    if a.price < b.price then
+      return true
+    else
+      return false
+    end
+  end)
+  m_productIds = m_products:select(function(p)
+    return p.productId
+  end)
+  m_products = m_products:where(function(_, p)
+    return p.ratio == 0
+  end):toarray():sort(function(a, b)
+    return a.count < b.count
+  end):append(m_products:where(function(_, p)
+    return p.ratio ~= 0
+  end):toarray())
+  m_mapProducts = {}
+  for i, v in ipairs(m_products) do
+    m_mapProducts[v.productId] = v
+  end
+  if m_iap ~= nil then
+    m_iap:Init()
+  end
+end
+
+function OnDestroy()
+  if m_iap ~= nil then
+    m_iap:Uninit()
+  end
+end
+
+function OnGetActivityInfo(result)
+  m_activityInfo = {}
+  if result == nil then
+    return
+  end
+  local luaData = JsonD(result)
+  if luaData.mp_info and luaData.mp_info.utp_mpinfo_detail and luaData.mp_info.utp_mpinfo_detail.rank_info then
+    for i, v in ipairs(luaData.mp_info.utp_mpinfo_detail.rank_info) do
+      local info = m_activityInfo[tonumber(v.num)]
+      if info == nil then
+        info = {}
+        info.rank_info = v
+        m_activityInfo[tonumber(v.num)] = info
+      else
+        info.rank_info = v
+      end
+    end
+    for i, v in ipairs(luaData.mp_info.utp_mpinfo_detail.range_info) do
+      local info = m_activityInfo[tonumber(v.num)]
+      if info == nil then
+        info = {}
+        info.range_info = v
+        m_activityInfo[tonumber(v.num)] = v
+      else
+        info.range_info = v
+      end
+    end
+  end
+  this:BroadcastGameEvent("OnGetPurchaseActivityInfo")
+end
+
+function IsDoubleSendByFirst(v)
+  return v.rank_info and v.rank_info.send_ext ~= ""
+end
+
+function GetSendNum(v)
+  if v.range_info and v.range_info.coin and #v.range_info.coin > 0 and v.range_info.coin[1].send_num then
+    return tonumber(v.range_info.coin[1].send_num)
+  end
+  return 0
+end
+
+function GetActivityByPrice(price)
+  return m_activityInfo[price]
+end
+
+function GetProductsByID(proID)
+  return m_mapProducts[proID]
+end
+
+function GetMallGiftText(mallInfo, field)
+  local key = "MALL_GIFT_" .. field .. tostring(mallInfo.id)
+  local text = WU.GetString(key)
+  if text ~= nil and text ~= "" and text ~= key then
+    return text
+  end
+  -- Original Mall 926/927 repeat 918/919's product and Item 123003 reward,
+  -- but the APK does not provide the newer rows' title/description strings.
+  local legacyId = ({[926] = 918, [927] = 919})[mallInfo.id]
+  local legacy = legacyId and PB.get("Mall", legacyId)
+  if legacy and legacy.productId == mallInfo.productId then
+    local legacyKey = "MALL_GIFT_" .. field .. tostring(legacyId)
+    local legacyText = WU.GetString(legacyKey)
+    if legacyText ~= nil and legacyText ~= "" and legacyText ~= legacyKey then
+      return legacyText
+    end
+    local reward = mallInfo.reward and mallInfo.reward[1]
+    if reward and reward.type == PB.enum.ResourceType.ResItem then
+      if field == "NAME" then
+        return WU.GetItemName(reward.id, reward.type)
+      elseif field == "DESC" then
+        return WU.GetItemDesc(reward.id)
+      end
+    end
+  end
+  return text
+end
+
+function GetProducts()
+  return m_payProducts
+end
+
+function UseRemoteProduct()
+  if IsLocalAccountServer() then
+    return false
+  else
+    return m_platform == PB.enum.PurchasePlatform.ios_cn or m_platform == PB.enum.PurchasePlatform.android_global or m_platform == PB.enum.PurchasePlatform.ios_midas
+  end
+end
+
+function LocalDelevery()
+  return m_platform == PB.enum.PurchasePlatform.ios_cn or m_platform == PB.enum.PurchasePlatform.android_global or m_platform == PB.enum.PurchasePlatform.ios_midas or m_platform == PB.enum.PurchasePlatform.android_midas
+end
+
+function ResolveProductPrice()
+  if UseRemoteProduct() then
+    if m_iap ~= nil then
+      local productId = m_productIds
+      local json = JsonE(productId)
+      m_iap:RequestRemoteProduct(json)
+    end
+  else
+    m_localPrice = {}
+    for k, p in pairs(m_products) do
+      m_localPrice[p.productId] = WU.GetString("Purchase_LocalPrice", p.price)
+    end
+  end
+end
+
+function SetUserInfo(info)
+  if m_iap ~= nil then
+    m_iap:SetUserInfo(JsonE(info))
+  end
+end
+
+function Refresh()
+  if IsLocalAccountServer() then
+    ResolveProductPrice()
+    return
+  end
+  ResolveProductPrice()
+  if m_iap ~= nil then
+    m_iap:Refresh()
+  end
+end
+
+function Purchase(product, channel, count)
+  MidasProxy(function()
+    PurchaseImpl(product, channel, count)
+  end)
+end
+
+function IsGoods(product)
+  local isGoods = false
+  for i, v in ipairs(product.purchaseRes) do
+    if v.type ~= PB.enum.ResourceType.ResNone then
+      isGoods = true
+      break
+    end
+  end
+  return isGoods
+end
+
+function GetActivityInfo()
+  if IsLocalAccountServer() then
+    this:DelayInvokeInSeconds(0.1, function()
+      this:GameRequest("fci/purchase-activity-info/"):SyncInput(false):Get(function(result)
+        OnGetActivityInfo(JsonE(result or {}))
+      end, function()
+        OnGetActivityInfo("{}")
+      end)
+    end)
+    return
+  end
+  m_iap:GetActivityInfo(JsonE({platform = m_platform, channel = "midas"}))
+end
+
+function PurchaseImpl(product, channel, count)
+  if IsLocalAccountServer() then
+    m_channel = channel
+    if m_timeout ~= nil then
+      this:StopCoroutine(m_timeout)
+    end
+    m_timeout = this:DelayInvokeInSeconds(30, function()
+      m_timeout = nil
+      LocalPurchaseFailed()
+    end)
+    WU.SetLockFlag(WU.LockInputFlag.Purchase, true)
+    local accountCache = this:GetData("accountCache") or {}
+    this:GameRequest("fci/purchasetouch/"):Post({
+      isGuest = accountCache.entryType == "guest",
+      productId = product.productId,
+      platform = m_platform,
+      channel = m_channel,
+      count = count
+    }, function(response)
+      if response == nil or response.tradeData == nil or response.tradeData == "" then
+        LocalPurchaseFailed()
+        return
+      end
+      this:GameRequest("fci/purchasedelevery/"):Post({
+        productId = product.productId,
+        tradeData = response.tradeData,
+        platform = m_platform,
+        channel = m_channel
+      }, function(result)
+        OnLocalDelivered(product, result)
+      end, LocalPurchaseFailed)
+    end, LocalPurchaseFailed)
+    return
+  end
+  if m_iap ~= nil then
+    m_channel = channel
+    m_timeout = this:DelayInvokeInSeconds(30, function()
+      OnIAPPurchaseFailed({reason = "Timeout"})
+    end)
+    local accountCache = this:GetData("accountCache")
+    this:GameRequest("fci/purchasetouch/"):Post({
+      isGuest = accountCache.entryType == "guest",
+      productId = product.productId,
+      platform = m_platform,
+      channel = m_channel,
+      count = count
+    }, function(response)
+      if response ~= nil then
+        local isGoods = IsGoods(product)
+        local payItem = ""
+        if isGoods then
+          payItem = string.format("%s*%d*%s", product.productId, product.price * 10, 1)
+        end
+        m_iap:Purchase(JsonE(_ENV["!"]({
+          productId = product.productId,
+          presetCount = count,
+          platform = m_platform,
+          channel = PB.enum.PurchaseChannel.__keys[m_channel],
+          isGoods = isGoods,
+          payItem = payItem
+        }):merge(response)))
+      end
+    end, FinishPurchase)
+    WU.SetLockFlag(WU.LockInputFlag.Purchase, true)
+  end
+end
+
+function Finish(response)
+  if m_iap ~= nil and m_channel ~= nil then
+    response.channel = PB.enum.PurchaseChannel.__keys[m_channel]
+    m_iap:Finish(JsonE(response))
+  end
+end
+
+function GetLocalizedPrice(productId)
+  if IsLocalAccountServer() then
+    if m_localPrice == nil and m_products ~= nil then
+      ResolveProductPrice()
+    end
+    if m_localPrice ~= nil then
+      return m_localPrice[productId]
+    end
+  else
+    if UseRemoteProduct() then
+      if m_remotePrice ~= nil then
+        return m_remotePrice[productId]
+      end
+    elseif m_localPrice ~= nil then
+      return m_localPrice[productId]
+    end
+  end
+end
+
+function OnIAPRemoteProduct(json)
+  m_remotePrice = JsonD(json)
+end
+
+function OnIAPRemoteProductFailed(json)
+  this:DelayInvokeInSeconds(15, ResolveProductPrice)
+end
+
+function OnIAPPurchase(json)
+  if LocalDelevery() then
+    local jsonData = JsonD(json) or {}
+    local data = table.linq(jsonData):merge({channel = m_channel, platform = m_platform})
+    this:GameRequest("fci/purchasedelevery/"):Post(data, function(response)
+      Finish(response)
+      FinishPurchase()
+    end, FinishPurchase)
+  else
+    FinishPurchase()
+  end
+end
+
+function CheckWXAutoLogin()
+  local accountCache = this:GetData("accountCache")
+  local platform = U.ToEnum(CS.Msdk.ePlatform, accountCache.socialPlatform)
+  if platform == CS.Msdk.ePlatform.ePlatform_Weixin then
+    CS.PlatformManager.IsNeedWXAutoLogin = true
+  end
+end
+
+function OnIAPPurchaseFailed(json)
+  local jsonData = JsonD(json) or {}
+  local reason = jsonData.reason
+  if reason == "NeedLogin" then
+    if not m_bReset then
+      m_bReset = true
+      WU.ShowMessageOK(WU.GetString("Error_ExpiredRelationData"), function()
+        CheckWXAutoLogin()
+        this:SetData("accountCache", {})
+        CS.GameGlobal.Instance:ResetGame()
+      end)
+    end
+  elseif reason ~= nil then
+    WU.ShowHintText(WU.GetString("Purchase_PurchaseFailed"))
+  else
+    if type(json) == "string" and json == "NeedLogin" then
+      WU.ShowMessageOK(WU.GetString("Purchase_PurchaseFailed_TokenTimeOut"), function()
+        CheckWXAutoLogin()
+        this:SetData("accountCache", {})
+        CS.GameGlobal.Instance:ResetGame()
+      end)
+      WU.SetLockFlag(WU.LockInputFlag.Purchase, false)
+      if m_timeout ~= nil then
+        this:StopCoroutine(m_timeout)
+        m_timeout = nil
+      end
+      return
+    end
+    WU.ShowHintText(WU.GetString("Purchase_PurchaseFailed"))
+  end
+  FinishPurchase()
+end
+
+function FinishPurchase()
+  WU.SetLockFlag(WU.LockInputFlag.Purchase, false)
+  if m_timeout ~= nil then
+    this:StopCoroutine(m_timeout)
+    m_timeout = nil
+  end
+  GetActivityInfo()
+  this:BroadcastGameEvent("FinishPurchase")
+end
+
+local Msdk = CS.Msdk
+local m_midasInfoCache
+
+function MidasProxy(callback)
+  if IsLocalAccountServer() then
+    if callback ~= nil then
+      callback()
+    end
+    return
+  end
+  WU.SetLockFlag(WU.LockInputFlag.Purchase, true)
+  UpdateMidasUserInfo(nil, function(changed)
+    WU.SetLockFlag(WU.LockInputFlag.Purchase, false)
+    if changed == nil then
+      WU.ShowMessageOK(WU.GetString("Purchase_PurchaseFailed_TokenTimeOut"), function()
+        CS.GameGlobal.Instance:ResetGame()
+      end)
+    elseif changed then
+      SyncMidas(callback)
+    elseif callback ~= nil then
+      callback()
+    end
+  end)
+end
+
+function UpdateMidasUserInfoImpl(loginRet, callback)
+  local midasInfo = _ENV["!"]({
+    openId = loginRet.open_id,
+    pf = loginRet.pf,
+    pfKey = loginRet.pf_key,
+    platform = CS.ResourceManager.Instance.ConstConfig.PurchasePlatform,
+    accessToken = loginRet:GetAccessToken()
+  })
+  local platformEnum = U.ToEnum(Msdk.ePlatform, loginRet.platform)
+  if platformEnum == Msdk.ePlatform.ePlatform_QQ then
+    midasInfo.openKey = loginRet:GetTokenByType(Msdk.eTokenType.eToken_QQ_Pay)
+    midasInfo.sessionId = "openid"
+    midasInfo.sessionType = "kp_actoken"
+  end
+  if platformEnum == Msdk.ePlatform.ePlatform_Weixin then
+    midasInfo.openKey = loginRet:GetTokenByType(Msdk.eTokenType.eToken_WX_Access)
+    midasInfo.sessionId = "hy_gameid"
+    midasInfo.sessionType = "wc_actoken"
+  end
+  if platformEnum == Msdk.ePlatform.ePlatform_Guest then
+    midasInfo.openKey = "openkey"
+    midasInfo.sessionId = "hy_gameid"
+    midasInfo.sessionType = "st_dummy"
+  end
+  local changed = midasInfo:compare(m_midasInfoCache)
+  m_midasInfoCache = midasInfo
+  return changed
+end
+
+function UpdateMidasUserInfo(loginRet, callback)
+  if loginRet == nil then
+    loginRet = Msdk.WGPlatform.Instance:WGGetLoginRecord()
+  end
+  if loginRet.flag == Msdk.eFlag.eFlag_Succ then
+    local changed = UpdateMidasUserInfoImpl(loginRet)
+    if callback ~= nil then
+      callback(changed)
+    end
+  elseif loginRet.flag == Msdk.eFlag.eFlag_Checking_Token then
+    this:DelayInvokeInSeconds(3, function()
+      UpdateMidasUserInfo(nil, callback)
+    end)
+  elseif callback ~= nil then
+    callback(nil)
+  end
+end
+
+function SyncMidas(callback)
+  if IsLocalAccountServer() then
+    if m_midasInfoCache == nil then
+      this:SetData("TssReportInterval", 1000000000)
+    end
+    if callback ~= nil then
+      callback()
+    end
+    return
+  end
+  CS.Restifizer.RestifizerManager.Instance:ConfigBearerAuth(m_midasInfoCache.accessToken)
+  SetUserInfo(m_midasInfoCache)
+  local luaTable = {midasInfo = m_midasInfoCache}
+  local wireForMatTable = ProtobufT("ApiPlayerSyncMidasInfo", luaTable)
+  this:GameRequest("/fci/syncmidas"):Patch(wireForMatTable, callback)
+end
+
+function LocalPurchaseFailed()
+  WU.ShowHintText(WU.GetString("Purchase_PurchaseFailed"))
+  FinishPurchase()
+end
+
+function OnLocalDelivered(product, result)
+  if result ~= nil and result.resChange ~= nil then
+    require("Manager/DataBindingHandler").ResChange(result.resChange)
+  end
+  DB:HandleRemoteChanged("fci/baseresource/")
+  if result ~= nil and result.buyCount ~= nil then
+    this:BroadcastGameEvent("PushTypePurchaseBuyRecord", {
+      product.productId,
+      tostring(result.buyCount)
+    })
+  end
+  if IsGoods(product) then
+    this:BroadcastGameEvent("HandlePurchaseGoodsNew", product.productId)
+  elseif result ~= nil and result.resChange ~= nil then
+    WU.ShowRewards(result.resChange)
+  end
+  FinishPurchase()
+end
