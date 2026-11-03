@@ -1522,6 +1522,10 @@ class LocalDungeons:
         # map (the client looks up TeamDungeonGroup locally).
         groups = {str(TEAM_DUNGEON_ACTIVITY_ID): 1}
         return 200, {
+            # Native DungeonTeam.lua reads the activity -> group map from the
+            # response root. Keep ``result`` as a compatibility alias for
+            # older local tools that used the pre-native wrapper.
+            **groups,
             "result": groups,
             "groups": [
                 {"groupId": group, "dungeonIds": list(stages), "bgPicture": f"Dungeon_team_bg_{group}"}
@@ -1577,6 +1581,23 @@ class LocalDungeons:
                     "baseInfo": self._base_info(profile, dungeon_id, actor_ids, actor_uids, dungeon_type=TEAM_DUNGEON_DUNGEON_TYPE, activity_id=TEAM_DUNGEON_ACTIVITY_ID),
                     "roomInfo": self._team_room(profile, uid, dungeon_id, actor_ids, actor_uids), "resChange": [], "retry": True, "localAi": True,
                 }
+            # A room created but never started must not consume a ticket forever.
+            # Starting a different stage closes abandoned local rooms and
+            # returns their ticket; same-stage retry above stays idempotent.
+            refund_changes: list[dict[str, Any]] = []
+            abandoned = connection.execute(
+                "SELECT dungeon_uid FROM local_dungeons WHERE account_id = ? AND mode = 'team' AND status = 'active' AND dungeon_id != ?",
+                (int(profile["account_id"]), dungeon_id),
+            ).fetchall()
+            if abandoned:
+                connection.execute(
+                    "UPDATE local_dungeons SET status = 'failed', closed_at = ?, terminal_outcome = 2 WHERE account_id = ? AND mode = 'team' AND status = 'active' AND dungeon_id != ?",
+                    (int(self._clock()), int(profile["account_id"]), dungeon_id),
+                )
+                for _ in abandoned:
+                    change = self._team_change_ticket(profile, 1)
+                    if change is not None:
+                        refund_changes.append(change)
             if self._team_ticket_count(profile) < 1:
                 return 409, {"error": "team_dungeon_ticket_not_enough", "ticketId": TEAM_DUNGEON_TICKET_ID, "tickets": 0}
             ticket_change = self._team_change_ticket(profile, -1)
@@ -1593,7 +1614,7 @@ class LocalDungeons:
                 "dungeonUid": uid, "dungeonId": dungeon_id, "mode": "team", "groupId": group, "level": level,
                 "baseInfo": self._base_info(profile, dungeon_id, actor_ids, actor_uids, dungeon_type=TEAM_DUNGEON_DUNGEON_TYPE, activity_id=TEAM_DUNGEON_ACTIVITY_ID, create_time=created),
                 "roomInfo": self._team_room(profile, uid, dungeon_id, actor_ids, actor_uids),
-                "resChange": [ticket_change], "ticket": {"type": TEAM_DUNGEON_TICKET_TYPE, "id": TEAM_DUNGEON_TICKET_ID, "countDelta": -1},
+                "resChange": refund_changes + [ticket_change], "ticket": {"type": TEAM_DUNGEON_TICKET_TYPE, "id": TEAM_DUNGEON_TICKET_ID, "countDelta": -1},
                 "tickets": self._team_ticket_count(profile), "localAi": True,
             }
 
@@ -1667,10 +1688,10 @@ class LocalDungeons:
         payload = {
             "dungeonUid": dungeon_uid, "dungeonId": dungeon_id, "mode": "team", "localAi": True,
             "balanced": True, "balanceTime": balance_time, "win": won, "firstFinish": won,
-            "profits": reward_changes, "resChange": reward_changes, "expChange": [],
+            "profits": [], "resChange": reward_changes, "expChange": [],
             "playerDamages": player_damages,
             "roomInfo": self._team_room(profile, dungeon_uid, dungeon_id, actor_ids, actor_uids, status="finished"),
-            "balanceInfo": {"balanced": True, "win": won, "firstFinish": won, "balanceTime": balance_time, "profits": reward_changes, "resChange": reward_changes},
+            "balanceInfo": {"balanced": True, "win": won, "firstFinish": won, "balanceTime": balance_time, "profits": [], "resChange": reward_changes},
         }
         self._store_balance(profile, dungeon_uid, payload)
         return 200, payload

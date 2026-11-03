@@ -468,6 +468,18 @@ class LocalWelfareFeatures:
         return 200, [row for row in self.game.tasks.snapshot(profile)["tasks"]
                      if _int(row.get("category")) == 102]
 
+    def redpoint_fields(self, profile: Mapping[str, Any]) -> dict[str, Any]:
+        """Fields consumed by the native welfare red-point bootstrap."""
+        state = self._state(profile)
+        welfare = state.get("welfare", {}) if isinstance(state, Mapping) else {}
+        seal = welfare.get("seal", {}) if isinstance(welfare, Mapping) else {}
+        postcard = welfare.get("postcard", {}) if isinstance(welfare, Mapping) else {}
+        return {
+            "sealResult": {"newOpenFlag": bool(seal.get("newOpenFlag", True))},
+            "sealFlagResult": {"newOpenFlag": bool(seal.get("newOpenFlag", True))},
+            "postcardResult": {"isFirstEnter": not bool(postcard.get("visited") or postcard.get("cells")), "postcardInfo": [], "prizeInfo": []},
+        }
+
     def handle_http(self, method: str, path: str, body: Body, profile: Mapping[str, Any]) -> Optional[Response]:
         route = _route(path)
         if not route.startswith(("/fci/seal", "/fci/chipexchange", "/fci/postcard", "/fci/jigsawpuzzle", "/fci/jigsaw-puzzle", "/fci/themeactivitytasks", "/fci/theme-activity-tasks")):

@@ -487,6 +487,10 @@ class LocalActivityModes:
                    "tower": "_tower_balance", "triggered": "_triggered_balance"}.get(run["mode"])
         handler = getattr(self, handler, None) if handler else None
         payload = handler(profile, run, active, won) if handler else self._result(profile, won=won)
+        if won and run.get("mode") != "material":
+            event = self.trigger_passive_event(profile, int(run.get("dungeon_id") or 0))
+            if event:
+                payload["eventInfo"] = dict(event)
         self._store_balance(profile, uid, payload)
         return 200, payload
 
@@ -1579,6 +1583,8 @@ class LocalActivityModes:
         if _int(deploy.get("accomplishNum")) >= _int(MISC.get("maxAccomplishDeployNum"), 40):
             return 409, {"error": "deploy_accomplish_limit"}
         level = max(1, _int(profile.get("level"), 1))
+        if level < 20:
+            return 409, {"error": "deploy_level_locked", "levelLimit": 20}
         cap = DEPLOY_COUNT.get(level) or max(DEPLOY_COUNT.values(), default=2)
         if sum(1 for m in deploy["missions"] if _int(m.get("startTimestamp"))) >= cap:
             return 409, {"error": "deploy_count_limit", "missionCount": cap}

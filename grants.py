@@ -27,6 +27,7 @@ except ImportError:  # pragma: no cover - direct PYTHONPATH execution
 RES_ITEM = 11
 RES_ACTOR = 15
 RES_MEDAL = 8
+RES_ACTOR_SKIN = 29
 _MEDALS = {int(row["id"]): row for row in json.loads(
     (Path(__file__).parent / "data/client-tables/MedalInfo.json").read_text(encoding="utf-8"))["rows"]}
 
@@ -50,6 +51,7 @@ def grant_rewards(game: Any, profile: Mapping[str, Any], rewards: Iterable[Mappi
     ledger: list[dict[str, int]] = []
     new_instances: list[dict[str, Any]] = []
     medal_ids: list[int] = []
+    skin_ids: list[int] = []
     state = systems._state(profile) if systems is not None else None
     now = int(game._now()) if hasattr(game, "_now") else int(time.time())
     for reward in rewards:
@@ -64,6 +66,19 @@ def grant_rewards(game: Any, profile: Mapping[str, Any], rewards: Iterable[Mappi
         elif rtype == RES_ACTOR and state is not None:
             for _ in range(count):
                 new_instances.append(systems.new_actor(profile, state, rid, _int(reward.get("param"))))
+        elif rtype == RES_ACTOR_SKIN and state is not None:
+            try:
+                owners = {int(row["id"]): int(row.get("actorId", 0) or 0)
+                          for row in json.loads((Path(__file__).parent / "data/client-tables/ActorSkin.json").read_text(encoding="utf-8")).get("rows", [])
+                          if row.get("id")}
+            except (OSError, TypeError, ValueError, json.JSONDecodeError):
+                owners = {}
+            owner = int(owners.get(rid, 0) or 0)
+            unlocked = state.setdefault("unlockedSkins", {}).setdefault(str(owner), [])
+            if rid not in unlocked:
+                unlocked.append(rid)
+                unlocked.sort()
+            skin_ids.append(rid)
         else:
             ledger.append({"type": rtype, "id": rid, "param": _int(reward.get("param")), "count": count})
             if rtype == RES_MEDAL and state is not None:
@@ -83,6 +98,8 @@ def grant_rewards(game: Any, profile: Mapping[str, Any], rewards: Iterable[Mappi
             for delta in deltas:
                 changes.append({"baseRes": {"type": delta["type"], "id": delta["id"], "param": delta["param"],
                                             "count": delta["count"], "countDelta": delta["countDelta"]}})
+    for skin_id in skin_ids:
+        changes.append({"baseRes": {"type": RES_ACTOR_SKIN, "id": skin_id, "param": 0, "count": 1, "countDelta": 1}})
     if new_instances:
         for record in new_instances:
             changes.append({"actor": systems._st_actor_json(record, profile, state, 1)})

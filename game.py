@@ -1270,7 +1270,24 @@ class LocalGame:
         messages.append(("ScLoginTutorial", tutorial.SerializeToString()))
 
         actors = self._types["DBGamePlayer.Actors"]()
-        actors.unlocked_skins.append(0)
+        try:
+            system_state = self.systems._state(profile)
+        except Exception:
+            system_state = {}
+        # Login must restore every persisted skin. The client uses this
+        # repeated field as its authoritative unlock cache; sending only the
+        # default skin made purchases disappear after reconnect.
+        try:
+            unlocked = system_state.get("unlockedSkins", {}) if isinstance(system_state, dict) else {}
+            actors.unlocked_skins.append(0)
+            for values in unlocked.values() if isinstance(unlocked, dict) else ():
+                if isinstance(values, (list, tuple, set)):
+                    actors.unlocked_skins.extend(int(value) for value in values)
+            unique_skins = sorted({int(value) for value in actors.unlocked_skins})
+            del actors.unlocked_skins[:]
+            actors.unlocked_skins.extend(unique_skins)
+        except (TypeError, ValueError, AttributeError):
+            actors.unlocked_skins.append(0)
         # One STActor per owned instance (uid-keyed, copies allowed), with the
         # saved level/star/EXP so a reconnect reflects local play.
         try:
@@ -1597,6 +1614,7 @@ class LocalGame:
                 result = (200, {**result[1], **event_redpoints, **self.mall.redpoint_fields(profile),
                                 **self.achievements.redpoint_fields(profile),
                                 **self.activity_modes.redpoint_fields(profile),
+                                **(self.welfare.redpoint_fields(profile) if hasattr(self.welfare, "redpoint_fields") else {}),
                                 **(self.social.redpoint_fields(profile) if hasattr(self.social, "redpoint_fields") else {}),
                                 **self.redpoints.fields(profile)})
             return result

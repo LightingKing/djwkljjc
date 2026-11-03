@@ -86,6 +86,7 @@ permanentActivities:
       type: 23           # DungeonTeam -> window DungeonTeam (local AI teammates)
       activityId: 23001
       levelLimit: 30
+      weekdays: [1, 2, 3, 4, 5, 6, 7]
     - id: challenge-mode
       type: 30           # ChallengeMode -> ChapterChallenge (UnlockWindow 16, Lv18)
       activityId: 30001
@@ -123,7 +124,7 @@ permanentActivities:
     - id: maze
       type: 34           # Local Maze entry; client widgets/routes are present
       activityId: 34001
-      levelLimit: 1
+      levelLimit: 30
     - id: seal
       type: 16           # Welfare tab Seal16
       activityId: 16001

@@ -329,8 +329,7 @@ class LocalTasks:
             )
             return state
 
-    @staticmethod
-    def _extra_entry(state: dict[str, Any], point_type: int) -> dict[str, Any]:
+    def _extra_entry(self, state: dict[str, Any], point_type: int) -> dict[str, Any]:
         """Return a normalized per-type extra-active-point accumulator."""
 
         all_entries = state.setdefault("extraActivePoint", {})
@@ -342,7 +341,15 @@ class LocalTasks:
         if not isinstance(entry, dict):
             entry = {}
             all_entries[key] = entry
-        entry["season"] = _int(entry.get("season"), 1) or 1
+        try:
+            current_season = _int(self.game.welfare.cycle_window()["season"], 1)
+        except Exception:
+            current_season = 1
+        previous_season = _int(entry.get("season"), current_season) or current_season
+        if previous_season != current_season:
+            entry["points"] = 0
+            entry["rewardGot"] = []
+        entry["season"] = current_season
         entry["points"] = max(0, _int(entry.get("points"), 0))
         got = entry.get("rewardGot", [])
         entry["rewardGot"] = sorted({_int(value) for value in got}) if isinstance(got, list) else []
