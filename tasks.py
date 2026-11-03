@@ -71,12 +71,15 @@ CATEGORY_MAIN = 2
 CATEGORY_PRESENT = 100
 CATEGORY_ACTIVITY = 102
 CATEGORY_RANDOM = 104
+CATEGORY_CHRISTMAS_DAILY = 105
+CATEGORY_CHRISTMAS_WEEKLY = 106
 # Category 104 is owned by LocalCultivation, which has actor-specific
 # progress and daily random selection.  Keep it out of the generic task store.
 # Present is the native "choose an S character" chain (TaskPresent).  It is
 # still transported in the ordinary TaskInfo envelope; the client-side
 # TaskUtil.Categorize moves category 100 into fci/presentTasks.
-OWNED_CATEGORIES = (CATEGORY_ROUTINE, CATEGORY_MAIN, CATEGORY_PRESENT, CATEGORY_ACTIVITY)
+OWNED_CATEGORIES = (CATEGORY_ROUTINE, CATEGORY_MAIN, CATEGORY_PRESENT, CATEGORY_ACTIVITY,
+                    CATEGORY_CHRISTMAS_DAILY, CATEGORY_CHRISTMAS_WEEKLY)
 # Deadline/Repeat/Newbie/Challenge/Favour have no local source yet; listing
 # them in ``disableCategory`` hides their tabs (TaskUtil.CheckCategory).
 DISABLED_CATEGORIES = [3, 4, 5, 6, 7]
@@ -184,6 +187,9 @@ MAIN_IDS = tuple(sorted(tid for tid, task in TASKS.items() if task["category"] =
 ACTIVITY_IDS = tuple(sorted(tid for tid, task in TASKS.items() if task["category"] == CATEGORY_ACTIVITY))
 PRESENT_IDS = tuple(sorted(tid for tid, task in TASKS.items() if task["category"] == CATEGORY_PRESENT))
 RANDOM_IDS = tuple(sorted(tid for tid, task in TASKS.items() if task["category"] == CATEGORY_RANDOM))
+CHRISTMAS_DAILY_IDS = tuple(sorted(tid for tid, task in TASKS.items() if task["category"] == CATEGORY_CHRISTMAS_DAILY))
+CHRISTMAS_WEEKLY_IDS = tuple(sorted(tid for tid, task in TASKS.items() if task["category"] == CATEGORY_CHRISTMAS_WEEKLY))
+ACTOR_ROLES = {_int(row.get("id")): _int(row.get("role")) for row in _rows("ActorConfig")}
 ACTIVE_POINT_REWARDS: dict[int, list[dict[str, int]]] = {
     _int(row.get("targetActivePoint")): _rewards(row.get("reward"))
     for row in _rows("TaskActivePointReward") if _int(row.get("targetActivePoint")) > 0
@@ -441,6 +447,11 @@ class LocalTasks:
         # category-104 tasks stand in for the unavailable random-roll service.
         for tid in ACTIVITY_IDS:
             yield TASKS[tid]
+        if state.get("christmasOpen"):
+            # Local permanent schedule: all recovered daily/weekly rows are
+            # offered once per period; no retired random-task allocator exists.
+            for tid in CHRISTMAS_DAILY_IDS + CHRISTMAS_WEEKLY_IDS:
+                yield TASKS[tid]
 
     def _history(self, task: Mapping[str, Any], state: Mapping[str, Any], now: int) -> int:
         """Progress a ``recordBeforeGot`` task already earned before it was offered."""
@@ -481,6 +492,8 @@ class LocalTasks:
         now = self._now()
         day, week = self._day(now), self._week(now)
         tasks = state["tasks"]
+        hidden = getattr(self.game, "hidden_events", None)
+        state["christmasOpen"] = bool(hidden and hidden._open(54, profile=profile))
         if period_due(state.get("day"), day):
             for tid in ROUTINE_IDS:
                 tasks.pop(str(tid), None)
@@ -488,8 +501,13 @@ class LocalTasks:
                 tasks.pop(str(tid), None)
             for tid in RANDOM_IDS:
                 tasks.pop(str(tid), None)
+            for tid in CHRISTMAS_DAILY_IDS:
+                tasks.pop(str(tid), None)
+            state["christmasStages"] = {}
             state["day"], state["activePoint"], state["activePointRewardGot"] = day, 0, []
         if period_due(state.get("week"), week):
+            for tid in CHRISTMAS_WEEKLY_IDS:
+                tasks.pop(str(tid), None)
             state["week"], state["weekActivePoint"], state["weekRewardGot"] = week, 0, []
         changed: list[int] = []
         # Rewarding a task can unlock a successor whose state goal is already
@@ -575,10 +593,14 @@ class LocalTasks:
         notifier = self.notifier
         if notifier is None:
             return
-        try:
-            notifier(profile, payload)
-        except Exception:  # an offline/broken push client must not fail gameplay
-            _log.debug("task push notification failed", exc_info=True)
+        def send():
+            try:
+                notifier(profile, payload)
+            except Exception:  # an offline/broken push client must not fail gameplay
+                _log.debug("task push notification failed", exc_info=True)
+        # Event balance/claim calls may still roll back their encompassing
+        # transaction. Only publish the task projection once it is durable.
+        self.game.after_commit(send)
 
     # ----------------------------------------------------------------- hooks
     def on_login(self, profile: Mapping[str, Any]) -> list[int]:
@@ -670,6 +692,36 @@ class LocalTasks:
             changed += self._advance(state, BATTLE_LINK_P0_M_TIMES, _int(stats.get("linkSkills")), match=any_actor)
             changed += self._advance(state, ACTOR_ID_P0_BIG_SKILL_M_TIMES, _int(stats.get("bigSkills")), match=any_actor)
             changed += self._advance(state, KILL_ACTOR_ID_P0_M_TIMES, _int(stats.get("kills")), match=any_actor)
+            if _int(activity_type) == 54 and state.get("christmasOpen"):
+                def activity_match(params):
+                    return len(params) >= 2 and params[0] == 54 and params[1] in (0, _int(activity_id))
+                if stats.get("statisticsPresent"):
+                    for goal, field in ((92, "bigSkills"), (93, "linkSkills"), (94, "assistSkills")):
+                        if field in stats:
+                            changed += self._advance(state, goal, 1, match=lambda p, f=field:
+                                activity_match(p) and len(p) > 2 and _int(stats[f]) <= p[2])
+                stages = state.setdefault("christmasStages", {})
+                stages[str(dungeon_id)] = _int(stages.get(str(dungeon_id))) + 1
+                for task in self._offered(state):
+                    if task["goalType"] == 95:
+                        entry = state["tasks"][str(task["id"])]
+                        # PassDungeonPnAll: every listed stage must be cleared
+                        # once for one unit; repetitions of one stage cannot
+                        # replace an uncleared stage.
+                        count = min([task["maxProgress"]] + [_int(stages.get(str(did))) for did in task["taskParam"]])
+                        if not entry.get("rewardGot") and count > _int(entry.get("progress")):
+                            entry.update(progress=count, isDone=count >= task["maxProgress"])
+                            changed.append(task["id"])
+                deaths = (cultivation_stats or stats.get("cultivationStats") or {}).get("enemyDeadInfo", [])
+                for death in deaths:
+                    role = ACTOR_ROLES.get(_int(death.get("id")), 0)
+                    if role:
+                        changed += self._advance(state, 96, 1, match=lambda p, r=role:
+                            activity_match(p) and len(p) > 2 and p[2] == r)
+                if deaths:
+                    first_seat = _int(deaths[0].get("seat"))
+                    changed += self._advance(state, 97, 1, match=lambda p:
+                        activity_match(p) and len(p) > 3 and p[2] == 0 and p[3] == first_seat)
             return changed
 
         cultivation = getattr(self.game, 'cultivation', None)
@@ -734,6 +786,9 @@ class LocalTasks:
             row = {"id": task["id"], "progress": _int(entry.get("progress")),
                    "isDone": bool(entry.get("isDone")), "rewardGot": bool(entry.get("rewardGot")),
                    "endTime": 0}
+            if task["category"] in (CATEGORY_CHRISTMAS_DAILY, CATEGORY_CHRISTMAS_WEEKLY):
+                row["endTime"] = policy_for(self.game).next_boundary(self._now(),
+                    "day" if task["category"] == CATEGORY_CHRISTMAS_DAILY else "week")
             # The legacy TaskUtil binding only defines the five fields above
             # for routine/main tasks.  Activity task rows (60000+) use the
             # newer generated shape with category and extra-active-point
@@ -750,7 +805,7 @@ class LocalTasks:
         return {
             "tasks": rows + extra.get('tasks', []),
             # Make the owned categories authoritative when the client merges.
-            "delTasks": [tid for tid in ROUTINE_IDS + MAIN_IDS + PRESENT_IDS + ACTIVITY_IDS + RANDOM_IDS if tid not in shown] + extra.get('delTasks', []),
+            "delTasks": [tid for tid in ROUTINE_IDS + MAIN_IDS + PRESENT_IDS + ACTIVITY_IDS + RANDOM_IDS + CHRISTMAS_DAILY_IDS + CHRISTMAS_WEEKLY_IDS if tid not in shown] + extra.get('delTasks', []),
             "disableCategory": list(DISABLED_CATEGORIES),
             "activePoint": _int(state["activePoint"]),
             "activePointRewardGot": [_int(v) for v in state["activePointRewardGot"]],
@@ -773,6 +828,11 @@ class LocalTasks:
     def handle_http(self, method: str, path: str, body: Body, profile: Mapping[str, Any]) -> Optional[Response]:
         route = _route(path)
         method = (method or "GET").upper()
+        if route in ("/fci/christmasdailytasks", "/fci/christmasweeklytasks"):
+            if method != "GET":
+                return 405, {"error": "method_not_allowed"}
+            category = CATEGORY_CHRISTMAS_DAILY if route.endswith("dailytasks") else CATEGORY_CHRISTMAS_WEEKLY
+            return 200, [row for row in self.snapshot(profile)["tasks"] if row.get("category") == category]
         if route == "/fci/task":
             if method != "GET":
                 return 405, {"error": "method_not_allowed", "message": "GET required"}
@@ -831,6 +891,9 @@ class LocalTasks:
                 return None  # present/theme/scene tasks stay with their own handlers
             if method != "POST":
                 return 405, {"error": "method_not_allowed", "message": "POST required"}
+            if TASKS[task_id]["category"] in (CATEGORY_CHRISTMAS_DAILY, CATEGORY_CHRISTMAS_WEEKLY):
+                with self.game.atomic_mutation():
+                    return self._claim_task(profile, task_id)
             return self._claim_task(profile, task_id)
         return None
 

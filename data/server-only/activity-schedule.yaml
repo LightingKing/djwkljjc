@@ -143,6 +143,86 @@ permanentActivities:
     - id: theme-tasks
       type: 43           # Welfare tab Theme43
       activityId: 43001
-    # Not listed:
-    # - EventDungeon (27), EventDungeon_Autumn2018(+Hard) (39/40),
-    #   RacePVPActivity (42): dated events, schedule them as phases instead.
+    # Full reopening, 2026-11-04: native IDs; perpetual availability is D/local.
+    # Modes enforce their native level/prerequisite checks. Guild assist and
+    # challenge share the client status calendar; their entries stay visible.
+    - {id: reopened-27001, type: 27, activityId: 27001, levelLimit: 18}
+    - {id: reopened-39000, type: 39, activityId: 39000, category: 4, levelLimit: 20}
+    - {id: reopened-39001, type: 39, activityId: 39001, levelLimit: 20}
+    - {id: reopened-39002, type: 39, activityId: 39002, levelLimit: 20}
+    - {id: reopened-39003, type: 39, activityId: 39003, levelLimit: 20}
+    - {id: reopened-40001, type: 40, activityId: 40001, levelLimit: 20}
+    - {id: reopened-40002, type: 40, activityId: 40002, levelLimit: 20}
+    - {id: reopened-38001, type: 38, activityId: 38001}
+    - {id: reopened-14019, type: 14, activityId: 14019}
+    - {id: reopened-14020, type: 14, activityId: 14020}
+    - {id: reopened-14021, type: 14, activityId: 14021}
+    - {id: reopened-14022, type: 14, activityId: 14022}
+    - {id: reopened-14023, type: 14, activityId: 14023}
+    - {id: reopened-14024, type: 14, activityId: 14024}
+    - {id: reopened-14025, type: 14, activityId: 14025}
+    - {id: reopened-14026, type: 14, activityId: 14026}
+    - {id: reopened-14027, type: 14, activityId: 14027}
+    - {id: reopened-14028, type: 14, activityId: 14028}
+    - {id: reopened-14029, type: 14, activityId: 14029}
+    - {id: reopened-14030, type: 14, activityId: 14030}
+    - {id: reopened-14031, type: 14, activityId: 14031}
+    - {id: reopened-14034, type: 14, activityId: 14034}
+    - {id: reopened-14035, type: 14, activityId: 14035}
+    - {id: reopened-14036, type: 14, activityId: 14036}
+    - {id: reopened-14037, type: 14, activityId: 14037}
+    - {id: reopened-14038, type: 14, activityId: 14038}
+    - {id: reopened-14039, type: 14, activityId: 14039}
+    - {id: reopened-14040, type: 14, activityId: 14040}
+    - {id: reopened-19001, type: 19, activityId: 19001}
+    - {id: reopened-19002, type: 19, activityId: 19002}
+    - {id: reopened-19003, type: 19, activityId: 19003}
+    - {id: reopened-19004, type: 19, activityId: 19004}
+    - {id: reopened-19005, type: 19, activityId: 19005}
+    - {id: reopened-19006, type: 19, activityId: 19006}
+    - {id: reopened-19007, type: 19, activityId: 19007}
+    - {id: reopened-19008, type: 19, activityId: 19008}
+    - {id: reopened-19009, type: 19, activityId: 19009}
+    - {id: reopened-19011, type: 19, activityId: 19011}
+    - {id: reopened-19021, type: 19, activityId: 19021}
+    - {id: reopened-19040, type: 19, activityId: 19040}
+    - {id: reopened-19041, type: 19, activityId: 19041}
+    - {id: reopened-19042, type: 19, activityId: 19042}
+    - {id: reopened-19043, type: 19, activityId: 19043}
+    - {id: reopened-19044, type: 19, activityId: 19044}
+    - {id: reopened-19045, type: 19, activityId: 19045}
+    - {id: reopened-19046, type: 19, activityId: 19046}
+    - {id: reopened-19047, type: 19, activityId: 19047}
+    - {id: reopened-19048, type: 19, activityId: 19048}
+    - {id: reopened-19049, type: 19, activityId: 19049}
+    - {id: reopened-19050, type: 19, activityId: 19050}
+    - {id: reopened-19051, type: 19, activityId: 19051}
+    - {id: reopened-19052, type: 19, activityId: 19052}
+    - {id: reopened-19053, type: 19, activityId: 19053}
+    - {id: reopened-19054, type: 19, activityId: 19054}
+    - {id: reopened-19055, type: 19, activityId: 19055}
+    - {id: reopened-19056, type: 19, activityId: 19056}
+    - {id: reopened-19057, type: 19, activityId: 19057}
+    - {id: reopened-19058, type: 19, activityId: 19058}
+    - {id: reopened-19059, type: 19, activityId: 19059}
+    - {id: reopened-19060, type: 19, activityId: 19060}
+    - {id: reopened-13001, type: 13, activityId: 13001}
+    - {id: reopened-54000, type: 54, activityId: 54000, category: 4}
+    - {id: reopened-54001, type: 54, activityId: 54001, category: 5}
+    - {id: reopened-54002, type: 54, activityId: 54002, category: 5}
+    - {id: reopened-54003, type: 54, activityId: 54003, category: 5}
+    - {id: reopened-54004, type: 54, activityId: 54004, category: 5}
+    - {id: reopened-54005, type: 54, activityId: 54005, category: 5}
+    - {id: reopened-54006, type: 54, activityId: 54006, category: 5}
+    - {id: reopened-11016, type: 11, activityId: 11016}
+    - {id: reopened-51001, type: 51, activityId: 51001, category: 4}
+    - {id: reopened-51002, type: 51, activityId: 51002, category: 5}
+    - {id: reopened-51003, type: 51, activityId: 51003, category: 5}
+    - {id: reopened-45001, type: 45, activityId: 45001}
+    - {id: reopened-49001, type: 49, activityId: 49001, levelLimit: 23}
+    - {id: reopened-49002, type: 49, activityId: 49002, levelLimit: 23}
+    - {id: reopened-49003, type: 49, activityId: 49003, levelLimit: 23}
+    - {id: reopened-49004, type: 49, activityId: 49004, levelLimit: 23}
+    - {id: reopened-49005, type: 49, activityId: 49005, levelLimit: 23}
+    - {id: reopened-50001, type: 50, activityId: 50001, levelLimit: 23}
+    - {id: reopened-42001, type: 42, activityId: 42001, levelLimit: 26}

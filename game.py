@@ -414,6 +414,8 @@ def _message_pool(descriptor_path: Path) -> descriptor_pool.DescriptorPool:
             # bootstrap graph is checked below and must still resolve.
             break
         pending = remaining
+    from recovered_protocols import add_recovered_dungeon_messages
+    add_recovered_dungeon_messages(pool)
     return pool
 
 
@@ -587,6 +589,14 @@ class LocalGame:
         self.achievements = LocalAchievements(self, clock=self._clock)
         # Material/gold dungeon, tower, deploy, triggered events.
         self.activity_modes = LocalActivityModes(self, clock=self._clock)
+        from hidden_event_dungeons import LocalHiddenEventDungeons
+        from gacha_score_shop import LocalGachaScoreShop
+        from hidden_challenge import LocalHiddenChallenge
+        from guild_dungeons import LocalGuildDungeons
+        self.hidden_events = LocalHiddenEventDungeons(self)
+        self.gacha_score_shop = LocalGachaScoreShop(self)
+        self.hidden_challenge = LocalHiddenChallenge(self)
+        self.guild_dungeons = LocalGuildDungeons(self)
         from server.core.redpoints import LocalRedpoints
         self.redpoints = LocalRedpoints(self)
         from cultivation import LocalCultivation
@@ -1487,6 +1497,10 @@ class LocalGame:
             profile = self._profile(account)
             economy_profile = dict(profile)
             economy_profile["account"] = account
+            for feature in (self.hidden_events, self.gacha_score_shop, self.hidden_challenge, self.guild_dungeons):
+                feature_result = feature.handle_http(method, path, body, profile)
+                if feature_result is not None:
+                    return feature_result
             cultivation_result = self.cultivation.handle_http(method.upper(), path, body, profile)
             if cultivation_result is not None:
                 return cultivation_result
@@ -1614,6 +1628,10 @@ class LocalGame:
                 result = (200, {**result[1], **event_redpoints, **self.mall.redpoint_fields(profile),
                                 **self.achievements.redpoint_fields(profile),
                                 **self.activity_modes.redpoint_fields(profile),
+                                **self.hidden_events.redpoint_fields(profile),
+                                **self.gacha_score_shop.redpoint_fields(profile),
+                                **self.hidden_challenge.redpoint_fields(profile),
+                                **self.guild_dungeons.redpoint_fields(profile),
                                 **(self.welfare.redpoint_fields(profile) if hasattr(self.welfare, "redpoint_fields") else {}),
                                 **(self.social.redpoint_fields(profile) if hasattr(self.social, "redpoint_fields") else {}),
                                 **self.redpoints.fields(profile)})

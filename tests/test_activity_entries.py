@@ -40,7 +40,8 @@ LUA_DIR = external_path("LJJC_DECOMPILED_LUA", "analysis/lua-decompiled")
 # xlsx ActivitySort row 1 (sortType 1), the order InitSort applies on open.
 ACTIVITY_SORT_ROW1 = [39, 40, 31, 27, 2, 3, 17, 30, 10, 5, 20, 42, 18, 23]
 # WU.ActivityTypeToUnlockWindowType + PlayerLevelInitConfig.unlockWindow levels.
-UNLOCK_LEVEL = {2: 10, 3: 16, 17: 18, 30: 18, 10: 20, 31: 32, 5: 23, 18: 28, 20: 26, 23: 30}
+UNLOCK_LEVEL = {2: 10, 3: 16, 17: 18, 30: 18, 10: 20, 31: 32, 5: 23, 18: 28, 20: 26, 23: 30,
+                27: 18, 39: 20, 40: 20, 42: 26}
 # xlsx ActivityDungeon: base material activities and their multipleActivityId.
 COLLECTION_IDS = {2001: 2101, 2002: 2102, 2003: 2103}
 # Type 23 is the locally opened TeamDungeon activity (D3).  It is a
@@ -169,16 +170,16 @@ class PermanentActivityEntryTests(unittest.TestCase):
         rows = self.rows()
         # Forced tutorial 14 (Lv10, UnlockWindow ActivityStageChoose2) clicks
         # the first Activity slot: CollectionDungeon is the only unlocked group.
-        self.assertEqual(menu_types(rows, self.now[0], 10), [2, 31, 3, 17, 30, 10, 5, 20, 18, 23])
-        self.assertEqual(menu_types(rows, self.now[0], 32), [31, 2, 3, 17, 30, 10, 5, 20, 18, 23])
+        self.assertEqual(menu_types(rows, self.now[0], 10), [2, 39, 40, 31, 27, 3, 17, 30, 10, 5, 20, 42, 18, 23])
+        self.assertEqual(menu_types(rows, self.now[0], 32), [39, 40, 31, 27, 2, 3, 17, 30, 10, 5, 20, 42, 18, 23])
         # Before this change the menu was empty: 12/15/25/46 are not sorted.
-        legacy = [row for row in rows if row["type"] not in PERMANENT_TYPES]
+        legacy = [row for row in rows if row["type"] not in PERMANENT_TYPES | {27, 39, 40, 42}]
         self.assertEqual(menu_types(legacy, self.now[0], 60), [])
 
     def test_entries_stay_open_across_days(self):
         for _ in range(9):
             self.now[0] += DAY
-            self.assertEqual(menu_types(self.rows(), self.now[0], 60), [31, 2, 3, 17, 30, 10, 5, 20, 18, 23])
+            self.assertEqual(menu_types(self.rows(), self.now[0], 60), [39, 40, 31, 27, 2, 3, 17, 30, 10, 5, 20, 42, 18, 23])
 
     # -- attached schedule document ----------------------------------------
     def test_shipped_schedule_document_lists_the_permanent_modes(self):
@@ -270,7 +271,8 @@ class ClientEvidenceTests(unittest.TestCase):
                 if int(value):
                     levels[int(value)] = level
         # ActivityType -> UnlockWindow (WU.ActivityTypeToUnlockWindowType)
-        window = {2: 7, 3: 9, 17: 18, 30: 16, 10: 13, 31: 32, 5: 10, 18: 26, 20: 27, 23: 31}
+        window = {2: 7, 3: 9, 17: 18, 30: 16, 10: 13, 31: 32, 5: 10, 18: 26, 20: 27, 23: 31,
+                  27: 35, 39: 36, 40: 37, 42: 38}
         self.assertEqual({t: levels.get(w, 0) for t, w in window.items()}, UNLOCK_LEVEL)
 
 

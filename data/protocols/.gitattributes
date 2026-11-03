@@ -1,0 +1,2 @@
+*.pb binary
+*.json text eol=lf

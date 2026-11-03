@@ -872,40 +872,8 @@ class LocalEvents:
 
         # gachainfo/gachatrade are owned by LocalSystems (client GachaType /
         # GachaActorPool tables); this module only handles gacha side routes.
-        if "gachashoptrade" in action:
-            if method != "POST":
-                return 405, {"error": "method_not_allowed", "message": "POST required"}
-            result = self._message("ApiGachaShopTrade.post")
-            if result is None:
-                return None
-            good_id = int(request.get("goodId", request.get("good_id", 1)) or 1)
-            claim_key = f"gacha-shop:{good_id}"
-            if claim_key in {str(value) for value in state.get("activity_claims", [])}:
-                # A retried shop request must be a no-op.  Returning the same
-                # typed envelope lets the client finish its callback without
-                # charging the player a second time.
-                return 200, result
-            ok, spend_changes, error = self._spend_gold(profile, 1000)
-            if not ok:
-                return 409, {"error": error or "insufficient_resource"}
-            reward = self._claim_activity_reward(profile, state, f"gacha-shop:{good_id}",
-                                                  {"type": 11, "id": 20001, "count": 1, "param": 0})
-            self._save(profile, state)
-            for change in spend_changes:
-                result.res_change.add().CopyFrom(self._dynamic(change, delta=int(change.get("countDelta", 0))))
-            if reward is not None:
-                result.res_change.add().CopyFrom(reward)
-            return 200, result
         if "gachashop" in action:
-            if method != "GET":
-                return 405, {"error": "method_not_allowed", "message": "GET required"}
-            result = self._message("ApiGachaShop.get")
-            if result is None:
-                return None
-            result.next_refresh_time = now + 86400
-            good = result.goods.add(); good.good_id = 1; good.cost.type = 7; good.cost.count = 1000
-            good.good.type = 11; good.good.id = 20001; good.good.count = 1
-            return 200, result
+            return self.game.gacha_score_shop.handle_http(method, path, body, profile)
         if "gachapoolverify" in action:
             if method != "GET" and method != "POST":
                 return 405, {"error": "method_not_allowed", "message": "GET or POST required"}
@@ -1216,6 +1184,22 @@ class LocalEvents:
             activity.category = entry["category"]
             activity.time_type = entry["timeType"]
             activity.level_limit = entry["levelLimit"]
+            if entry['type'] == 45 and entry['activityId'] == 45001:
+                # The original UI has at most four stage tabs. Ten distinct
+                # original sets rotate weekly; duplicate historical sets 11–20
+                # add no content. Claims remain keyed by original dungeon ID.
+                from hidden_challenge import season_activity_id
+                activity.activity_id = season_activity_id(now)
+            if entry['type'] == 11 and entry['activityId'] == 11016:
+                # ChristmasTask reads an actual weekly end time. Availability
+                # is continuous; the claim window follows Beijing Monday 06:00.
+                policy = policy_for(self.game)
+                activity.timestamp_preheat = policy.period_start(now, 'week')
+                activity.timestamp_start = activity.timestamp_preheat
+                activity.timestamp_end = policy.next_boundary(now, 'week')
+                activity.timestamp_close = activity.timestamp_end
+                activity.forever = False
+                activity.time_type = 3
             if entry["type"] == 23 and entry["activityId"] == 23001:
                 # DungeonTeam.lua indexes dayOpenTime[1] unconditionally.
                 # The recovered permanent-menu row had no historical window,

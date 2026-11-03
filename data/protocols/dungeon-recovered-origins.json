@@ -1,0 +1,700 @@
+{
+  "source": "analysis/ljjc-static/protocol-fields.txt",
+  "sourceSHA256": "e6d93bdd0365d5f16ef30f44c9f468571cabfb882c6d9eb6c8d9f79c0677bdfb",
+  "base64Start": 148874,
+  "base64End": 182166,
+  "originalSHA256": "460e6037c1b74c123809e3450e3cd5e9bb810831444765299b4735d2c07b0470",
+  "fields": [
+    {
+      "start": 131,
+      "end": 171,
+      "message": "DbBattleRoomGlobal"
+    },
+    {
+      "start": 171,
+      "end": 365,
+      "message": "DbTeamDungeonWeekIds"
+    },
+    {
+      "start": 365,
+      "end": 713,
+      "message": "DbTeamDungeonInfo"
+    },
+    {
+      "start": 713,
+      "end": 1188,
+      "message": "DbTeamDungeonBalanceRecord"
+    },
+    {
+      "start": 1188,
+      "end": 1464,
+      "message": "DbBattleRoom"
+    },
+    {
+      "start": 1464,
+      "end": 1646,
+      "message": "DbBattleInstance"
+    },
+    {
+      "start": 1646,
+      "end": 2942,
+      "message": "DbActivityDungeonRecords"
+    },
+    {
+      "start": 2942,
+      "end": 3190,
+      "message": "DbEventDungeonReward"
+    },
+    {
+      "start": 3190,
+      "end": 4957,
+      "message": "DbDungeon"
+    },
+    {
+      "start": 4957,
+      "end": 5307,
+      "message": "DbSemiFixedDungeonInfo"
+    },
+    {
+      "start": 5307,
+      "end": 5447,
+      "message": "ApiChapterSummary"
+    },
+    {
+      "start": 5447,
+      "end": 5657,
+      "message": "ApiChapterReward"
+    },
+    {
+      "start": 5657,
+      "end": 6199,
+      "message": "ChapterSummary"
+    },
+    {
+      "start": 6199,
+      "end": 6647,
+      "message": "ApiChapterInfo"
+    },
+    {
+      "start": 6647,
+      "end": 6808,
+      "message": "ApiChapterRecord"
+    },
+    {
+      "start": 6808,
+      "end": 7186,
+      "message": "ApiActorGroup"
+    },
+    {
+      "start": 7186,
+      "end": 7719,
+      "message": "ApiDungeon"
+    },
+    {
+      "start": 7719,
+      "end": 8152,
+      "message": "ApiActivityDungeon"
+    },
+    {
+      "start": 8152,
+      "end": 8657,
+      "message": "ApiEventDungeonStarReward"
+    },
+    {
+      "start": 8657,
+      "end": 9111,
+      "message": "ApiEventDungeon"
+    },
+    {
+      "start": 9111,
+      "end": 9287,
+      "message": "ApiEventDungeonBalance"
+    },
+    {
+      "start": 9287,
+      "end": 9619,
+      "message": "ApiGoldDungeon"
+    },
+    {
+      "start": 9619,
+      "end": 9770,
+      "message": "ApiGoldDungeonRecord"
+    },
+    {
+      "start": 9770,
+      "end": 9949,
+      "message": "ApiGoldDungeonBalance"
+    },
+    {
+      "start": 9949,
+      "end": 10359,
+      "message": "ApiRacePVPDungeon"
+    },
+    {
+      "start": 10359,
+      "end": 10612,
+      "message": "ApiRacePVPDungeonBalance"
+    },
+    {
+      "start": 10612,
+      "end": 11022,
+      "error": "Error parsing message with type 'google.protobuf.FileDescriptorProto'"
+    }
+  ],
+  "recoveredMessages": [
+    {
+      "name": "DbBattleRoomGlobal",
+      "start": 131,
+      "payloadStart": 133,
+      "end": 171,
+      "sha256": "7be3df8d3dab8dadcb6b3a80bcfc4a72077ed68897a5c2dfe76fa73e7662e615"
+    },
+    {
+      "name": "DbTeamDungeonWeekIds",
+      "start": 171,
+      "payloadStart": 174,
+      "end": 365,
+      "sha256": "91592f32158fe531a82b431772fa56080108c29e6c42c0b698c4f59aba512054"
+    },
+    {
+      "name": "DbTeamDungeonInfo",
+      "start": 365,
+      "payloadStart": 368,
+      "end": 713,
+      "sha256": "5c82e15ed8e70353d43d9cfb585f40ef7c982fb0b4e0b4a3933b4fe85a8ec7e6"
+    },
+    {
+      "name": "DbTeamDungeonBalanceRecord",
+      "start": 713,
+      "payloadStart": 716,
+      "end": 1188,
+      "sha256": "585744cbcf786d901faa1730683c04061ef6dfc4cfa023527b3479a9aff2144e"
+    },
+    {
+      "name": "DbBattleRoom",
+      "start": 1188,
+      "payloadStart": 1191,
+      "end": 1464,
+      "sha256": "cfb5a14b53645be8c228942ed946a71bb65970cb514884dc48a132943da8a281"
+    },
+    {
+      "name": "DbBattleInstance",
+      "start": 1464,
+      "payloadStart": 1467,
+      "end": 1646,
+      "sha256": "82585adfaf1006109e732fb7631f38a219301e41be78a2207c41b178bc7c7023"
+    },
+    {
+      "name": "DbActivityDungeonRecords",
+      "start": 1646,
+      "payloadStart": 1649,
+      "end": 2942,
+      "sha256": "5ee407fa51dcf58c2c3de92c28ecfb669d540bfd6a2d996c9e0955e1d007e3a5"
+    },
+    {
+      "name": "DbEventDungeonReward",
+      "start": 2942,
+      "payloadStart": 2945,
+      "end": 3190,
+      "sha256": "e2a4946ddecbc7761dfe85429b35d886cff1fbb18c58d9dbc85495438c8af17f"
+    },
+    {
+      "name": "DbDungeon",
+      "start": 3190,
+      "payloadStart": 3193,
+      "end": 4957,
+      "sha256": "a2b72757dc776d32e9d75b296df66b411bfbe1f07c17d176e8fb238d018a1367"
+    },
+    {
+      "name": "DbSemiFixedDungeonInfo",
+      "start": 4957,
+      "payloadStart": 4960,
+      "end": 5307,
+      "sha256": "73d31f84445572802d2ff73080ff36d8ecc39ec6971c24877684d9df1b24aef2"
+    },
+    {
+      "name": "ApiChapterSummary",
+      "start": 5307,
+      "payloadStart": 5310,
+      "end": 5447,
+      "sha256": "25bd4c701618021184ff7fda45a8d188d28c0740e3b3c879da513210d5cdd383"
+    },
+    {
+      "name": "ApiChapterReward",
+      "start": 5447,
+      "payloadStart": 5450,
+      "end": 5657,
+      "sha256": "6dd20424e798536f8075a87b09294fc94775cca6c6a658be5ac2811520784cd9"
+    },
+    {
+      "name": "ChapterSummary",
+      "start": 5657,
+      "payloadStart": 5660,
+      "end": 6199,
+      "sha256": "817d6f449be5feff1c54d498f163823564f15fd31dcef4a305f005ff07c48082"
+    },
+    {
+      "name": "ApiChapterInfo",
+      "start": 6199,
+      "payloadStart": 6202,
+      "end": 6647,
+      "sha256": "f9629a9c86a43961bf2d6435adcbff701ecf12f5c4172f26a66b67055e5fc5c5"
+    },
+    {
+      "name": "ApiChapterRecord",
+      "start": 6647,
+      "payloadStart": 6650,
+      "end": 6808,
+      "sha256": "06cebb04bc7014a37bf49ee98bd5d06cb24ba6643d68de957200812aa484217e"
+    },
+    {
+      "name": "ApiActorGroup",
+      "start": 6808,
+      "payloadStart": 6811,
+      "end": 7186,
+      "sha256": "30a1b33ad6b380363446d80c08e8263882434c8be979e88927f88289bb8f52d5"
+    },
+    {
+      "name": "ApiDungeon",
+      "start": 7186,
+      "payloadStart": 7189,
+      "end": 7719,
+      "sha256": "0bd6caac93f9866e78a1aff06cad0b7da544b76bb21afb7317c62f1daaf53e4d"
+    },
+    {
+      "name": "ApiActivityDungeon",
+      "start": 7719,
+      "payloadStart": 7722,
+      "end": 8152,
+      "sha256": "5399c4a97f1956319133b9686ca1047bb8c2aa6252fedd9e0d543564277ed659"
+    },
+    {
+      "name": "ApiEventDungeonStarReward",
+      "start": 8152,
+      "payloadStart": 8155,
+      "end": 8657,
+      "sha256": "8d4817788cbb0aa2a8297fd6d93619ea41f42d5bf32a1ca006f3e220e7063370"
+    },
+    {
+      "name": "ApiEventDungeon",
+      "start": 8657,
+      "payloadStart": 8660,
+      "end": 9111,
+      "sha256": "5c841ba1483adcf91d34dc5c31fb1b18f0898cb1fc048f038f60ed9d2c08fa91"
+    },
+    {
+      "name": "ApiEventDungeonBalance",
+      "start": 9111,
+      "payloadStart": 9114,
+      "end": 9287,
+      "sha256": "c248b659b48c1b9cca591324fb83d9d70f32aec653f04894947035e9123e4126"
+    },
+    {
+      "name": "ApiGoldDungeon",
+      "start": 9287,
+      "payloadStart": 9290,
+      "end": 9619,
+      "sha256": "44a7b42f89d92a0f09fd3a337940cbba8769af8bf9d5003170efd057fd3a16c6"
+    },
+    {
+      "name": "ApiGoldDungeonRecord",
+      "start": 9619,
+      "payloadStart": 9622,
+      "end": 9770,
+      "sha256": "3bd76b50fd7e6a9759a07a5cb2eee3f8bdfb158a6fd88946340a15c807ef39ac"
+    },
+    {
+      "name": "ApiGoldDungeonBalance",
+      "start": 9770,
+      "payloadStart": 9773,
+      "end": 9949,
+      "sha256": "10492708a11e153197290eef00e6a51820a1d113a7da996b3f7b6c1ce952bcaa"
+    },
+    {
+      "name": "ApiRacePVPDungeon",
+      "start": 9949,
+      "payloadStart": 9952,
+      "end": 10359,
+      "sha256": "5a7fd03f31ffa572aa24fbd0ea8afbc430b7be9ccc8f82eb2c769dd71c576e98"
+    },
+    {
+      "name": "ApiRacePVPDungeonBalance",
+      "start": 10359,
+      "payloadStart": 10362,
+      "end": 10612,
+      "sha256": "12db5ad50931b1f0e143c4ef7206d9c4a34181376323453d7971d20431017709"
+    },
+    {
+      "name": "ApiUnlockDungeon",
+      "start": 10977,
+      "payloadStart": 10979,
+      "end": 11085,
+      "sha256": "c5dfe3516be53d4c42b5e4338ec61f57fbf8e1d65bb966d10c29cf23f05cba5e"
+    },
+    {
+      "name": "ApiDungeonBalance",
+      "start": 11085,
+      "payloadStart": 11088,
+      "end": 11388,
+      "sha256": "8420d5a4c60ff947d70f69865e4813fa3b80ba718942fd7d2b7e53d960eb7a66"
+    },
+    {
+      "name": "ApiDungeonActive",
+      "start": 11388,
+      "payloadStart": 11391,
+      "end": 11587,
+      "sha256": "403e8f78705878a0e15b087c405d453f4f09ce8c0be78885d0886388d36514a6"
+    },
+    {
+      "name": "ApiTowerDungeonActive",
+      "start": 11587,
+      "payloadStart": 11590,
+      "end": 11805,
+      "sha256": "54a9847d3f1a3d169a0de8f2364f8021b6b74a022018f8be8f344c90e8ca6bd8"
+    },
+    {
+      "name": "ApiSelectedActorGroup",
+      "start": 11805,
+      "payloadStart": 11808,
+      "end": 12066,
+      "sha256": "3e72a4ce1084d5e27c3070a1bab30e96e39cff467a36e3a343d9ebd6b0aee59e"
+    },
+    {
+      "name": "ApiBattleRoom",
+      "start": 12066,
+      "payloadStart": 12069,
+      "end": 12320,
+      "sha256": "db7fe3c60343d9b70e9f957f54efa0f1087c1e369243f75c76a36b3fe398aca5"
+    },
+    {
+      "name": "ApiBattleRoomMembers",
+      "start": 12320,
+      "payloadStart": 12323,
+      "end": 12535,
+      "sha256": "4f40b8429b19177fa958ddc5edea7e156580a3ebd6f672cb4f30726ca79d538f"
+    },
+    {
+      "name": "ApiBattleInstance",
+      "start": 12535,
+      "payloadStart": 12538,
+      "end": 12701,
+      "sha256": "51b862253fc51b6c8e19177d51a89a09a5aea7ffcfc740f0e48d990c7a4cafc5"
+    },
+    {
+      "name": "ApiBattleInstanceBalance",
+      "start": 12701,
+      "payloadStart": 12703,
+      "end": 12828,
+      "sha256": "3d6f3aa7119d382d831c31ad6954e78070bc4680be4189c56903be367b26a189"
+    },
+    {
+      "name": "ApiBattleMatch",
+      "start": 12828,
+      "payloadStart": 12830,
+      "end": 12854,
+      "sha256": "a2c228b26368a592e2ce7eceb02e1f2bc8030ac0d12ba0568583f14aa7b8960b"
+    },
+    {
+      "name": "ApiActivityDungeonSummary",
+      "start": 12936,
+      "payloadStart": 12939,
+      "end": 13106,
+      "sha256": "baae5ff826cad2227a69c51276b2ecd7a9f802b390fca1faa42085e7f2e7e12e"
+    },
+    {
+      "name": "ApiActivityDungeonRecord",
+      "start": 13106,
+      "payloadStart": 13109,
+      "end": 13348,
+      "sha256": "e980c83a3c792f1fe739e98c08dd6c1681513f1566b86e80c2f4a4da1a557290"
+    },
+    {
+      "name": "ApiEventDungeonRecord",
+      "start": 13348,
+      "payloadStart": 13351,
+      "end": 13574,
+      "sha256": "dda25267e0fa54456d665d88ccbc6244fbb00fc558973c858c6dc12bdbe035d7"
+    },
+    {
+      "name": "ApiActivityDungeonBalance",
+      "start": 13574,
+      "payloadStart": 13577,
+      "end": 13759,
+      "sha256": "5ab5db289516891cc58afeb42f75243306a77631fbba6a7879625ed13d6110e5"
+    },
+    {
+      "name": "ApiTowerDungeonBalance",
+      "start": 13759,
+      "payloadStart": 13762,
+      "end": 13941,
+      "sha256": "1ea004bdf0f442a7194f8cbfd1af7e66635735acca04a95544878881bb26d943"
+    },
+    {
+      "name": "ApiCheckCheat",
+      "start": 13941,
+      "payloadStart": 13944,
+      "end": 14181,
+      "sha256": "fd24bbfac21c3565a8f13c008abb3d41b289fa99a2470765b50088092e06e564"
+    },
+    {
+      "name": "ApiWeekActivityFull",
+      "start": 14181,
+      "payloadStart": 14183,
+      "end": 14294,
+      "sha256": "f9413fbf5131d88032b00dbf7fe5af6165128812c683c6adf8895d7a87e96853"
+    },
+    {
+      "name": "ApiTeamDungeonGroupIds",
+      "start": 14294,
+      "payloadStart": 14297,
+      "end": 14526,
+      "sha256": "74fd7853ab9de2b8d5f19e0b46ca8f0a9e2b2d957c26439497c8e2a65435445d"
+    },
+    {
+      "name": "ApiTeamDungeonSvrUrl",
+      "start": 14526,
+      "payloadStart": 14528,
+      "end": 14642,
+      "sha256": "f9bd7e78f4601cbbe549c78f9d8c6f712fe1da6701a0b87cbe4dde80627fad8a"
+    },
+    {
+      "name": "ApiTeamDungeonBalance",
+      "start": 14642,
+      "payloadStart": 14645,
+      "end": 14946,
+      "sha256": "47597099bf8e1907dc328fe79ee510c02838da5bb7c2c910ba60d9daccbc17e6"
+    },
+    {
+      "name": "ApiEventDungeonActive",
+      "start": 14946,
+      "payloadStart": 14949,
+      "end": 15161,
+      "sha256": "f3d78632f0e792b68716ce58d8192360cb0f9357cb759275a497afd90fbc6ca9"
+    },
+    {
+      "name": "ApiTriggeredDungeon",
+      "start": 15161,
+      "payloadStart": 15164,
+      "end": 15572,
+      "sha256": "4f615e252bcbb6cdb0a171e395fdf75770eb81b798a4c02102f545deb194895f"
+    },
+    {
+      "name": "ApiTriggeredDungeonBalance",
+      "start": 15572,
+      "payloadStart": 15575,
+      "end": 15769,
+      "sha256": "619763988e185951ad98fba7e355e72e8bdecd10b589cdf92211b25a45fc7e5d"
+    },
+    {
+      "name": "ApiTriggeredDungeonActive",
+      "start": 15769,
+      "payloadStart": 15772,
+      "end": 15999,
+      "sha256": "a30ac16ee104d31daecf160b6a1be42d75877575809d0a88aa363531d79a985f"
+    },
+    {
+      "name": "ApiMazeDungeon",
+      "start": 15999,
+      "payloadStart": 16002,
+      "end": 16400,
+      "sha256": "b4aa955bf88e39dfd26481dc332d5522cc70abbdf3088b6e43d3d40922032651"
+    },
+    {
+      "name": "ApiMazeDungeonBalance",
+      "start": 16400,
+      "payloadStart": 16403,
+      "end": 16641,
+      "sha256": "5571856c995e82d0e5fa105dc3bcb449c1cd8ca3da5edbc392a0118c628ed5b5"
+    },
+    {
+      "name": "ApiMazeDungeonActive",
+      "start": 16641,
+      "payloadStart": 16644,
+      "end": 16875,
+      "sha256": "03a6020840d2f185db21f7f8e1e3abb974c1b24698d2e7ad4385499ed62d9a17"
+    },
+    {
+      "name": "DBChallengeModeRank",
+      "start": 16875,
+      "payloadStart": 16878,
+      "end": 17139,
+      "sha256": "d4872e5f23090448e463dd1a4fcfc4589fd765fec009b9c99e7d8ed2d779a407"
+    },
+    {
+      "name": "ApiChallengeModeRank",
+      "start": 17139,
+      "payloadStart": 17142,
+      "end": 17337,
+      "sha256": "e3e8ed1bbcf70240ae271b903402a3553b67813be242f05f0aaf9993a6fafc4b"
+    },
+    {
+      "name": "DBChallengeModeRankSeason",
+      "start": 17337,
+      "payloadStart": 17339,
+      "end": 17427,
+      "sha256": "296708caf211eef09495d6cd11949a5fd104545e7afb4187dfbd14fce72c9422"
+    },
+    {
+      "name": "DBChallengeModeScoreReward",
+      "start": 17427,
+      "payloadStart": 17430,
+      "end": 17672,
+      "sha256": "4a644722739971f56a708240a4e0b54659c7aba6822bf7f51e116f192fea4b30"
+    },
+    {
+      "name": "ApiChallengeModeReward",
+      "start": 17672,
+      "payloadStart": 17675,
+      "end": 18405,
+      "sha256": "461254fda44027df3411e38b0778c59cad784390bc5132b48e09eebe267f752d"
+    },
+    {
+      "name": "ApiChallengeModeSeason",
+      "start": 18405,
+      "payloadStart": 18408,
+      "end": 18592,
+      "sha256": "379ecac735e7b93822af3bc11f3b132c01053578183592e040280e7f7dc3b2d2"
+    },
+    {
+      "name": "ApiSemiFixedDungeon",
+      "start": 18592,
+      "payloadStart": 18595,
+      "end": 19070,
+      "sha256": "5ae1756758bb48803a6edfa435dffc1d88be58bd71642c8a58c6b87b370b9711"
+    },
+    {
+      "name": "ApiSemiFixedDungeonBalance",
+      "start": 19070,
+      "payloadStart": 19073,
+      "end": 19278,
+      "sha256": "be9125e76d48f5527fc957b19168eafc77c059989a0eaaff96634d3cd743be61"
+    },
+    {
+      "name": "ApiSemiFixedDungeonActive",
+      "start": 19278,
+      "payloadStart": 19281,
+      "end": 19498,
+      "sha256": "37a54a697cf7e4a5b2130b24b8573f88d3cf29406f45b35df5ce923f9c475714"
+    },
+    {
+      "name": "ApiSemiFixedDungeonActorGroup",
+      "start": 19498,
+      "payloadStart": 19501,
+      "end": 19862,
+      "sha256": "8ad2630ae199a4559db2930c2426023d7d9d40890703ae19b854b1f74b216653"
+    },
+    {
+      "name": "ApiActivityStarReward",
+      "start": 19862,
+      "payloadStart": 19865,
+      "end": 20409,
+      "sha256": "7405d6f35c24bd15b97103c0be4984c698a0dd234d08ff7d5953ef287f4d9cb8"
+    },
+    {
+      "name": "ApiActivityRecord",
+      "start": 20409,
+      "payloadStart": 20412,
+      "end": 20692,
+      "sha256": "d97718b46ae218b83228cdcbad6138061bcdc35b01bd30282a083b7c433fdacc"
+    },
+    {
+      "name": "DbGuildDungeonRankDetail",
+      "start": 20692,
+      "payloadStart": 20695,
+      "end": 20958,
+      "sha256": "c6b5da65c56254512f2c9805717b14ed3469b3c454b704fb61a8a18206166f1e"
+    },
+    {
+      "name": "DbGuildDungeonRecord",
+      "start": 20958,
+      "payloadStart": 20961,
+      "end": 21309,
+      "sha256": "052b73cf061dc02e158c14bc93c7e72f63f8741a50bb935746e4a4b5a53dc78c"
+    },
+    {
+      "name": "DbGuildDungeonDetail",
+      "start": 21309,
+      "payloadStart": 21312,
+      "end": 21886,
+      "sha256": "7500fd0487323b954ec4e44b05511cdbb151918313b668db0be1781a6b10dbcd"
+    },
+    {
+      "name": "DbAssistMemberRank",
+      "start": 21886,
+      "payloadStart": 21889,
+      "end": 22097,
+      "sha256": "c779a867fe039acca1e226a7c41730c2bd27b0136b32fbe9c70f6d697abba4d1"
+    },
+    {
+      "name": "ApiGuildDungeonSummary",
+      "start": 22097,
+      "payloadStart": 22100,
+      "end": 22534,
+      "sha256": "4b335221a7ba1b551f661663c43780e7954dfc4bc9945bac8fcfb8a9ef530979"
+    },
+    {
+      "name": "ApiGuildDungeon",
+      "start": 22534,
+      "payloadStart": 22537,
+      "end": 22807,
+      "sha256": "a3ed7b18811ca324b82be323ee10909a1a9b3c55813d7c0c3d62c6d98ce3b3c2"
+    },
+    {
+      "name": "ApiGuildDungeonActive",
+      "start": 22807,
+      "payloadStart": 22810,
+      "end": 23025,
+      "sha256": "0ea692e265af6cf319fe4bd7616e26ddae822d3ff2ca0de341db38dfd294b74d"
+    },
+    {
+      "name": "ApiGuildDungeonBalance",
+      "start": 23025,
+      "payloadStart": 23028,
+      "end": 23234,
+      "sha256": "a8501b5a60288831d14a6d05ba0c51a8455c7b640d8670727ff7555630f144a6"
+    },
+    {
+      "name": "ApiGuildDungeonRecord",
+      "start": 23234,
+      "payloadStart": 23237,
+      "end": 23596,
+      "sha256": "6cb29630a4ef6de99e75b2073be483896e94e8dd8873785bfcf7175857e66731"
+    },
+    {
+      "name": "DbGuildDungeonScoreReward",
+      "start": 23596,
+      "payloadStart": 23599,
+      "end": 23838,
+      "sha256": "d77967e769d4ddab5154d8dc3167c013acbe7ca0964077974bdd2104fc077e26"
+    },
+    {
+      "name": "ApiGuildDungeonScoreReward",
+      "start": 23838,
+      "payloadStart": 23841,
+      "end": 24485,
+      "sha256": "6f13b6878bb2cea2d058303413591424c664c20ef9c01894ba854dd9e9aa019b"
+    },
+    {
+      "name": "DbGuildDungeonProgressReward",
+      "start": 24485,
+      "payloadStart": 24487,
+      "end": 24537,
+      "sha256": "9fec7e768fd49e6916f08cae9622069b5864c92cd16921fbec7314453450eaa8"
+    },
+    {
+      "name": "ApiGuildDungeonProgressReward",
+      "start": 24537,
+      "payloadStart": 24540,
+      "end": 24821,
+      "sha256": "dcb2dd10c0b10430a7dd59b1534f158ce88b9528069ec1f47817926c33efb15f"
+    },
+    {
+      "name": "ApiGMGuildDungeon",
+      "start": 24821,
+      "payloadStart": 24824,
+      "end": 24961,
+      "sha256": "a44eeaa3c2b616e2046cfef313ea7df1c1e9b8142c196e4102f7c10740d9ec87"
+    }
+  ],
+  "note": "Only independently valid original DescriptorProto records recovered; malformed unrelated records not repaired. File wrapper is local, message fields unchanged."
+}

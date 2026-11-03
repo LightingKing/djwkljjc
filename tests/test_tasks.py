@@ -85,7 +85,12 @@ class LocalTasksTests(unittest.TestCase):
                 self.assertTrue({"category", "activePoint", "extraActivePoint", "extraActivePointType"}.issubset(task))
             else:
                 self.assertEqual(set(task), {"id", "progress", "isDone", "rewardGot", "endTime"})
-            self.assertEqual(task["endTime"], 0)
+            if task.get("category") in (105, 106):
+                from server.core.reset import policy_for
+                period = "day" if task["category"] == 105 else "week"
+                self.assertEqual(task["endTime"], policy_for(self.game).next_boundary(self.now[0], period))
+            else:
+                self.assertEqual(task["endTime"], 0)
         # The task list request is the session-start login: task 9 is done.
         self.assertTrue(self._task(payload, 9)["isDone"])
         self.assertFalse(self._task(payload, 1)["isDone"])  # 11-16h window not reached

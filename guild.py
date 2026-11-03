@@ -475,7 +475,9 @@ class LocalGuild:
         return result
 
     def player_data(self, profile):
-        return self._run(profile, lambda conn, state, player, now, notices: dict(player))
+        result = self._run(profile, lambda conn, state, player, now, notices: dict(player))
+        result.update(self.game.guild_dungeons.player_fields(profile))
+        return result
 
     def active_profits(self, profile):
         """Return the currently effective native ProfitDetail rows for a member.
@@ -581,8 +583,11 @@ class LocalGuild:
                 break
         try:
             payload = self._request(body, request_type)
-            return self._run(profile, lambda conn, state, player, now, notices:
-                             self._dispatch(conn, state, player, now, notices, method, route, payload, profile))
+            result = self._run(profile, lambda conn, state, player, now, notices:
+                               self._dispatch(conn, state, player, now, notices, method, route, payload, profile))
+            if route == "/fci/guild-player/" and result[0] == 200:
+                result[1].update(self.game.guild_dungeons.player_fields(profile))
+            return result
         except GuildError as exc:
             return exc.status, {"error": exc.code}
 

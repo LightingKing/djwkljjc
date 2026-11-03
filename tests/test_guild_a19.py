@@ -96,13 +96,14 @@ class GuildA19Tests(unittest.TestCase):
 
     def test_legacy_guild_dungeon_cannot_fabricate_progress(self):
         before = self.game.systems._state(self.profile).get("guild")
-        for method, route in (("POST", "/fci/guild/dungeon/settle"),
-                              ("POST", "/fci/guild-dungeon/"),
+        status,result=self.native("POST","/fci/guild/dungeon/settle",{"stage":99,"score":100000})
+        self.assertEqual((status,result["error"]),(404,"invalid_request"))
+        for method, route in (("POST", "/fci/guild-dungeon/"),
                               ("GET", "/fci/guild-dungeon-record/"),
                               ("GET", "/fci/guild/1/dungeon/summary/")):
             with self.subTest(route=route):
                 status, result = self.native(method, route, {"stage": 99, "score": 100000})
-                self.assertEqual((status, result["error"]), (404, "guild_dungeon_not_implemented"))
+                self.assertEqual((status, result["error"]), (403, "guild_not_member"))
         self.assertEqual(self.game.systems._state(self.profile).get("guild"), before)
         self.assertFalse(any(kind == 87 for _, kind, _ in self.pushes))
 
