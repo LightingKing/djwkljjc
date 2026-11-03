@@ -602,6 +602,33 @@ class LocalTasks:
         mode = (str(mode).strip().lower() or None) if mode is not None else None
         stats = stats if isinstance(stats, Mapping) else {}
 
+        # Goal 67's taskParam mixes actor ids with stage ids.  Resolve the
+        # submitted uid list once, before the state mutation, so a stage id
+        # that happens to equal an actor id (2112/2113/2114) cannot satisfy
+        # the actor requirement by itself.
+        actor_ids: list[int] = []
+        if actor_uids:
+            try:
+                import actors
+                system = self.game.systems._state(profile)
+                actor_ids = [int(record['id']) for uid in actor_uids
+                             if (record := actors.get(profile, system, uid)) is not None]
+            except Exception:
+                actor_ids = []
+        actor_id_set = set(actor_ids)
+        try:
+            import actors as actor_store
+            known_actor_ids = {int(actor_id) for actor_id, _quality in actor_store.ACTOR_INFO}
+        except Exception:
+            known_actor_ids = set()
+
+        def goal67_match(params: list[int]) -> bool:
+            actor_requirements = {value for value in params if value in known_actor_ids}
+            stage_requirements = {value for value in params if value not in known_actor_ids}
+            if actor_requirements and not actor_requirements.intersection(actor_id_set):
+                return False
+            return not stage_requirements or dungeon_id in stage_requirements
+
         def mutate(state: dict[str, Any]) -> list[int]:
             if dungeon_id:
                 wins = state["dungeonWins"]
@@ -625,7 +652,7 @@ class LocalTasks:
             # the same criterion the client applies to its battle result.
             if mode in ("activity", "normal", "story", None) or dungeon_id in ACTIVITY_DUNGEON_RANGE:
                 changed += self._advance(state, BALANCE_PN_DUNGEON_M_TIMES_ACTOR_P0, 1,
-                                         match=lambda p: not p or dungeon_id in p)
+                                         match=goal67_match)
             if mode == "tower":
                 changed += self._advance(state, TOWER_P0_FLOOR_M, 1,
                                          match=lambda p: not p or p[0] == 0 or tower_floor >= p[0])
@@ -640,10 +667,6 @@ class LocalTasks:
 
         cultivation = getattr(self.game, 'cultivation', None)
         if cultivation is not None and actor_uids:
-            import actors
-            system = self.game.systems._state(profile)
-            actor_ids = [record['id'] for uid in actor_uids
-                         if (record := actors.get(profile, system, uid)) is not None]
             cultivation_stats = cultivation_stats or (stats.get("cultivationStats", stats) if isinstance(stats, Mapping) else {})
             cultivation.on_battle_win(profile, dungeon_id, actor_ids=actor_ids,
                                       dungeon_type=dungeon_type, activity_type=activity_type,

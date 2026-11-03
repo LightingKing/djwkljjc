@@ -10,6 +10,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from accounts import LocalAccounts
+import actors
 from game import LocalGame
 from tasks import LocalTasks
 
@@ -116,6 +117,29 @@ class LocalTasksTests(unittest.TestCase):
         self.assertIsNone(self._task(payload, 3001))
         self.assertIsNotNone(self._task(payload, 3002))
         self.assertFalse(self._task(payload, 3002)["isDone"])
+
+    def test_activity_theme_tasks_require_both_actor_and_stage(self) -> None:
+        self._get()
+        # 2112 is both an ActorInfo id and a story stage id.  A stage win
+        # without the required actor must not advance the actor/stage goals.
+        changed = self.tasks.on_battle_win(self.profile, 2112, mode="story", actor_uids=[1])
+        self.assertNotIn(60004, changed)
+        self.assertNotIn(60005, changed)
+        payload = self._get()
+        self.assertEqual(self._task(payload, 60004)["progress"], 0)
+        self.assertEqual(self._task(payload, 60005)["progress"], 0)
+
+        # The same stage list is valid once the lineup contains actor 2112,
+        # and a real listed stage (2800101) then advances both matching tasks.
+        state = self.game.systems._state(self.profile)
+        actor = actors.add(self.profile, state, 2112)
+        self.game.systems._save(self.profile, state)
+        changed = self.tasks.on_battle_win(self.profile, 2800101, mode="story", actor_uids=[actor["uid"]])
+        self.assertIn(60004, changed)
+        self.assertIn(60005, changed)
+        payload = self._get()
+        self.assertEqual(self._task(payload, 60004)["progress"], 1)
+        self.assertEqual(self._task(payload, 60005)["progress"], 1)
 
     def test_win_five_battles_completes_and_pays(self) -> None:
         self._get()

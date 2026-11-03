@@ -431,6 +431,20 @@ class LocalProfileFeatures:
             claims = self._state(profile).get('rolePresents', {})
             day = policy_for(self.game).day_index(self._now())
             start = policy_for(self.game).day_start_from_index(day)
+            daily_claims = set()
+            claim_rows = claims.items() if isinstance(claims, Mapping) else ()
+            for key, stamp in claim_rows:
+                text_key = str(key)
+                if text_key.startswith(f'{day}:'):
+                    daily_claims.add(text_key)
+                elif _int(stamp) >= start:
+                    # Preserve compatibility with saves written by the old
+                    # UTC-day implementation, which only recorded a time.
+                    daily_claims.add(text_key)
+            daily_cap = max(0, misc_value('rolePresentMaxNum', 3))
+            if len(daily_claims) >= daily_cap:
+                return []
+            remaining = daily_cap - len(daily_claims)
             roles = {_int(row.get('id')): row for row in table_rows('Role')}
             items = {_int(row.get('id')) for row in table_rows('ItemInfo')}
             pending = []
@@ -449,6 +463,8 @@ class LocalProfileFeatures:
                     continue
                 pending.append({'presentId': role_id, 'roleId': role_id, 'presentType': 1,
                                 'rewards': [{'type': 11, 'id': item_id, 'count': 5}]})
+                if len(pending) >= remaining:
+                    break
             return pending
 
     def role_notepad(self, profile: Mapping[str, Any], role_id: Any) -> Optional[dict[str, Any]]:

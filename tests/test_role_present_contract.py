@@ -70,6 +70,51 @@ class RolePresentContractTests(unittest.TestCase):
         self.assertEqual(statuses[:3], [200, 200, 200])
         self.assertEqual(statuses[3], 509)
 
+    def test_daily_cap_removes_list_and_redpoint_until_next_day(self):
+        # Own four roles and raise their favour to the threshold.  Select a
+        # deterministic Beijing day on which all four local offers are rolled.
+        import actors
+        actor_ids = [1001, 1002, 1003, 1004]
+        state = self.game.systems._state(self.profile)
+        for actor_id in actor_ids[1:]:
+            actors.add(self.profile, state, actor_id)
+        self.game.systems._save(self.profile, state)
+        self.game.profile_features.role_notepads(self.profile)
+        feature_state = self.game.profile_features._state(self.profile)
+        role_ids = list(range(1, 5))
+        for role_id in role_ids:
+            feature_state["notepad"][str(role_id)]["favourLevel"] = 9
+        self.game.profile_features._save(self.profile, feature_state)
+
+        base_day = self.game.reset_policy.day_index(self.game._now())
+        day = base_day
+        while True:
+            offered = [role_id for role_id in role_ids
+                       if (int(self.account["accountId"]) * 31 + day * 17 + role_id * 13) % 100 < 70]
+            if len(offered) == len(role_ids):
+                break
+            day += 1
+        now = self.game.reset_policy.day_start_from_index(day) + 1
+        with patch.object(self.game, '_now', return_value=now), patch.object(self.game.profile_features, '_clock', return_value=now):
+            status, pending = self.request('GET', '/fci/RolePresent/')
+            self.assertEqual(status, 200)
+            self.assertEqual(len(pending), 3)
+            self.assertTrue({row['roleId'] for row in pending}.issubset(set(role_ids)))
+            for row in pending:
+                self.assertEqual(self.request('POST', f"/fci/RolePresent/{row['presentId']}", b'null')[0], 200)
+            self.assertEqual(self.request('GET', '/fci/RolePresent/')[1], [])
+            self.assertEqual(self.request('GET', '/fci/redpoint/data')[1]['rolePresentRedpoint']['presents'], [])
+
+            next_day = day + 1
+            while not any((int(self.account["accountId"]) * 31 + next_day * 17 + role_id * 13) % 100 < 70
+                           for role_id in role_ids):
+                next_day += 1
+            next_now = self.game.reset_policy.day_start_from_index(next_day) + 1
+        with patch.object(self.game, '_now', return_value=next_now), patch.object(self.game.profile_features, '_clock', return_value=next_now):
+            status, after_reset = self.request('GET', '/fci/RolePresent/')
+            self.assertEqual(status, 200)
+            self.assertTrue(after_reset)
+
 
 class LoginAndMatchContractTests(unittest.TestCase):
     setUp = native_http.NativeHttpTests.setUp
