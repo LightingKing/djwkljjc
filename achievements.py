@@ -354,6 +354,14 @@ class LocalAchievements:
 
     # ------------------------------------------------------------ snapshot
     def _actor_open(self, actor_id: int, now: int) -> bool:
+        try:
+            from .content_opening import OPEN_CHARACTERS, POLICY
+        except ImportError:
+            from content_opening import OPEN_CHARACTERS, POLICY
+        if int(actor_id) in POLICY["excludedCharacterIds"]:
+            return False
+        if int(actor_id) in OPEN_CHARACTERS:
+            return True
         opened = _parse_open_time(ACTOR_OPEN_TIME.get(int(actor_id), ""), policy_for(self.game))
         return opened is None or opened <= now
 
@@ -634,7 +642,7 @@ class LocalAchievements:
 
     def _novel_http(self, method: str, novel_id: Optional[int], body: Body,
                     profile: Mapping[str, Any]) -> tuple[Response, list[int]]:
-        with self._lock:
+        with self.game.atomic_mutation():
             state = self._state(profile)
             done = self._update(profile, state)
             try:

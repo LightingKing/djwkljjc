@@ -70,6 +70,7 @@ CATEGORY_ROUTINE = 1
 CATEGORY_MAIN = 2
 CATEGORY_PRESENT = 100
 CATEGORY_ACTIVITY = 102
+CATEGORY_SCENE = 103
 CATEGORY_RANDOM = 104
 CATEGORY_CHRISTMAS_DAILY = 105
 CATEGORY_CHRISTMAS_WEEKLY = 106
@@ -78,7 +79,7 @@ CATEGORY_CHRISTMAS_WEEKLY = 106
 # Present is the native "choose an S character" chain (TaskPresent).  It is
 # still transported in the ordinary TaskInfo envelope; the client-side
 # TaskUtil.Categorize moves category 100 into fci/presentTasks.
-OWNED_CATEGORIES = (CATEGORY_ROUTINE, CATEGORY_MAIN, CATEGORY_PRESENT, CATEGORY_ACTIVITY,
+OWNED_CATEGORIES = (CATEGORY_ROUTINE, CATEGORY_MAIN, CATEGORY_PRESENT, CATEGORY_ACTIVITY, CATEGORY_SCENE,
                     CATEGORY_CHRISTMAS_DAILY, CATEGORY_CHRISTMAS_WEEKLY)
 # Deadline/Repeat/Newbie/Challenge/Favour have no local source yet; listing
 # them in ``disableCategory`` hides their tabs (TaskUtil.CheckCategory).
@@ -186,6 +187,7 @@ ROUTINE_IDS = tuple(sorted(tid for tid, task in TASKS.items() if task["category"
 MAIN_IDS = tuple(sorted(tid for tid, task in TASKS.items() if task["category"] == CATEGORY_MAIN))
 ACTIVITY_IDS = tuple(sorted(tid for tid, task in TASKS.items() if task["category"] == CATEGORY_ACTIVITY))
 PRESENT_IDS = tuple(sorted(tid for tid, task in TASKS.items() if task["category"] == CATEGORY_PRESENT))
+SCENE_IDS = tuple(sorted(tid for tid, task in TASKS.items() if task["category"] == CATEGORY_SCENE))
 RANDOM_IDS = tuple(sorted(tid for tid, task in TASKS.items() if task["category"] == CATEGORY_RANDOM))
 CHRISTMAS_DAILY_IDS = tuple(sorted(tid for tid, task in TASKS.items() if task["category"] == CATEGORY_CHRISTMAS_DAILY))
 CHRISTMAS_WEEKLY_IDS = tuple(sorted(tid for tid, task in TASKS.items() if task["category"] == CATEGORY_CHRISTMAS_WEEKLY))
@@ -447,6 +449,8 @@ class LocalTasks:
         # category-104 tasks stand in for the unavailable random-roll service.
         for tid in ACTIVITY_IDS:
             yield TASKS[tid]
+        for tid in SCENE_IDS:
+            yield TASKS[tid]
         if state.get("christmasOpen"):
             # Local permanent schedule: all recovered daily/weekly rows are
             # offered once per period; no retired random-task allocator exists.
@@ -463,6 +467,12 @@ class LocalTasks:
             return sum(_int(v) for v in wins.values()) if target == 0 else _int(wins.get(str(target)))
         if goal == BALANCE_DUNGEON_PN_M_TIMES:
             return sum(_int(wins.get(str(dungeon_id))) for dungeon_id in set(params))
+        if goal == 35:  # Original BalanceTournamentMTimes; existing trusted arena clear ledger.
+            try:
+                from .tournament import TOURNAMENT_DUNGEON_ID
+            except ImportError:
+                from tournament import TOURNAMENT_DUNGEON_ID
+            return _int(wins.get(str(TOURNAMENT_DUNGEON_ID)))
         if goal == TOWER_P0_FLOOR_M:
             floor = params[0] if params else 0
             return 1 if _int(state["towerMaxFloor"]) >= max(1, floor) else 0
@@ -606,7 +616,15 @@ class LocalTasks:
     def on_login(self, profile: Mapping[str, Any]) -> list[int]:
         """Call after a successful game login; returns task ids whose progress changed."""
 
+        self._deliver_scene_gift(profile)
         return self._run(profile, self._mark_login)
+
+    def _deliver_scene_gift(self, profile: Mapping[str, Any]) -> None:
+        try:
+            from .scene_collections import deliver_local_scene_gift
+        except ImportError:
+            from scene_collections import deliver_local_scene_gift
+        deliver_local_scene_gift(self.game, profile)
 
     def on_level(self, profile: Mapping[str, Any]) -> list[int]:
         """Call after the player level changes (reads ``profile["level"]``)."""
@@ -805,7 +823,7 @@ class LocalTasks:
         return {
             "tasks": rows + extra.get('tasks', []),
             # Make the owned categories authoritative when the client merges.
-            "delTasks": [tid for tid in ROUTINE_IDS + MAIN_IDS + PRESENT_IDS + ACTIVITY_IDS + RANDOM_IDS + CHRISTMAS_DAILY_IDS + CHRISTMAS_WEEKLY_IDS if tid not in shown] + extra.get('delTasks', []),
+            "delTasks": [tid for tid in ROUTINE_IDS + MAIN_IDS + PRESENT_IDS + ACTIVITY_IDS + SCENE_IDS + RANDOM_IDS + CHRISTMAS_DAILY_IDS + CHRISTMAS_WEEKLY_IDS if tid not in shown] + extra.get('delTasks', []),
             "disableCategory": list(DISABLED_CATEGORIES),
             "activePoint": _int(state["activePoint"]),
             "activePointRewardGot": [_int(v) for v in state["activePointRewardGot"]],
@@ -828,6 +846,10 @@ class LocalTasks:
     def handle_http(self, method: str, path: str, body: Body, profile: Mapping[str, Any]) -> Optional[Response]:
         route = _route(path)
         method = (method or "GET").upper()
+        if route == "/fci/scenetasks":
+            if method != "GET":
+                return 405, {"error": "method_not_allowed"}
+            return 200, [row for row in self.snapshot(profile)["tasks"] if row["id"] in SCENE_IDS]
         if route in ("/fci/christmasdailytasks", "/fci/christmasweeklytasks"):
             if method != "GET":
                 return 405, {"error": "method_not_allowed"}
@@ -836,6 +858,7 @@ class LocalTasks:
         if route == "/fci/task":
             if method != "GET":
                 return 405, {"error": "method_not_allowed", "message": "GET required"}
+            self._deliver_scene_gift(profile)
             with self._lock:
                 state = self._state(profile)
                 self._sync(profile, state)
@@ -891,7 +914,7 @@ class LocalTasks:
                 return None  # present/theme/scene tasks stay with their own handlers
             if method != "POST":
                 return 405, {"error": "method_not_allowed", "message": "POST required"}
-            if TASKS[task_id]["category"] in (CATEGORY_CHRISTMAS_DAILY, CATEGORY_CHRISTMAS_WEEKLY):
+            if TASKS[task_id]["category"] in (CATEGORY_SCENE, CATEGORY_CHRISTMAS_DAILY, CATEGORY_CHRISTMAS_WEEKLY):
                 with self.game.atomic_mutation():
                     return self._claim_task(profile, task_id)
             return self._claim_task(profile, task_id)

@@ -324,6 +324,12 @@ class LocalProfileFeatures:
         current = _int(request.get("homeBackGround", request.get("homeBackground", request.get("current", getattr(message, "home_back_ground", 0) if message else 0))))
         is_random = _int(request.get("isRandom", request.get("is_random", getattr(message, "is_random", 0) if message else 0))) != 0
         if method in {"POST", "PATCH", "PUT"}:
+            try:
+                from .scene_collections import scene_unlocked
+            except ImportError:
+                from scene_collections import scene_unlocked
+            if not scene_unlocked(self.game, profile, current):
+                return 409, {"error": "scene_locked", "message": "场景尚未解锁", "sceneId": current}
             state["homeBackground"] = {"current": max(0, current), "isRandom": is_random}
             self._save(profile, state)
         result = self._message("ApiHomeBackGround.result")
