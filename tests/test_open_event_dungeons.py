@@ -163,6 +163,146 @@ class HiddenEventDungeonTests(common.ModeTestBase):
         self.assertEqual(reply[1]["error"], "insufficient_resource")
         self.assertEqual(self.item(61001), 0)
 
+    def claw_prize(self, prize_id, request_id):
+        from hidden_event_dungeons import CLAW
+        roll = sum(row['probability'] for gid, row in CLAW.items() if gid < prize_id)
+        with patch('hidden_event_dungeons.hashlib.sha256') as digest:
+            digest.return_value.digest.return_value = roll.to_bytes(8, 'big') + bytes(24)
+            return self.ok('POST', '/fci/ClawCraneBingo/', {'requestId': request_id})
+
+    def test_claw_six_autoboxes_grant_usable_contents_without_box_inventory(self):
+        self.set_item(61001, 6)
+        expected = {4: (71002, 30021), 5: (71012, 30022), 6: (71022, 30023),
+                    7: (71032, 30024), 9: (75004, 30011), 10: (75005, 30006)}
+        before_actors = self.game.systems._state(self.profile())['actors']
+        for prize, (box, content) in expected.items():
+            with self.subTest(prize=prize):
+                before = self.item(content)
+                result = self.claw_prize(prize, f'autobox-{prize}')
+                self.assertEqual(result['id'], prize)
+                self.assertEqual(self.item(box), 0, 'AutoBox has no native use button and must never be left in the bag')
+                self.assertEqual(self.item(content), before + 1)
+                wrapper = next(c for c in result['resChange'] if c.get('baseRes', {}).get('id') == box)
+                self.assertEqual(wrapper['baseRes']['count'], 0)
+                self.assertEqual(wrapper['baseRes']['countDelta'], 1)
+                self.assertEqual(wrapper['inBox'][0]['baseRes']['id'], content)
+                self.assertEqual(wrapper['inBox'][0]['baseRes']['countDelta'], 1)
+                cls = message_factory.GetMessageClass(self.game._pool.FindMessageTypeByName('ApiClawCraneBingo.result'))
+                json_format.ParseDict(result, cls())
+        self.assertEqual(self.item(61001), 0)
+        self.assertEqual(self.game.systems._state(self.profile())['actors'], before_actors)
+
+    def test_claw_autobox_native_flatten_and_animation_read_the_original_wrapper(self):
+        from external_assets import external_path, require_file
+        from lupa.lua53 import LuaRuntime
+        self.set_item(61001, 1)
+        result = self.claw_prize(4, 'autobox-native')
+        root = external_path('LJJC_DECOMPILED_LUA', 'analysis/lua-decompiled')
+        lua = LuaRuntime(unpack_returned_tuples=True)
+        lua.execute('''
+          _ENV['!']=function(v) return v end
+          table.append=function(a,b) for _,v in ipairs(b) do table.insert(a,v) end end
+          table.find=function(t,p) for k,v in pairs(t) do if p(k,v) then return k,v end end end
+          fif=function(v,a,b) if v then return a else return b end end
+          PB={enum={ResourceType={ResItem=11}},all=function() return {{getAnim=true,res={id=71002}}} end}
+          require=function(n)
+            if n=='Common/WindowUtil' then return function() return {},{} end end
+            if n=='Common/PbHelper' then return PB end
+            return {}
+          end
+        ''')
+        iu_path = require_file(root / 'common__itemutil.lua', 'LJJC_DECOMPILED_LUA')
+        au_path = require_file(root / 'common__autumnutil.lua', 'LJJC_DECOMPILED_LUA')
+        iu = lua.execute(iu_path.read_text(encoding='utf8'))
+        atu = lua.execute(au_path.read_text(encoding='utf8'))
+        changes = lua.table_from(result['resChange'], recursive=True)
+        self.assertTrue(atu.GetPresent(changes))
+        flat = list(iu.FlatInboxItems(changes).values())
+        self.assertEqual([r.baseRes.id for r in flat], [61001, 30021])
+        self.assertEqual(flat[1].ownerBoxId, 71002)
+
+    def test_claw_autobox_receipt_restart_and_failed_commit_do_not_duplicate(self):
+        self.set_item(61001, 1)
+        before = self.game.systems._state(self.profile())
+        with patch.object(self.hidden, '_save', side_effect=RuntimeError('autobox receipt failed')):
+            with self.assertRaisesRegex(RuntimeError, 'autobox receipt failed'):
+                self.claw_prize(10, 'autobox-rollback')
+        self.assertEqual(self.game.systems._state(self.profile()), before)
+        self.assertNotIn('autobox-rollback', self.hidden._state(self.profile())['claw'].get('receipts', {}))
+        first = self.claw_prize(10, 'autobox-rollback')
+        self.assertEqual(self.item(30006), 1)
+        self.assertEqual(self.item(75005), 0)
+        self.hidden = LocalHiddenEventDungeons(self.game)
+        before = self.game.systems._state(self.profile())
+        replay = self.ok('POST', '/fci/ClawCraneBingo/', {'requestId': 'autobox-rollback'})
+        self.assertEqual(replay, first)
+        self.assertEqual(self.game.systems._state(self.profile()), before)
+
+    def test_entry_retry_replays_before_payment_check_with_only_win_cost_left(self):
+        self.add_resource(6, 0, 12 - self.resource(6))
+        first = self.enter()
+        self.assertEqual(self.resource(6), 11)
+        self.hidden = LocalHiddenEventDungeons(self.game)
+        self.assertEqual(self.enter(), first)
+        self.assertEqual(self.resource(6), 11)
+        invalid = self.call('POST', '/fci/event-dungeon/', {'activityType': 27, 'activityId': 27001,
+                                                        'dungeonId': 3000101, 'multiPower': 1})
+        self.assertEqual(invalid[0], 400)
+        self.assertEqual(self.resource(6), 11)
+
+    def test_entry_retry_different_valid_group_is_not_the_old_receipt(self):
+        state = self.game.systems._state(self.profile())
+        groups = self.game.systems._default_actor_groups()
+        existing = self.game.systems._normalise_actor_groups(state.get('actorGroups')) or groups
+        existing['2'] = json.loads(json.dumps(existing['1']))
+        state['actorGroups'] = existing
+        self.game.systems._save(self.profile(), state)
+        first = self.enter()
+        other = self.ok('POST', '/fci/event-dungeon/', {'activityType': 27, 'activityId': 27001,
+            'dungeonId': 2700101, 'selectActorGroupId': 2, 'multiPower': 1})
+        self.assertNotEqual(other['dungeonUid'], first['dungeonUid'])
+
+    def test_entry_retry_different_support_does_not_replay_unbuffed_team(self):
+        first = self.enter()
+        other = self.ok('POST', '/fci/event-dungeon/', {'activityType': 27, 'activityId': 27001,
+            'dungeonId': 2700101, 'selectActorGroupId': 1, 'multiPower': 1,
+            'auraPlayerId': 'local-support', 'auraActorId': 1002, 'auraActorQuality': 3})
+        self.assertNotEqual(other['dungeonUid'], first['dungeonUid'])
+
+    def test_carnival_original_predecessor_count_boundaries_match_entry_and_list(self):
+        from hidden_event_dungeons import DUNGEON_REWARD, EVENTS
+        for did in (2900102, 2900103, 2900202, 2900203, 2900302, 2900303):
+            row = DUNGEON_REWARD[did]
+            required = row['preDungeonDoneTimes']
+            aid = next(aid for aid, event in EVENTS.items() if did in event['dungeonId'])
+            for count in (1, required - 1, required):
+                with self.subTest(dungeon=did, count=count):
+                    state = self.hidden._state(self.profile())
+                    state['records'][str(row['preDungeonId'])] = {'finished': True, 'doneTimes': count}
+                    self.hidden._save(self.profile(), state)
+                    records = self.ok('GET', f'/fci/activity/record/51/{aid}')['records']
+                    record = next(r for r in records if r['dungeonId'] == did)
+                    self.assertEqual(record['unlocked'], count >= required)
+                    response = self.call('POST', '/fci/semifixed-dungeon/', {'activityType': 51,
+                        'activityId': aid, 'dungeonId': did, 'selectActorGroupId': 1})
+                    self.assertEqual(response[0], 200 if count >= required else 409, response)
+                    if response[0] == 200:
+                        self.ok('DELETE', f"/fci/semifixed-dungeon/{response[1]['dungeonUid']}")
+
+    def test_carnival_completion_count_survives_day_restart_and_replayed_balance(self):
+        state = self.hidden._state(self.profile())
+        state['records']['2900101'] = {'finished': True, 'doneTimes': 29}
+        self.hidden._save(self.profile(), state)
+        uid = self.enter(51, 51002, 2900101, 'semifixed-dungeon')['dungeonUid']
+        first = self.win(uid, 'semifixed-dungeon')
+        self.assertEqual(self.hidden._state(self.profile())['records']['2900101']['doneTimes'], 30)
+        self.clock.now += 86400
+        self.hidden = LocalHiddenEventDungeons(self.game)
+        self.assertEqual(self.ok('POST', f'/fci/semifixed-dungeon/{uid}/balance', {}), first)
+        record = self.hidden._record(self.profile(), self.hidden._state(self.profile()), 2900101)
+        self.assertEqual(record['doneTimes'], 30)
+        self.assertTrue(self.hidden._record(self.profile(), self.hidden._state(self.profile()), 2900102)['unlocked'])
+
     def test_christmas_original_daily_and_weekly_tasks_are_listed(self):
         payload = self.game.tasks.snapshot(self.profile())
         rows = {r["id"]: r for r in payload["tasks"]}

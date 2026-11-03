@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "provenance": "D / local: original ItemInfo supplies AutoBox type, quality and DropInfo names, but the retired DropInfo contents and quantities were not recovered. These six fixed material rewards and quantity 1 are local policy.",
+  "evidence": [
+    "data/client-tables/ClawCrane.json: prizes 4/5/6/7/9/10",
+    "data/client-tables/ItemInfo.json: box IDs 71002/71012/71022/71032 quality 4, 75004 quality 2, 75005 quality 1; funcType 11",
+    "data/client-tables/ItemInfo.json: original Star material IDs 30021/30022/30023/30024 quality 4, 30011 quality 2, 30006 quality 1; funcType 7"
+  ],
+  "reason": "Use a deterministic original material of matching quality, one per original box. Do not leave unusable AutoBox inventory, invent original DropInfo or award an unavailable character. Only ClawCrane grants use this policy.",
+  "boxes": [
+    {"boxId": 71002, "dropId": "Box_71002", "reward": {"type": 11, "id": 30021, "count": 1, "param": 0}},
+    {"boxId": 71012, "dropId": "Box_71012", "reward": {"type": 11, "id": 30022, "count": 1, "param": 0}},
+    {"boxId": 71022, "dropId": "Box_71022", "reward": {"type": 11, "id": 30023, "count": 1, "param": 0}},
+    {"boxId": 71032, "dropId": "Box_71032", "reward": {"type": 11, "id": 30024, "count": 1, "param": 0}},
+    {"boxId": 75004, "dropId": "Box_75004", "reward": {"type": 11, "id": 30011, "count": 1, "param": 0}},
+    {"boxId": 75005, "dropId": "Box_75005", "reward": {"type": 11, "id": 30006, "count": 1, "param": 0}}
+  ]
+}

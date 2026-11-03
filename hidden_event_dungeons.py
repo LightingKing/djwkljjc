@@ -30,6 +30,8 @@ BUFF_GOODS = {(int(r["goodId"]), int(r["grade"])): r for r in _rows("ActivityBuf
 CLAW = {int(r["id"]): r for r in _rows("ClawCrane")}
 CLAW_STOCK = _rows("ClawCraneStock")
 CLAW_FORCE = _rows("ClawCraneForceCount")
+CLAW_AUTOBOXES = {r['boxId']: r['reward'] for r in json.loads(
+    (Path(__file__).parent / 'data/server-only/claw-autobox.json').read_text(encoding='utf8'))['boxes']}
 ACTOR_SKILLS = _rows("ActorSkill")
 ACTOR_KINDS = {int(r["id"]): int(r.get("kind", 0)) for r in _rows("ActorConfig")}
 DROP_CAPS = {int(r["id"]): int(r["dropMaxCount"]) for r in _rows("ItemInfo") if r.get("dropMaxCount")}
@@ -51,8 +53,11 @@ class LocalHiddenEventDungeons:
             state.setdefault(key, {})
         day = policy_for(self.game).day_index(self.game._now())
         if period_due(state.get("day"), day):
-            for r in state["records"].values():
-                r["doneTimes"] = 0
+            for did, r in state["records"].items():
+                # Carnival's original UI compares cumulative predecessor
+                # doneTimes to 30/60; it is not a daily entry allowance.
+                if int(did) not in SEMI:
+                    r["doneTimes"] = 0
             state["day"] = day
         return state
 
@@ -79,8 +84,11 @@ class LocalHiddenEventDungeons:
         row = DUNGEON_REWARD.get(did, {})
         old = state["records"].get(str(did), {})
         pre = _int(row.get("preDungeonId"))
+        predecessor = state["records"].get(str(pre), {})
+        pre_done = not pre or (predecessor.get("finished", False) and
+                              _int(predecessor.get("doneTimes")) >= _int(row.get("preDungeonDoneTimes")))
         unlocked = int(profile.get("level", 1)) >= _int(row.get("unlockLevel")) and (
-            not pre or state["records"].get(str(pre), {}).get("finished", False))
+            pre_done)
         return {"dungeonId": did, "unlocked": unlocked, "finished": bool(old.get("finished")),
                 "targetsDone": old.get("targetsDone", []), "multiPower": old.get("multiPower", 1),
                 "doneTimes": old.get("doneTimes", 0), "finishCondition": unlocked, "new": not bool(old.get("finished"))}
@@ -152,8 +160,6 @@ class LocalHiddenEventDungeons:
             return 409, {"error": "dungeon_done_times"}
         multi = max(1, min(_int(req.get("multiPower"), 1), max(1, len(record["targetsDone"])), 3))
         costs, win_costs = _costs(row, "cost", multi), _costs(row, "costWin", multi)
-        if not self.modes._can_pay(profile, costs + win_costs):
-            return 409, {"error": "insufficient_resource"}
         ids, uids, actors, npc_count = self._fighters(profile, state, did, req.get("selectActorGroupId", 1))
         if not any(ids[:3]):
             return 409, {"error": "invalid_request"}
@@ -163,17 +169,20 @@ class LocalHiddenEventDungeons:
             old = conn.execute("SELECT dungeon_uid, extra_json FROM activity_mode_runs WHERE account_id=? "
                                "AND mode=? AND status='active' AND active_data IS NULL ORDER BY dungeon_uid DESC LIMIT 1",
                                (profile["account_id"], "hidden_semi" if semi else "hidden_event")).fetchone()
-        signature = [did, aid, multi, uids, ids]
+        aura = self.modes._aura(profile, req)
+        signature = [did, aid, multi, uids, ids, _int(req.get("selectActorGroupId"), 1),
+                     aura, str(req.get('eventKey', ''))]
         if old:
             extra = json.loads(old["extra_json"])
             if extra.get("signature") == signature:
                 return 200, extra["entry"]
+        if not self.modes._can_pay(profile, costs + win_costs):
+            return 409, {"error": "insufficient_resource"}
         paid = self.modes._pay(profile, costs)
         if paid is None:
             return 409, {"error": "insufficient_resource"}
         uid, now = self.modes._insert_run(profile, "hidden_semi" if semi else "hidden_event", did,
             activity_id=aid, multi_power=multi, group_id=_int(req.get("selectActorGroupId"), 1), actor_uids=uids)
-        aura = self.modes._aura(profile, req)
         base = self.modes._base_info(profile, "material", did, ids, uids, now, activity_id=aid, actors=actors, aura=aura)
         base.update(activityType=kind, dungeonType=14 if semi else 5, npcCnt=npc_count, reduceInfo={},
                     fightBuffs=[BUFF_GOODS[(int(g), grade)]["buffId"] for g, grade in state["buffs"].get(str(kind), {}).items() if grade])
@@ -361,7 +370,18 @@ class LocalHiddenEventDungeons:
             result = {"id": 0, "resChange": changes}
         else:
             gid = chosen["id"]
-            changes += grant_rewards(self.game, profile, [chosen["res"]])
+            reward = chosen['res']
+            contents = CLAW_AUTOBOXES.get(_int(reward.get('id'))) if _int(reward.get('type')) == 11 else None
+            if contents:
+                # AutoBox is a display envelope, never a usable bag item.
+                # Original DBH.ResChange and GachaClaw flatten inBox; keeping
+                # the box id preserves the original prize-animation decision.
+                actual = grant_rewards(self.game, profile, [{**contents,
+                    'count': contents['count'] * _int(reward.get('count'), 1)}])
+                changes.append({'baseRes': {**_res(reward), 'count': 0,
+                    'countDelta': _int(reward.get('count'), 1)}, 'inBox': actual})
+            else:
+                changes += grant_rewards(self.game, profile, [reward])
             claw["used"][str(gid)] = claw["used"].get(str(gid), 0) + 1
             result = {"id": gid, "resChange": changes}
         claw.update(sequence=sequence)
