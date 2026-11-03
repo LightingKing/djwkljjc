@@ -100,13 +100,13 @@ class LocalGuildDungeons:
     def _boss(self):
         return 6001 + (self._week() // 604800) % 3
 
-    def _membership(self, profile):
+    def _membership(self, profile, *, check_cooldown=True):
         def read(conn, state, player, now, notices):
             guild_id = int(player.get('guildId',0))
             guild = state['guilds'].get(str(guild_id))
             if not guild or str(profile['player_id']) not in guild['members']:
                 raise GuildDungeonError('guild_not_member',403)
-            if int(player.get('guildDungeonLimitEndTime',0)) > now:
+            if check_cooldown and int(player.get('guildDungeonLimitEndTime',0)) > now:
                 raise GuildDungeonError('guild_function_cooldown')
             return guild_id, _copy(guild)
         return self.game.guild._run(profile, read)
@@ -482,21 +482,27 @@ class LocalGuildDungeons:
     def redpoint_fields(self, profile):
         try:
             with self.game.atomic_mutation():
-                gid,guild=self._membership(profile);state=self._state(gid,guild);player=self._player(profile)
+                # Cooldown disables actions; it does not erase native summary
+                # or formation data that remains bound in the city UI.
+                gid,guild=self._membership(profile,check_cooldown=False)
+                state=self._state(gid,guild);player=self._player(profile)
                 did=self._boss()
                 return {'guildDungeonSummary':self._summary(profile,state),
                         'guildDungeonScoreReward':{'dungeonRecords':list(player['records'].values()),'rewardRecords':player['rewardRecords']},
                         'guildDungeonProgressReward':{'rewardGot':player['progressRewards'].get(str(did),[])}}
         except GuildDungeonError:
-            return {'guildDungeonSummary':{'dungeonRecords':[],'memberRank':[],'challengeStatus':self.CLOSE},
-                    'guildDungeonScoreReward':{'dungeonRecords':[],'rewardRecords':{}},
-                    'guildDungeonProgressReward':{'rewardGot':[]}}
+            # ApiRedPointData has optional message fields. Native
+            # OnGuildPlayerChange clears these caches when guildId is zero;
+            # RestifizerManager must preserve that absence, including after
+            # leaving a guild. A non-nil summary requires a challenge record.
+            return {'guildDungeonSummary':None,'guildDungeonScoreReward':None,
+                    'guildDungeonProgressReward':None}
 
     def player_fields(self, profile):
         """Native login fields consumed by PushService's DungeonGuild bindings."""
         try:
             with self.game.atomic_mutation():
-                self._membership(profile)
+                self._membership(profile,check_cooldown=False)
                 player=self._player(profile)
                 return {'rentActor':player['rentActor'],'rentedActors':player['rented'],
                         'actorGroupInfo':{'actorGroups':player['groups'],'selectId':player['selectedGroupId']},

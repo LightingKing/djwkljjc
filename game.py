@@ -416,6 +416,19 @@ def _message_pool(descriptor_path: Path) -> descriptor_pool.DescriptorPool:
         pending = remaining
     from recovered_protocols import add_recovered_dungeon_messages
     add_recovered_dungeon_messages(pool)
+    # Original redpoint.proto depends on the recovered guild-dungeon API
+    # messages. Retry unresolved original files now, so the first process
+    # bootstrap has the same schema as a later LocalGame in the global pool.
+    while pending:
+        remaining = []
+        for file_descriptor in pending:
+            try:
+                pool.Add(file_descriptor)
+            except Exception:
+                remaining.append(file_descriptor)
+        if len(remaining) == len(pending):
+            break
+        pending = remaining
     return pool
 
 
