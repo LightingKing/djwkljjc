@@ -240,6 +240,66 @@ class FixtureServer(ThreadingHTTPServer):
         self._sni_lock = threading.Lock()
         self._pending_sni: dict[int, str | None] = {}
 
+    def certificate_health(self) -> dict[str, Any] | None:
+        """Return the public certificate expiry state for health responses."""
+
+        info = self.tls_certificate
+        return dict(info) if isinstance(info, dict) else None
+
+    def request_base_url(self, host_header: str | None = None) -> str:
+        """Return the advertised URL for this request's safe local Host.
+
+        A configured ``public_base_url`` remains the fallback.  A Host value
+        is used only when it names a loopback/RFC1918 address and explicitly
+        targets this listener's port; this prevents an attacker from making
+        bootstrap responses point at an arbitrary public endpoint.
+        """
+        configured = self.public_base_url
+        fallback = configured or f"{'https' if self.tls else 'http'}://{self.server_address[0]}:{self.server_port}"
+        # Test/fixture servers may bind an ephemeral listener while retaining
+        # a production URL in their captured configuration.  In that mode the
+        # captured URL is authoritative because its port is not this listener.
+        if configured:
+            try:
+                configured_port = urlsplit(configured).port
+            except ValueError:
+                configured_port = None
+            if configured_port is not None and configured_port != int(self.server_port):
+                return fallback
+        raw = str(host_header or "").strip()
+        if not raw or "@" in raw or "/" in raw or any(ch in raw for ch in "\r\n"):
+            return fallback
+        try:
+            parsed = urlsplit("//" + raw)
+            hostname = parsed.hostname
+            port = parsed.port
+            if not hostname or port != int(self.server_port):
+                return fallback
+            address = ipaddress.ip_address(hostname)
+        except (TypeError, ValueError):
+            address = None
+        if hostname.casefold().rstrip(".") == "localhost":
+            allowed = True
+        elif address is None:
+            allowed = False
+        elif address.is_loopback:
+            allowed = True
+        elif isinstance(address, ipaddress.IPv4Address):
+            allowed = any(address in network for network in (
+                ipaddress.ip_network("10.0.0.0/8"),
+                ipaddress.ip_network("172.16.0.0/12"),
+                ipaddress.ip_network("192.168.0.0/16"),
+            ))
+        else:
+            # RFC1918 is IPv4-specific; IPv6 link-local/ULA values are not
+            # accepted by this LAN bootstrap policy.
+            allowed = False
+        if not allowed:
+            return fallback
+        # Preserve brackets required for IPv6 Host URLs.
+        netloc = f"[{hostname}]" if ":" in hostname else hostname
+        return f"{'https' if self.tls else 'http'}://{netloc}:{port}"
+
     def _wire_task_push(self) -> None:
         """Deliver task progress live as ``ScTasksChange`` (TaskUtil.InitData).
 
@@ -279,7 +339,7 @@ class FixtureServer(ThreadingHTTPServer):
         or third-party account endpoint is advertised.
         """
 
-        base_url = self.public_base_url or f"http://{self.server_address[0]}:{self.server_address[1]}"
+        base_url = self.request_base_url(request.get("host"))
         if base_url.endswith("/"):
             base_url = base_url.rstrip("/")
         world = {
@@ -345,9 +405,15 @@ class FixtureServer(ThreadingHTTPServer):
         """
 
         normalised = str(route).rstrip("/") or "/"
-        base_url = self.public_base_url or f"http://{self.server_address[0]}:{self.server_address[1]}"
+        base_url = self.request_base_url(request.get("host"))
         if normalised == "/health":
-            return 200, {"status": "ok", "service": "ljjc-fixture-server", "sandbox": True}
+            payload: dict[str, Any] = {"status": "ok", "service": "ljjc-fixture-server", "sandbox": True}
+            certificate = self.certificate_health()
+            if certificate is not None:
+                payload["certificate"] = certificate
+                if certificate.get("status") in {"warning", "expired", "error"}:
+                    payload["status"] = "warning"
+            return 200, payload
         if normalised == "/info":
             settings = {
                 "service": "ljjc-fixture-server",
@@ -864,7 +930,7 @@ class FixtureHandler(BaseHTTPRequestHandler):
         except (UnicodeDecodeError, json.JSONDecodeError):
             return None
 
-    def _dynamic_fixture(self, parsed) -> tuple[bytes, str] | None:
+    def _dynamic_fixture(self, parsed, host_header: str | None = None) -> tuple[bytes, str] | None:
         """Render the small directory/bootstrap fixtures from server.toml.
 
         The original fixture files contain loopback URLs.  Keeping their
@@ -873,7 +939,7 @@ class FixtureHandler(BaseHTTPRequestHandler):
         second host-specific copy.
         """
         configured_base_url = self.server.public_base_url
-        base_url = configured_base_url or f"http://{self.server.server_address[0]}:{self.server.server_port}"
+        base_url = self.server.request_base_url(host_header)
         path = parsed.path.rstrip("/") or "/"
         if path == "/pr2new_djwk.json":
             if not configured_base_url:
@@ -1617,6 +1683,8 @@ document.querySelector('#refresh').addEventListener('click',load);load();
             "body": payload_body,
             "content_type": self.headers.get("Content-Type"),
             "authorization": self.headers.get("Authorization"),
+            "host": self.headers.get("Host", ""),
+            "request_base_url": self.server.request_base_url(self.headers.get("Host", "")),
         })
         if contract_response is not None:
             status, payload = contract_response.status, contract_response.payload
@@ -1640,8 +1708,17 @@ document.querySelector('#refresh').addEventListener('click',load);load();
 
         if self.server.game is not None and (parsed.path.startswith('/fci/') or parsed.path.startswith('/match/')):
             game_path = parsed.path + ('?' + parsed.query if parsed.query else '')
-            result = self.server.game.handle_http(method, game_path, payload_body,
-                self.headers.get('Content-Type'), self.headers.get('Authorization'))
+            try:
+                result = self.server.game.handle_http(method, game_path, payload_body,
+                    self.headers.get('Content-Type'), self.headers.get('Authorization'),
+                    request_base_url=self.server.request_base_url(self.headers.get("Host", "")))
+            except TypeError as exc:
+                # Preserve compatibility with small fixture doubles and
+                # third-party game adapters that predate request_base_url.
+                if "request_base_url" not in str(exc):
+                    raise
+                result = self.server.game.handle_http(method, game_path, payload_body,
+                    self.headers.get('Content-Type'), self.headers.get('Authorization'))
             if result is not None:
                 status, payload = result
                 if status == 200:
@@ -1654,7 +1731,7 @@ document.querySelector('#refresh').addEventListener('click',load);load();
                 return
 
         try:
-            dynamic = self._dynamic_fixture(parsed)
+            dynamic = self._dynamic_fixture(parsed, self.headers.get("Host", ""))
         except PatchVersionError as exc:
             status = 409 if isinstance(exc, PatchVersionMismatch) else 400
             self._send_bytes(status, json.dumps({"error": str(exc)}).encode("utf-8"), "application/json", send_body)
