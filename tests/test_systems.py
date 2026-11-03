@@ -306,13 +306,31 @@ class LocalSystemsTests(unittest.TestCase):
             self.assertEqual(status, 200)
             self.assertEqual(changed["socialPicture"], "local://avatar/1")
 
-            status, changed = game.handle_http(
-                "PATCH", "/fci/home-back-ground/",
-                b'{"homeBackGround":42,"isRandom":true}',
+            # Scene 42 was a placeholder, absent from the original scene table.
+            # Obtain real scene 31015 through the visible local gift and native
+            # mailbox claim before testing profile persistence.
+            status, _ = game.handle_http("GET", "/fci/task/", authorization=auth)
+            self.assertEqual(status, 200)
+            status, mailbox = game.handle_http("GET", "/fci/mail/", authorization=auth)
+            self.assertEqual(status, 200)
+            scene_mail = next(mail for mail in mailbox["mails"] if any(
+                item["baseRes"]["type"] == 11 and item["baseRes"]["id"] == 31015 for item in mail["attachments"]))
+            status, claim = game.handle_http(
+                "PATCH", f"/fci/mail/{scene_mail['id']}/", b'{"attachmentsGot":true}',
                 "application/json", auth,
             )
             self.assertEqual(status, 200)
-            self.assertEqual(changed["result"]["current"], 42)
+            self.assertTrue(any(change.get("baseRes", {}).get("id") == 31015
+                                for change in claim["resChange"]))
+            self.assertEqual(game.systems._state(game._profile(account))["items"]["31015"]["count"], 1)
+
+            status, changed = game.handle_http(
+                "PATCH", "/fci/home-back-ground/",
+                b'{"homeBackGround":31015,"isRandom":true}',
+                "application/json", auth,
+            )
+            self.assertEqual(status, 200)
+            self.assertEqual(changed["result"]["current"], 31015)
             self.assertTrue(changed["result"]["isRandom"])
 
             status, changed = game.handle_http(
@@ -358,7 +376,7 @@ class LocalSystemsTests(unittest.TestCase):
             status, base = restarted.handle_http("GET", "/fci/baseinfo/", authorization=auth)
             self.assertEqual(status, 200)
             self.assertEqual(base["level"], 8)
-            self.assertEqual(base["homeBackGround"]["current"], 42)
+            self.assertEqual(base["homeBackGround"]["current"], 31015)
             status, stored_signboard = restarted.handle_http("GET", "/fci/signboard/", authorization=auth)
             self.assertEqual(status, 200)
             self.assertEqual(stored_signboard["signboard"], 202)
