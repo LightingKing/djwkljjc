@@ -372,6 +372,23 @@ class LocalWelfareFeatures:
         return 200, snapshot()
 
     # ------------------------------------------ postcard (4*18 cells; 5 prizes)
+    @staticmethod
+    def _postcard_snapshot(data: Mapping[str, Any]) -> dict[str, Any]:
+        """Native City red points and the detail window consume one contract."""
+        cells = data.get("cells", {})
+        received = {int(v) for v in data.get("received", [])}
+        return {
+            "isFirstEnter": not bool(data.get("visited") or cells),
+            "postcardInfo": [
+                {"postcardId": pid, "postcardCell": [
+                    {"cellId": cid, "isLighten": f"{pid}:{cid}" in cells}
+                    for cid in range(1, 19)
+                ]} for pid in range(1, 5)
+            ],
+            # Lua indexes the total prize at 1, then the four card prizes.
+            "prizeInfo": [{"prizeReceiveStatus": pid in received} for pid in range(5)],
+        }
+
     def _postcard(self, method: str, route: str, body: Body, profile: Mapping[str, Any], state: dict[str, Any]) -> Response:
         data = state["welfare"]["postcard"]; cells = data.setdefault("cells", {}); received = {int(v) for v in data.setdefault("received", [])}
         payload = _json(body)
@@ -386,9 +403,7 @@ class LocalWelfareFeatures:
         path_match = native_lighten or legacy_path
         postcard_id = int(path_match[1]) if path_match else _int(payload.get("postcardId", payload.get("postcard_id")))
         if method == "GET":
-            infos = [{"postcardId": pid, "postcardCell": [{"cellId": cid, "isLighten": f"{pid}:{cid}" in cells} for cid in range(1, 19)]} for pid in range(1, 5)]
-            prizes = [{"prizeReceiveStatus": 0 in received}] + [{"prizeReceiveStatus": pid in received} for pid in range(1, 5)]
-            return 200, {"isFirstEnter": not bool(data.get("visited") or cells), "postcardInfo": infos, "prizeInfo": prizes}
+            return 200, self._postcard_snapshot(data)
         if method != "POST": return 405, {"error": "method_not_allowed"}
         if "lighten" in route:
             if not 1 <= postcard_id <= 4: return 400, {"error": "invalid_postcard_id"}
@@ -477,7 +492,7 @@ class LocalWelfareFeatures:
         return {
             "sealResult": {"newOpenFlag": bool(seal.get("newOpenFlag", True))},
             "sealFlagResult": {"newOpenFlag": bool(seal.get("newOpenFlag", True))},
-            "postcardResult": {"isFirstEnter": not bool(postcard.get("visited") or postcard.get("cells")), "postcardInfo": [], "prizeInfo": []},
+            "postcardResult": self._postcard_snapshot(postcard),
         }
 
     def handle_http(self, method: str, path: str, body: Body, profile: Mapping[str, Any]) -> Optional[Response]:
