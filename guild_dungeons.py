@@ -19,6 +19,7 @@ from google.protobuf.message import DecodeError
 
 import actors
 from grants import grant_rewards
+from local_mailbox import send_mail
 
 
 def _rows(name):
@@ -34,6 +35,7 @@ ACTOR_CONFIG = {r['id']:r for r in _rows('ActorConfig')}
 ASSIST_REWARDS = {r['score']:r['rewards'] for r in _rows('GuildDungeonAssistScoreReward')}
 CHALLENGE_REWARDS = {(r['dungeonId'],r['score']):r['rewards'] for r in _rows('GuildDungeonChallengeScoreReward')}
 PROGRESS_REWARDS = {(r['dungeonId'],r['progress']):r['rewards'] for r in _rows('GuildDungeonChallengeProgressReward')}
+PROFITS = {r['id']:r for r in _rows('ProfitDetail') if r['id'] in (501,502,503)}
 BEIJING = timezone(timedelta(hours=8))
 UID_BASE = 7_000_000_000_000
 
@@ -76,6 +78,13 @@ class LocalGuildDungeons:
             conn.execute('CREATE TABLE IF NOT EXISTS local_hidden_guild_runs '
                          '(uid INTEGER PRIMARY KEY,account_id INTEGER NOT NULL,guild_id INTEGER NOT NULL,'
                          'week INTEGER NOT NULL,run_json TEXT NOT NULL)')
+            conn.execute('CREATE TABLE IF NOT EXISTS local_hidden_guild_clock '
+                         '(id INTEGER PRIMARY KEY CHECK(id=1), max_seen INTEGER NOT NULL)')
+
+    def _max_seen(self):
+        with closing(self.game._connect()) as conn:
+            row=conn.execute('SELECT max_seen FROM local_hidden_guild_clock WHERE id=1').fetchone()
+        return int(row[0]) if row else 0
 
     def _week(self):
         local = datetime.fromtimestamp(self.game._now(), BEIJING) - timedelta(hours=6)
@@ -120,10 +129,13 @@ class LocalGuildDungeons:
         return {'stages':stages}
 
     def _save_guild(self, guild_id, state):
+        self._save_cycle(guild_id,self._week(),state)
+
+    def _save_cycle(self, guild_id, week, state):
         with closing(self.game._connect()) as conn, conn:
             conn.execute('INSERT INTO local_hidden_guild_state VALUES (?,?,?) '
                          'ON CONFLICT(guild_id,week) DO UPDATE SET state_json=excluded.state_json',
-                         (guild_id,self._week(),json.dumps(state,separators=(',',':'))))
+                         (guild_id,week,json.dumps(state,separators=(',',':'))))
 
     def _player(self, profile):
         with closing(self.game._connect()) as conn:
@@ -257,6 +269,8 @@ class LocalGuildDungeons:
                          (uid,profile['account_id'],guild_id,self._week(),json.dumps(run,separators=(',',':'))))
 
     def _enter(self, profile, guild_id, guild_state, player, request):
+        if self.game._now()<self._max_seen() or guild_state.get('settlement'):
+            raise GuildDungeonError('clock_rollback')
         try:
             dungeon=int(request.get('dungeonId',0)); group=int(request.get('selectActorGroupId',1))
         except (TypeError,ValueError):
@@ -314,6 +328,8 @@ class LocalGuildDungeons:
             raise GuildDungeonError('dungeon_not_active')
         if run['result']:
             return run['result']
+        if guild_state.get('settlement') or self.game._now()<self._max_seen():
+            raise GuildDungeonError('activity_closed_today')
         report=run['report']
         if run['status']!='active' or not report or not int(report.get('winTeam',0)) or int(report.get('gameRound',0))<=0:
             raise GuildDungeonError('dungeon_not_active')
@@ -321,6 +337,8 @@ class LocalGuildDungeons:
         enemy=next((t for t in report.get('teamList',[]) if int(t.get('team',0))==2),{})
         damage=max(0,int(enemy.get('statistic',{}).get('totalDamage',0)))
         score=min(sum(_base_hp(did)),damage)
+        if score>0 and STAGES[did]['dungeonType']==16:
+            guild_state.setdefault('humanParticipants',{})[str(profile['player_id'])]=int(profile['account_id'])
         target['damage']=min(sum(_base_hp(did)),target['damage']+score)
         actor_group=[{key:actor[key] for key in ('id','quality','star','level') if key in actor}
                      for actor in run['entry']['baseInfo']['actors']]
@@ -365,6 +383,97 @@ class LocalGuildDungeons:
             result={'rewardRecords':player['rewardRecords'],'resChange':changes}
         self._save_player(profile,player)
         return result
+
+    def settle_due(self, profile):
+        """Settle completed guild challenges at Monday 00:00 Beijing.
+
+        Shared popularity and the original profit tier are frozen once for
+        the guild/week. Personal contribution mails are delivered only to
+        accounts that actually dealt challenge damage, including offline
+        members when they next log in. Late delivery never extends a buff.
+        """
+        with self.game.atomic_mutation():
+            now=self.game._now()
+            with closing(self.game._connect()) as conn:
+                conn.execute('INSERT INTO local_hidden_guild_clock VALUES(1,?) '
+                             'ON CONFLICT(id) DO UPDATE SET max_seen=MAX(max_seen,excluded.max_seen)',(now,))
+                rows=conn.execute('SELECT guild_id,week,state_json FROM local_hidden_guild_state '
+                                  'WHERE week+?<=? ORDER BY week,guild_id',(604800-21600,now)).fetchall()
+            for row in rows:
+                state=json.loads(row['state_json']);before=json.dumps(state,sort_keys=True)
+                participants=state.get('humanParticipants',{})
+                if not participants:
+                    continue
+                gid,week=int(row['guild_id']),int(row['week'])
+                did=6001+(week//604800)%3;config=STAGES[did]
+                if not state.get('settlement'):
+                    scores=sorted((r['score'] for r in state['stages'][str(did)]['records'].values()),reverse=True)
+                    top_three=sum(scores[:3])
+                    excess=max(0,top_three-config['scoreDelta'])
+                    shared=min(config['scoreUpLimitForGuild'],excess*config['exchangeScaleForGuild']//10000)
+                    personal=min(config['scoreUpLimit'],excess*config['exchangeScaleForPerson']//10000)
+                    reached=[r for r in config['challengeBuffs'] if top_three>=r['targetScore']]
+                    profit_id=max(reached,key=lambda r:r['targetScore'])['id'] if reached else 0
+                    end=week+604800-21600
+                    state['settlement']={'topThreeScore':top_three,'guildScore':shared,'personalScore':personal,
+                                         'profitId':profit_id,'startTime':end,
+                                         'endTime':end+PROFITS[profit_id]['time'] if profit_id else end}
+                    def credit(conn,guilds,player,clock,notices):
+                        guild=guilds['guilds'].get(str(gid))
+                        if guild is None:
+                            return
+                        guild['baseInfo']['score']=int(guild['baseInfo'].get('score',0))+shared
+                        for pid in participants:
+                            member=guild.get('members',{}).get(pid)
+                            owner=guilds['players'].get(pid)
+                            if member and owner and int(owner['data'].get('guildId',0))==gid:
+                                owner['data']['guildScoreRecord']=int(owner['data'].get('guildScoreRecord',0))+personal
+                                member['guildScoreRecord']=owner['data']['guildScoreRecord']
+                                member['guildScore']=int(member.get('guildScore',0))+personal
+                                notices.append(({'account_id':owner['accountId'],'player_id':pid},55,
+                                                [guild['baseInfo']['score'],pid,member['guildScoreRecord']]))
+                    self.game.guild._run(profile,credit)
+                pid=str(profile['player_id'])
+                receipts=state.setdefault('personalMails',{})
+                if participants.get(pid)==int(profile['account_id']) and pid not in receipts:
+                    amount=state['settlement']['personalScore']
+                    mail=send_mail(self.game,profile,'公会副本周期贡献奖励',
+                        f"公会 {gid}，挑战关卡 {did}。前三名总分 {state['settlement']['topThreeScore']}，按原表结算贡献。",
+                        [{'type':17,'id':0,'count':amount}],sender_name='本地公会副本',important=True) if amount else None
+                    receipts[pid]=mail['id'] if mail else 0
+                if json.dumps(state,sort_keys=True)!=before:
+                    self._save_cycle(gid,week,state)
+
+    def _active_cycle_profit(self, profile):
+        # Native guild profits benefit current members. Personal medals and
+        # contribution mails remain participation-gated in settle_due().
+        gid=self.game.guild._run(profile,lambda conn,state,player,now,notices:int(player.get('guildId',0)))
+        if not gid:
+            return None
+        now=max(self.game._now(),self._max_seen())
+        with closing(self.game._connect()) as conn:
+            rows=conn.execute('SELECT state_json FROM local_hidden_guild_state WHERE guild_id=? ORDER BY week DESC',(gid,)).fetchall()
+        for row in rows:
+            settlement=json.loads(row[0]).get('settlement',{})
+            if settlement.get('profitId') and settlement['startTime']<=now<settlement['endTime']:
+                return settlement
+        return None
+
+    def active_profits(self, profile):
+        settlement=self._active_cycle_profit(profile)
+        if not settlement:
+            return []
+        row=PROFITS[settlement['profitId']]
+        return [{'id':row['id'],'type':row['type'],'add':row['add'],
+                 'startTime':settlement['startTime'],'endTime':settlement['endTime']}]
+
+    def active_profit_rules(self, profile):
+        settlement=self._active_cycle_profit(profile)
+        if not settlement:
+            return []
+        row=PROFITS[settlement['profitId']]
+        return [{'id':row['id'],'type':row['type'],'add':row['add'],'isRatio':row['isRatio'],
+                 'dungeonType':row.get('dungeonType',[]),'resType':row.get('resType',0),'funcType':row.get('funcType',0)}]
 
     def redpoint_fields(self, profile):
         try:
@@ -471,7 +580,14 @@ class LocalGuildDungeons:
                         run,owner=self._run(profile,uid)
                         if owner!=gid:raise GuildDungeonError('dungeon_not_active')
                         if run['status']=='active':
-                            run['status']='closed';self._save_run(profile,uid,gid,run)
+                            report=run.get('report') or {}
+                            if int(report.get('winTeam',0)) and int(report.get('gameRound',0))>0:
+                                # Guild ranking uses damage on both win and loss.
+                                # Native clients can DELETE before requesting
+                                # balance; keep the same atomic cached result.
+                                self._balance(profile,uid,gid,state,player)
+                            else:
+                                run['status']='closed';self._save_run(profile,uid,gid,run)
                         return 200,{'result':True}
                 return 404,{'error':'unknown_guild_dungeon_route'}
         except GuildDungeonError as exc:

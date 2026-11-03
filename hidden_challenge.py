@@ -17,6 +17,7 @@ from google.protobuf.message import DecodeError
 
 import actors
 from grants import grant_rewards
+from local_mailbox import send_mail
 
 ROOT = Path(__file__).resolve().parent / 'data/client-tables'
 
@@ -29,12 +30,18 @@ ACTIVITIES = {r['activityId']: r for r in rows('ChallengeModeDungeon')}
 DUNGEONS = frozenset(d for row in ACTIVITIES.values() for d in row['dungeonId'])
 SCORE_REWARDS = rows('ChallengeModeScoreReward')
 REWARDS = {(r['dungeonId'], r['score']): r for r in SCORE_REWARDS}
+RANK_REWARDS = {(r['type'],r['rank']):r['reward'] for r in rows('ChallengeModeRankReward')}
+SEASON_ANCHOR = 1793570400
+
+
+def season_start(now):
+    return SEASON_ANCHOR + ((int(now)-SEASON_ANCHOR)//604800)*604800
 
 
 def season_activity_id(now):
     # D/local: first distinct season starts 2026-11-02 06:00 Asia/Shanghai.
     # 45011..45020 repeat the first ten dungeon sets in the original table.
-    return 45001 + ((int(now) - 1793570400) // 604800) % 10
+    return 45001 + ((int(now) - SEASON_ANCHOR) // 604800) % 10
 
 
 class LocalHiddenChallenge:
@@ -66,6 +73,10 @@ class LocalHiddenChallenge:
                 if previous['dungeonId'] != int(dungeon_id):
                     raise ValueError('challenge_run_identity_mismatch')
                 return previous
+            week=season_start(self.game._now())
+            if week<int(state.get('maxObservedWeek',week)):
+                raise ValueError('clock_rollback')
+            state['maxObservedWeek']=week
             owned = self.game.systems._state(profile)
             uids = [int(u) for u in actor_uids if int(u)]
             if not uids or len(set(uids)) != len(uids):
@@ -86,7 +97,8 @@ class LocalHiddenChallenge:
                 base = 20*int(actor.get('level',1)) + 100*int(actor.get('star',1)) + 10*int(actor.get('quality',1))
                 score += max(1, (base*ratio + 999)//1000)
                 team.append(self.game.systems._st_actor_json(actor, profile, owned, 1))
-            run = {'dungeonId':int(dungeon_id), 'score':score, 'actorGroup':team, 'reduceInfo':ratios, 'won':False}
+            run = {'dungeonId':int(dungeon_id), 'score':score, 'actorGroup':team, 'reduceInfo':ratios,
+                   'won':False,'seasonStart':week,'activityId':season_activity_id(week)}
             state['runs'][str(uid)] = run
             self._save(profile, state)
             return run
@@ -195,11 +207,31 @@ class LocalHiddenChallenge:
             if old is None or run['score'] < old:
                 state['scoreRecord'][key] = run['score']
                 state['teams'][key] = run['actorGroup']
+            # A run keeps the season in which it entered. Once a season has
+            # been paid, late completions may improve permanent score prizes
+            # but cannot change its frozen rank or issue another medal.
+            if 'seasonStart' in run:
+                cycle=state.setdefault('rankSeasons',{}).setdefault(str(run['seasonStart']),
+                    {'activityId':run['activityId'],'stages':{},'settled':False,'mails':{}})
+                if not cycle['settled']:
+                    prior=cycle['stages'].get(key)
+                    if prior is None or run['score']<prior['score']:
+                        cycle['stages'][key]={'score':run['score'],'actorGroup':run['actorGroup']}
             self._save(profile, state)
             return run['score']
 
-    def _ranks(self, profile, dungeon, top=50):
-        state = self._state(profile)
+    def _ranks(self, profile, dungeon, top=50, state=None, historical=False):
+        if state is None:
+            saved=self._state(profile);week=season_start(self.game._now())
+            seasons=saved.get('rankSeasons',{})
+            if historical:
+                cycle=next((cycle for start,cycle in sorted(seasons.items(),key=lambda pair:int(pair[0]),reverse=True)
+                            if int(start)<week and str(dungeon) in cycle.get('stages',{})),{})
+            else:
+                cycle=seasons.get(str(week),{})
+            record=cycle.get('stages',{}).get(str(dungeon))
+            state={'scoreRecord':{str(dungeon):record['score']} if record else {},
+                   'teams':{str(dungeon):record['actorGroup']} if record else {}}
         thresholds = sorted(r['score'] for r in SCORE_REWARDS if r['dungeonId'] == dungeon)
         floor, ceiling = min(thresholds), max(thresholds)
         # Fixed identities and scores across GET/restart; no rewards are issued
@@ -214,6 +246,35 @@ class LocalHiddenChallenge:
                            'actorGroup':[{key:actor[key] for key in ('id','quality') if key in actor}
                                          for actor in state['teams'].get(str(dungeon),[])]})
         return sorted(values, key=lambda r:(-r['score'],r['playerId']))[:max(1,min(50,int(top)))]
+
+    def settle_due(self, profile):
+        """Deliver earned original rank medals once after each local week.
+
+        Only recorded wins create rank seasons. Delivery is lazy on login /
+        activity reads, so offline users catch up without fabricating played
+        weeks. Mail creation and the permanent receipt share one transaction.
+        """
+        with self.game.atomic_mutation():
+            state=self._state(profile);before=json.dumps(state,sort_keys=True)
+            now=self.game._now();week=season_start(now)
+            state['maxObservedWeek']=max(week,int(state.get('maxObservedWeek',week)))
+            for key,cycle in state.get('rankSeasons',{}).items():
+                if int(key)+604800>now or cycle.get('settled'):
+                    continue
+                config=ACTIVITIES[cycle['activityId']]
+                for did,record in cycle['stages'].items():
+                    snapshot={'scoreRecord':{did:record['score']},'teams':{did:record['actorGroup']}}
+                    ranks=self._ranks(profile,int(did),state=snapshot)
+                    rank=next(i for i,row in enumerate(ranks,1) if row['playerId']==str(profile['player_id']))
+                    reward_type=config['dungeonReward'][config['dungeonId'].index(int(did))]
+                    mail=send_mail(self.game,profile,'练度竞赛赛季排名奖励',
+                        f"本地赛季 {cycle['activityId']}，关卡 {did}，排名 {rank}。奖励采用原版排名表。",
+                        RANK_REWARDS[(reward_type,rank)],sender_name='本地练度竞赛',important=True)
+                    cycle['mails'][did]={'mailId':mail['id'],'rank':rank}
+                cycle['settled']=True
+                cycle['settledAt']=now
+            if json.dumps(state,sort_keys=True)!=before:
+                self._save(profile,state)
 
     def redpoint_fields(self, profile):
         state = self._state(profile)
@@ -235,7 +296,7 @@ class LocalHiddenChallenge:
             if dungeon not in DUNGEONS:
                 return 404, {'error':'unknown_challenge_dungeon'}
             with self.game.atomic_mutation():
-                ranks = self._ranks(profile, dungeon, int(match[1]) if match else 50)
+                ranks = self._ranks(profile, dungeon, int(match[1]) if match else 50,historical=bool(season))
             return 200, {'rankInfo' if match else 'rankList': ranks}
         if route != '/fci/challenge-mode/reward':
             return 404, {'error':'unknown_challenge_route'}

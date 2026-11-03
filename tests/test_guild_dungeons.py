@@ -88,6 +88,39 @@ class GuildDungeonTests(unittest.TestCase):
         self.assertEqual(self.dungeon_call('PATCH', f'/fci/guild-dungeon/{uid}/active/', {'stageID':6102,'dungeonType':15,'winTeam':1})[0], 400)
         self.assertEqual(self.dungeon_call('POST', '/fci/guild-dungeon/reward/', {'dungeonId':0,'score':100000})[0], 409)
 
+    def test_quit_after_terminal_report_commits_damage_once_for_win_and_loss(self):
+        for winner,did in ((1,6101),(2,6102)):
+            with self.subTest(winner=winner):
+                uid=self.enter(did)['dungeonUid']
+                active=message_factory.GetMessageClass(self.game._pool.FindMessageTypeByName('FightActiveData'))(
+                    dungeonType=15,stageID=did,gameRound=3,winTeam=winner)
+                team=active.teamList.add();team.team=2;team.statistic.totalDamage=200000
+                self.assertEqual(self.dungeon_call('PATCH',f'/fci/guild-dungeon/{uid}/active/',active.SerializeToString())[0],200)
+                self.assertEqual(self.dungeon_call('DELETE',f'/fci/guild-dungeon/{uid}/')[0],200)
+                status,result=self.dungeon_call('POST',f'/fci/guild-dungeon/{uid}/balance/',{})
+                self.assertEqual(status,200,result)
+                self.assertEqual(result['result']['win'],winner==1)
+                self.assertEqual(result['score'],200000)
+                before=self.dungeon_call('GET','/fci/guild-dungeon-record/')[1]
+                self.assertEqual(self.dungeon_call('DELETE',f'/fci/guild-dungeon/{uid}/')[0],200)
+                self.assertEqual(self.dungeon_call('POST',f'/fci/guild-dungeon/{uid}/balance/',{})[1],result)
+                self.assertEqual(self.dungeon_call('GET','/fci/guild-dungeon-record/')[1],before)
+                record=next(r for r in before['dungeonRecords'] if r['dungeonId']==did)
+                self.assertEqual(record['finishTimes'],1)
+
+    def test_quit_terminal_save_failure_rolls_back_damage_and_can_retry(self):
+        uid=self.enter()['dungeonUid']
+        report={'dungeonType':15,'stageID':6101,'gameRound':3,'winTeam':1,
+                'teamList':[{'team':2,'statistic':{'totalDamage':200000}}]}
+        self.assertEqual(self.dungeon_call('PATCH',f'/fci/guild-dungeon/{uid}/active/',report)[0],200)
+        before=self.dungeon_call('GET',f'/fci/guild/{self.gid}/dungeon/summary/')[1]
+        with patch.object(self.module,'_save_player',side_effect=RuntimeError('close save failed')):
+            with self.assertRaisesRegex(RuntimeError,'close save failed'):
+                self.dungeon_call('DELETE',f'/fci/guild-dungeon/{uid}/')
+        self.assertEqual(self.dungeon_call('GET',f'/fci/guild/{self.gid}/dungeon/summary/')[1],before)
+        self.assertEqual(self.dungeon_call('DELETE',f'/fci/guild-dungeon/{uid}/')[0],200)
+        self.assertEqual(self.dungeon_call('POST',f'/fci/guild-dungeon/{uid}/balance/',{})[1]['score'],200000)
+
     def test_challenge_progress_reward_and_concurrent_claim_once(self):
         self.now[0] = int(datetime(2026, 11, 7, 4, tzinfo=timezone.utc).timestamp())
         status, summary = self.dungeon_call('GET', f'/fci/guild/{self.gid}/dungeon/summary/')

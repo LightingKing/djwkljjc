@@ -359,6 +359,10 @@ class LocalMailbox:
     # -- operations ------------------------------------------------------
     def _claim(self, profile: Mapping[str, Any], ids: Optional[list[int]]) -> dict[str, Any]:
         """Claim attachments of ``ids`` (None = every mail). Exactly once each."""
+        with self.game.atomic_mutation():
+            return self._claim_atomic(profile, ids)
+
+    def _claim_atomic(self, profile: Mapping[str, Any], ids: Optional[list[int]]) -> dict[str, Any]:
 
         now = self._now()
         state = self._load(profile)
