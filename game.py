@@ -1497,8 +1497,13 @@ class LocalGame:
             profile = self._profile(account)
             self.mall.settle_month_card(profile)
             profile = self._profile(account)
-            self.hidden_challenge.settle_due(profile)
-            self.guild_dungeons.settle_due(profile)
+            # Catch up earned cycle mail on the valid collection reads that
+            # expose it. Authentication alone must not mutate unrelated
+            # ledgers for invalid routes or cached battle retries.
+            if method.upper() == 'GET' and route.rstrip('/').lower() in {
+                    '/fci/activity', '/fci/mail', '/fci/redpoint/data'}:
+                self.hidden_challenge.settle_due(profile)
+                self.guild_dungeons.settle_due(profile)
             economy_profile = dict(profile)
             economy_profile["account"] = account
             for feature in (self.hidden_events, self.gacha_score_shop, self.hidden_challenge, self.guild_dungeons):
@@ -1648,8 +1653,6 @@ class LocalGame:
         profile = self._profile(account)
         self.mall.settle_month_card(profile)
         profile = self._profile(account)
-        self.hidden_challenge.settle_due(profile)
-        self.guild_dungeons.settle_due(profile)
         economy_profile = dict(profile)
         economy_profile["account"] = account
         guild_result = self.guild.handle_http(method, path, body, profile)
@@ -1701,6 +1704,8 @@ class LocalGame:
         if action == "login":
             if method != "POST":
                 return 405, {"error": "method_not_allowed", "message": "POST required"}
+            self.hidden_challenge.settle_due(profile)
+            self.guild_dungeons.settle_due(profile)
             # The Lua callback ignores this response body.  Return an empty
             # local object rather than claiming a remote operation succeeded.
             self.tasks.on_login(profile)
