@@ -54,7 +54,7 @@ if ($env:LJJC_TEST_CONFIG) { $launch.ConfigFile=$env:LJJC_TEST_CONFIG }
 '''
         before = sorted(p.relative_to(self.root).as_posix() for p in self.root.rglob("*"))
         result = subprocess.run([PWSH, "-NoProfile", "-NonInteractive", "-Command", command],
-                                env=env, capture_output=True, text=True, encoding="utf-8", timeout=20)
+                                env=env, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=20)
         self.assertEqual(sorted(p.relative_to(self.root).as_posix() for p in self.root.rglob("*")), before)
         return result
 
@@ -62,6 +62,16 @@ if ($env:LJJC_TEST_CONFIG) { $launch.ConfigFile=$env:LJJC_TEST_CONFIG }
         path = self.root / "external LAN config.toml"
         path.write_text(text, encoding="utf-8")
         return path
+
+    @unittest.skipUnless(shutil.which("powershell"), "Windows PowerShell 5.1 is not installed")
+    def test_windows_powershell_rejected_before_any_release_work(self):
+        result = subprocess.run([
+            shutil.which("powershell"), "-NoProfile", "-NonInteractive", "-File", str(SCRIPT),
+            "-CodeDirectory", str(self.root / "does-not-exist"), "-PlanOnly",
+        ], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=20)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("PowerShell 7 (pwsh) is required", result.stderr)
+        self.assertFalse((self.root / "does-not-exist").exists())
 
     def assert_state_is_original(self, plan):
         args = plan["arguments"]

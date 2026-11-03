@@ -13,6 +13,8 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
+from external_assets import external_path, require_file
+
 from google.protobuf import json_format, message_factory
 
 from accounts import LocalAccounts
@@ -253,9 +255,8 @@ class TournamentRewardTests(unittest.TestCase):
 
     @unittest.skipIf(LuaRuntime is None, 'native Lua test requires hot-update/requirements.txt')
     def test_original_push44_handler_fetches_native_record_and_broadcasts_refresh(self):
-        source_root = Path(__file__).resolve().parents[3] / 'analysis/lua-decompiled'
-        if not source_root.is_dir():
-            self.skipTest('original decompiled client Lua is unavailable')
+        source_root = external_path("LJJC_DECOMPILED_LUA", "analysis/lua-decompiled")
+        require_file(source_root / "manager__pushservice.lua", "LJJC_DECOMPILED_LUA")
         source = (source_root / 'manager__pushservice.lua').read_text(encoding='utf-8')
         handler = re.search(r'^function m_handler.AsyncPvpDailyRefresh\(\).*?^end$', source, re.M | re.S).group()
         runtime = LuaRuntime()

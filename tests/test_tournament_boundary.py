@@ -8,6 +8,8 @@ import tempfile
 import threading
 import unittest
 
+from external_assets import external_path, require_file
+
 from google.protobuf import json_format, message_factory
 
 from accounts import LocalAccounts
@@ -27,8 +29,10 @@ class TournamentBoundaryTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.root = Path(self.temp.name)
+        self.now = 1793707200
         self.accounts = LocalAccounts(self.root / "accounts")
         self.game = LocalGame(self.root / "game", self.accounts, initial_level=23,
+                              clock=lambda: self.now,
                               initial_resources=[{"type": 7, "id": 0, "param": 0, "count": 200000}])
         self.account, self.auth = test_systems.LocalSystemsTests._guest(self.accounts)
         self.profile = self.game._profile(self.account)
@@ -237,6 +241,7 @@ class TournamentBoundaryTests(unittest.TestCase):
         self.assertEqual(rows[60011]["progress"], 1)
 
         before = self.saved_rows()
+        self.now += 1  # Cached balance must stay read-only across a clock tick.
         status, balance = self.game_call("POST", "/fci/tournament/dungeonbalance/", self.wire(
             "ApiTournamentDungeonBalance", activity_type=5))
         self.assertEqual((status, balance["balanceInfo"]["win"], balance["winNum"]), (200, True, 1))
@@ -310,9 +315,9 @@ class TournamentBoundaryTests(unittest.TestCase):
 
     @unittest.skipIf(LuaRuntime is None, "native Lua test requires hot-update/requirements.txt")
     def test_native_build_actor_from_data_keeps_all_three_enemy_units(self):
-        source_root = Path(__file__).resolve().parents[3] / "analysis/lua-decompiled"
-        if not source_root.is_dir():
-            self.skipTest("original decompiled client Lua is unavailable")
+        source_root = external_path("LJJC_DECOMPILED_LUA", "analysis/lua-decompiled")
+        require_file(source_root / "logic__initgamelogic.lua", "LJJC_DECOMPILED_LUA")
+        require_file(source_root / "logic__define.lua", "LJJC_DECOMPILED_LUA")
         source = (source_root / "logic__initgamelogic.lua").read_text(encoding="utf-8")
         native_function = re.search(r"^function buildActorFromData\(.*?^end$", source, re.M | re.S).group()
         runtime = LuaRuntime()

@@ -7,8 +7,10 @@ import tempfile
 import unittest
 import zipfile
 
+from external_assets import external_path, require_file
+
 ROOT = Path(__file__).resolve().parents[1]
-APK = ROOT.parents[1] / "runtime" / "installed-base.apk"
+APK = external_path("LJJC_ORIGINAL_APK", "runtime/installed-base.apk")
 SPEC = importlib.util.spec_from_file_location("lan_sdk_report", ROOT / "client-patch" / "lan" / "patch_sdk_report.py")
 patch = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(patch)
@@ -17,6 +19,7 @@ SPEC.loader.exec_module(patch)
 class ReportUnityDataPatchTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        require_file(APK, "LJJC_ORIGINAL_APK")
         with zipfile.ZipFile(APK) as archive:
             cls.libs = {abi: archive.read(f"lib/{abi}/libMsdkAdapter.so") for abi in patch.PATCHES}
 

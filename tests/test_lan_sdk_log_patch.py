@@ -8,8 +8,10 @@ import tempfile
 import unittest
 import zipfile
 
+from external_assets import external_path, require_file
+
 ROOT = Path(__file__).resolve().parents[1]
-ORIGINAL_APK = ROOT.parents[1] / "runtime" / "installed-base.apk"
+ORIGINAL_APK = external_path("LJJC_ORIGINAL_APK", "runtime/installed-base.apk")
 SPEC = importlib.util.spec_from_file_location(
     "lan_sdk_log_patch", ROOT / "client-patch" / "lan" / "patch_sdk_log.py")
 patch = importlib.util.module_from_spec(SPEC)
@@ -29,11 +31,12 @@ class SdkLogPatchInputTests(unittest.TestCase):
                 patch.patch_library(b"unverified ELF", abi)
 
 
-@unittest.skipUnless(ORIGINAL_APK.is_file() and ELFFile and capstone,
-                     "original APK, pyelftools and capstone are needed for binary integration checks")
+@unittest.skipUnless(ELFFile and capstone,
+                     "pyelftools and capstone are needed for binary integration checks")
 class SdkLogPatchBinaryTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        require_file(ORIGINAL_APK, "LJJC_ORIGINAL_APK")
         with zipfile.ZipFile(ORIGINAL_APK) as archive:
             cls.libraries = {abi: archive.read(f"lib/{abi}/libMsdkAdapter.so") for abi in patch.PATCHES}
 

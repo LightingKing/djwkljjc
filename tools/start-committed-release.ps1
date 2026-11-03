@@ -8,6 +8,9 @@ param(
     [string]$CandidateDirectory = 'I:/workspace/mobilegame/runtime/remediation-20261031/candidate'
 )
 $ErrorActionPreference = 'Stop'
+if ($PSVersionTable.PSVersion.Major -lt 7) {
+    throw 'PowerShell 7 (pwsh) is required. Run this script with pwsh; Windows PowerShell 5.1 is unsupported.'
+}
 Set-StrictMode -Version Latest
 
 $releaseRoot = 'I:/workspace/mobilegame/runtime/remediation-20261031'

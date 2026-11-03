@@ -188,7 +188,8 @@ class LocalTournament:
 
     def _save(self, conn, profile, state, now):
         conn.execute("""INSERT INTO local_tournament_state(account_id,state_json,updated_at) VALUES(?,?,?)
-                       ON CONFLICT(account_id) DO UPDATE SET state_json=excluded.state_json,updated_at=excluded.updated_at""",
+                       ON CONFLICT(account_id) DO UPDATE SET state_json=excluded.state_json,updated_at=excluded.updated_at
+                       WHERE local_tournament_state.state_json != excluded.state_json""",
                     (profile["account_id"], json.dumps(state, ensure_ascii=False, separators=(",", ":")), now))
 
     def _run(self, profile, callback):

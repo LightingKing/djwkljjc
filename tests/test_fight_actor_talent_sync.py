@@ -6,6 +6,8 @@ from pathlib import Path
 import tempfile
 import unittest
 
+from external_assets import external_path, require_file
+
 from google.protobuf import message_factory
 
 from accounts import LocalAccounts
@@ -83,10 +85,8 @@ class FightActorTalentSyncTests(unittest.TestCase):
 
     def test_original_lua_builds_dynamic_talents_from_entry_payload(self):
         # Exercise the original initialization function, not a Python copy of it.
-        source = (Path(__file__).resolve().parents[3] / "analysis" / "lua-decompiled"
-                  / "logic__initgamelogic.lua")
-        if not source.exists():
-            self.skipTest("original decompiled client Lua is not present")
+        source = (external_path("LJJC_DECOMPILED_LUA", "analysis/lua-decompiled") / "logic__initgamelogic.lua")
+        require_file(source, "LJJC_DECOMPILED_LUA")
         from lupa.lua53 import LuaRuntime
 
         expected = self.talents(self.login_actor())

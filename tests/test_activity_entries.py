@@ -19,6 +19,8 @@ import unittest
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+from external_assets import external_path, require_file
+
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
@@ -33,7 +35,7 @@ import test_systems as _systems  # noqa: E402  (module import: its tests are not
 DAY = 86400
 ANCHOR = int(datetime(2026, 10, 26, 6, tzinfo=timezone(timedelta(hours=8))).timestamp())  # a Monday
 SHIPPED_SCHEDULE = ROOT / "data" / "server-only" / "activity-schedule.yaml"
-LUA_DIR = ROOT.parents[1] / "analysis" / "lua-decompiled"
+LUA_DIR = external_path("LJJC_DECOMPILED_LUA", "analysis/lua-decompiled")
 
 # xlsx ActivitySort row 1 (sortType 1), the order InitSort applies on open.
 ACTIVITY_SORT_ROW1 = [39, 40, 31, 27, 2, 3, 17, 30, 10, 5, 20, 42, 18, 23]
@@ -238,8 +240,7 @@ class ClientEvidenceTests(unittest.TestCase):
 
     def lua(self, name: str) -> str:
         path = LUA_DIR / name
-        if not path.is_file():
-            self.skipTest(f"decompiled client table {name} not present")
+        require_file(path, "LJJC_DECOMPILED_LUA")
         return path.read_text(encoding="utf-8")
 
     def test_activity_sort_row1_matches_client(self):

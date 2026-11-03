@@ -7,17 +7,19 @@ import unittest
 import zipfile
 import zlib
 
+from external_assets import external_path, require_file
+
 ROOT = Path(__file__).resolve().parents[1]
-APK = ROOT.parents[1] / "runtime" / "installed-base.apk"
+APK = external_path("LJJC_ORIGINAL_APK", "runtime/installed-base.apk")
 SPEC = importlib.util.spec_from_file_location("lan_tprt_package", ROOT / "client-patch" / "lan" / "patch_tprt_package.py")
 patch = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(patch)
 
 
-@unittest.skipUnless(APK.is_file(), "original APK is required")
 class TprtPackagePatchTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        require_file(APK, "LJJC_ORIGINAL_APK")
         with zipfile.ZipFile(APK) as archive:
             cls.libs = {abi: archive.read(f"lib/{abi}/libtprt.so") for abi in patch.PATCHES}
 

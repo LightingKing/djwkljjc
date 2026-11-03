@@ -12,6 +12,8 @@ import tempfile
 import unittest
 import zipfile
 
+from external_assets import external_path, require_file
+
 try:
     from loguru import logger
     logger.disable("androguard")
@@ -27,7 +29,7 @@ SPEC.loader.exec_module(PATCH)
 ANDROID = "http://schemas.android.com/apk/res/android"
 NS = "{" + ANDROID + "}"
 OLD_PACKAGE = "com.tencent.tmgp.fcicv"
-ORIGINAL = Path(os.environ.get("LJJC_ORIGINAL_MANIFEST", str(ROOT.parents[1] / "analysis/ljjc_manifest_out/original/AndroidManifest.xml")))
+ORIGINAL = external_path("LJJC_ORIGINAL_MANIFEST", "analysis/ljjc_manifest_out/original/AndroidManifest.xml")
 
 
 def binary_fixture(utf8=False):
@@ -171,8 +173,8 @@ class LanManifestPatchTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "targetSdkVersion"):
             PATCH.patch_manifest(unexpected_target)
 
-    @unittest.skipUnless(ORIGINAL.is_file(), "original game Manifest not available in this checkout")
     def test_original_game_changes_only_the_requested_attributes(self):
+        require_file(ORIGINAL, "LJJC_ORIGINAL_MANIFEST")
         raw = ORIGINAL.read_bytes()
         output, report = PATCH.patch_manifest(raw, version_name="2.0.4")
         before = list(parse_independently(raw).iter())
@@ -213,7 +215,6 @@ class LanManifestPatchTests(unittest.TestCase):
         self.assertEqual([dict(e.attrib) for e in before if e.tag == "uses-permission"],
                          [dict(e.attrib) for e in after if e.tag == "uses-permission"])
 
-    @unittest.skipUnless(ORIGINAL.is_file(), "original game Manifest not available in this checkout")
     def test_aapt_reads_the_modified_original_without_rebuilt_resources(self):
         aapt = shutil.which("aapt")
         if not aapt:
@@ -222,6 +223,7 @@ class LanManifestPatchTests(unittest.TestCase):
             aapt = str(candidates[-1]) if candidates else None
         if not aapt:
             self.skipTest("Android build-tools aapt is not installed")
+        require_file(ORIGINAL, "LJJC_ORIGINAL_MANIFEST")
         output, _ = PATCH.patch_manifest(ORIGINAL.read_bytes(), version_name="2.0.4")
         # A tiny ZIP containing only this 22KB XML is sufficient for aapt's XML
         # reader; no APK/resources build or installation takes place.

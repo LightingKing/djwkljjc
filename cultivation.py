@@ -125,7 +125,8 @@ class LocalCultivation:
     def _save(self, profile, state):
         with closing(self.game._connect()) as connection, connection:
             connection.execute("INSERT INTO local_cultivation VALUES (?, ?, ?) ON CONFLICT(account_id) "
-                               "DO UPDATE SET state_json=excluded.state_json, updated_at=excluded.updated_at",
+                               "DO UPDATE SET state_json=excluded.state_json, updated_at=excluded.updated_at "
+                               "WHERE local_cultivation.state_json != excluded.state_json",
                                (int(profile["account_id"]), json.dumps(state, separators=(",", ":")), self._now()))
 
     def _owned(self, profile, system_state=None):

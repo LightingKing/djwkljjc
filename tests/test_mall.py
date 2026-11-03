@@ -20,9 +20,10 @@ from mall import (
     ACTIVITY_TYPE_MALL, MALL_ACTIVITY_START, LocalMall, MallCatalog, build_iaphandler_patch, window_start,
 )
 from test_systems import LocalSystemsTests
+from external_assets import external_path, require_file
 
 TABLES = ROOT / "data" / "client-tables"
-IAP_SOURCE = ROOT.parents[1] / "analysis" / "lua-decompiled" / "manager__iaphandler.lua"
+IAP_SOURCE = external_path("LJJC_DECOMPILED_LUA", "analysis/lua-decompiled") / "manager__iaphandler.lua"
 GEM60 = "com.tencent.fcicv.Gem60.android"
 GEM1280 = "com.tencent.fcicv.Gem1280.android"
 GEM64800 = "com.tencent.fcicv.Gem64800.android"
@@ -296,8 +297,8 @@ class LocalMallTests(unittest.TestCase):
 
 
 class IAPHandlerPatchTests(unittest.TestCase):
-    @unittest.skipUnless(IAP_SOURCE.is_file(), "decompiled IAPHandler not present")
     def test_patch_replaces_midas_paths_and_compiles(self):
+        require_file(IAP_SOURCE, "LJJC_DECOMPILED_LUA")
         patched = build_iaphandler_patch(IAP_SOURCE.read_text(encoding="utf-8"))
         purchase_impl = patched.split("function PurchaseImpl(", 1)[1].split("\nend\n", 1)[0]
         self.assertNotIn("m_iap", purchase_impl)
