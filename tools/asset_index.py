@@ -5,9 +5,9 @@ The index intentionally reports evidence instead of claiming that a server
 feature is implemented.  ActorConfig and ActorSkin are read from the JSON
 exports.  SceneConfig/CollectionsScenes can be supplied as JSON exports too;
 when they are not exported, the small ``xlsx__*.lua`` records are read with a
-conservative field parser.  The asset root is only enumerated: Unity bundles
-are never modified or executed.  UnityPy is therefore optional and is not
-needed for the path-level index.
+conservative field parser.  Full asset paths are checked exactly. UnityPy reads palette textures without
+modifying bundles; palette validation remains unverified if it is unavailable.
+This tool never executes client logic or changes client/server content.
 """
 
 from __future__ import annotations
@@ -87,102 +87,212 @@ def _lua_rows(path: Path, table_name: str) -> list[dict[str, Any]]:
     return rows
 
 
-def _find(paths: Iterable[str], tokens: Iterable[str]) -> list[str]:
-    needles = [str(token).strip("/\\").casefold() for token in tokens if str(token).strip("/\\")]
-    return sorted({path for path in paths if any(token in path.casefold() for token in needles)})
+# These are the paths assembled by the client, not fragments to search for.
+# UI consumers include widgetactorroller.lua:155,161, newactorget.lua:189,200,
+# collectionsactordetail.lua:244 and widgetactorwikiitem.lua:36.
+ACTOR_UI_PATHS = {
+    "portrait": "texture/actorportrait/actor_portrait_{animRes}",
+    "portraitFull": "texture/actorportraitfull/actor_portrait_full_{animRes}",
+    "headBig": "texture/actorheadbig/actor_head_big_{animRes}",
+    "headRect": "texture/actorheadrectangle/actor_head_{animRes}",
+    "logo": "texture/actorlogo/actor_logo_{animRes}",
+    "intro": "texture/actorintroduction/introduction_{animRes}",
+    "gachaHead": "texture/actorgachahead/gacha_head_{animRes}",
+    "skillHead": "texture/actorskillhead/actor_skill_head_{animRes}",
+    "journeyHead": "texture/actorjourneyhead/actor_head_{animRes}",
+    "selectTeam": "texture/actorgroup/selectteam_{animRes}",
+    "infightMain": "texture/actorinfighthead/main/infight_head_{animRes}",
+}
 
 
-def _resource_paths(paths: list[str], tokens: Iterable[str]) -> dict[str, list[str]]:
-    result: dict[str, list[str]] = {}
-    for token in tokens:
-        value = str(token)
-        if value:
-            result[value] = _find(paths, [value])
-    return result
-
-
-def _status(groups: Mapping[str, list[str]]) -> str:
-    present = [bool(value) for value in groups.values()]
-    if not present:
+def _coverage(present: Iterable[bool]) -> str:
+    values = list(present)
+    if not values:
         return "no_fields"
-    if all(present):
-        return "complete"
-    if any(present):
-        return "partial"
-    return "missing"
+    return "complete" if all(values) else "partial" if any(values) else "missing"
 
 
-def _actor_index(rows: list[dict[str, Any]], paths: list[str]) -> list[dict[str, Any]]:
-    fields = ("animRes", "prefabRes", "logicRes", "voiceRes", "skinUIRes")
+class AssetCatalog:
+    """Only case/separators are normalized; asset names are otherwise exact."""
+
+    def __init__(self, root: Path):
+        self.root = root
+        self.paths = sorted(p.relative_to(root).as_posix() for p in root.rglob("*") if p.is_file())
+        self.by_name = {p.casefold(): p for p in self.paths}
+        self.palettes: dict[str, tuple[dict[str, Any], list[Any] | None]] = {}
+
+    def exact(self, path: str | None) -> dict[str, Any]:
+        actual = self.by_name.get(path.replace("\\", "/").casefold()) if path else None
+        return {"expectedPath": path, "present": actual is not None, "matchedPaths": [actual] if actual else []}
+
+    def directory(self, path: str | None) -> dict[str, Any]:
+        # Directory boundary is significant: voice/foo must not match voice/foobar.
+        prefix = path.replace("\\", "/").rstrip("/").casefold() + "/" if path else None
+        matches = sorted(p for key, p in self.by_name.items() if prefix and key.startswith(prefix))
+        return {"expectedPath": path, "present": bool(matches), "matchedPaths": matches, "fileCount": len(matches)}
+
+    def palette(self, prefab: str | None, index: int | None) -> dict[str, Any]:
+        # common__actorutil.lua:1153-1162: Unity row index is bottom-up.
+        path = f"dependencies/sprite2d/role/{prefab}/{prefab}_palette" if prefab else None
+        evidence = self.exact(path)
+        result = {**evidence, "rowIndex": index}
+        if not evidence["present"]:
+            return {**result, "status": "missing"}
+        if path not in self.palettes:
+            metadata: dict[str, Any] = {}
+            rows = None
+            try:
+                import UnityPy
+                env = UnityPy.load(str(self.root / evidence["matchedPaths"][0]))
+                textures = [obj for obj in env.objects if obj.type.name == "Texture2D"]
+                if len(textures) != 1:
+                    metadata = {"status": "ambiguous_texture" if textures else "no_texture"}
+                else:
+                    texture = textures[0].read()
+                    image = texture.image.convert("RGBA")
+                    width, height = image.size
+                    pixels = image.load()
+                    rows = [tuple(pixels[x, height - 1 - y] for x in range(width)) for y in range(height)]
+                    metadata = {"textureName": texture.m_Name, "width": width, "height": height}
+            except ImportError:
+                metadata = {"status": "unverified", "reason": "UnityPy is not installed"}
+            except Exception as exc:
+                metadata = {"status": "unverified", "reason": f"{type(exc).__name__}: {exc}"}
+            self.palettes[path] = metadata, rows
+        metadata, rows = self.palettes[path]
+        result.update(metadata)
+        if rows is None:
+            return result
+        if not isinstance(index, int) or index < 0 or index >= len(rows):
+            return {**result, "status": "out_of_range"}
+        row = rows[index]
+        if all(pixel[3] == 0 for pixel in row) or all(pixel[:3] == (0, 0, 0) for pixel in row):
+            status = "empty_row"
+        elif index != 0 and row == rows[0]:
+            status = "same_as_row0"
+        else:
+            status = "ok"
+        return {**result, "status": status}
+
+
+def _shared_resources(row: Mapping[str, Any], catalog: AssetCatalog) -> dict[str, Any]:
+    prefab, logic, voice, skin_ui = (row.get(k) for k in ("prefabRes", "logicRes", "voiceRes", "skinUIRes"))
+    return {
+        "animationRole": catalog.exact(f"animation/role/{prefab}" if prefab else None),
+        "animationPreview": catalog.exact(f"animation/preview/{prefab}" if prefab else None),
+        "logic": catalog.exact(f"data/logicproto/{logic}" if logic else None),
+        "voice": catalog.directory(f"audio/voice/{voice}" if voice else None),
+        "skinHead": catalog.exact(f"texture/actorskinhead/actorskinhead_{skin_ui}" if skin_ui is not None else None),
+        "skinHeadBig": catalog.exact(f"texture/actorskinheadbig/actorskinhead_big_{skin_ui}" if skin_ui is not None else None),
+    }
+
+
+def _skill_index(actor: Mapping[str, Any], skills: list[dict[str, Any]]) -> dict[str, Any]:
+    rows = [s for s in skills if s.get("actorId") == actor.get("id")]
+    active = [s for s in rows if s.get("displayIndex") in (1, 2, 3)
+              and str(s.get("cmdStr", "")).strip() and not s.get("isPassive") and not s.get("isLink")]
+    slots = sorted({s["displayIndex"] for s in active})
+    # Sub/support cards expose one active slot; main cards expose three.
+    # window__burstlinkactorskill__burstlinkactorskill.lua:36-53.
+    expected = [1] if actor.get("kind") == 2 else [1, 2, 3]
+    missing = sorted(set(expected) - set(slots))
+    return {
+        "table": "ActorSkill", "rowCount": len(rows),
+        "activeSkills": [{k: s.get(k) for k in ("skillId", "displayIndex", "cmdStr")} for s in active],
+        "activeDisplayIndexes": slots, "expectedActiveSlots": expected,
+        "missingActiveSlots": missing, "passiveSkillIds": [s.get("skillId") for s in rows if s.get("isPassive")],
+        "status": "cannot_battle" if not slots else "incomplete" if missing else "complete",
+    }
+
+
+def _actor_index(rows: list[dict[str, Any]], catalog: AssetCatalog, skills: list[dict[str, Any]]) -> list[dict[str, Any]]:
     output = []
     for row in rows:
-        tokens = {field: str(row[field]) for field in fields if row.get(field) not in (None, "")}
-        resources = _resource_paths(paths, tokens.values())
+        ui = {key: catalog.exact(template.format(animRes=row["animRes"]) if row.get("animRes") else None)
+              for key, template in ACTOR_UI_PATHS.items()}
+        resources = _shared_resources(row, catalog)
+        palette = catalog.palette(row.get("prefabRes"), 0)
+        skill = _skill_index(row, skills)
+        present = sum(resource["present"] for resource in ui.values())
         output.append({
-            "id": row.get("id"),
-            "role": row.get("role"),
-            "kind": row.get("kind"),
-            "category": row.get("category"),
-            "openTime": row.get("openTime"),
-            "resourceFields": tokens,
-            "resources": resources,
-            "status": _status(resources),
+            "id": row.get("id"), "role": row.get("role"), "kind": row.get("kind"),
+            "category": row.get("category"), "openTime": row.get("openTime"),
+            "resourceFields": {k: row.get(k) for k in ("animRes", "prefabRes", "logicRes", "voiceRes", "skinUIRes")},
+            "uiResources": ui, "uiPresentCount": present, "uiExpectedCount": len(ui),
+            "uiStatus": _coverage(r["present"] for r in ui.values()),
+            "resources": resources, "palette": palette, "skills": skill,
+            "status": _coverage([*(r["present"] for r in ui.values()), *(r["present"] for r in resources.values()),
+                                  palette["status"] == "ok", skill["status"] == "complete"]),
         })
     return output
 
 
-def _skin_index(rows: list[dict[str, Any]], paths: list[str]) -> list[dict[str, Any]]:
+def _skin_index(rows: list[dict[str, Any]], actor_rows: list[dict[str, Any]], catalog: AssetCatalog) -> list[dict[str, Any]]:
+    actors = {a["id"]: a for a in actor_rows}
     output = []
     for row in rows:
-        skin_id = row.get("id")
-        actor_ids = [str(value) for value in row.get("actorIds", []) if value not in (None, "")]
-        id_matches = _find(paths, [str(skin_id)]) if skin_id is not None else []
-        actor_matches = _find(paths, actor_ids)
-        output.append({
-            "id": skin_id,
-            "actorIds": row.get("actorIds", []),
-            "openTime": row.get("openTime"),
-            "sources": row.get("sources", []),
-            "paletteIndexs": row.get("paletteIndexs", []),
-            "exchangeDefault": row.get("exchangeDefault"),
-            "exchangeGacha": row.get("exchangeGacha"),
-            "skinIdMatches": id_matches,
-            "baseActorMatches": actor_matches,
-            "status": "skin_id_evidence" if id_matches else ("base_actor_evidence" if actor_matches else "missing"),
-        })
+        variants, warnings = [], []
+        ids, palettes = row.get("actorIds", []), row.get("paletteIndexs", [])
+        if len(ids) != len(palettes):
+            warnings.append("actorIds/paletteIndexs length mismatch")
+        for i, actor_id in enumerate(ids):
+            index = palettes[i] if i < len(palettes) else None
+            actor = actors.get(actor_id)
+            if actor is None:
+                variants.append({"actorId": actor_id, "paletteIndex": index, "status": "missing_actor_config"})
+                continue
+            shared = _shared_resources(actor, catalog)
+            resources = {key: shared[key] for key in ("animationRole", "animationPreview", "skinHead", "skinHeadBig")}
+            palette = catalog.palette(actor.get("prefabRes"), index)
+            if not resources["skinHead"]["present"]:
+                warnings.append(f"actor {actor_id}: small skin icon missing")
+            checks = [resources[key]["present"] for key in ("animationRole", "animationPreview", "skinHeadBig")]
+            checks.append(palette["status"] == "ok")
+            variants.append({"actorId": actor_id, "paletteIndex": index, "resources": resources,
+                             "palette": palette, "status": _coverage(checks)})
+        states = [v["status"] for v in variants]
+        complete = bool(states) and all(s == "complete" for s in states) and not len(ids) != len(palettes)
+        status = "complete" if complete else "partial" if any(s in ("complete", "partial") for s in states) else "missing"
+        output.append({**{k: row.get(k) for k in ("id", "actorIds", "openTime", "sources", "paletteIndexs", "exchangeDefault", "exchangeGacha")},
+                       "variants": variants, "warnings": warnings, "status": status})
     return output
 
 
-def _scene_index(rows: list[dict[str, Any]], paths: list[str], table: str) -> list[dict[str, Any]]:
+def _scene_index(rows: list[dict[str, Any]], catalog: AssetCatalog, table: str) -> list[dict[str, Any]]:
     output = []
     for row in rows:
-        tokens = {field: str(row[field]) for field in ("sceneName", "textureRes", "effectRes", "bgmRes") if row.get(field) not in (None, "")}
-        resources = _resource_paths(paths, tokens.values())
-        output.append({"table": table, "id": row.get("id"), "fields": tokens, "resources": resources, "status": _status(resources)})
+        fields = {field: row[field] for field in ("sceneName", "textureRes", "effectRes", "bgmRes") if row.get(field)}
+        paths = {"textureRes": "texture/background/", "effectRes": "effect/ui/", "bgmRes": "audio/music/"}
+        resources = {field: catalog.exact(prefix + str(row[field])) for field, prefix in paths.items() if row.get(field)}
+        output.append({"table": table, "id": row.get("id", row.get("sceneName", 0)), "fields": fields,
+                       "openTime": row.get("openTime"), "resources": resources,
+                       "status": _coverage(r["present"] for r in resources.values()) if resources else "unverified",
+                       "note": "SceneConfig.sceneName names a runtime scene; no bundle path is inferred." if not resources else None})
     return output
 
 
 def build_index(asset_root: Path, config_dir: Path, lua_dir: Path | None = None) -> dict[str, Any]:
-    paths = sorted(p.relative_to(asset_root).as_posix() for p in asset_root.rglob("*") if p.is_file())
+    if not asset_root.is_dir():
+        raise FileNotFoundError(f"Asset root does not exist: {asset_root}")
+    catalog = AssetCatalog(asset_root)
     lua_dir = lua_dir or config_dir
     actor_rows = _json_rows(config_dir / "ActorConfig.json")
     skin_rows = _json_rows(config_dir / "ActorSkin.json")
-    scene_rows = _json_rows(config_dir / "SceneConfig.json")
-    collection_rows = _json_rows(config_dir / "CollectionsScenes.json")
-    if not scene_rows:
-        scene_rows = _lua_rows(lua_dir / "xlsx__sceneconfig.lua", "SceneConfig")
-    if not collection_rows:
-        collection_rows = _lua_rows(lua_dir / "xlsx__collectionsscenes.lua", "CollectionsScenes")
+    skill_rows = _json_rows(config_dir / "ActorSkill.json")
+    scene_rows = _json_rows(config_dir / "SceneConfig.json") or _lua_rows(lua_dir / "xlsx__sceneconfig.lua", "SceneConfig")
+    collection_rows = _json_rows(config_dir / "CollectionsScenes.json") or _lua_rows(lua_dir / "xlsx__collectionsscenes.lua", "CollectionsScenes")
     return {
-        "schemaVersion": 1,
-        "source": {"assetRoot": str(asset_root), "fileCount": len(paths), "configDir": str(config_dir)},
-        "characters": _actor_index(actor_rows, paths),
-        "skins": _skin_index(skin_rows, paths),
-        "scenes": _scene_index(scene_rows, paths, "SceneConfig") + _scene_index(collection_rows, paths, "CollectionsScenes"),
+        "schemaVersion": 2,
+        "source": {"assetRoot": str(asset_root), "fileCount": len(catalog.paths), "configDir": str(config_dir), "luaDir": str(lua_dir)},
+        "characters": _actor_index(actor_rows, catalog, skill_rows),
+        "skins": _skin_index(skin_rows, actor_rows, catalog),
+        "scenes": _scene_index(scene_rows, catalog, "SceneConfig") + _scene_index(collection_rows, catalog, "CollectionsScenes"),
         "notes": [
-            "Path matches are evidence that a named asset exists; they do not prove runtime loading or server availability.",
-            "ActorSkin has palette/exchange fields but no direct animation field; baseActorMatches and skinIdMatches are reported separately.",
-            "The scanner is read-only and does not decrypt, modify, or rebuild Unity AssetBundles.",
+            "Exact normalized full paths only; voice uses an exact directory boundary. No substring or numeric-ID match is used.",
+            "UI, shared animation/voice, skin palettes and active skills are separate evidence; 0/11 UI does not mean shared resources are absent.",
+            "Skin status checks role/preview animation, large skin head and a nonempty authored palette row. Small skin icons are separately reported warnings.",
+            "Palette rows are read-only decoded with UnityPy; missing decoder or failed decode never counts as a verified row.",
+            "Evidence is automated and does not establish runtime loading or server availability; no content has been opened.",
         ],
     }
 
