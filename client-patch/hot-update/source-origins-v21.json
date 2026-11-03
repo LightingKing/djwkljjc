@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "baseModules": "modules-v20.json",
-  "baseModulesSha256": "aa53517000a1fb2549ada024d573a87b8f46371d833ec632e046f1aaeab6e2be",
+  "baseModulesSha256": "9ab32381cae63869e71b8428bd5edef95860e435e127f344bfde6272a438ae4f",
   "patchVersion": 21,
   "reproduction": "Cumulative v21: original v20 modules plus local UP fallback, persistent gacha request keys, and durable claw-crane request keys. Existing source-origins remain unchanged. All hashes below are exact LF build inputs.",
   "modules": [
