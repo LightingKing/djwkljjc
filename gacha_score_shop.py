@@ -12,6 +12,9 @@ from urllib.parse import urlsplit
 
 from google.protobuf import json_format
 
+import actors
+from content_opening import (CHARACTER_GOOD_BASE, FUTURE_SKINS, OPEN_CHARACTERS, POLICY,
+                             allowed_skin_actors, collection_products)
 from grants import grant_rewards
 from server.core.reset import policy_for
 
@@ -35,7 +38,7 @@ def active_activities(game, profile, activity_type):
 class LocalGachaScoreShop:
     def __init__(self, game):
         self.game = game
-        self.products = json.loads(PRODUCTS_PATH.read_text(encoding="utf-8"))["goods"]
+        self.products = json.loads(PRODUCTS_PATH.read_text(encoding="utf-8"))["goods"] + collection_products()
         with game._lock, closing(game._connect()) as conn, conn:
             conn.execute("CREATE TABLE IF NOT EXISTS local_gacha_shop_claims ("
                          "account_id INTEGER NOT NULL,good_id INTEGER NOT NULL,claimed_at INTEGER NOT NULL,"
@@ -64,8 +67,9 @@ class LocalGachaScoreShop:
             if not active_activities(self.game, profile, 13):
                 return 409, {"error": "activity_not_open"}
             claimed = self._claimed(profile)
+            state = self.game.systems._state(profile)
             owned_skins = {int(skin_id) for skin_ids in
-                           self.game.systems._state(profile).get("unlockedSkins", {}).values()
+                           state.get("unlockedSkins", {}).values()
                            for skin_id in skin_ids}
 
             def skin_owned(product):
@@ -91,11 +95,30 @@ class LocalGachaScoreShop:
             if skin_owned(product):
                 return 409, {"error": "invalid_request"}
             cost = product["cost"]
-            ok, paid, error = self.game.economy._change_resources(profile, [{**cost, "count": -cost["count"]}])
-            if not ok:
-                return 409, {"error": error or "insufficient_resource"}
+            if int(cost['type']) == 11:
+                if self.game.systems._items_owned(state, cost['id']) < cost['count']:
+                    return 409, {"error": "insufficient_item"}
+                paid = self.game.systems._items_take(state, {cost['id']: cost['count']})
+                # Persist the bag inside the same transaction before the common
+                # grant helper reads it; otherwise its reload would restore cost.
+                self.game.systems._save(profile, state)
+            else:
+                ok, paid, error = self.game.economy._change_resources(profile, [{**cost, "count": -cost["count"]}])
+                if not ok:
+                    return 409, {"error": error or "insufficient_resource"}
             changes = [{"baseRes": change} for change in paid]
-            changes += grant_rewards(self.game, profile, [product["good"]])
+            rewards = [product["good"]]
+            actor_id = int(product['good']['id'])
+            if (product['good']['type'] == 15 and actor_id in OPEN_CHARACTERS
+                    and good_id == CHARACTER_GOOD_BASE + actor_id
+                    and actors.first_uid(profile, state, actor_id) is not None):
+                # Only the new local collection offers convert existing cards.
+                # The original purple ActorDecompose rows supply shard counts.
+                from systems import ACTOR_DECOMPOSE
+                rewards = ACTOR_DECOMPOSE[(actor_id, POLICY['characterOffer']['duplicateQuality'])]
+            skin_owners = ({actor_id: allowed_skin_actors(actor_id)}
+                           if product['good']['type'] == 29 and actor_id in FUTURE_SKINS else None)
+            changes += grant_rewards(self.game, profile, rewards, skin_owner_overrides=skin_owners)
             with closing(self.game._connect()) as conn, conn:
                 conn.execute("INSERT INTO local_gacha_shop_claims VALUES(?,?,?)",
                              (profile["account_id"], good_id, int(self.game._now())))

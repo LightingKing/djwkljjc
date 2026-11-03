@@ -831,6 +831,12 @@ class LocalSystems:
             return 200, result
         if method in {"PATCH", "POST"} and lower.startswith("/fci/actor/"):
             request = self._request_values(body)
+            if "skin" in request or "actorSkin" in request:
+                from content_opening import allowed_skin_actors
+                skin = self._first_int(request, "skin", "actorSkin", default=0)
+                if skin and (skin not in state.get("unlockedSkins", {}).get(str(actor_id), [])
+                             or actor_id not in allowed_skin_actors(skin)):
+                    return 409, {"error": "invalid_skin"}
             # PATCH is a local administrative seam; preserve the existing
             # compatibility behavior while still normalizing new fields.
             actor["level"] = max(1, min(60, _int(request.get("level", actor.get("level", 1)))))
@@ -1360,14 +1366,15 @@ class LocalSystems:
                 except Exception:
                     return 200, {"actorId": actor_id, "skin": _int(actor.get("skin"))}
             if method not in {"POST", "PATCH"}: return 405, {"error": "method_not_allowed", "message": "POST required"}
-            skin = self._first_int(payload, "skin", "skinId", "actorSkin", default=0)
+            native = self._request(body, "ApiActorSkin")
+            skin = self._first_int(payload, "skin", "skinId", "actorSkin",
+                                   default=_int(native.actor_skin) if native is not None else 0)
             if skin < 0:
                 return 400, {"error": "invalid_skin"}
-            unlocked = state.setdefault("unlockedSkins", {})
-            owned = unlocked.setdefault(str(actor_id), [])
-            if skin and skin not in owned:
-                owned.append(skin)
-                owned.sort()
+            from content_opening import allowed_skin_actors
+            owned = state.get("unlockedSkins", {}).get(str(actor_id), [])
+            if skin and (skin not in owned or actor_id not in allowed_skin_actors(skin)):
+                return 409, {"error": "invalid_skin"}
             actor["skin"] = skin
             self._save(profile, state)
             try:

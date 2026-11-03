@@ -39,7 +39,8 @@ def _int(value: Any, default: int = 0) -> int:
         return default
 
 
-def grant_rewards(game: Any, profile: Mapping[str, Any], rewards: Iterable[Mapping[str, Any]]) -> list[dict[str, Any]]:
+def grant_rewards(game: Any, profile: Mapping[str, Any], rewards: Iterable[Mapping[str, Any]], *,
+                  skin_owner_overrides: Mapping[int, Iterable[int]] | None = None) -> list[dict[str, Any]]:
     """Grant ``rewards`` (STResource-like mappings); return resChange entries."""
 
     rewards = [reward for reward in rewards if isinstance(reward, Mapping) and _int(reward.get("count")) > 0]
@@ -76,6 +77,8 @@ def grant_rewards(game: Any, profile: Mapping[str, Any], rewards: Iterable[Mappi
             except (OSError, TypeError, ValueError, json.JSONDecodeError):
                 owners = {}
             owner_ids = owners.get(rid) or [0]
+            if skin_owner_overrides is not None and rid in skin_owner_overrides:
+                owner_ids = list(skin_owner_overrides[rid])
             for owner in owner_ids:
                 unlocked = state.setdefault("unlockedSkins", {}).setdefault(str(owner), [])
                 if rid not in unlocked:

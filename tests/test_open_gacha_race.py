@@ -73,7 +73,11 @@ class OpenGachaTests(unittest.TestCase):
             status, shop = self.call("GET", "/fci/gacha-shop/")
             self.assertEqual(status, 200, shop)
             self.assertTrue(shop.goods)
-            self.assertTrue(all(g.cost.type == 23 and g.good.type in (15, 29) for g in shop.goods))
+            # Preserve the original three point-shop goods contract; batch two
+            # additionally exposes the checked skin list at its exact shard costs.
+            original = [g for g in shop.goods if g.good_id in {1300101, 1300102, 1300103}]
+            self.assertEqual(len(original), 3)
+            self.assertTrue(all(g.cost.type == 23 and g.good.type in (15, 29) for g in original))
             before = self.game.systems._state(self.profile)
             status, error = self.call("POST", "/fci/gacha-shop/trade", {"good_id": shop.goods[0].good_id})
             self.assertEqual(status, 409, error)
