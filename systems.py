@@ -2359,7 +2359,12 @@ class LocalSystems:
             return 405, {"error": "method_not_allowed", "message": "POST required"}
         payload = self._request_values(body)
         msg = self._request(body, "ApiGachaTrade")
-        pool_id = _int(payload.get("id", getattr(msg, "id", 1) if msg else 1), 1) or 1
+        # Window_Gacha always sends the selected pool id.  Falling back to
+        # pool 1 on a malformed request can silently charge the normal pool
+        # when the caller intended a limited/bookmark pool, so reject it.
+        if "id" not in payload and (msg is None or not _int(getattr(msg, "id", 0))):
+            return 400, {"error": "gacha_id_required"}
+        pool_id = _int(payload.get("id", getattr(msg, "id", 0) if msg else 0), 0)
         config = GACHA_TYPES.get(pool_id)
         if config is None or not GACHA_POOL:
             return 404, {"error": "unknown_gacha", "id": pool_id}

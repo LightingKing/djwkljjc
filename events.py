@@ -1226,7 +1226,7 @@ class LocalEvents:
                 day.timestamp_start = 6 * 3600
                 day.timestamp_end = 24 * 3600
             welfare = getattr(self.game, "welfare", None)
-            if welfare is not None and entry["type"] in (16, 26, 43, 44, 48):
+            if welfare is not None and entry["type"] in (16, 26, 43, 44, 48, 53):
                 window = welfare.cycle_window(now)
                 activity.timestamp_preheat = window["start"]
                 activity.timestamp_start = window["start"]
@@ -1278,17 +1278,28 @@ class LocalEvents:
         activity.time_preheat = "local"; activity.time_start = "local"; activity.time_end = "local"
         activity.category = 1
         cycle_start = self._cycle_start(snapshot, now)
-        if activity_type == ACTIVITY_TYPE_EVERYDAY_CHECKIN:
+        if activity_type in (ACTIVITY_TYPE_EVERYDAY_CHECKIN, ACTIVITY_TYPE_TEN_CHECKIN):
             window = len(ACTIVITY_SIGNIN_GIFTS.get(activity.activity_id, {})) or 10
             # Independent ten-day windows: a 28-day event rotation must not
             # truncate days 9/10, and the client changes sign-in days at midnight.
             policy = policy_for(self.game)
             cycle_start = policy.period_start(self._anchor_timestamp(snapshot), signin=True)
-            cycle_day = (now - cycle_start) // 86400
-            start = cycle_start + (cycle_day // window) * window * 86400
-            end = start + window * 86400
+            if activity_type == ACTIVITY_TYPE_TEN_CHECKIN:
+                # Keep the ten-day tab inside the configured local welfare
+                # cycle instead of exposing an open-ended/epoch end date.
+                welfare = getattr(self.game, "welfare", None)
+                welfare_window = welfare.cycle_window(now) if welfare is not None else None
+                start = int((welfare_window or {}).get("start", cycle_start))
+                end = int((welfare_window or {}).get("end", start + 28 * 86400))
+            else:
+                cycle_day = (now - cycle_start) // 86400
+                start = cycle_start + (cycle_day // window) * window * 86400
+                end = start + window * 86400
             activity.timestamp_preheat = start; activity.timestamp_start = start
             activity.timestamp_end = end - 1
+            if activity_type == ACTIVITY_TYPE_TEN_CHECKIN:
+                activity.timestamp_end = end
+                activity.timestamp_close = end
             activity.forever = False
         else:
             day_floor = cycle_start + ((now - cycle_start) // 86400) * 86400
@@ -1375,6 +1386,9 @@ class LocalEvents:
                 activity.timestamp_preheat = cycle_start + day_start * 86400
                 activity.timestamp_start = activity.timestamp_preheat
                 activity.timestamp_end = cycle_start + day_end * 86400
+                if bool(selected_phase.get("forever", False)):
+                    activity.timestamp_end = 0
+                    activity.timestamp_close = 0
             except (TypeError, ValueError):
                 pass
         activity.forever = selected_phase is None or bool(selected_phase.get("forever", False))

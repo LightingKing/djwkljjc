@@ -41,7 +41,8 @@ def client_error_reply(status: int, payload: dict) -> tuple[int, dict]:
                  "buy_limit_reached", "pending_product_unavailable", "purchase_product_mismatch"}:
         return 509, {"notify": {"code": "Error_BuyLimit"}}
     if lower in {"activity_closed_today", "mall_activity_closed", "race_cycle_closed",
-                 "activity_not_open", "activity_not_started", "activity_inactive"}:
+                 "activity_not_open", "activity_not_started", "activity_inactive",
+                 "guild_dungeon_not_implemented", "actor_inherit_activity_unavailable"}:
         return 509, {"notify": {"code": "Error_ActivityNotStart"}}
     if lower in {"level_too_low", "player_level_too_low", "gold_dungeon_locked", "race_level_locked"}:
         return 509, {"notify": {"code": "Error_PlayerLevelNotReach"}}
@@ -68,7 +69,8 @@ def client_error_reply(status: int, payload: dict) -> tuple[int, dict]:
         return 509, {"notify": {"code": "Error_TaskNotFound"}}
     if lower in {"dungeon_not_active", "race_dungeon_closed", "battle_not_finished"}:
         return 509, {"notify": {"code": "Error_DungeonNotActive"}}
-    if lower in {"dungeon_balance_not_implemented", "resource_update_failed", "invalid_request"}:
+    if lower in {"dungeon_balance_not_implemented", "resource_update_failed", "invalid_request",
+                 "gacha_id_required"}:
         return 509, {"notify": {"code": "Error_RequestFailed"}}
     if lower in {"actor_skill_not_found", "invalid_skill_request"}:
         return 509, {"notify": {"code": "Error_ActorSkillNotFound"}}

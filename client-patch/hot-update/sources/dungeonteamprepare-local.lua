@@ -122,12 +122,21 @@ function SetupWindow()
     end
   end)
   WU.BindButtonEvent(REF.Confirm, function()
-    SendTeamSocket("CsTeamDungeonSelectActor", {
-      actorUids = {
-        m_mainUid or 0,
-        m_subUid or 0
-      }
-    })
+    local selected = {m_mainUid or 0, m_subUid or 0}
+    if m_localAi then
+      -- The retired websocket has no local endpoint. Persist the selected
+      -- pair through the authenticated HTTP room start route so the local
+      -- fight uses the same actor UIDs shown in this window.
+      this:GameRequest("fci/teamdungeon/" .. tostring(m_roomInfo.dungeonUid or m_roomInfo.roomId) .. "/start/"):Post({
+        actorUids = selected
+      }, function(result)
+        m_localBaseInfo = result.baseInfo
+        m_roomInfo = result.roomInfo
+        OnTeamDungeonRoom(result)
+      end)
+    else
+      SendTeamSocket("CsTeamDungeonSelectActor", {actorUids = selected})
+    end
     REF.RoomState.UIToggle.value = true
     m_showButton = true
     RefreshShowCustom()

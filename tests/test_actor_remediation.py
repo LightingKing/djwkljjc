@@ -93,6 +93,26 @@ class ActorRemediationTests(unittest.TestCase):
             self.assertEqual((granted.quality, granted.star, len(granted.talent_info)), (4, 3, 4))
             self.assertEqual(len(self.login_actors()[granted.uid].talent_info), 4)
 
+    def test_skin_reward_unlocks_each_actor_and_survives_relogin(self):
+        # ActorSkin uses actorIds (plural); a skin may be shared by multiple
+        # actor records.  Type-29 grants must update every owner and the
+        # login bootstrap must publish the persisted skin IDs.
+        skin = next(row for row in json.loads(
+            (Path(__file__).resolve().parents[1] / "data/client-tables/ActorSkin.json").read_text(encoding="utf-8")
+        )["rows"] if row.get("actorIds"))
+        skin_id = int(skin["id"])
+        owners = {int(actor_id) for actor_id in skin["actorIds"]}
+        changes = grants.grant_rewards(self.game, self.profile, [{"type": 29, "id": skin_id, "count": 1}])
+        self.assertTrue(any(change.get("baseRes", {}).get("id") == skin_id for change in changes))
+        state = self.state()
+        unlocked = state["unlockedSkins"]
+        for owner in owners:
+            self.assertIn(skin_id, unlocked[str(owner)])
+        payload = dict(self.game.login_messages(self.account))["DBGamePlayer.Actors"]
+        message = self.game._types["DBGamePlayer.Actors"]()
+        message.ParseFromString(payload)
+        self.assertIn(skin_id, set(message.unlocked_skins))
+
     def test_legacy_talents_and_pending_reset_survive_migration_and_login(self):
         state = self.state()
         state.pop("actorInstances")

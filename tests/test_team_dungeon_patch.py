@@ -43,6 +43,7 @@ class TeamDungeonPatchContractTests(unittest.TestCase):
         entry = (PATCH / "sources" / "dungeonteam-local.lua").read_text(encoding="utf-8")
         prepare = (PATCH / "sources" / "dungeonteamprepare-local.lua").read_text(encoding="utf-8")
         self.assertIn('this:GameRequest("fci/teamdungeon/enter/"):Post', prepare)
+        self.assertIn('this:GameRequest("fci/teamdungeon/" .. tostring(m_roomInfo.dungeonUid or m_roomInfo.roomId) .. "/start/"):Post', prepare)
         self.assertIn('this:SetData("DungeonTeam/LocalAi", result.localAi == true)', entry)
         self.assertIn('WU.EnterGameLevel(message.dungeonUid, message.baseInfo, m_dungeonId, PB.enum.DungeonType.TeamPve', prepare)
         self.assertIn('m_localAi = this:GetData("DungeonTeam/LocalAi") == true', prepare)

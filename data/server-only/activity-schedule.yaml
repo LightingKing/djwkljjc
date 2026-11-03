@@ -18,8 +18,11 @@ cycle:
       dayEnd: 28
       activityType: 12
     - id: sandbox-gacha
-      dayStart: 7
-      dayEnd: 21
+      # ContinuousLogin keeps its tab open for the complete local cycle;
+      # this phase only supplies the cycle timestamps to the client.
+      dayStart: 0
+      dayEnd: 28
+      forever: true
       activityType: 25
     - id: diff-actor-inherit
       dayStart: 0

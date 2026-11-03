@@ -19,6 +19,7 @@ import sqlite3
 import threading
 import time
 from contextlib import closing
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Mapping, Optional, Tuple
 from urllib.parse import urlsplit
@@ -26,6 +27,7 @@ from urllib.parse import urlsplit
 import yaml
 
 from google.protobuf import json_format
+from google.protobuf.message import DecodeError
 
 from server.core.content import DungeonConfig, load_dungeon_config
 from server.core.atomic import track_mapping
@@ -948,6 +950,8 @@ class LocalDungeons:
                 connection.execute("ALTER TABLE local_dungeons ADD COLUMN multi_power INTEGER NOT NULL DEFAULT 1")
             if "aura_json" not in columns:
                 connection.execute("ALTER TABLE local_dungeons ADD COLUMN aura_json TEXT")
+            if "team_started_at" not in columns:
+                connection.execute("ALTER TABLE local_dungeons ADD COLUMN team_started_at INTEGER")
             # Stars already traded in the chapter star exchange
             # (DBGamePlayer.BaseInfo.exchange_star in the original).
             connection.execute(
@@ -1243,7 +1247,7 @@ class LocalDungeons:
         try:
             floor = max(1, int(floor_value or 1))
             node = max(1, int(node_value or 1))
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, DecodeError):
             return None
         if mode == "tower":
             # A supplied id wins; otherwise derive it from the requested
@@ -1521,10 +1525,11 @@ class LocalDungeons:
         # The original endpoint returns an activityId -> TeamDungeonGroup id
         # map (the client looks up TeamDungeonGroup locally).
         groups = {str(TEAM_DUNGEON_ACTIVITY_ID): 1}
+        return 200, groups
+
+    def _team_summary(self, profile: Mapping[str, Any]) -> Response:
+        groups = {str(TEAM_DUNGEON_ACTIVITY_ID): 1}
         return 200, {
-            # Native DungeonTeam.lua reads the activity -> group map from the
-            # response root. Keep ``result`` as a compatibility alias for
-            # older local tools that used the pre-native wrapper.
             **groups,
             "result": groups,
             "groups": [
@@ -1538,7 +1543,33 @@ class LocalDungeons:
             "localAi": True,
         }
 
+    def _team_open(self) -> bool:
+        """Local TeamDungeon policy: every day from 06:00 through 24:00."""
+        local = datetime.fromtimestamp(int(self._clock()), timezone(timedelta(hours=8)))
+        return local.hour >= 6
+
+    @staticmethod
+    def _team_selected_actors(profile: Mapping[str, Any], state: Mapping[str, Any], values: Any) -> tuple[list[int], list[int]] | None:
+        if not isinstance(values, (list, tuple)) or len(values) != 2:
+            return None
+        try:
+            uids = [int(value) for value in values]
+        except (TypeError, ValueError):
+            return None
+        if any(uid <= 0 for uid in uids) or len(set(uids)) != 2:
+            return None
+        rows = [actor_store.get(profile, state, uid) for uid in uids]
+        if any(row is None for row in rows):
+            return None
+        # TeamDungeon baseInfo uses six actor slots, with the selected main
+        # and support actors in slots 0 and 3 (the native room convention).
+        actor_uids = [uids[0], 0, 0, uids[1], 0, 0]
+        actor_ids = [int(rows[0].get("id", 0)), 0, 0, int(rows[1].get("id", 0)), 0, 0]
+        return actor_ids, actor_uids
+
     def _team_enter(self, profile: Mapping[str, Any], request: Mapping[str, Any]) -> Response:
+        if not self._team_open():
+            return 409, {"error": "activity_closed_today"}
         try:
             player_level = int(profile.get("level", 1) or 1)
         except (TypeError, ValueError):
@@ -1586,12 +1617,12 @@ class LocalDungeons:
             # returns their ticket; same-stage retry above stays idempotent.
             refund_changes: list[dict[str, Any]] = []
             abandoned = connection.execute(
-                "SELECT dungeon_uid FROM local_dungeons WHERE account_id = ? AND mode = 'team' AND status = 'active' AND dungeon_id != ?",
+                "SELECT dungeon_uid FROM local_dungeons WHERE account_id = ? AND mode = 'team' AND status = 'active' AND dungeon_id != ? AND team_started_at IS NULL AND active_data IS NULL",
                 (int(profile["account_id"]), dungeon_id),
             ).fetchall()
             if abandoned:
                 connection.execute(
-                    "UPDATE local_dungeons SET status = 'failed', closed_at = ?, terminal_outcome = 2 WHERE account_id = ? AND mode = 'team' AND status = 'active' AND dungeon_id != ?",
+                    "UPDATE local_dungeons SET status = 'failed', closed_at = ?, terminal_outcome = 2 WHERE account_id = ? AND mode = 'team' AND status = 'active' AND dungeon_id != ? AND team_started_at IS NULL AND active_data IS NULL",
                     (int(self._clock()), int(profile["account_id"]), dungeon_id),
                 )
                 for _ in abandoned:
@@ -1616,6 +1647,43 @@ class LocalDungeons:
                 "roomInfo": self._team_room(profile, uid, dungeon_id, actor_ids, actor_uids),
                 "resChange": refund_changes + [ticket_change], "ticket": {"type": TEAM_DUNGEON_TICKET_TYPE, "id": TEAM_DUNGEON_TICKET_ID, "countDelta": -1},
                 "tickets": self._team_ticket_count(profile), "localAi": True,
+            }
+
+    def _team_start(self, profile: Mapping[str, Any], dungeon_uid: int, body: bytes | bytearray | str | Mapping[str, Any] | None) -> Response:
+        if not self._team_open():
+            return 409, {"error": "activity_closed_today"}
+        request = _body_object(body)
+        with self._lock, closing(self._connect()) as connection, connection:
+            row = connection.execute(
+                "SELECT dungeon_id, status, actor_uids_json, team_started_at FROM local_dungeons "
+                "WHERE dungeon_uid = ? AND account_id = ? AND mode = 'team'",
+                (dungeon_uid, int(profile["account_id"])),
+            ).fetchone()
+            if row is None:
+                return 404, {"error": "team_dungeon_not_found"}
+            if row["status"] != "active":
+                return 409, {"error": "team_dungeon_not_active", "status": row["status"]}
+            state = self.game.systems._state(profile)
+            if row["team_started_at"]:
+                try:
+                    actor_uids = [int(value) for value in json.loads(row["actor_uids_json"] or "[]")]
+                except (TypeError, ValueError, json.JSONDecodeError):
+                    actor_uids = []
+                actor_ids = [int((actor_store.get(profile, state, uid) or {}).get("id", 0)) if uid else 0 for uid in actor_uids]
+            else:
+                selected = self._team_selected_actors(profile, state, request.get("actorUids", request.get("actor_uids")))
+                if selected is None:
+                    return 400, {"error": "invalid_team_actor_selection"}
+                actor_ids, actor_uids = selected
+                connection.execute(
+                    "UPDATE local_dungeons SET actor_uids_json = ?, team_started_at = ? WHERE dungeon_uid = ? AND account_id = ? AND status = 'active'",
+                    (json.dumps(actor_uids, separators=(",", ":")), int(self._clock()), dungeon_uid, int(profile["account_id"])),
+                )
+            return 200, {
+                "dungeonUid": int(dungeon_uid), "dungeonId": int(row["dungeon_id"]), "mode": "team", "localAi": True,
+                "baseInfo": self._base_info(profile, int(row["dungeon_id"]), actor_ids, actor_uids,
+                                             dungeon_type=TEAM_DUNGEON_DUNGEON_TYPE, activity_id=TEAM_DUNGEON_ACTIVITY_ID),
+                "roomInfo": self._team_room(profile, dungeon_uid, int(row["dungeon_id"]), actor_ids, actor_uids),
             }
 
     def _team_balance(self, profile: Mapping[str, Any], dungeon_uid: int, body: bytes | bytearray | str | Mapping[str, Any] | None) -> Response:
@@ -1711,13 +1779,17 @@ class LocalDungeons:
             return None
         if route.endswith("/info") or route.endswith("/summary") or route == "/fci/teamdungeon":
             if method == "GET":
-                return self._team_groups(profile)
+                return self._team_summary(profile)
             if method == "POST":
                 return self._team_enter(profile, _body_object(body))
-        match = re.search(r"/teamdungeon/(?:dungeon|room|match|run/)?(\d+)", route)
+        match = re.search(r"/teamdungeon/(?:dungeon|room|match|run/)?(\d+)(?:/|$)", route)
         uid_text = match.group(1) if match else None
         if route.endswith("/enter") or route.endswith("/start") or route.endswith("/create") or route.endswith("/join"):
-            return self._team_enter(profile, _body_object(body)) if method == "POST" else (405, {"error": "method_not_allowed"})
+            if method != "POST":
+                return 405, {"error": "method_not_allowed"}
+            if route.endswith("/start") and uid_text:
+                return self._team_start(profile, int(uid_text), body)
+            return self._team_enter(profile, _body_object(body))
         if uid_text and route.endswith("/active"):
             return self._active(profile, int(uid_text), body) if method == "PATCH" else (405, {"error": "method_not_allowed"})
         if uid_text and route.endswith("/balance"):
@@ -2034,7 +2106,11 @@ class LocalDungeons:
         parts = self._snapshot_parts(profile)
         compact = self._snapshot_from_parts(parts, compact=True)
         record_chapter = parts["chapters"].get(int(chapter_id))
-        record_dungeons = dict(compact["record"]["dungeonRecord"])
+        allowed = set(_chapter_ids(CHAPTERS_BY_ID.get(int(chapter_id), {})))
+        record_dungeons = {
+            str(did): value for did, value in compact["record"]["dungeonRecord"].items()
+            if int(did) in allowed
+        }
         return {
             "recordChapter": dict(record_chapter) if record_chapter is not None else _chapter_record(int(chapter_id)),
             "recordDungeons": record_dungeons,
@@ -2266,7 +2342,7 @@ class LocalDungeons:
         if bool(getattr(message, "is_challenge_mode", False)):
             # Preserve the wire request's challenge flag for the local
             # baseInfo/difficulty marker.
-            request["difficulty"] = "hard"
+            request["difficulty"] = "challenge"
         return request
 
     def _assistant_quality(self, profile: Mapping[str, Any], player_id: str, actor_id: int) -> int:
@@ -2398,6 +2474,7 @@ class LocalDungeons:
             return self._enter_special(profile, mode, spec, floor, node)
         if dungeon_id not in PLAYABLE_DUNGEON_IDS:
             return 501, {"error": "dungeon_not_implemented", "dungeonId": dungeon_id}
+        requested_difficulty = str(request.get("difficulty", request.get("modeDifficulty", "")) or "").strip().lower()
         if request.get("enforceUnlock", request.get("strictUnlock", False)):
             chapter_row = _chapter_row_for_dungeon(dungeon_id)
             if chapter_row is not None:
@@ -2417,7 +2494,7 @@ class LocalDungeons:
             difficulty = str(difficulty_value or "normal").strip().lower()
         if difficulty in {"2", "1", "hardmode", "difficult"}:
             difficulty = "hard"
-        elif difficulty not in {"normal", "hard"}:
+        elif difficulty not in {"normal", "hard", "challenge"}:
             # "challenge" was a local marker for 5xxx ids; challenge chapter
             # stages are ordinary runs of DungeonType 11.
             difficulty = "normal"
@@ -3625,7 +3702,7 @@ class LocalDungeons:
         message = message_type()
         try:
             message.ParseFromString(raw)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, DecodeError):
             return None
         return message
 

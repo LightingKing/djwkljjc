@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from contextlib import closing
+from datetime import datetime
 from pathlib import Path
 import tempfile
 import unittest
@@ -18,7 +19,9 @@ class TeamDungeonLocalTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         root = Path(self.temp.name)
         self.accounts = LocalAccounts(root / "accounts")
-        self.game = LocalGame(root / "game", self.accounts, initial_level=30)
+        self.now = [int(datetime.fromisoformat("2026-11-03T12:00:00+08:00").timestamp())]
+        self.game = LocalGame(root / "game", self.accounts, initial_level=30,
+                              initial_actor_ids=[1001, 1002, 1501, 1502], clock=lambda: self.now[0])
         self.account, self.auth = test_systems.LocalSystemsTests._guest(self.accounts)
         profile = self.game._profile(self.account)
         grant_rewards(self.game, profile, [{"type": 11, "id": 80005, "count": 1}])
@@ -42,9 +45,10 @@ class TeamDungeonLocalTests(unittest.TestCase):
     def test_groups_entry_ai_ticket_and_idempotent_balance(self):
         status, groups = self.call("GET", "/fci/teamdungeongroups/")
         self.assertEqual(status, 200)
-        self.assertEqual(groups["result"], {"23001": 1})
-        self.assertEqual(len(groups["groups"]), 7)
-        self.assertEqual(groups["groups"][0]["dungeonIds"][0], 7011)
+        self.assertEqual(groups, {"23001": 1})
+        summary = self.call("GET", "/fci/teamdungeon/summary/")[1]
+        self.assertEqual(len(summary["groups"]), 7)
+        self.assertEqual(summary["groups"][0]["dungeonIds"][0], 7011)
         status, entered = self.call("POST", "/fci/teamdungeon/enter", {"dungeonGroup": 1, "level": 1})
         self.assertEqual(status, 200)
         self.assertEqual((entered["dungeonId"], entered["mode"]), (7011, "team"))
@@ -64,6 +68,8 @@ class TeamDungeonLocalTests(unittest.TestCase):
         self.assertEqual(status, 200)
         self.assertTrue(settled["win"])
         self.assertTrue(settled["localAi"])
+        self.assertEqual(settled["profits"], [])
+        self.assertEqual(settled["balanceInfo"]["profits"], [])
         self.assertTrue(any(change["baseRes"]["id"] == 71501 for change in settled["resChange"]))
         self.assertEqual(self.item(1016), 8)
         status, repeated = self.call("POST", f"/fci/teamdungeon/{uid}/balance", {})
@@ -71,6 +77,68 @@ class TeamDungeonLocalTests(unittest.TestCase):
         self.assertEqual(repeated, settled)
         self.assertEqual(self.item(1016), 8)
 
+    def test_active_null_and_malformed_payloads_do_not_crash_or_close_room(self):
+        status, entered = self.call("POST", "/fci/teamdungeon/enter/", {"dungeonId": 7011})
+        self.assertEqual(status, 200)
+        uid = entered["dungeonUid"]
+        for body in (b"null", b"{broken", b"\xff\xff"):
+            with self.subTest(body=body):
+                result = self.call("PATCH", f"/fci/teamdungeon/{uid}/active/", body,
+                                   "application/wireformat")
+                self.assertEqual(result, (400, {"error": "invalid_fight_active_data"}))
+        self.assertEqual(self.call("GET", f"/fci/teamdungeon/{uid}/")[1]["status"], "active")
+
+    def test_new_room_refunds_only_an_unstarted_room(self):
+        first = self.call("POST", "/fci/teamdungeon/enter/", {"dungeonId": 7011})[1]
+        status, second = self.call("POST", "/fci/teamdungeon/enter/", {"dungeonId": 7021})
+        self.assertEqual(status, 200)
+        self.assertNotEqual(second["dungeonUid"], first["dungeonUid"])
+        self.assertEqual(self.item(80005), 0)
+        self.assertEqual(self.call("GET", f"/fci/teamdungeon/{first['dungeonUid']}/")[1]["status"], "failed")
+        active = self.game._types["FightActiveData"](dungeonType=10, stageID=7021, winTeam=1)
+        self.assertEqual(self.call("PATCH", f"/fci/teamdungeon/{second['dungeonUid']}/active/",
+                                   active.SerializeToString(), "application/wireformat")[0], 200)
+        status, refused = self.call("POST", "/fci/teamdungeon/enter/", {"dungeonId": 7031})
+        self.assertEqual((status, refused["error"]), (409, "team_dungeon_ticket_not_enough"))
+        self.assertEqual(self.call("GET", f"/fci/teamdungeon/{second['dungeonUid']}/")[1]["status"], "active")
+
+    def test_start_uses_selected_owned_actors_and_is_immutable_on_retry(self):
+        entered = self.call("POST", "/fci/teamdungeon/enter/", {"dungeonId": 7011})[1]
+        uid = entered["dungeonUid"]
+        status, started = self.call("POST", f"/fci/teamdungeon/{uid}/start/", {"actorUids": [2, 4]})
+        self.assertEqual(status, 200)
+        self.assertEqual(started["baseInfo"]["actorUid"], [2, 0, 0, 4, 0, 0])
+        self.assertEqual(started["baseInfo"]["actorId"], [1002, 0, 0, 1502, 0, 0])
+        player_id = self.game._profile(self.account)["player_id"]
+        self.assertEqual([row["uid"] for row in started["roomInfo"]["actorInfo"][player_id]["actors"]], [2, 4])
+        replay = self.call("POST", f"/fci/teamdungeon/{uid}/start/", {"actorUids": [1, 3]})
+        self.assertEqual(replay, (200, started))
+        self.assertEqual(self.item(80005), 0)
+        self.assertEqual(self.call("POST", "/fci/teamdungeon/enter/", {"dungeonId": 7021})[0], 409)
+
+    def test_start_rejects_invalid_actor_selection_without_consuming_room(self):
+        entered = self.call("POST", "/fci/teamdungeon/enter/", {"dungeonId": 7011})[1]
+        uid = entered["dungeonUid"]
+        for actor_uids in ([999, 4], [2, 2], [2, 4, 1], []):
+            with self.subTest(actor_uids=actor_uids):
+                self.assertEqual(self.call("POST", f"/fci/teamdungeon/{uid}/start/",
+                                           {"actorUids": actor_uids})[0], 400)
+        # Invalid selections did not mark the room started, so it is refundable.
+        self.assertEqual(self.call("POST", "/fci/teamdungeon/enter/", {"dungeonId": 7021})[0], 200)
+        self.assertEqual(self.item(80005), 0)
+
+    def test_team_open_hours_are_enforced_at_create_and_start(self):
+        self.now[0] = int(datetime.fromisoformat("2026-11-03T05:59:59+08:00").timestamp())
+        self.assertEqual(self.call("POST", "/fci/teamdungeon/enter/", {"dungeonId": 7011}),
+                         (409, {"error": "activity_closed_today"}))
+        self.assertEqual(self.item(80005), 1)
+        self.assertEqual(self.team_runs(), 0)
+        self.now[0] += 1
+        status, entered = self.call("POST", "/fci/teamdungeon/enter/", {"dungeonId": 7011})
+        self.assertEqual(status, 200)
+        self.now[0] = int(datetime.fromisoformat("2026-11-04T00:00:00+08:00").timestamp())
+        self.assertEqual(self.call("POST", f"/fci/teamdungeon/{entered['dungeonUid']}/start/", {"actorUids": [2, 4]}),
+                         (409, {"error": "activity_closed_today"}))
     def test_team_dungeon_candy_respects_season_cap(self):
         profile = self.game._profile(self.account)
         state = self.game.welfare._state(profile)

@@ -68,16 +68,19 @@ def grant_rewards(game: Any, profile: Mapping[str, Any], rewards: Iterable[Mappi
                 new_instances.append(systems.new_actor(profile, state, rid, _int(reward.get("param"))))
         elif rtype == RES_ACTOR_SKIN and state is not None:
             try:
-                owners = {int(row["id"]): int(row.get("actorId", 0) or 0)
-                          for row in json.loads((Path(__file__).parent / "data/client-tables/ActorSkin.json").read_text(encoding="utf-8")).get("rows", [])
-                          if row.get("id")}
+                owners = {
+                    int(row["id"]): [_int(actor_id) for actor_id in (row.get("actorIds") or []) if _int(actor_id)]
+                    for row in json.loads((Path(__file__).parent / "data/client-tables/ActorSkin.json").read_text(encoding="utf-8")).get("rows", [])
+                    if row.get("id")
+                }
             except (OSError, TypeError, ValueError, json.JSONDecodeError):
                 owners = {}
-            owner = int(owners.get(rid, 0) or 0)
-            unlocked = state.setdefault("unlockedSkins", {}).setdefault(str(owner), [])
-            if rid not in unlocked:
-                unlocked.append(rid)
-                unlocked.sort()
+            owner_ids = owners.get(rid) or [0]
+            for owner in owner_ids:
+                unlocked = state.setdefault("unlockedSkins", {}).setdefault(str(owner), [])
+                if rid not in unlocked:
+                    unlocked.append(rid)
+                    unlocked.sort()
             skin_ids.append(rid)
         else:
             ledger.append({"type": rtype, "id": rid, "param": _int(reward.get("param")), "count": count})

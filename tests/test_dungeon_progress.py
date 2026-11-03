@@ -153,6 +153,36 @@ class DungeonProgressTests(unittest.TestCase):
                 self.assertEqual(balance["dungeonId"], dungeon_id)
                 self.assertEqual(balance["balanceInfo"]["resChange"][0]["baseRes"]["countDelta"], 0)
 
+    def test_challenge_entry_checks_chapter_unlock_and_null_active_is_safe(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            accounts = LocalAccounts(root / "accounts")
+            game = LocalGame(root / "game", accounts)
+            _, auth = self._account(accounts)
+            status, entered_challenge = game.handle_http(
+                "POST", "/fci/dungeon/", b'{"dungeonId":11011,"difficulty":"challenge"}',
+                "application/json", auth,
+            )
+            self.assertEqual(status, 200)
+            self.assertEqual(entered_challenge["baseInfo"]["dungeonId"], 11011)
+            # A malformed/null active payload is a client error, never an
+            # uncaught protobuf DecodeError (HTTP 500).
+            status, entered = game.handle_http(
+                "POST", "/fci/dungeon/", b'{"dungeonId":1}', "application/json", auth,
+            )
+            self.assertEqual(status, 200)
+            uid = entered["dungeonUid"]
+            for body in (b"null", b"{broken", b"\xff"):
+                status, payload = game.handle_http(
+                    "PATCH", f"/fci/dungeon/{uid}/active", body, "application/wireformat", auth,
+                )
+                self.assertEqual((status, payload["error"]), (400, "invalid_fight_active_data"))
+            status, chapter = game.handle_http(
+                "GET", "/fci/dungeon/chapter/1", b"", "application/wireformat", auth,
+            )
+            self.assertEqual(status, 200)
+            self.assertTrue(set(chapter.record_dungeons).issubset({1, 2, 3, 4, 5, 6, 7, 8}))
+
 
 if __name__ == "__main__":
     unittest.main()
