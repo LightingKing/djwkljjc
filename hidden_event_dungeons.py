@@ -10,7 +10,7 @@ from contextlib import closing
 import hashlib
 import json
 from pathlib import Path
-from urllib.parse import urlsplit
+from urllib.parse import urlsplit, parse_qs
 
 from activity_modes import DUNGEON_REWARD, MISC, _costs, _int, _res, _team_statistics
 from grants import grant_rewards
@@ -137,7 +137,7 @@ class LocalHiddenEventDungeons:
         return ids, uids, actors, count
 
     def _enter(self, profile, body, semi=False):
-        req = self.modes._request(body, "ApiEventDungeon")
+        req = self.modes._request(body, "ApiSemiFixedDungeon" if semi else "ApiEventDungeon")
         aid, kind, did = (_int(req.get(k)) for k in ("activityId", "activityType", "dungeonId"))
         event = EVENTS.get(aid)
         if not event or int(event["activityType"]) != kind or did not in event["dungeonId"] or semi != (did in SEMI):
@@ -261,10 +261,10 @@ class LocalHiddenEventDungeons:
         self.modes._store_balance(profile, run["dungeon_uid"], result)
         return 200, result
 
-    def _star(self, profile, state, aid, body):
+    def _star(self, profile, state, aid, body, schema="ApiEventDungeonStarReward"):
         if not self._open(EVENTS[aid]["activityType"], aid, profile):
             return 409, {"error": "activity_not_open"}
-        req = self.modes._request(body, "ApiEventDungeonStarReward")
+        req = self.modes._request(body, schema)
         star = _int(req.get("star"))
         row = STARS.get((aid, star))
         if row is None:
@@ -303,7 +303,7 @@ class LocalHiddenEventDungeons:
         self._save(profile, state)
         return 200, {"resChange": changes}
 
-    def _claw(self, action, method, body, profile):
+    def _claw(self, action, method, body, profile, query_nonce=""):
         state = self._state(profile)
         claw = state["claw"]
         now = int(self.game._now())
@@ -326,16 +326,16 @@ class LocalHiddenEventDungeons:
         if not self._open(38, profile=profile) or not self._open(39, profile=profile):
             return 409, {"error": "activity_not_open"}
         req = self.modes._request(body)
-        nonce = str(req.get("requestId", ""))
+        nonce = query_nonce or str(req.get("requestId", ""))
         if len(nonce) > 128:
             return 400, {"error": "invalid_request"}
+        if not nonce:
+            return 409, {"error": "request_id_required"}
         if nonce and nonce in claw["receipts"]:
             return 200, claw["receipts"][nonce]
-        # Native request lacks a nonce. Replay a double-submit within two
-        # seconds; a normal claw animation takes longer. Paid rolls remain
-        # sequential and persisted, so reconnect never re-rolls a receipt.
-        if not nonce and 0 <= now - claw.get("lastAt", -10) < 2 and claw.get("lastResult"):
-            return 200, claw["lastResult"]
+        # The local Lua branch persists a pending operation in the original
+        # GameDataCache before POST, then supplies this nonce in the query.
+        # A retry can arrive after any delay or either process's restart.
         costs = [{**_res(MISC["clawCraneCost"]), "count": -_int(MISC["clawCraneCost"]["count"])}]
         changes = self.modes._pay(profile, costs)
         if changes is None:
@@ -364,7 +364,7 @@ class LocalHiddenEventDungeons:
             changes += grant_rewards(self.game, profile, [chosen["res"]])
             claw["used"][str(gid)] = claw["used"].get(str(gid), 0) + 1
             result = {"id": gid, "resChange": changes}
-        claw.update(sequence=sequence, lastAt=now, lastResult=result)
+        claw.update(sequence=sequence)
         if nonce:
             claw["receipts"][nonce] = result
         self._save(profile, state)
@@ -383,7 +383,8 @@ class LocalHiddenEventDungeons:
             return None
         with self.game.atomic_mutation():
             if action.startswith("clawcrane"):
-                return self._claw(action, method, body, profile)
+                query = parse_qs(urlsplit(path).query)
+                return self._claw(action, method, body, profile, query.get("localRequestId", [""])[0])
             if action == "buffshop" and len(sub) == 1 and sub[0].isdigit():
                 return self._buff(method, int(sub[0]), body, profile)
             state = self._state(profile)
@@ -398,9 +399,16 @@ class LocalHiddenEventDungeons:
                 if sub[0] == "star-reward":
                     if method not in ("GET", "POST"):
                         return 405, {"error": "method_not_allowed"}
-                    return (200, self._summary(profile, state, aid)) if method == "GET" else self._star(profile, state, aid, body)
+                    return (200, {"rewardSummary": {str(aid): self._summary(profile, state, aid)}}) if method == "GET" else self._star(profile, state, aid, body, "ApiActivityStarReward")
             if action == "event-dungeon" and sub == ["record"] and method == "GET":
-                return 200, [self._record(profile, state, did) for e in EVENTS.values() if e["activityType"] in (27,39,40) for did in e["dungeonId"]]
+                records = []
+                for e in EVENTS.values():
+                    if e["activityType"] in (27, 39, 40):
+                        for did in e["dungeonId"]:
+                            record = self._record(profile, state, did)
+                            records.append({**{k: record[k] for k in ("dungeonId", "finished", "targetsDone", "multiPower", "doneTimes")},
+                                            "activityId": e["activityId"], "activityType": e["activityType"]})
+                return 200, records
             if action == "event-dungeon" and sub == ["star-reward"]:
                 if method == "GET":
                     return 200, self.redpoint_fields(profile)["eventDungeonStarRewardGet"]
@@ -415,7 +423,7 @@ class LocalHiddenEventDungeons:
                     return 404, {"error": "invalid_request"}
                 if method == "GET":
                     return 200, self._group(profile, state, did)
-                req = self.modes._request(body)
+                req = self.modes._request(body, "ApiSemiFixedDungeonActorGroup")
                 group = req.get("groupInfo")
                 members = group.get("members", []) if isinstance(group, dict) else []
                 if (method != "PUT" or not isinstance(members, list) or len(members) != 6
@@ -435,7 +443,7 @@ class LocalHiddenEventDungeons:
                     if uid:
                         seen.add(uid)
                 state["groups"][str(did)] = {"groupInfo": {"members": [
-                    {"index": m["index"], "isNpc": bool(m.get("isNpc")), "actorUid": _int(m.get("actorUid"))}
+                    {"index": m.get("index", 0), "isNpc": bool(m.get("isNpc")), "actorUid": _int(m.get("actorUid"))}
                     for m in members]}}
                 self._save(profile, state)
                 return 200, {}
@@ -451,6 +459,10 @@ class LocalHiddenEventDungeons:
                     return self.modes._close(profile, uid)
                 if sub[1:] == ["active"] and method == "PATCH":
                     active = self.modes._parse_active(body)
+                    if active is None or int(active.winTeam) not in (1, 2):
+                        schema = "ApiSemiFixedDungeonActive" if action == "semifixed-dungeon" else "ApiEventDungeonActive"
+                        wrapped = self.modes._request(body, schema)
+                        active = self.modes._parse_active(wrapped.get("request"))
                     if run["status"] != "active":
                         return 409, {"error": "dungeon_not_active"}
                     if active is None or int(active.winTeam) not in (1, 2):
@@ -458,7 +470,7 @@ class LocalHiddenEventDungeons:
                     # First terminal report is immutable across retries.
                     if run.get("active_data") and bytes(run["active_data"]) != active.SerializeToString():
                         return 409, {"error": "invalid_request"}
-                    return self.modes._store_active(profile, uid, body)
+                    return self.modes._store_active(profile, uid, active.SerializeToString())
                 if sub[1:] == ["balance"] and method == "POST":
                     return self._balance(profile, run)
             return 405, {"error": "invalid_request"}

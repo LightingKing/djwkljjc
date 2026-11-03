@@ -83,7 +83,7 @@ class HiddenEventDungeonTests(common.ModeTestBase):
                 result = self.win(self.enter(kind, aid, did, prefix)["dungeonUid"], prefix)
                 self.assertTrue(result["win"])
                 self.assertTrue(result["resChange"])
-                self.assertTrue(self.ok("GET", f"/fci/activity/star-reward/{kind}/{aid}")["totalStar"])
+                self.assertTrue(self.ok("GET", f"/fci/activity/star-reward/{kind}/{aid}")["rewardSummary"][str(aid)]["totalStar"])
 
     def test_activity_mismatch_and_original_level_gate_are_rejected(self):
         bad = self.call("POST", "/fci/event-dungeon/", {"activityType": 27, "activityId": 27001, "dungeonId": 3000101})
@@ -157,9 +157,10 @@ class HiddenEventDungeonTests(common.ModeTestBase):
 
     def test_claw_insufficient_currency_returns_error_without_changing_state(self):
         self.set_item(61001, 0)
-        reply = self.call("POST", "/fci/ClawCraneBingo/", {})
+        reply = self.call("POST", "/fci/ClawCraneBingo/", {"requestId": "empty-wallet"})
         self.assertIsNotNone(reply)
         self.assertEqual(reply[0], 409)
+        self.assertEqual(reply[1]["error"], "insufficient_resource")
         self.assertEqual(self.item(61001), 0)
 
     def test_christmas_original_daily_and_weekly_tasks_are_listed(self):
@@ -316,3 +317,70 @@ class HiddenEventDungeonTests(common.ModeTestBase):
                 request("GET", f"/fci/activity/record/{kind}/{aid}")
         self.assertEqual({r["id"] for r in request("GET", "/fci/ClawCranePrize")["limitInfo"]}, {1, 2, 3})
         self.assertTrue(request("GET", "/fci/BuffShop/54")["shopInfo"])
+
+    def test_claw_query_receipt_survives_late_retry_and_restart(self):
+        self.set_item(61001, 3)
+        path = "/fci/ClawCraneBingo/?localRequestId=claw-123-1"
+        response = self.game.handle_http("POST", path, b"{}", authorization=self.auth)
+        self.assertEqual(response[0], 200)
+        first = response[1]
+        self.clock.now += 86400
+        self.hidden = LocalHiddenEventDungeons(self.game)
+        self.assertEqual(self.ok("POST", path, {}), first)
+        self.assertEqual(self.item(61001), 2)
+        self.ok("POST", "/fci/ClawCraneBingo/?localRequestId=claw-123-2", {})
+        self.assertEqual(self.item(61001), 1)
+
+    def test_claw_mutation_without_persistable_request_id_is_rejected(self):
+        self.set_item(61001, 2)
+        result = self.call("POST", "/fci/ClawCraneBingo", {})
+        self.assertEqual(result[0], 409)
+        self.assertEqual(result[1]["error"], "request_id_required")
+        self.assertEqual(self.item(61001), 2)
+
+    def test_recovered_native_wire_requests_and_response_shapes(self):
+        def cls(name):
+            return message_factory.GetMessageClass(self.game._pool.FindMessageTypeByName(name))
+        for kind, aid, did, prefix, request_type, active_type in (
+            (27, 27001, 2700101, "event-dungeon", "ApiEventDungeon", "ApiEventDungeonActive"),
+            (51, 51002, 2900101, "semifixed-dungeon", "ApiSemiFixedDungeon", "ApiSemiFixedDungeonActive")):
+            with self.subTest(prefix=prefix):
+                if kind == 51:
+                    group = self.ok("GET", f"/fci/semifixed-dungeon/actorgroup/{did}")
+                    json_format.ParseDict(group, cls("ApiSemiFixedDungeonActorGroup.result")())
+                    put = json_format.ParseDict(group, cls("ApiSemiFixedDungeonActorGroup")())
+                    self.ok("PUT", f"/fci/semifixed-dungeon/actorgroup/{did}", put.SerializeToString())
+                request = cls(request_type)(dungeon_id=did, activity_type=kind, activity_id=aid, multi_power=1)
+                entered = self.ok("POST", f"/fci/{prefix}", request.SerializeToString())
+                json_format.ParseDict(entered, cls(request_type + ".result")())
+                active = cls(active_type)()
+                active.request.winTeam = 1
+                uid = entered["dungeonUid"]
+                self.ok("PATCH", f"/fci/{prefix}/{uid}/active", active.SerializeToString())
+                result = self.ok("POST", f"/fci/{prefix}/{uid}/balance", {})
+                json_format.ParseDict(result, cls("DbDungeon.BalanceInfo")())
+                json_format.ParseDict(self.ok("GET", f"/fci/activity/record/{kind}/{aid}"), cls("ApiActivityRecord.result")())
+                summary = self.ok("GET", f"/fci/activity/star-reward/{kind}/{aid}")
+                json_format.ParseDict(summary, cls("ApiActivityStarReward.get")())
+                self.assertEqual(summary["rewardSummary"][str(aid)]["totalStar"], 3)
+        for record in self.ok("GET", "/fci/event-dungeon/record"):
+            json_format.ParseDict(record, cls("DBGamePlayer.EventDungeonRecords.DungeonRecord")())
+        json_format.ParseDict(self.ok("GET", "/fci/event-dungeon/star-reward"), cls("ApiEventDungeonStarReward.get")())
+        reward = cls("ApiActivityStarReward")(star=3)
+        reply = self.ok("POST", "/fci/activity/star-reward/27/27001", reward.SerializeToString())
+        json_format.ParseDict(reply, cls("ApiActivityStarReward.post")())
+        legacy = cls("ApiEventDungeonStarReward")(activity_id=27001, star=3)
+        replay = self.ok("POST", "/fci/event-dungeon/star-reward", legacy.SerializeToString())
+        json_format.ParseDict(replay, cls("ApiEventDungeonStarReward.result")())
+        self.assertEqual(replay["resChange"], [])
+        for kind, currency, gid in ((51, 2009, 5101), (54, 2013, 5401)):
+            self.set_item(currency, 100)
+            shop = self.ok("GET", f"/fci/BuffShop/{kind}")
+            json_format.ParseDict(shop, cls("ApiActivityBuffShop.get")())
+            request = cls("ApiActivityBuffShop")(goods_id=gid, grade=1)
+            bought = self.ok("POST", f"/fci/BuffShop/{kind}", request.SerializeToString())
+            json_format.ParseDict(bought, cls("ApiActivityBuffShop.post")())
+        self.set_item(61001, 1)
+        draw = self.ok("POST", "/fci/ClawCraneBingo?localRequestId=wire-1", cls("ApiClawCraneBingo")().SerializeToString())
+        json_format.ParseDict(draw, cls("ApiClawCraneBingo.result")())
+        json_format.ParseDict(self.ok("GET", "/fci/ClawCraneRecord"), cls("ApiClawCraneRecord.result")())
