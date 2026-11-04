@@ -25,6 +25,7 @@ import json
 import math
 from pathlib import Path
 from typing import Any, Mapping, MutableMapping, Optional
+from role_completion import apply_table_overlay
 
 MIN_ACTOR_ID = 1000
 MAX_ACTOR_LEVEL = 60  # Misc.maxActorLevel
@@ -36,7 +37,7 @@ def _rows(name: str) -> list[dict[str, Any]]:
         payload = json.loads((_TABLES / f"{name}.json").read_text(encoding="utf-8"))
     except (OSError, ValueError):
         return []
-    return [row for row in payload.get("rows", []) if isinstance(row, dict)]
+    return apply_table_overlay(name, [row for row in payload.get("rows", []) if isinstance(row, dict)])
 
 
 ACTOR_INFO: dict[tuple[int, int], dict[str, Any]] = {

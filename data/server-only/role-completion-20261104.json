@@ -1,0 +1,3656 @@
+{
+  "schemaVersion": 1,
+  "provenance": "D / local candidate; original APK tables remain unchanged; no obtainability change",
+  "battleAcceptance": "pending isolated emulator-5566 for every actor; no automatic approval",
+  "excludedActorIds": [
+    2134
+  ],
+  "experimentalMainModelIds": [
+    1607
+  ],
+  "names": {
+    "1501": "御坂美琴",
+    "1503": "司波深雪",
+    "1505": "夏娜",
+    "1506": "玉置亚子",
+    "1511": "亚丝娜",
+    "1515": "逢坂大河",
+    "1516": "湊智花",
+    "1517": "司波达也",
+    "1601": "黑猫",
+    "1607": "真奥贞夫（魔王形态）",
+    "2016": "湊智花",
+    "2017": "司波达也",
+    "2018": "库温瑟",
+    "2106": "晓古城",
+    "2115": "折原临也",
+    "2134": "伊里野加奈"
+  },
+  "sameRoleDonors": {
+    "1501": 1001,
+    "1503": 1003,
+    "1505": 1005,
+    "1506": 1006,
+    "1511": 1011,
+    "1515": 1015,
+    "1516": 1016,
+    "1517": 1017,
+    "1601": 1101,
+    "1607": 2107,
+    "2016": 1016,
+    "2017": 1017,
+    "2018": 1018,
+    "2106": 1106,
+    "2115": 1115
+  },
+  "tables": {
+    "ActorSkill": [
+      {
+        "key": {
+          "skillId": 1503001
+        },
+        "original": null,
+        "row": {
+          "resIndex": 1,
+          "actorId": 1503,
+          "cmdStr": "InputCardCmd10001",
+          "name": "司波深雪",
+          "skillId": 1503001,
+          "costIndex": 1,
+          "specialIndex": [],
+          "target": 2,
+          "displayIndex": 1
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskill.lua; donor actor 1003; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1503002
+        },
+        "original": null,
+        "row": {
+          "resIndex": 2,
+          "actorId": 1503,
+          "cmdStr": "InputCardCmd10002",
+          "name": "司波深雪",
+          "skillId": 1503002,
+          "costIndex": 2,
+          "specialIndex": [],
+          "target": 1,
+          "displayIndex": 2
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskill.lua; donor actor 1003; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1503015
+        },
+        "original": null,
+        "row": {
+          "resIndex": 3,
+          "actorId": 1503,
+          "cmdStr": "InputCardCmd10010",
+          "name": "司波深雪",
+          "skillId": 1503015,
+          "costIndex": 3,
+          "specialIndex": [],
+          "target": 1,
+          "displayIndex": 3
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskill.lua; donor actor 1003; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1503301
+        },
+        "original": null,
+        "row": {
+          "specialIndex": [],
+          "actorId": 1503,
+          "cmdStr": "InputCardCmd10020",
+          "name": "boss挑衅",
+          "skillId": 1503301,
+          "target": 1
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskill.lua; donor actor 1003; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1505001
+        },
+        "original": null,
+        "row": {
+          "resIndex": 1,
+          "actorId": 1505,
+          "cmdStr": "InputCardCmd10001",
+          "name": "夏娜",
+          "skillId": 1505001,
+          "costIndex": 1,
+          "specialIndex": [],
+          "displayIndex": 1,
+          "target": 1,
+          "followSkill": 1505002
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskill.lua; donor actor 1005; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1505002
+        },
+        "original": null,
+        "row": {
+          "specialIndex": [],
+          "actorId": 1505,
+          "cmdStr": "InputCardCmd10002",
+          "name": "夏娜",
+          "skillId": 1505002,
+          "target": 1
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskill.lua; donor actor 1005; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1505003
+        },
+        "original": null,
+        "row": {
+          "resIndex": 2,
+          "actorId": 1505,
+          "cmdStr": "InputCardCmd10003",
+          "name": "夏娜",
+          "skillId": 1505003,
+          "costIndex": 2,
+          "specialIndex": [],
+          "displayIndex": 2,
+          "target": 1,
+          "followSkill": 1505004
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskill.lua; donor actor 1005; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1505004
+        },
+        "original": null,
+        "row": {
+          "specialIndex": [],
+          "actorId": 1505,
+          "cmdStr": "InputCardCmd10004",
+          "name": "夏娜",
+          "skillId": 1505004,
+          "target": 1
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskill.lua; donor actor 1005; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1505015
+        },
+        "original": null,
+        "row": {
+          "resIndex": 3,
+          "actorId": 1505,
+          "cmdStr": "InputCardCmd10010",
+          "name": "夏娜",
+          "skillId": 1505015,
+          "costIndex": 3,
+          "specialIndex": [],
+          "target": 1,
+          "displayIndex": 3
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskill.lua; donor actor 1005; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1505301
+        },
+        "original": null,
+        "row": {
+          "specialIndex": [],
+          "actorId": 1505,
+          "cmdStr": "InputCardCmd10020",
+          "name": "boss挑衅",
+          "skillId": 1505301,
+          "target": 1
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskill.lua; donor actor 1005; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1506003
+        },
+        "original": null,
+        "row": {
+          "resIndex": 1,
+          "actorId": 1506,
+          "cmdStr": "InputCardCmd10003",
+          "name": "亚子",
+          "skillId": 1506003,
+          "costIndex": 1,
+          "specialIndex": [],
+          "target": -1,
+          "displayIndex": 1
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskill.lua; donor actor 1006; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1506004
+        },
+        "original": null,
+        "row": {
+          "resIndex": 2,
+          "actorId": 1506,
+          "cmdStr": "InputCardCmd10004",
+          "name": "亚子",
+          "skillId": 1506004,
+          "costIndex": 2,
+          "specialIndex": [],
+          "target": -2,
+          "displayIndex": 2
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskill.lua; donor actor 1006; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1506015
+        },
+        "original": null,
+        "row": {
+          "resIndex": 3,
+          "actorId": 1506,
+          "cmdStr": "InputCardCmd10005",
+          "name": "亚子",
+          "skillId": 1506015,
+          "costIndex": 3,
+          "specialIndex": [],
+          "target": 1,
+          "displayIndex": 3
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskill.lua; donor actor 1006; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1506301
+        },
+        "original": null,
+        "row": {
+          "specialIndex": [],
+          "actorId": 1506,
+          "cmdStr": "InputCardCmd10020",
+          "name": "boss挑衅",
+          "skillId": 1506301,
+          "target": 1
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskill.lua; donor actor 1006; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1515001
+        },
+        "original": null,
+        "row": {
+          "resIndex": 1,
+          "actorId": 1515,
+          "cmdStr": "InputCardCmd10001",
+          "name": "大河",
+          "skillId": 1515001,
+          "costIndex": 1,
+          "specialIndex": [],
+          "defense": "3.0",
+          "target": 1,
+          "displayIndex": 1
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskill.lua; donor actor 1015; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1515002
+        },
+        "original": null,
+        "row": {
+          "resIndex": 2,
+          "actorId": 1515,
+          "cmdStr": "InputCardCmd10002",
+          "name": "大河",
+          "skillId": 1515002,
+          "costIndex": 2,
+          "specialIndex": [],
+          "defense": "3.0",
+          "displayIndex": 2,
+          "target": 2,
+          "followSkill": 1515003
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskill.lua; donor actor 1015; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1515003
+        },
+        "original": null,
+        "row": {
+          "specialIndex": [],
+          "actorId": 1515,
+          "cmdStr": "InputCardCmd10003",
+          "name": "大河",
+          "skillId": 1515003,
+          "target": 2,
+          "followSkill": 1515004
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskill.lua; donor actor 1015; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1515004
+        },
+        "original": null,
+        "row": {
+          "specialIndex": [],
+          "actorId": 1515,
+          "cmdStr": "InputCardCmd10004",
+          "name": "大河",
+          "skillId": 1515004,
+          "target": 2
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskill.lua; donor actor 1015; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1515015
+        },
+        "original": null,
+        "row": {
+          "resIndex": 3,
+          "actorId": 1515,
+          "cmdStr": "InputCardCmd10010",
+          "name": "大河",
+          "skillId": 1515015,
+          "costIndex": 3,
+          "specialIndex": [],
+          "defense": "2,3",
+          "target": 1,
+          "displayIndex": 3
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskill.lua; donor actor 1015; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1515301
+        },
+        "original": null,
+        "row": {
+          "specialIndex": [],
+          "actorId": 1515,
+          "cmdStr": "InputCardCmd10020",
+          "name": "boss挑衅",
+          "skillId": 1515301,
+          "target": 1
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskill.lua; donor actor 1015; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1516001
+        },
+        "original": null,
+        "row": {
+          "resIndex": 1,
+          "actorId": 1516,
+          "cmdStr": "InputCardCmd10001",
+          "name": "凑智花",
+          "skillId": 1516001,
+          "costIndex": 1,
+          "specialIndex": [],
+          "target": 1,
+          "displayIndex": 1
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskill.lua; donor actor 1016; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1516002
+        },
+        "original": null,
+        "row": {
+          "resIndex": 2,
+          "actorId": 1516,
+          "cmdStr": "InputCardCmd10002",
+          "name": "凑智花",
+          "skillId": 1516002,
+          "costIndex": 2,
+          "specialIndex": [],
+          "target": -2,
+          "displayIndex": 2
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskill.lua; donor actor 1016; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1516015
+        },
+        "original": null,
+        "row": {
+          "resIndex": 3,
+          "actorId": 1516,
+          "cmdStr": "InputCardCmd10010",
+          "name": "凑智花",
+          "skillId": 1516015,
+          "costIndex": 3,
+          "specialIndex": [],
+          "target": 1,
+          "displayIndex": 3
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskill.lua; donor actor 1016; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1516301
+        },
+        "original": null,
+        "row": {
+          "specialIndex": [],
+          "actorId": 1516,
+          "cmdStr": "InputCardCmd10020",
+          "name": "boss挑衅",
+          "skillId": 1516301,
+          "target": 1
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskill.lua; donor actor 1016; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1601001
+        },
+        "original": null,
+        "row": {
+          "resIndex": 1,
+          "actorId": 1601,
+          "cmdStr": "InputCardCmd10001",
+          "name": "黑猫",
+          "skillId": 1601001,
+          "costIndex": 1,
+          "specialIndex": [],
+          "target": 1,
+          "displayIndex": 1
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskill.lua; donor actor 1101; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1601002
+        },
+        "original": null,
+        "row": {
+          "resIndex": 2,
+          "actorId": 1601,
+          "cmdStr": "InputCardCmd10002",
+          "name": "黑猫",
+          "skillId": 1601002,
+          "costIndex": 2,
+          "specialIndex": [],
+          "target": 1,
+          "displayIndex": 2
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskill.lua; donor actor 1101; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1601015
+        },
+        "original": null,
+        "row": {
+          "resIndex": 3,
+          "actorId": 1601,
+          "cmdStr": "InputCardCmd10010",
+          "name": "黑猫",
+          "skillId": 1601015,
+          "costIndex": 3,
+          "specialIndex": [],
+          "target": 1,
+          "displayIndex": 3
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskill.lua; donor actor 1101; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1511001
+        },
+        "original": {
+          "specialIndex": [],
+          "actorId": 1511,
+          "cmdStr": "InputCardCmd10003",
+          "name": "亚丝娜",
+          "skillId": 1511001,
+          "target": 1
+        },
+        "row": {
+          "specialIndex": [],
+          "actorId": 1511,
+          "cmdStr": "InputCardCmd10003",
+          "name": "亚丝娜",
+          "skillId": 1511001,
+          "target": 1,
+          "displayIndex": 1,
+          "resIndex": 1,
+          "costIndex": 1
+        },
+        "source": "original fields absent (protobuf default 0); restore existing Asuna_2 command slot, D/local"
+      },
+      {
+        "key": {
+          "skillId": 1511002
+        },
+        "original": {
+          "specialIndex": [],
+          "actorId": 1511,
+          "cmdStr": "InputCardCmd10004",
+          "name": "亚丝娜",
+          "skillId": 1511002,
+          "target": 1
+        },
+        "row": {
+          "specialIndex": [],
+          "actorId": 1511,
+          "cmdStr": "InputCardCmd10004",
+          "name": "亚丝娜",
+          "skillId": 1511002,
+          "target": 1,
+          "displayIndex": 2,
+          "resIndex": 2,
+          "costIndex": 2
+        },
+        "source": "original fields absent (protobuf default 0); restore existing Asuna_2 command slot, D/local"
+      },
+      {
+        "key": {
+          "skillId": 1607001
+        },
+        "original": null,
+        "row": {
+          "resIndex": 1,
+          "actorId": 1607,
+          "cmdStr": "InputCardCmd10001",
+          "name": "魔王",
+          "skillId": 1607001,
+          "costIndex": 1,
+          "specialIndex": [],
+          "displayIndex": 1,
+          "target": 3
+        },
+        "source": "satan logicproto inputKeys 10001/10002/10003 exist; split support actions into experimental main slots D/local; isolated combat required"
+      },
+      {
+        "key": {
+          "skillId": 1607002
+        },
+        "original": null,
+        "row": {
+          "resIndex": 2,
+          "actorId": 1607,
+          "cmdStr": "InputCardCmd10002",
+          "name": "魔王2",
+          "skillId": 1607002,
+          "costIndex": 2,
+          "specialIndex": [
+            2107001,
+            2107004,
+            2107002,
+            2107003,
+            2107005
+          ],
+          "target": 1,
+          "displayIndex": 2
+        },
+        "source": "satan logicproto inputKeys 10001/10002/10003 exist; split support actions into experimental main slots D/local; isolated combat required"
+      },
+      {
+        "key": {
+          "skillId": 1607003
+        },
+        "original": null,
+        "row": {
+          "resIndex": 3,
+          "actorId": 1607,
+          "cmdStr": "InputCardCmd10003",
+          "name": "魔王2",
+          "skillId": 1607003,
+          "costIndex": 3,
+          "specialIndex": [
+            2107001,
+            2107004,
+            2107002,
+            2107003,
+            2107005
+          ],
+          "target": 1,
+          "displayIndex": 3
+        },
+        "source": "satan logicproto inputKeys 10001/10002/10003 exist; split support actions into experimental main slots D/local; isolated combat required"
+      }
+    ],
+    "ActorSkillMaxLevel": [
+      {
+        "key": {
+          "actorId": 1503,
+          "star": 1
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "actorId": 1503,
+          "star": 1
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1003; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1503,
+          "star": 2
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            5,
+            5,
+            5,
+            5,
+            5,
+            5,
+            5
+          ],
+          "actorId": 1503,
+          "star": 2
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1003; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1503,
+          "star": 3
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10
+          ],
+          "actorId": 1503,
+          "star": 3
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1003; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1503,
+          "star": 4
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            15,
+            15,
+            15,
+            15,
+            15,
+            15,
+            15
+          ],
+          "actorId": 1503,
+          "star": 4
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1003; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1503,
+          "star": 5
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20
+          ],
+          "actorId": 1503,
+          "star": 5
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1003; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1503,
+          "star": 6
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            25,
+            25,
+            25,
+            25,
+            25,
+            25,
+            25
+          ],
+          "actorId": 1503,
+          "star": 6
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1003; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1505,
+          "star": 1
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "actorId": 1505,
+          "star": 1
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1005; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1505,
+          "star": 2
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            5,
+            5,
+            5,
+            5,
+            5,
+            5,
+            5
+          ],
+          "actorId": 1505,
+          "star": 2
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1005; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1505,
+          "star": 3
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10
+          ],
+          "actorId": 1505,
+          "star": 3
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1005; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1505,
+          "star": 4
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            15,
+            15,
+            15,
+            15,
+            15,
+            15,
+            15
+          ],
+          "actorId": 1505,
+          "star": 4
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1005; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1505,
+          "star": 5
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20
+          ],
+          "actorId": 1505,
+          "star": 5
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1005; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1505,
+          "star": 6
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            25,
+            25,
+            25,
+            25,
+            25,
+            25,
+            25
+          ],
+          "actorId": 1505,
+          "star": 6
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1005; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1506,
+          "star": 1
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "actorId": 1506,
+          "star": 1
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1006; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1506,
+          "star": 2
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            5,
+            5,
+            5,
+            5,
+            5,
+            5,
+            5
+          ],
+          "actorId": 1506,
+          "star": 2
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1006; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1506,
+          "star": 3
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10
+          ],
+          "actorId": 1506,
+          "star": 3
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1006; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1506,
+          "star": 4
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            15,
+            15,
+            15,
+            15,
+            15,
+            15,
+            15
+          ],
+          "actorId": 1506,
+          "star": 4
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1006; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1506,
+          "star": 5
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20
+          ],
+          "actorId": 1506,
+          "star": 5
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1006; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1506,
+          "star": 6
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            25,
+            25,
+            25,
+            25,
+            25,
+            25,
+            25
+          ],
+          "actorId": 1506,
+          "star": 6
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1006; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1511,
+          "star": 1
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "actorId": 1511,
+          "star": 1
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1011; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1511,
+          "star": 2
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            5,
+            5,
+            5,
+            5,
+            5,
+            5,
+            5
+          ],
+          "actorId": 1511,
+          "star": 2
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1011; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1511,
+          "star": 3
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10
+          ],
+          "actorId": 1511,
+          "star": 3
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1011; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1511,
+          "star": 4
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            15,
+            15,
+            15,
+            15,
+            15,
+            15,
+            15
+          ],
+          "actorId": 1511,
+          "star": 4
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1011; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1511,
+          "star": 5
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20
+          ],
+          "actorId": 1511,
+          "star": 5
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1011; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1511,
+          "star": 6
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            25,
+            25,
+            25,
+            25,
+            25,
+            25,
+            25
+          ],
+          "actorId": 1511,
+          "star": 6
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1011; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1515,
+          "star": 1
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "actorId": 1515,
+          "star": 1
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1015; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1515,
+          "star": 2
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            5,
+            5,
+            5,
+            5,
+            5,
+            5,
+            5
+          ],
+          "actorId": 1515,
+          "star": 2
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1015; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1515,
+          "star": 3
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10
+          ],
+          "actorId": 1515,
+          "star": 3
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1015; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1515,
+          "star": 4
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            15,
+            15,
+            15,
+            15,
+            15,
+            15,
+            15
+          ],
+          "actorId": 1515,
+          "star": 4
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1015; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1515,
+          "star": 5
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20
+          ],
+          "actorId": 1515,
+          "star": 5
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1015; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1515,
+          "star": 6
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            25,
+            25,
+            25,
+            25,
+            25,
+            25,
+            25
+          ],
+          "actorId": 1515,
+          "star": 6
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1015; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1516,
+          "star": 1
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "actorId": 1516,
+          "star": 1
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1016; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1516,
+          "star": 2
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            5,
+            5,
+            5,
+            5,
+            5,
+            5,
+            5
+          ],
+          "actorId": 1516,
+          "star": 2
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1016; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1516,
+          "star": 3
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10
+          ],
+          "actorId": 1516,
+          "star": 3
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1016; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1516,
+          "star": 4
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            15,
+            15,
+            15,
+            15,
+            15,
+            15,
+            15
+          ],
+          "actorId": 1516,
+          "star": 4
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1016; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1516,
+          "star": 5
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20
+          ],
+          "actorId": 1516,
+          "star": 5
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1016; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1516,
+          "star": 6
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            25,
+            25,
+            25,
+            25,
+            25,
+            25,
+            25
+          ],
+          "actorId": 1516,
+          "star": 6
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1016; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1517,
+          "star": 1
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "actorId": 1517,
+          "star": 1
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1017; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1517,
+          "star": 2
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            5,
+            5,
+            5,
+            5,
+            5,
+            5,
+            5
+          ],
+          "actorId": 1517,
+          "star": 2
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1017; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1517,
+          "star": 3
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10
+          ],
+          "actorId": 1517,
+          "star": 3
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1017; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1517,
+          "star": 4
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            15,
+            15,
+            15,
+            15,
+            15,
+            15,
+            15
+          ],
+          "actorId": 1517,
+          "star": 4
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1017; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1517,
+          "star": 5
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20
+          ],
+          "actorId": 1517,
+          "star": 5
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1017; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1517,
+          "star": 6
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            25,
+            25,
+            25,
+            25,
+            25,
+            25,
+            25
+          ],
+          "actorId": 1517,
+          "star": 6
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1017; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1601,
+          "star": 1
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "actorId": 1601,
+          "star": 1
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1101; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1601,
+          "star": 2
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            5,
+            5,
+            5,
+            5,
+            5,
+            5,
+            5
+          ],
+          "actorId": 1601,
+          "star": 2
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1101; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1601,
+          "star": 3
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10
+          ],
+          "actorId": 1601,
+          "star": 3
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1101; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1601,
+          "star": 4
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            15,
+            15,
+            15,
+            15,
+            15,
+            15,
+            15
+          ],
+          "actorId": 1601,
+          "star": 4
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1101; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1601,
+          "star": 5
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20
+          ],
+          "actorId": 1601,
+          "star": 5
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1101; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1601,
+          "star": 6
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            25,
+            25,
+            25,
+            25,
+            25,
+            25,
+            25
+          ],
+          "actorId": 1601,
+          "star": 6
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1101; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1607,
+          "star": 1
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "actorId": 1607,
+          "star": 1
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1001; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1607,
+          "star": 2
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            5,
+            5,
+            5,
+            5,
+            5,
+            5,
+            5
+          ],
+          "actorId": 1607,
+          "star": 2
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1001; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1607,
+          "star": 3
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            10,
+            10,
+            10,
+            10,
+            10,
+            10,
+            10
+          ],
+          "actorId": 1607,
+          "star": 3
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1001; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1607,
+          "star": 4
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            15,
+            15,
+            15,
+            15,
+            15,
+            15,
+            15
+          ],
+          "actorId": 1607,
+          "star": 4
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1001; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1607,
+          "star": 5
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            20,
+            20,
+            20,
+            20,
+            20,
+            20,
+            20
+          ],
+          "actorId": 1607,
+          "star": 5
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1001; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1607,
+          "star": 6
+        },
+        "original": null,
+        "row": {
+          "maxLevel": [
+            25,
+            25,
+            25,
+            25,
+            25,
+            25,
+            25
+          ],
+          "actorId": 1607,
+          "star": 6
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorskillmaxlevel.lua; donor actor 1001; numeric values retained, recipient selection D/local"
+      }
+    ],
+    "ActorConfig": [
+      {
+        "key": {
+          "id": 1601
+        },
+        "original": {
+          "scale": 1.0,
+          "voiceRes": "kuroneko",
+          "exclusiveTalentId": [
+            1001101
+          ],
+          "openTime": "2020-3-30 00:00:00",
+          "chooseAudio": [
+            "kuroneko/character_select/Kro_s00_1100",
+            "kuroneko/character_select/Kro_s00_1120",
+            "kuroneko/character_select/Kro_s00_1130"
+          ],
+          "width": 1.0,
+          "role": 101,
+          "height": 4.0,
+          "shadowBaseY": 0.61,
+          "hitH": 3.0,
+          "animType": 2,
+          "poseActionCnt": 1,
+          "category": 3,
+          "prefabRes": "ruri",
+          "book": 5,
+          "logicRes": "ruri",
+          "kind": 1,
+          "hookObject": [],
+          "hitW": 0.7,
+          "skinUIRes": 2101,
+          "id": 1601,
+          "animRes": "1601a"
+        },
+        "row": {
+          "scale": 1.0,
+          "voiceRes": "kuroneko",
+          "exclusiveTalentId": [
+            1001101
+          ],
+          "openTime": "2020-3-30 00:00:00",
+          "chooseAudio": [
+            "kuroneko/character_select/Kro_s00_1100",
+            "kuroneko/character_select/Kro_s00_1120",
+            "kuroneko/character_select/Kro_s00_1130"
+          ],
+          "width": 1.0,
+          "role": 101,
+          "height": 4.0,
+          "shadowBaseY": 0.61,
+          "hitH": 3.0,
+          "animType": 2,
+          "poseActionCnt": 1,
+          "category": 3,
+          "prefabRes": "ruri2",
+          "book": 5,
+          "logicRes": "ruri2",
+          "kind": 1,
+          "hookObject": [],
+          "hitW": 0.7,
+          "skinUIRes": 2101,
+          "id": 1601,
+          "animRes": "1601a"
+        },
+        "source": "same Role 101 donor 1101; original model retained in this record; D/local model substitution pending battle"
+      },
+      {
+        "key": {
+          "id": 2115
+        },
+        "original": {
+          "scale": 1.0,
+          "voiceRes": "izaya",
+          "exclusiveTalentId": [
+            1001101
+          ],
+          "openTime": "2020-3-30 00:00:00",
+          "chooseAudio": [
+            "izaya/character_select/Izy_s00_1100",
+            "izaya/character_select/Izy_s00_1120",
+            "izaya/character_select/Izy_s00_1130"
+          ],
+          "width": 1.0,
+          "role": 115,
+          "height": 4.0,
+          "shadowBaseY": 0.6,
+          "hitH": 3.0,
+          "animType": 2,
+          "poseActionCnt": 1,
+          "supSound": "izaya/Izy00_4900",
+          "prefabRes": "satan",
+          "category": 1,
+          "book": 22,
+          "logicRes": "satan",
+          "kind": 2,
+          "hookObject": [],
+          "hitW": 0.7,
+          "skinUIRes": 1115,
+          "id": 2115,
+          "animRes": "2115a"
+        },
+        "row": {
+          "scale": 1.0,
+          "voiceRes": "izaya",
+          "exclusiveTalentId": [
+            1001101
+          ],
+          "openTime": "2020-3-30 00:00:00",
+          "chooseAudio": [
+            "izaya/character_select/Izy_s00_1100",
+            "izaya/character_select/Izy_s00_1120",
+            "izaya/character_select/Izy_s00_1130"
+          ],
+          "width": 1.0,
+          "role": 115,
+          "height": 4.0,
+          "shadowBaseY": 0.6,
+          "hitH": 3.0,
+          "animType": 2,
+          "poseActionCnt": 1,
+          "supSound": "izaya/Izy00_4900",
+          "prefabRes": "izaya",
+          "category": 1,
+          "book": 22,
+          "logicRes": "izaya",
+          "kind": 2,
+          "hookObject": [],
+          "hitW": 0.7,
+          "skinUIRes": 1115,
+          "id": 2115,
+          "animRes": "2115a"
+        },
+        "source": "same Role 115 donor 1115; original model retained in this record; D/local model substitution pending battle"
+      }
+    ],
+    "ActorTag": [
+      {
+        "key": {
+          "id": 1501
+        },
+        "original": {
+          "id": 1501,
+          "tag": []
+        },
+        "row": {
+          "id": 1501,
+          "tag": [
+            3,
+            18,
+            2
+          ]
+        },
+        "source": "analysis/lua-decompiled/xlsx__actortag.lua; donor actor 1001; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "id": 1503
+        },
+        "original": null,
+        "row": {
+          "id": 1503,
+          "tag": [
+            3,
+            9,
+            22,
+            2
+          ]
+        },
+        "source": "analysis/lua-decompiled/xlsx__actortag.lua; donor actor 1003; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "id": 1505
+        },
+        "original": null,
+        "row": {
+          "id": 1505,
+          "tag": [
+            3,
+            18,
+            1,
+            2
+          ]
+        },
+        "source": "analysis/lua-decompiled/xlsx__actortag.lua; donor actor 1005; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "id": 1506
+        },
+        "original": null,
+        "row": {
+          "id": 1506,
+          "tag": [
+            8,
+            9,
+            10,
+            17,
+            12,
+            23,
+            29
+          ]
+        },
+        "source": "analysis/lua-decompiled/xlsx__actortag.lua; donor actor 1006; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "id": 1511
+        },
+        "original": {
+          "id": 1511,
+          "tag": []
+        },
+        "row": {
+          "id": 1511,
+          "tag": [
+            4,
+            20,
+            1
+          ]
+        },
+        "source": "analysis/lua-decompiled/xlsx__actortag.lua; donor actor 1011; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "id": 1515
+        },
+        "original": null,
+        "row": {
+          "id": 1515,
+          "tag": [
+            4,
+            3,
+            27,
+            20,
+            1
+          ]
+        },
+        "source": "analysis/lua-decompiled/xlsx__actortag.lua; donor actor 1015; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "id": 1516
+        },
+        "original": null,
+        "row": {
+          "id": 1516,
+          "tag": [
+            8,
+            23,
+            17,
+            15,
+            29
+          ]
+        },
+        "source": "analysis/lua-decompiled/xlsx__actortag.lua; donor actor 1016; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "id": 1517
+        },
+        "original": null,
+        "row": {
+          "id": 1517,
+          "tag": [
+            990001
+          ]
+        },
+        "source": "analysis/lua-decompiled/xlsx__actortag.lua; donor actor 1017; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "id": 1601
+        },
+        "original": null,
+        "row": {
+          "id": 1601,
+          "tag": [
+            3,
+            18,
+            20,
+            2
+          ]
+        },
+        "source": "analysis/lua-decompiled/xlsx__actortag.lua; donor actor 1101; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "id": 1607
+        },
+        "original": null,
+        "row": {
+          "id": 1607,
+          "tag": [
+            5,
+            3,
+            1,
+            2
+          ]
+        },
+        "source": "analysis/lua-decompiled/xlsx__actortag.lua; donor actor 2107; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "id": 2016
+        },
+        "original": {
+          "id": 2016,
+          "tag": []
+        },
+        "row": {
+          "id": 2016,
+          "tag": [
+            8,
+            23,
+            17,
+            15,
+            29
+          ]
+        },
+        "source": "analysis/lua-decompiled/xlsx__actortag.lua; donor actor 1016; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "id": 2017
+        },
+        "original": {
+          "id": 2017,
+          "tag": []
+        },
+        "row": {
+          "id": 2017,
+          "tag": [
+            990001
+          ]
+        },
+        "source": "analysis/lua-decompiled/xlsx__actortag.lua; donor actor 1017; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "id": 2018
+        },
+        "original": {
+          "id": 2018,
+          "tag": []
+        },
+        "row": {
+          "id": 2018,
+          "tag": [
+            3,
+            1
+          ]
+        },
+        "source": "analysis/lua-decompiled/xlsx__actortag.lua; donor actor 1018; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "id": 2106
+        },
+        "original": {
+          "id": 2106,
+          "tag": []
+        },
+        "row": {
+          "id": 2106,
+          "tag": [
+            3,
+            29,
+            9,
+            10,
+            22,
+            12
+          ]
+        },
+        "source": "analysis/lua-decompiled/xlsx__actortag.lua; donor actor 1106; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "id": 2115
+        },
+        "original": {
+          "id": 2115,
+          "tag": []
+        },
+        "row": {
+          "id": 2115,
+          "tag": [
+            3,
+            6,
+            28,
+            1
+          ]
+        },
+        "source": "analysis/lua-decompiled/xlsx__actortag.lua; donor actor 1115; numeric values retained, recipient selection D/local"
+      }
+    ],
+    "ActorTagInfo": [
+      {
+        "key": {
+          "id": 990001
+        },
+        "original": null,
+        "row": {
+          "id": 990001,
+          "color": 1,
+          "displayTag": true
+        },
+        "source": "D/local neutral Reprise tag for roles whose original same-Role tag is also empty; not a gameplay ability classification"
+      }
+    ],
+    "ActorCombo": [
+      {
+        "key": {
+          "actorId": 1503,
+          "cardCount": 1,
+          "sCount": 0
+        },
+        "original": null,
+        "row": {
+          "paramInt": [],
+          "actorId": 1503,
+          "skillList": [
+            1503001
+          ],
+          "placeIndex": 1,
+          "kindIcon": "skill_all_attack",
+          "cardCount": 1
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorcombo.lua; donor actor 1003; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1503,
+          "cardCount": 2,
+          "sCount": 0
+        },
+        "original": null,
+        "row": {
+          "paramInt": [],
+          "actorId": 1503,
+          "placeIndex": 2,
+          "skillList": [
+            1503002
+          ],
+          "costMp": 3,
+          "kindIcon": "skill_all_dispel",
+          "cardCount": 2
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorcombo.lua; donor actor 1003; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1503,
+          "cardCount": 0,
+          "sCount": 1
+        },
+        "original": null,
+        "row": {
+          "placeIndex": 3,
+          "paramInt": [],
+          "actorId": 1503,
+          "sCount": 1,
+          "skillList": [
+            1503015
+          ],
+          "fireCount": 1,
+          "kindIcon": "skill_all_vulnerability",
+          "costSp": 10
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorcombo.lua; donor actor 1003; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1505,
+          "cardCount": 1,
+          "sCount": 0
+        },
+        "original": null,
+        "row": {
+          "paramInt": [],
+          "actorId": 1505,
+          "skillList": [
+            1505001,
+            1505002
+          ],
+          "placeIndex": 1,
+          "kindIcon": "skill_all_attack",
+          "cardCount": 1
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorcombo.lua; donor actor 1005; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1505,
+          "cardCount": 2,
+          "sCount": 0
+        },
+        "original": null,
+        "row": {
+          "paramInt": [],
+          "actorId": 1505,
+          "placeIndex": 2,
+          "skillList": [
+            1505004,
+            1505003
+          ],
+          "costMp": 4,
+          "kindIcon": "skill_all_dot",
+          "cardCount": 2
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorcombo.lua; donor actor 1005; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1505,
+          "cardCount": 0,
+          "sCount": 1
+        },
+        "original": null,
+        "row": {
+          "placeIndex": 3,
+          "paramInt": [],
+          "actorId": 1505,
+          "sCount": 1,
+          "skillList": [
+            1505015
+          ],
+          "fireCount": 1,
+          "kindIcon": "skill_all_dot",
+          "costSp": 12
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorcombo.lua; donor actor 1005; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1506,
+          "cardCount": 1,
+          "sCount": 0
+        },
+        "original": null,
+        "row": {
+          "paramInt": [],
+          "actorId": 1506,
+          "skillList": [
+            1506003
+          ],
+          "placeIndex": 1,
+          "kindIcon": "skill_front_heal",
+          "cardCount": 1
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorcombo.lua; donor actor 1006; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1506,
+          "cardCount": 2,
+          "sCount": 0
+        },
+        "original": null,
+        "row": {
+          "paramInt": [],
+          "actorId": 1506,
+          "placeIndex": 2,
+          "skillList": [
+            1506004
+          ],
+          "costMp": 5,
+          "kindIcon": "skill_all_behitdown",
+          "cardCount": 2
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorcombo.lua; donor actor 1006; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1506,
+          "cardCount": 0,
+          "sCount": 1
+        },
+        "original": null,
+        "row": {
+          "placeIndex": 3,
+          "paramInt": [],
+          "actorId": 1506,
+          "sCount": 1,
+          "skillList": [
+            1506015
+          ],
+          "fireCount": 1,
+          "kindIcon": "skill_all_pure",
+          "costSp": 8
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorcombo.lua; donor actor 1006; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1515,
+          "cardCount": 1,
+          "sCount": 0
+        },
+        "original": null,
+        "row": {
+          "paramInt": [],
+          "actorId": 1515,
+          "skillList": [
+            1515001
+          ],
+          "placeIndex": 1,
+          "kindIcon": "skill_fmiddle_attack",
+          "cardCount": 1
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorcombo.lua; donor actor 1015; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1515,
+          "cardCount": 2,
+          "sCount": 0
+        },
+        "original": null,
+        "row": {
+          "paramInt": [],
+          "actorId": 1515,
+          "placeIndex": 2,
+          "skillList": [
+            1515002,
+            1515003,
+            1515004
+          ],
+          "costMp": 3,
+          "kindIcon": "skill_all_attack",
+          "cardCount": 2
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorcombo.lua; donor actor 1015; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1515,
+          "cardCount": 0,
+          "sCount": 1
+        },
+        "original": null,
+        "row": {
+          "placeIndex": 3,
+          "paramInt": [],
+          "actorId": 1515,
+          "sCount": 1,
+          "skillList": [
+            1515015
+          ],
+          "fireCount": 1,
+          "kindIcon": "skill_front_attack",
+          "costSp": 10
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorcombo.lua; donor actor 1015; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1516,
+          "cardCount": 1,
+          "sCount": 0
+        },
+        "original": null,
+        "row": {
+          "paramInt": [],
+          "actorId": 1516,
+          "skillList": [
+            1516001
+          ],
+          "placeIndex": 1,
+          "kindIcon": "skill_all_heal",
+          "cardCount": 1
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorcombo.lua; donor actor 1016; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1516,
+          "cardCount": 2,
+          "sCount": 0
+        },
+        "original": null,
+        "row": {
+          "paramInt": [],
+          "actorId": 1516,
+          "placeIndex": 2,
+          "skillList": [
+            1516002
+          ],
+          "costMp": 5,
+          "kindIcon": "skill_all_behitdown",
+          "cardCount": 2
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorcombo.lua; donor actor 1016; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1516,
+          "cardCount": 0,
+          "sCount": 1
+        },
+        "original": null,
+        "row": {
+          "placeIndex": 3,
+          "paramInt": [],
+          "actorId": 1516,
+          "sCount": 1,
+          "skillList": [
+            1516015
+          ],
+          "fireCount": 1,
+          "kindIcon": "skill_all_attackup",
+          "costSp": 6
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorcombo.lua; donor actor 1016; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1601,
+          "cardCount": 1,
+          "sCount": 0
+        },
+        "original": null,
+        "row": {
+          "paramInt": [],
+          "actorId": 1601,
+          "skillList": [
+            1601001
+          ],
+          "placeIndex": 1,
+          "kindIcon": "skill_self_attackup",
+          "cardCount": 1
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorcombo.lua; donor actor 1101; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1601,
+          "cardCount": 2,
+          "sCount": 0
+        },
+        "original": null,
+        "row": {
+          "paramInt": [],
+          "actorId": 1601,
+          "placeIndex": 2,
+          "skillList": [
+            1601002
+          ],
+          "costMp": 3,
+          "kindIcon": "skill_all_attack",
+          "cardCount": 2
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorcombo.lua; donor actor 1101; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1601,
+          "cardCount": 0,
+          "sCount": 1
+        },
+        "original": null,
+        "row": {
+          "placeIndex": 3,
+          "paramInt": [],
+          "actorId": 1601,
+          "sCount": 1,
+          "skillList": [
+            1601015
+          ],
+          "fireCount": 1,
+          "kindIcon": "skill_all_attack",
+          "costSp": 10
+        },
+        "source": "analysis/lua-decompiled/xlsx__actorcombo.lua; donor actor 1101; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "actorId": 1607,
+          "cardCount": 1,
+          "sCount": 0
+        },
+        "original": null,
+        "row": {
+          "paramInt": [],
+          "actorId": 1607,
+          "skillList": [
+            1607001
+          ],
+          "placeIndex": 1,
+          "kindIcon": "skill_all_attack",
+          "cardCount": 1
+        },
+        "source": "D/local experimental main costs from original 1001 slots; satan commands require isolated battle validation"
+      },
+      {
+        "key": {
+          "actorId": 1607,
+          "cardCount": 2,
+          "sCount": 0
+        },
+        "original": null,
+        "row": {
+          "paramInt": [],
+          "actorId": 1607,
+          "placeIndex": 2,
+          "skillList": [
+            1607002
+          ],
+          "costMp": 3,
+          "kindIcon": "skill_all_attack",
+          "cardCount": 2
+        },
+        "source": "D/local experimental main costs from original 1001 slots; satan commands require isolated battle validation"
+      },
+      {
+        "key": {
+          "actorId": 1607,
+          "cardCount": 0,
+          "sCount": 1
+        },
+        "original": null,
+        "row": {
+          "placeIndex": 3,
+          "paramInt": [],
+          "actorId": 1607,
+          "sCount": 1,
+          "skillList": [
+            1607003
+          ],
+          "fireCount": 1,
+          "kindIcon": "skill_all_attack",
+          "costSp": 10
+        },
+        "source": "D/local experimental main costs from original 1001 slots; satan commands require isolated battle validation"
+      }
+    ],
+    "ActionDamage": [
+      {
+        "key": {
+          "skillId": 1503001,
+          "name": "s100"
+        },
+        "original": null,
+        "row": {
+          "name": "s100",
+          "skillId": 1503001,
+          "actorId": 1503,
+          "index": 100300101
+        },
+        "source": "analysis/lua-decompiled/xlsx__actiondamage.lua; donor actor 1003; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1503002,
+          "name": "s400"
+        },
+        "original": null,
+        "row": {
+          "name": "s400",
+          "skillId": 1503002,
+          "actorId": 1503,
+          "index": 100300201
+        },
+        "source": "analysis/lua-decompiled/xlsx__actiondamage.lua; donor actor 1003; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1503015,
+          "name": "climax2"
+        },
+        "original": null,
+        "row": {
+          "name": "climax2",
+          "skillId": 1503015,
+          "actorId": 1503,
+          "index": 100301501
+        },
+        "source": "analysis/lua-decompiled/xlsx__actiondamage.lua; donor actor 1003; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1503015,
+          "name": "climax3"
+        },
+        "original": null,
+        "row": {
+          "name": "climax3",
+          "skillId": 1503015,
+          "actorId": 1503,
+          "index": 100301502
+        },
+        "source": "analysis/lua-decompiled/xlsx__actiondamage.lua; donor actor 1003; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1505001,
+          "name": "x4"
+        },
+        "original": null,
+        "row": {
+          "name": "x4",
+          "skillId": 1505001,
+          "actorId": 1505,
+          "index": 100500101
+        },
+        "source": "analysis/lua-decompiled/xlsx__actiondamage.lua; donor actor 1005; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1505001,
+          "name": "x4n"
+        },
+        "original": null,
+        "row": {
+          "name": "x4n",
+          "skillId": 1505001,
+          "actorId": 1505,
+          "index": 100500102
+        },
+        "source": "analysis/lua-decompiled/xlsx__actiondamage.lua; donor actor 1005; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1505002,
+          "name": "x5a"
+        },
+        "original": null,
+        "row": {
+          "name": "x5a",
+          "skillId": 1505002,
+          "actorId": 1505,
+          "index": 100500201
+        },
+        "source": "analysis/lua-decompiled/xlsx__actiondamage.lua; donor actor 1005; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1505002,
+          "name": "x5b"
+        },
+        "original": null,
+        "row": {
+          "name": "x5b",
+          "skillId": 1505002,
+          "actorId": 1505,
+          "index": 100500202
+        },
+        "source": "analysis/lua-decompiled/xlsx__actiondamage.lua; donor actor 1005; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1505002,
+          "name": "x5c"
+        },
+        "original": null,
+        "row": {
+          "name": "x5c",
+          "skillId": 1505002,
+          "actorId": 1505,
+          "index": 100500203
+        },
+        "source": "analysis/lua-decompiled/xlsx__actiondamage.lua; donor actor 1005; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1505002,
+          "name": "s2n1"
+        },
+        "original": null,
+        "row": {
+          "name": "s2n1",
+          "skillId": 1505002,
+          "actorId": 1505,
+          "index": 100500204
+        },
+        "source": "analysis/lua-decompiled/xlsx__actiondamage.lua; donor actor 1005; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1505003,
+          "name": "s2n11"
+        },
+        "original": null,
+        "row": {
+          "name": "s2n11",
+          "skillId": 1505003,
+          "actorId": 1505,
+          "index": 100500301
+        },
+        "source": "analysis/lua-decompiled/xlsx__actiondamage.lua; donor actor 1005; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1505004,
+          "name": "xs"
+        },
+        "original": null,
+        "row": {
+          "name": "xs",
+          "skillId": 1505004,
+          "actorId": 1505,
+          "index": 100500401
+        },
+        "source": "analysis/lua-decompiled/xlsx__actiondamage.lua; donor actor 1005; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1505015,
+          "name": "dazhao"
+        },
+        "original": null,
+        "row": {
+          "name": "dazhao",
+          "skillId": 1505015,
+          "actorId": 1505,
+          "index": 100501501
+        },
+        "source": "analysis/lua-decompiled/xlsx__actiondamage.lua; donor actor 1005; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1506003,
+          "name": "skill3"
+        },
+        "original": null,
+        "row": {
+          "name": "skill3",
+          "skillId": 1506003,
+          "actorId": 1506,
+          "index": 100600301
+        },
+        "source": "analysis/lua-decompiled/xlsx__actiondamage.lua; donor actor 1006; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1506004,
+          "name": "skill4"
+        },
+        "original": null,
+        "row": {
+          "name": "skill4",
+          "skillId": 1506004,
+          "actorId": 1506,
+          "index": 100600401
+        },
+        "source": "analysis/lua-decompiled/xlsx__actiondamage.lua; donor actor 1006; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1506015,
+          "name": "dazhao"
+        },
+        "original": null,
+        "row": {
+          "name": "dazhao",
+          "skillId": 1506015,
+          "actorId": 1506,
+          "index": 100601501
+        },
+        "source": "analysis/lua-decompiled/xlsx__actiondamage.lua; donor actor 1006; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1515001,
+          "name": "skill4"
+        },
+        "original": null,
+        "row": {
+          "name": "skill4",
+          "skillId": 1515001,
+          "actorId": 1515,
+          "index": 101500101
+        },
+        "source": "analysis/lua-decompiled/xlsx__actiondamage.lua; donor actor 1015; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1515001,
+          "name": "skill41"
+        },
+        "original": null,
+        "row": {
+          "name": "skill41",
+          "skillId": 1515001,
+          "actorId": 1515,
+          "index": 101500102
+        },
+        "source": "analysis/lua-decompiled/xlsx__actiondamage.lua; donor actor 1015; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1515002,
+          "name": "skill21"
+        },
+        "original": null,
+        "row": {
+          "name": "skill21",
+          "skillId": 1515002,
+          "actorId": 1515,
+          "index": 101500201
+        },
+        "source": "analysis/lua-decompiled/xlsx__actiondamage.lua; donor actor 1015; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1515002,
+          "name": "skill22"
+        },
+        "original": null,
+        "row": {
+          "name": "skill22",
+          "skillId": 1515002,
+          "actorId": 1515,
+          "index": 101500202
+        },
+        "source": "analysis/lua-decompiled/xlsx__actiondamage.lua; donor actor 1015; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1515002,
+          "name": "skill23"
+        },
+        "original": null,
+        "row": {
+          "name": "skill23",
+          "skillId": 1515002,
+          "actorId": 1515,
+          "index": 101500203
+        },
+        "source": "analysis/lua-decompiled/xlsx__actiondamage.lua; donor actor 1015; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1515003,
+          "name": "skill2"
+        },
+        "original": null,
+        "row": {
+          "name": "skill2",
+          "skillId": 1515003,
+          "actorId": 1515,
+          "index": 101500301
+        },
+        "source": "analysis/lua-decompiled/xlsx__actiondamage.lua; donor actor 1015; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1515003,
+          "name": "skill2n"
+        },
+        "original": null,
+        "row": {
+          "name": "skill2n",
+          "skillId": 1515003,
+          "actorId": 1515,
+          "index": 101500302
+        },
+        "source": "analysis/lua-decompiled/xlsx__actiondamage.lua; donor actor 1015; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1515004,
+          "name": "skill8"
+        },
+        "original": null,
+        "row": {
+          "name": "skill8",
+          "skillId": 1515004,
+          "actorId": 1515,
+          "index": 101500401
+        },
+        "source": "analysis/lua-decompiled/xlsx__actiondamage.lua; donor actor 1015; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1515004,
+          "name": "skill8n"
+        },
+        "original": null,
+        "row": {
+          "name": "skill8n",
+          "skillId": 1515004,
+          "actorId": 1515,
+          "index": 101500402
+        },
+        "source": "analysis/lua-decompiled/xlsx__actiondamage.lua; donor actor 1015; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1515015,
+          "name": "dazhao"
+        },
+        "original": null,
+        "row": {
+          "name": "dazhao",
+          "skillId": 1515015,
+          "actorId": 1515,
+          "index": 101501501
+        },
+        "source": "analysis/lua-decompiled/xlsx__actiondamage.lua; donor actor 1015; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1515015,
+          "name": "dazhao1"
+        },
+        "original": null,
+        "row": {
+          "name": "dazhao1",
+          "skillId": 1515015,
+          "actorId": 1515,
+          "index": 101501502
+        },
+        "source": "analysis/lua-decompiled/xlsx__actiondamage.lua; donor actor 1015; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1515015,
+          "name": "dazhao2"
+        },
+        "original": null,
+        "row": {
+          "name": "dazhao2",
+          "skillId": 1515015,
+          "actorId": 1515,
+          "index": 101501503
+        },
+        "source": "analysis/lua-decompiled/xlsx__actiondamage.lua; donor actor 1015; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1515015,
+          "name": "dazhao4"
+        },
+        "original": null,
+        "row": {
+          "name": "dazhao4",
+          "skillId": 1515015,
+          "actorId": 1515,
+          "index": 101501504
+        },
+        "source": "analysis/lua-decompiled/xlsx__actiondamage.lua; donor actor 1015; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1515015,
+          "name": "dazhao6"
+        },
+        "original": null,
+        "row": {
+          "name": "dazhao6",
+          "skillId": 1515015,
+          "actorId": 1515,
+          "index": 101501505
+        },
+        "source": "analysis/lua-decompiled/xlsx__actiondamage.lua; donor actor 1015; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1516001,
+          "name": "s100"
+        },
+        "original": null,
+        "row": {
+          "name": "s100",
+          "skillId": 1516001,
+          "actorId": 1516,
+          "index": 101600101
+        },
+        "source": "analysis/lua-decompiled/xlsx__actiondamage.lua; donor actor 1016; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1516002,
+          "name": "s201"
+        },
+        "original": null,
+        "row": {
+          "name": "s201",
+          "skillId": 1516002,
+          "actorId": 1516,
+          "index": 101600201
+        },
+        "source": "analysis/lua-decompiled/xlsx__actiondamage.lua; donor actor 1016; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1516015,
+          "name": "climax103"
+        },
+        "original": null,
+        "row": {
+          "name": "climax103",
+          "skillId": 1516015,
+          "actorId": 1516,
+          "index": 101601501
+        },
+        "source": "analysis/lua-decompiled/xlsx__actiondamage.lua; donor actor 1016; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1601001,
+          "name": "s100"
+        },
+        "original": null,
+        "row": {
+          "name": "s100",
+          "skillId": 1601001,
+          "actorId": 1601,
+          "index": 110100101
+        },
+        "source": "analysis/lua-decompiled/xlsx__actiondamage.lua; donor actor 1101; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1601002,
+          "name": "s200"
+        },
+        "original": null,
+        "row": {
+          "name": "s200",
+          "skillId": 1601002,
+          "actorId": 1601,
+          "index": 110100201
+        },
+        "source": "analysis/lua-decompiled/xlsx__actiondamage.lua; donor actor 1101; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1601015,
+          "name": "climax101"
+        },
+        "original": null,
+        "row": {
+          "name": "climax101",
+          "skillId": 1601015,
+          "actorId": 1601,
+          "index": 110101501
+        },
+        "source": "analysis/lua-decompiled/xlsx__actiondamage.lua; donor actor 1101; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1607001,
+          "name": "sup100"
+        },
+        "original": null,
+        "row": {
+          "name": "sup100",
+          "skillId": 1607001,
+          "actorId": 1607,
+          "index": 210700101
+        },
+        "source": "analysis/lua-decompiled/xlsx__actiondamage.lua; donor actor 2107; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1607002,
+          "name": "sup102"
+        },
+        "original": null,
+        "row": {
+          "name": "sup102",
+          "skillId": 1607002,
+          "actorId": 1607,
+          "index": 210700201
+        },
+        "source": "analysis/lua-decompiled/xlsx__actiondamage.lua; donor actor 2107; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1607003,
+          "name": "sup101"
+        },
+        "original": null,
+        "row": {
+          "name": "sup101",
+          "skillId": 1607003,
+          "actorId": 1607,
+          "index": 210700201
+        },
+        "source": "D/local third satan input10003 starts sup101; donor2107002 originally binds sup102, damage index210700201 retained; isolated combat required"
+      }
+    ],
+    "ActionBuff": [
+      {
+        "key": {
+          "skillId": 1503002,
+          "name": "s400",
+          "addroleid": 1003001,
+          "logicname": "s400"
+        },
+        "original": null,
+        "row": {
+          "actorId": 1503,
+          "logicname": "s400",
+          "name": "s400",
+          "skillId": 1503002,
+          "buffIndex": [
+            1003011,
+            1003011,
+            1003011,
+            1003011,
+            1003011,
+            1003011
+          ],
+          "addroleid": 1003001
+        },
+        "source": "analysis/lua-decompiled/xlsx__actionbuff.lua; donor actor 1003; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1503015,
+          "name": "climax2",
+          "addroleid": 1003001,
+          "logicname": "climax_ice"
+        },
+        "original": null,
+        "row": {
+          "actorId": 1503,
+          "logicname": "climax_ice",
+          "name": "climax2",
+          "skillId": 1503015,
+          "buffIndex": [
+            1003021,
+            1003024,
+            1003022,
+            1003023,
+            1003025,
+            1003025
+          ],
+          "addroleid": 1003001
+        },
+        "source": "analysis/lua-decompiled/xlsx__actionbuff.lua; donor actor 1003; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1503015,
+          "name": "climax2",
+          "addroleid": 1003001,
+          "logicname": "climax_fire"
+        },
+        "original": null,
+        "row": {
+          "actorId": 1503,
+          "logicname": "climax_fire",
+          "name": "climax2",
+          "skillId": 1503015,
+          "buffIndex": [
+            1003021,
+            1003024,
+            1003022,
+            1003023,
+            1003025,
+            1003025
+          ],
+          "addroleid": 1003001
+        },
+        "source": "analysis/lua-decompiled/xlsx__actionbuff.lua; donor actor 1003; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1505004,
+          "name": "xs",
+          "addroleid": 1005001,
+          "logicname": "bigfire2"
+        },
+        "original": null,
+        "row": {
+          "actorId": 1505,
+          "logicname": "bigfire2",
+          "name": "xs",
+          "skillId": 1505004,
+          "buffIndex": [
+            1005011,
+            1005014,
+            1005012,
+            1005013,
+            1005015,
+            1005015
+          ],
+          "addroleid": 1005001
+        },
+        "source": "analysis/lua-decompiled/xlsx__actionbuff.lua; donor actor 1005; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1505015,
+          "name": "dazhao",
+          "addroleid": 1005001,
+          "logicname": "bigfire3"
+        },
+        "original": null,
+        "row": {
+          "actorId": 1505,
+          "logicname": "bigfire3",
+          "name": "dazhao",
+          "skillId": 1505015,
+          "buffIndex": [
+            1005021,
+            1005024,
+            1005022,
+            1005023,
+            1005025,
+            1005025
+          ],
+          "addroleid": 1005001
+        },
+        "source": "analysis/lua-decompiled/xlsx__actionbuff.lua; donor actor 1005; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1506003,
+          "name": "skill3",
+          "addroleid": 1006001,
+          "logicname": "s1_heal"
+        },
+        "original": null,
+        "row": {
+          "actorId": 1506,
+          "logicname": "s1_heal",
+          "name": "skill3",
+          "skillId": 1506003,
+          "buffIndex": [
+            1006001,
+            1006004,
+            1006002,
+            1006003,
+            1006005,
+            1006005
+          ],
+          "addroleid": 1006001
+        },
+        "source": "analysis/lua-decompiled/xlsx__actionbuff.lua; donor actor 1006; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1506004,
+          "name": "skill4",
+          "addroleid": 0,
+          "logicname": "skill4"
+        },
+        "original": null,
+        "row": {
+          "actorId": 1506,
+          "logicname": "skill4",
+          "name": "skill4",
+          "skillId": 1506004,
+          "buffIndex": [
+            1006011,
+            1006014,
+            1006012,
+            1006013,
+            1006015,
+            1006015
+          ]
+        },
+        "source": "analysis/lua-decompiled/xlsx__actionbuff.lua; donor actor 1006; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1506015,
+          "name": "dazhao",
+          "addroleid": 1006001,
+          "logicname": "dazhao_enemyHit"
+        },
+        "original": null,
+        "row": {
+          "actorId": 1506,
+          "logicname": "dazhao_enemyHit",
+          "name": "dazhao",
+          "skillId": 1506015,
+          "buffIndex": [
+            1006021,
+            1006021,
+            1006021,
+            1006021,
+            1006021,
+            1006021
+          ],
+          "addroleid": 1006001
+        },
+        "source": "analysis/lua-decompiled/xlsx__actionbuff.lua; donor actor 1006; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1506015,
+          "name": "dazhao",
+          "addroleid": 0,
+          "logicname": "dazhao"
+        },
+        "original": null,
+        "row": {
+          "actorId": 1506,
+          "logicname": "dazhao",
+          "name": "dazhao",
+          "skillId": 1506015,
+          "buffIndex": [
+            1006022,
+            1006022,
+            1006022,
+            1006022,
+            1006022,
+            1006022
+          ]
+        },
+        "source": "analysis/lua-decompiled/xlsx__actionbuff.lua; donor actor 1006; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1515001,
+          "name": "skill41",
+          "addroleid": 0,
+          "logicname": "skill41"
+        },
+        "original": null,
+        "row": {
+          "actorId": 1515,
+          "logicname": "skill41",
+          "name": "skill41",
+          "skillId": 1515001,
+          "buffIndex": [
+            1015001,
+            1015004,
+            1015002,
+            1015003,
+            1015005,
+            1015005
+          ]
+        },
+        "source": "analysis/lua-decompiled/xlsx__actionbuff.lua; donor actor 1015; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1515004,
+          "name": "skill8n",
+          "addroleid": 0,
+          "logicname": "skill8n"
+        },
+        "original": null,
+        "row": {
+          "actorId": 1515,
+          "logicname": "skill8n",
+          "name": "skill8n",
+          "skillId": 1515004,
+          "buffIndex": [
+            1015011,
+            1015011,
+            1015011,
+            1015011,
+            1015011,
+            1015011
+          ]
+        },
+        "source": "analysis/lua-decompiled/xlsx__actionbuff.lua; donor actor 1015; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1515015,
+          "name": "dazhao6",
+          "addroleid": 0,
+          "logicname": "dazhao6"
+        },
+        "original": null,
+        "row": {
+          "actorId": 1515,
+          "logicname": "dazhao6",
+          "name": "dazhao6",
+          "skillId": 1515015,
+          "buffIndex": [
+            1015011,
+            1015011,
+            1015011,
+            1015011,
+            1015011,
+            1015011
+          ]
+        },
+        "source": "analysis/lua-decompiled/xlsx__actionbuff.lua; donor actor 1015; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1516001,
+          "name": "s100",
+          "addroleid": 0,
+          "logicname": "s100"
+        },
+        "original": null,
+        "row": {
+          "actorId": 1516,
+          "logicname": "s100",
+          "name": "s100",
+          "skillId": 1516001,
+          "buffIndex": [
+            1016001,
+            1016004,
+            1016002,
+            1016003,
+            1016005,
+            1016005
+          ]
+        },
+        "source": "analysis/lua-decompiled/xlsx__actionbuff.lua; donor actor 1016; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1516002,
+          "name": "s201",
+          "addroleid": 0,
+          "logicname": "s201"
+        },
+        "original": null,
+        "row": {
+          "actorId": 1516,
+          "logicname": "s201",
+          "name": "s201",
+          "skillId": 1516002,
+          "buffIndex": [
+            1016011,
+            1016014,
+            1016012,
+            1016013,
+            1016015,
+            1016015
+          ]
+        },
+        "source": "analysis/lua-decompiled/xlsx__actionbuff.lua; donor actor 1016; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1516015,
+          "name": "climax103",
+          "addroleid": 1016001,
+          "logicname": "climax1"
+        },
+        "original": null,
+        "row": {
+          "actorId": 1516,
+          "logicname": "climax1",
+          "name": "climax103",
+          "skillId": 1516015,
+          "buffIndex": [
+            1016021,
+            1016024,
+            1016022,
+            1016023,
+            1016025,
+            1016025
+          ],
+          "addroleid": 1016001
+        },
+        "source": "analysis/lua-decompiled/xlsx__actionbuff.lua; donor actor 1016; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1601001,
+          "name": "s100",
+          "addroleid": 1101001,
+          "logicname": "curse_enemy"
+        },
+        "original": null,
+        "row": {
+          "actorId": 1601,
+          "logicname": "curse_enemy",
+          "name": "s100",
+          "skillId": 1601001,
+          "buffIndex": [
+            1101001,
+            1101001,
+            1101001,
+            1101001,
+            1101001,
+            1101001
+          ],
+          "addroleid": 1101001
+        },
+        "source": "analysis/lua-decompiled/xlsx__actionbuff.lua; donor actor 1101; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1601001,
+          "name": "s100",
+          "addroleid": 1101001,
+          "logicname": "curse1"
+        },
+        "original": null,
+        "row": {
+          "actorId": 1601,
+          "logicname": "curse1",
+          "name": "s100",
+          "skillId": 1601001,
+          "buffIndex": [
+            1101011,
+            1101011,
+            1101011,
+            1101011,
+            1101011,
+            1101011
+          ],
+          "addroleid": 1101001
+        },
+        "source": "analysis/lua-decompiled/xlsx__actionbuff.lua; donor actor 1101; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1601001,
+          "name": "s100",
+          "addroleid": 1101001,
+          "logicname": "curse2"
+        },
+        "original": null,
+        "row": {
+          "actorId": 1601,
+          "logicname": "curse2",
+          "name": "s100",
+          "skillId": 1601001,
+          "buffIndex": [
+            1101011,
+            1101011,
+            1101011,
+            1101011,
+            1101011,
+            1101011
+          ],
+          "addroleid": 1101001
+        },
+        "source": "analysis/lua-decompiled/xlsx__actionbuff.lua; donor actor 1101; numeric values retained, recipient selection D/local"
+      },
+      {
+        "key": {
+          "skillId": 1601001,
+          "name": "s100",
+          "addroleid": 0,
+          "logicname": "s100"
+        },
+        "original": null,
+        "row": {
+          "actorId": 1601,
+          "logicname": "s100",
+          "name": "s100",
+          "skillId": 1601001,
+          "buffIndex": [
+            1101021,
+            1101021,
+            1101021,
+            1101021,
+            1101021,
+            1101021
+          ]
+        },
+        "source": "analysis/lua-decompiled/xlsx__actionbuff.lua; donor actor 1101; numeric values retained, recipient selection D/local"
+      }
+    ]
+  },
+  "skillAliases": {
+    "1503001": 1003001,
+    "1503002": 1003002,
+    "1503015": 1003015,
+    "1503301": 1003301,
+    "1505001": 1005001,
+    "1505002": 1005002,
+    "1505003": 1005003,
+    "1505004": 1005004,
+    "1505015": 1005015,
+    "1505301": 1005301,
+    "1506003": 1006003,
+    "1506004": 1006004,
+    "1506015": 1006015,
+    "1506301": 1006301,
+    "1515001": 1015001,
+    "1515002": 1015002,
+    "1515003": 1015003,
+    "1515004": 1015004,
+    "1515015": 1015015,
+    "1515301": 1015301,
+    "1516001": 1016001,
+    "1516002": 1016002,
+    "1516015": 1016015,
+    "1516301": 1016301,
+    "1601001": 1101001,
+    "1601002": 1101002,
+    "1601015": 1101015,
+    "1607001": 2107001,
+    "1607002": 2107002,
+    "1607003": 2107002,
+    "1511001": 1011001,
+    "1511002": 1011002
+  }
+}

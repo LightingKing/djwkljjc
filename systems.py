@@ -22,6 +22,7 @@ from urllib.parse import parse_qs, urlsplit
 
 from google.protobuf import message_factory
 from google.protobuf.message import DecodeError
+from role_completion import apply_table_overlay
 
 
 Body = bytes | bytearray | str | None
@@ -57,7 +58,7 @@ def _client_table_rows(name: str) -> list[dict[str, Any]]:
     except (OSError, ValueError, TypeError):
         return []
     rows = payload.get("rows", []) if isinstance(payload, Mapping) else []
-    return [row for row in rows if isinstance(row, dict)]
+    return apply_table_overlay(name, [row for row in rows if isinstance(row, dict)])
 
 
 # Client GachaType (pools 1 normal, 2 periodic, 5 chips, 6 friendship) and
