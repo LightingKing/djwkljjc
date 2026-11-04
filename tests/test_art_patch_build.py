@@ -4,6 +4,7 @@ import hashlib
 import importlib.util
 import io
 import json
+import shutil
 import sys
 import tempfile
 import unittest
@@ -122,6 +123,20 @@ class ArtPatchBuildTests(unittest.TestCase):
         with zipfile.ZipFile(self.root / 'a/synthetic.zip', 'a') as z: z.writestr('unexpected.txt', b'untracked')
         with self.assertRaises(ValueError):
             verify_candidate(self.source / 'modules.json', self.root / 'a', self.bundle_root, self.art)
+
+    def test_verifier_checks_texture_candidate_when_staged(self):
+        from tools.verify_hot_update_assets import verify_candidate
+        self.build()
+        candidate = self.root / 'a'
+        fixture_root = self.root / 'fixtures'
+        fixture_root.mkdir()
+        shutil.copyfile(candidate / 'synthetic.zip', fixture_root / 'synthetic.zip')
+        result = verify_candidate(
+            self.source / 'modules.json', candidate, self.bundle_root, self.art,
+            staged_manifest=candidate / 'patch-manifest.json', fixture_root=fixture_root)
+        self.assertTrue(result['verified'])
+        self.assertTrue(result['staged'])
+        self.assertEqual(result['textureCount'], 1)
 
 
 if __name__ == '__main__': unittest.main()

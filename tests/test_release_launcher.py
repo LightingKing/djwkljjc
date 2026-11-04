@@ -135,3 +135,11 @@ if ($env:LJJC_TEST_CONFIG) { $launch.ConfigFile=$env:LJJC_TEST_CONFIG }
         self.assertEqual(config["public_base_url"], "http://192.168.1.22:19082")
         self.assertFalse(config["enable_tls"])
         self.assertEqual(Path(config["unified_store_path"]), Path("I:/workspace/mobilegame/runtime/lan-validation-19082/state/local.sqlite3"))
+
+    def test_release_script_uses_repository_verifier_for_texture_candidates(self):
+        script = SCRIPT.read_text(encoding="utf-8")
+        self.assertIn("tools/verify_hot_update_assets.py", script)
+        self.assertIn("Invoke-RepositoryArtifactVerification -Staged", script)
+        self.assertIn("--art-root", script)
+        self.assertIn("--manifest", script)
+        self.assertIn("--fixtures", script)
