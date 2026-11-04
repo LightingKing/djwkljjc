@@ -136,7 +136,8 @@ def build_zip(entries: dict[str, bytes]) -> tuple[bytes, int]:
 
 
 def build_candidate(config_path: Path, bundle_root: Path, output_dir: Path,
-                    base_url: str, zip_name: str = "ljjc-hot-update-v7.zip") -> dict:
+                    base_url: str, zip_name: str = "ljjc-hot-update-v7.zip", *,
+                    art_root: Path | None = None) -> dict:
     config_path, bundle_root, output_dir = config_path.resolve(), bundle_root.resolve(), output_dir.resolve()
     if relative_path(zip_name) != zip_name or "/" in zip_name or not zip_name.endswith(".zip"):
         raise ValueError("ZIP name must be a .zip filename")
@@ -173,6 +174,59 @@ def build_candidate(config_path: Path, bundle_root: Path, output_dir: Path,
             raise ValueError("input changed during candidate compilation")
         entries[target] = bundle
         records.append({"source": module["source"], "target": target, **record})
+    textures = []
+    art_origins_hash = None
+    if config.get("textures"):
+        from tools.art.bundle import clone_texture_bundle
+        from tools.art.origins import verify_approved_asset
+
+        if art_root is None:
+            raise ValueError("texture inputs require an explicit private art root")
+        art_root = art_root.resolve(strict=True)
+        if output_dir.is_relative_to(art_root):
+            raise ValueError("candidate output must be outside the art input tree")
+        origin_path = (source_root / relative_path(config["artOrigins"])).resolve(strict=True)
+        if not origin_path.is_relative_to(source_root):
+            raise ValueError("art origins escaped the source tree")
+        origin_bytes = origin_path.read_bytes()
+        origins = json.loads(origin_bytes)
+        if origins.get("schemaVersion") != 1:
+            raise ValueError("unsupported art origins schema")
+        assets = {entry["id"]: entry for entry in origins["assets"]}
+        if len(assets) != len(origins["assets"]):
+            raise ValueError("duplicate art origin id")
+        art_origins_hash = sha256(origin_bytes)
+        for texture in config["textures"]:
+            target = relative_path(texture["target"])
+            template = relative_path(texture["template"])
+            if (not target.startswith("assetbundle/texture/") or target in entries
+                    or not template.startswith("assetbundle/texture/")):
+                raise ValueError("texture target must be a unique texture bundle path")
+            template_path = (bundle_root / template).resolve(strict=True)
+            if not template_path.is_relative_to(bundle_root):
+                raise ValueError("texture template escaped the input tree")
+            original = template_path.read_bytes()
+            if sha256(original) != texture.get("templateSha256"):
+                raise ValueError(f"texture template digest mismatch: {template}")
+            try:
+                entry = assets[texture["artId"]]
+            except KeyError as exc:
+                raise ValueError("texture artId is absent from art origins") from exc
+            png = verify_approved_asset(entry, art_root)
+            size = (texture["width"], texture["height"])
+            bundle, validation = clone_texture_bundle(
+                original, png, target, expected_size=size,
+                expected_format=texture["format"], alpha_source=texture["alphaSource"])
+            if template_path.read_bytes() != original or verify_approved_asset(entry, art_root) != png:
+                raise ValueError("texture input changed during compilation")
+            entries[target] = bundle
+            textures.append({"artId": texture["artId"], "source": entry["path"],
+                             "sourceSha256": sha256(png), "template": template,
+                             "templateSha256": sha256(original), "target": target,
+                             "bundleSha256": sha256(bundle), "bundleLength": len(bundle),
+                             "validation": validation})
+        if origin_path.read_bytes() != origin_bytes:
+            raise ValueError("art origins changed during compilation")
     raw, crc = build_zip(entries)
     manifest = {"version": config["appVersion"], "history": [{
         "version": patch_version, "length": len(raw), "checksum": crc,
@@ -185,6 +239,10 @@ def build_candidate(config_path: Path, bundle_root: Path, output_dir: Path,
               "zipSha256": sha256(raw), "modules": records,
               "validation": {"zipIntegrity": True, "fciRoundTrip": True,
                              "luaLoadable": True, "clientColdStart": "not-run"}}
+    if textures:
+        report["textures"] = textures
+        report["artOriginsSha256"] = art_origins_hash
+        report["validation"].update(textureRoundTrip=True, artApproval=True)
     output_dir.mkdir(parents=True, exist_ok=True)
     for target, content in entries.items():
         destination = output_dir / "bundles" / target
@@ -203,8 +261,10 @@ def main() -> None:
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--base-url", default="http://127.0.0.1:19080")
     parser.add_argument("--zip-name", default="ljjc-hot-update-v7.zip")
+    parser.add_argument("--art-root", type=Path, help="private approved PNG root; never checked into Git")
     args = parser.parse_args()
-    report = build_candidate(args.config, args.bundle_root, args.output_dir, args.base_url, args.zip_name)
+    report = build_candidate(args.config, args.bundle_root, args.output_dir, args.base_url, args.zip_name,
+                             art_root=args.art_root)
     print(json.dumps({key: report[key] for key in ("status", "published", "zip", "zipLength", "zipCrc32", "zipSha256")}, indent=2))
 
 
