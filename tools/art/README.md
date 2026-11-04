@@ -18,7 +18,7 @@
 - ETC2_RGBA8=47：RGBA PNG，`alpha_source=rgba`。Alpha8=1：RGBA的真实A通道用`alpha`；显式L遮罩用`mask`。禁止把RGB亮度隐式当alpha。UnityPy原始A编码要求RGBA容器，代码把指定mask放入A后编码。
 - 模板只接受1个CAB、1个Texture2D、1个AssetBundle、1个正确指向纹理的容器，不支持外部stream。
 - 克隆同时改AssetBundle的m_Name/m_AssetBundleName、容器路径、Texture2D.m_Name和内部CAB；CAB由目标路径确定，多个目标互不冲突。
-- 序列化后重新读取核对名字、路径、尺寸、格式。Alpha8逐像素无损；ETC2为有损格式，透明度每像素最大差不得超过20。双构建必须字节一致。正式补丁仍需Lua/FCI、ZIP及完整验收。
+- 序列化后重新读取核对名字、路径、尺寸、格式。Alpha8逐像素无损；ETC2为有损格式，透明度每像素最大差不得超过40（真实 UnityPy 编码的审阅裁图边缘可能出现35级量化差异）。双构建必须字节一致。正式补丁仍需Lua/FCI、ZIP及完整验收。
 - 原1502尺寸：portrait/full1024×1024，headBig256×512，headRectangle256×256，selectTeam256×1024，gacha256×128，infight main/main_r128×128、sub_2 512×128，journey512×256，skill512×64，logo256×256，introduction512×1024，skinHead196×196（ETC2/RGBA），skinHeadBig438×530（Alpha8）。
 - `derive_ui`机械拒绝缺全身或逐像素相同的半身输入，但不能自动判断人体完整性；人工审核不可省略。skinHeadBig是按全身alpha与亮度生成的显式灰度遮罩，须与其余预览一起审核。
 

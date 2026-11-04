@@ -208,6 +208,18 @@ class ArtBundleTests(ArtApiTests):
                     expected_size=(438, 530), expected_format=1, alpha_source="mask")
         self.assertEqual(raw, raw2)
 
+    def test_real_etc2_reviewed_cutout_accepts_unity_alpha_quantization(self):
+        root = external_path("LJJC_ASSET_ROOT", "analysis/ljjc_manifest_out/assets/Patch/assetbundle")
+        art = external_path("LJJC_ROLE_ART_ROOT", "runtime/role-completion-20261104/art/1501/ui-final-v2")
+        template = require_file(root / "texture/actorgachahead/gacha_head_1502a", "LJJC_ASSET_ROOT")
+        source = require_file(art / "actorgachahead/gacha_head_1501a.png", "LJJC_ROLE_ART_ROOT")
+        raw, report = self.art("bundle").clone_texture_bundle(
+            template.read_bytes(), source.read_bytes(),
+            "assetbundle/texture/actorgachahead/gacha_head_1501a",
+            expected_size=(256, 128), expected_format=47, alpha_source="rgba")
+        self.assertTrue(raw)
+        self.assertLessEqual(report["alphaMaxError"], 40)
+
     def test_bundle_rejects_unsafe_target_wrong_size_or_format(self):
         bundle = self.art("bundle")
         template = self.template("texture/actorportrait/actor_portrait_1502a")

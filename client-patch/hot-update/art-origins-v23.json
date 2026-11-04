@@ -1,0 +1,3905 @@
+{
+  "schemaVersion": 1,
+  "assets": [
+    {
+      "id": "1501:actorgachahead/gacha_head_1501a",
+      "path": "1501/ui-final-v2/actorgachahead/gacha_head_1501a.png",
+      "sha256": "03ba814a493a8fdc2be70e4ec673d7979a5b711fae71b21374879d8bd3c38f69",
+      "width": 256,
+      "height": 128,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1501/fullbody-approved-cutout.png",
+            "sha256": "d4ba731c63aa71e66b94afb4dfd76882e247c8fd4aa66ec8174b5b9cbb30ff90"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "03ba814a493a8fdc2be70e4ec673d7979a5b711fae71b21374879d8bd3c38f69",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1501:actorgroup/selectteam_1501a",
+      "path": "1501/ui-final-v2/actorgroup/selectteam_1501a.png",
+      "sha256": "1021f78afe14443bbd8d44c3feeb8ec5a09c4993edb7a8ad8ea8fce8750b1cbf",
+      "width": 256,
+      "height": 1024,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1501/fullbody-approved-cutout.png",
+            "sha256": "d4ba731c63aa71e66b94afb4dfd76882e247c8fd4aa66ec8174b5b9cbb30ff90"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "1021f78afe14443bbd8d44c3feeb8ec5a09c4993edb7a8ad8ea8fce8750b1cbf",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1501:actorheadbig/actor_head_big_1501a",
+      "path": "1501/ui-final-v2/actorheadbig/actor_head_big_1501a.png",
+      "sha256": "d352955fd4b30fd92e3f0c8f42f72783ffad80036847dda2580a850e17fb3ca1",
+      "width": 256,
+      "height": 512,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1501/fullbody-approved-cutout.png",
+            "sha256": "d4ba731c63aa71e66b94afb4dfd76882e247c8fd4aa66ec8174b5b9cbb30ff90"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "d352955fd4b30fd92e3f0c8f42f72783ffad80036847dda2580a850e17fb3ca1",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1501:actorheadrectangle/actor_head_1501a",
+      "path": "1501/ui-final-v2/actorheadrectangle/actor_head_1501a.png",
+      "sha256": "d508f29783903ead5ab5cc57df44cf6bbbd8439ba49106f35191a56c32709302",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1501/fullbody-approved-cutout.png",
+            "sha256": "d4ba731c63aa71e66b94afb4dfd76882e247c8fd4aa66ec8174b5b9cbb30ff90"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "d508f29783903ead5ab5cc57df44cf6bbbd8439ba49106f35191a56c32709302",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1501:actorinfighthead/main/infight_head_1501a",
+      "path": "1501/ui-final-v2/actorinfighthead/main/infight_head_1501a.png",
+      "sha256": "ae70e6b08f4422bea43043764e06db7b8b4a099c6896c6b094fe3e9e1fa631f5",
+      "width": 128,
+      "height": 128,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1501/fullbody-approved-cutout.png",
+            "sha256": "d4ba731c63aa71e66b94afb4dfd76882e247c8fd4aa66ec8174b5b9cbb30ff90"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "ae70e6b08f4422bea43043764e06db7b8b4a099c6896c6b094fe3e9e1fa631f5",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1501:actorinfighthead/main_r/infight_head_1501a",
+      "path": "1501/ui-final-v2/actorinfighthead/main_r/infight_head_1501a.png",
+      "sha256": "0fe28448bb63609f617c1428c5534f386f821c2a90f74f649de95ce4460d0014",
+      "width": 128,
+      "height": 128,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1501/fullbody-approved-cutout.png",
+            "sha256": "d4ba731c63aa71e66b94afb4dfd76882e247c8fd4aa66ec8174b5b9cbb30ff90"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "0fe28448bb63609f617c1428c5534f386f821c2a90f74f649de95ce4460d0014",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1501:actorinfighthead/sub_2/infight_head_1501a",
+      "path": "1501/ui-final-v2/actorinfighthead/sub_2/infight_head_1501a.png",
+      "sha256": "41407e4f7c68059a5cd523d3e6f5e7844d1298484550d46082fcd94898b92071",
+      "width": 512,
+      "height": 128,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1501/fullbody-approved-cutout.png",
+            "sha256": "d4ba731c63aa71e66b94afb4dfd76882e247c8fd4aa66ec8174b5b9cbb30ff90"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "41407e4f7c68059a5cd523d3e6f5e7844d1298484550d46082fcd94898b92071",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1501:actorintroduction/introduction_1501a",
+      "path": "1501/ui-final-v2/actorintroduction/introduction_1501a.png",
+      "sha256": "468aa4a7c8fc8d5f7746032563428a95d29ba2e6bb5df0dc0ba1776ddb54088f",
+      "width": 512,
+      "height": 1024,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1501/fullbody-approved-cutout.png",
+            "sha256": "d4ba731c63aa71e66b94afb4dfd76882e247c8fd4aa66ec8174b5b9cbb30ff90"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "468aa4a7c8fc8d5f7746032563428a95d29ba2e6bb5df0dc0ba1776ddb54088f",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1501:actorjourneyhead/actor_head_1501a",
+      "path": "1501/ui-final-v2/actorjourneyhead/actor_head_1501a.png",
+      "sha256": "1a14d5f43120b00f599c405e458e40656f6ff360d85ffeb59029e140c39b2767",
+      "width": 512,
+      "height": 256,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1501/fullbody-approved-cutout.png",
+            "sha256": "d4ba731c63aa71e66b94afb4dfd76882e247c8fd4aa66ec8174b5b9cbb30ff90"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "1a14d5f43120b00f599c405e458e40656f6ff360d85ffeb59029e140c39b2767",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1501:actorlogo/actor_logo_1501a",
+      "path": "1501/ui-final-v2/actorlogo/actor_logo_1501a.png",
+      "sha256": "d57cf3e238bc966dc97e9d23fe746e23a6e11f7cb67f59af89e9ccca45a68141",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1501/fullbody-approved-cutout.png",
+            "sha256": "d4ba731c63aa71e66b94afb4dfd76882e247c8fd4aa66ec8174b5b9cbb30ff90"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "d57cf3e238bc966dc97e9d23fe746e23a6e11f7cb67f59af89e9ccca45a68141",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1501:actorportrait/actor_portrait_1501a",
+      "path": "1501/ui-final-v2/actorportrait/actor_portrait_1501a.png",
+      "sha256": "7f06c63f74b6d47ba7d542f4a0f33ae4f92170fa792f9194d9386651daad03ce",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1501/fullbody-approved-cutout.png",
+            "sha256": "d4ba731c63aa71e66b94afb4dfd76882e247c8fd4aa66ec8174b5b9cbb30ff90"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "7f06c63f74b6d47ba7d542f4a0f33ae4f92170fa792f9194d9386651daad03ce",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1501:actorportraitfull/actor_portrait_full_1501a",
+      "path": "1501/ui-final-v2/actorportraitfull/actor_portrait_full_1501a.png",
+      "sha256": "7f06c63f74b6d47ba7d542f4a0f33ae4f92170fa792f9194d9386651daad03ce",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1501/fullbody-approved-cutout.png",
+            "sha256": "d4ba731c63aa71e66b94afb4dfd76882e247c8fd4aa66ec8174b5b9cbb30ff90"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "7f06c63f74b6d47ba7d542f4a0f33ae4f92170fa792f9194d9386651daad03ce",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1501:actorskillhead/actor_skill_head_1501a",
+      "path": "1501/ui-final-v2/actorskillhead/actor_skill_head_1501a.png",
+      "sha256": "322b4b78a375f1009b756deec9c87c7aa5a7264a8b1f6189ce5d3a3c6dcc56a5",
+      "width": 512,
+      "height": 64,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1501/fullbody-approved-cutout.png",
+            "sha256": "d4ba731c63aa71e66b94afb4dfd76882e247c8fd4aa66ec8174b5b9cbb30ff90"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "322b4b78a375f1009b756deec9c87c7aa5a7264a8b1f6189ce5d3a3c6dcc56a5",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1501:actorskinhead/actorskinhead_2001",
+      "path": "1501/ui-final-v2/actorskinhead/actorskinhead_2001.png",
+      "sha256": "1165209170267e44c449cb11cb54805f79a5ec723bca72a46e0e6463ac59803e",
+      "width": 196,
+      "height": 196,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1501/fullbody-approved-cutout.png",
+            "sha256": "d4ba731c63aa71e66b94afb4dfd76882e247c8fd4aa66ec8174b5b9cbb30ff90"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "1165209170267e44c449cb11cb54805f79a5ec723bca72a46e0e6463ac59803e",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1501:actorskinheadbig/actorskinhead_big_2001",
+      "path": "1501/ui-final-v2/actorskinheadbig/actorskinhead_big_2001.png",
+      "sha256": "064023538c3f041dbdc5ea47647362b61ef238d2f94ed52994a6dee9ee603ca4",
+      "width": 438,
+      "height": 530,
+      "mode": "L",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1501/fullbody-approved-cutout.png",
+            "sha256": "d4ba731c63aa71e66b94afb4dfd76882e247c8fd4aa66ec8174b5b9cbb30ff90"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "064023538c3f041dbdc5ea47647362b61ef238d2f94ed52994a6dee9ee603ca4",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1503:actorgachahead/gacha_head_1503a",
+      "path": "1503/ui-final-v2/actorgachahead/gacha_head_1503a.png",
+      "sha256": "69a953add5e1317ba342542db8217c2f4b7b00c39f4ac01660d33e031a78f908",
+      "width": 256,
+      "height": 128,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1503/fullbody-approved-cutout.png",
+            "sha256": "ebfd38c7e2cbf805e1e32aecab86ae6df2fb24fe67663e9b400260af0775379a"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "69a953add5e1317ba342542db8217c2f4b7b00c39f4ac01660d33e031a78f908",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1503:actorgroup/selectteam_1503a",
+      "path": "1503/ui-final-v2/actorgroup/selectteam_1503a.png",
+      "sha256": "48587d168be51178cc167333e220e402277bb6bbffdeabba51f3168ce826fc5f",
+      "width": 256,
+      "height": 1024,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1503/fullbody-approved-cutout.png",
+            "sha256": "ebfd38c7e2cbf805e1e32aecab86ae6df2fb24fe67663e9b400260af0775379a"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "48587d168be51178cc167333e220e402277bb6bbffdeabba51f3168ce826fc5f",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1503:actorheadbig/actor_head_big_1503a",
+      "path": "1503/ui-final-v2/actorheadbig/actor_head_big_1503a.png",
+      "sha256": "5382cbca3c4ff8f31656ec7809d3b6011532dbe3d6395302321b9cceec2097d4",
+      "width": 256,
+      "height": 512,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1503/fullbody-approved-cutout.png",
+            "sha256": "ebfd38c7e2cbf805e1e32aecab86ae6df2fb24fe67663e9b400260af0775379a"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "5382cbca3c4ff8f31656ec7809d3b6011532dbe3d6395302321b9cceec2097d4",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1503:actorheadrectangle/actor_head_1503a",
+      "path": "1503/ui-final-v2/actorheadrectangle/actor_head_1503a.png",
+      "sha256": "a06e23ec3ffb9daa21e86b691f3de1f325a9bd1e4a79b9630e5733ea15efc69c",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1503/fullbody-approved-cutout.png",
+            "sha256": "ebfd38c7e2cbf805e1e32aecab86ae6df2fb24fe67663e9b400260af0775379a"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "a06e23ec3ffb9daa21e86b691f3de1f325a9bd1e4a79b9630e5733ea15efc69c",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1503:actorinfighthead/main/infight_head_1503a",
+      "path": "1503/ui-final-v2/actorinfighthead/main/infight_head_1503a.png",
+      "sha256": "0e77502f04919c54c8e267965b408799dda3c748a835187d76477d3357478f69",
+      "width": 128,
+      "height": 128,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1503/fullbody-approved-cutout.png",
+            "sha256": "ebfd38c7e2cbf805e1e32aecab86ae6df2fb24fe67663e9b400260af0775379a"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "0e77502f04919c54c8e267965b408799dda3c748a835187d76477d3357478f69",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1503:actorinfighthead/main_r/infight_head_1503a",
+      "path": "1503/ui-final-v2/actorinfighthead/main_r/infight_head_1503a.png",
+      "sha256": "9c84204a694e35b0545d3e9f6c5d050356b277973b67164288baae75f51430ff",
+      "width": 128,
+      "height": 128,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1503/fullbody-approved-cutout.png",
+            "sha256": "ebfd38c7e2cbf805e1e32aecab86ae6df2fb24fe67663e9b400260af0775379a"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "9c84204a694e35b0545d3e9f6c5d050356b277973b67164288baae75f51430ff",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1503:actorinfighthead/sub_2/infight_head_1503a",
+      "path": "1503/ui-final-v2/actorinfighthead/sub_2/infight_head_1503a.png",
+      "sha256": "97426899081d694ce0961835d30e582ba8694d432292df7c55e782aa8dc8acf4",
+      "width": 512,
+      "height": 128,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1503/fullbody-approved-cutout.png",
+            "sha256": "ebfd38c7e2cbf805e1e32aecab86ae6df2fb24fe67663e9b400260af0775379a"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "97426899081d694ce0961835d30e582ba8694d432292df7c55e782aa8dc8acf4",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1503:actorintroduction/introduction_1503a",
+      "path": "1503/ui-final-v2/actorintroduction/introduction_1503a.png",
+      "sha256": "3b135acf3a43025ec4768e1f67489c8e2e896fe254749e5fb27f9261b070baea",
+      "width": 512,
+      "height": 1024,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1503/fullbody-approved-cutout.png",
+            "sha256": "ebfd38c7e2cbf805e1e32aecab86ae6df2fb24fe67663e9b400260af0775379a"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "3b135acf3a43025ec4768e1f67489c8e2e896fe254749e5fb27f9261b070baea",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1503:actorjourneyhead/actor_head_1503a",
+      "path": "1503/ui-final-v2/actorjourneyhead/actor_head_1503a.png",
+      "sha256": "5ed5614b0a986d3e001441b5778d72f6f0c0582039f4b476c0a239f22764f121",
+      "width": 512,
+      "height": 256,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1503/fullbody-approved-cutout.png",
+            "sha256": "ebfd38c7e2cbf805e1e32aecab86ae6df2fb24fe67663e9b400260af0775379a"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "5ed5614b0a986d3e001441b5778d72f6f0c0582039f4b476c0a239f22764f121",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1503:actorlogo/actor_logo_1503a",
+      "path": "1503/ui-final-v2/actorlogo/actor_logo_1503a.png",
+      "sha256": "e53e8366481e911c90dbe4217abd508760bc67997c5a4d19e9d97017d8f6c1ca",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1503/fullbody-approved-cutout.png",
+            "sha256": "ebfd38c7e2cbf805e1e32aecab86ae6df2fb24fe67663e9b400260af0775379a"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "e53e8366481e911c90dbe4217abd508760bc67997c5a4d19e9d97017d8f6c1ca",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1503:actorportrait/actor_portrait_1503a",
+      "path": "1503/ui-final-v2/actorportrait/actor_portrait_1503a.png",
+      "sha256": "cc01ac178c77b4300d6a7c3ba9fa2f755b54a72e892a00355db80538d28c3a3e",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1503/fullbody-approved-cutout.png",
+            "sha256": "ebfd38c7e2cbf805e1e32aecab86ae6df2fb24fe67663e9b400260af0775379a"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "cc01ac178c77b4300d6a7c3ba9fa2f755b54a72e892a00355db80538d28c3a3e",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1503:actorportraitfull/actor_portrait_full_1503a",
+      "path": "1503/ui-final-v2/actorportraitfull/actor_portrait_full_1503a.png",
+      "sha256": "cc01ac178c77b4300d6a7c3ba9fa2f755b54a72e892a00355db80538d28c3a3e",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1503/fullbody-approved-cutout.png",
+            "sha256": "ebfd38c7e2cbf805e1e32aecab86ae6df2fb24fe67663e9b400260af0775379a"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "cc01ac178c77b4300d6a7c3ba9fa2f755b54a72e892a00355db80538d28c3a3e",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1503:actorskillhead/actor_skill_head_1503a",
+      "path": "1503/ui-final-v2/actorskillhead/actor_skill_head_1503a.png",
+      "sha256": "28ad373c08e8d3f9e67140821568307befc6669bd8a06623040a69e160970df6",
+      "width": 512,
+      "height": 64,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1503/fullbody-approved-cutout.png",
+            "sha256": "ebfd38c7e2cbf805e1e32aecab86ae6df2fb24fe67663e9b400260af0775379a"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "28ad373c08e8d3f9e67140821568307befc6669bd8a06623040a69e160970df6",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1503:actorskinhead/actorskinhead_2003",
+      "path": "1503/ui-final-v2/actorskinhead/actorskinhead_2003.png",
+      "sha256": "9701b749d83bfe2df9bc958f842b89ac84644fdd902d04ae8fbf39759bcf5056",
+      "width": 196,
+      "height": 196,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1503/fullbody-approved-cutout.png",
+            "sha256": "ebfd38c7e2cbf805e1e32aecab86ae6df2fb24fe67663e9b400260af0775379a"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "9701b749d83bfe2df9bc958f842b89ac84644fdd902d04ae8fbf39759bcf5056",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1503:actorskinheadbig/actorskinhead_big_2003",
+      "path": "1503/ui-final-v2/actorskinheadbig/actorskinhead_big_2003.png",
+      "sha256": "05ff0bedf4d4956928730b8750d8d541173174c209af07e14a7b2c238447c89c",
+      "width": 438,
+      "height": 530,
+      "mode": "L",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1503/fullbody-approved-cutout.png",
+            "sha256": "ebfd38c7e2cbf805e1e32aecab86ae6df2fb24fe67663e9b400260af0775379a"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "05ff0bedf4d4956928730b8750d8d541173174c209af07e14a7b2c238447c89c",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1505:actorgachahead/gacha_head_1505a",
+      "path": "1505/ui-final-v2/actorgachahead/gacha_head_1505a.png",
+      "sha256": "448355de5633f0243e959c3aed27a3bbdab8db7550c90148d0a9d9030e2a694d",
+      "width": 256,
+      "height": 128,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1505/fullbody-approved-cutout.png",
+            "sha256": "6a69f67c2157bc21342c763ab708f94d74584d453388961dd8d8cf733b375579"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "448355de5633f0243e959c3aed27a3bbdab8db7550c90148d0a9d9030e2a694d",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1505:actorgroup/selectteam_1505a",
+      "path": "1505/ui-final-v2/actorgroup/selectteam_1505a.png",
+      "sha256": "dee6ff86e0e12f63cb8a8e83bf9ceaa373c2a731e4cba00a9902afdbdcd5117d",
+      "width": 256,
+      "height": 1024,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1505/fullbody-approved-cutout.png",
+            "sha256": "6a69f67c2157bc21342c763ab708f94d74584d453388961dd8d8cf733b375579"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "dee6ff86e0e12f63cb8a8e83bf9ceaa373c2a731e4cba00a9902afdbdcd5117d",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1505:actorheadbig/actor_head_big_1505a",
+      "path": "1505/ui-final-v2/actorheadbig/actor_head_big_1505a.png",
+      "sha256": "72e2613f2c10dfb1fe795d93fd25a3813e9aaca219600b19290c0dbc76e6a645",
+      "width": 256,
+      "height": 512,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1505/fullbody-approved-cutout.png",
+            "sha256": "6a69f67c2157bc21342c763ab708f94d74584d453388961dd8d8cf733b375579"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "72e2613f2c10dfb1fe795d93fd25a3813e9aaca219600b19290c0dbc76e6a645",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1505:actorheadrectangle/actor_head_1505a",
+      "path": "1505/ui-final-v2/actorheadrectangle/actor_head_1505a.png",
+      "sha256": "241ace0b7872e413c540ddb0981cc48462efbfb0bb3a9d40772b58886cbed81c",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1505/fullbody-approved-cutout.png",
+            "sha256": "6a69f67c2157bc21342c763ab708f94d74584d453388961dd8d8cf733b375579"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "241ace0b7872e413c540ddb0981cc48462efbfb0bb3a9d40772b58886cbed81c",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1505:actorinfighthead/main/infight_head_1505a",
+      "path": "1505/ui-final-v2/actorinfighthead/main/infight_head_1505a.png",
+      "sha256": "9a04afa292d9e499c4dd39a29972f7455129651309e161475700bb269c0130e1",
+      "width": 128,
+      "height": 128,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1505/fullbody-approved-cutout.png",
+            "sha256": "6a69f67c2157bc21342c763ab708f94d74584d453388961dd8d8cf733b375579"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "9a04afa292d9e499c4dd39a29972f7455129651309e161475700bb269c0130e1",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1505:actorinfighthead/main_r/infight_head_1505a",
+      "path": "1505/ui-final-v2/actorinfighthead/main_r/infight_head_1505a.png",
+      "sha256": "b7f7e4e37e3f1017e7d6ec05e50ae3bbbaa38931e3a465446dc06e7c5d22c03a",
+      "width": 128,
+      "height": 128,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1505/fullbody-approved-cutout.png",
+            "sha256": "6a69f67c2157bc21342c763ab708f94d74584d453388961dd8d8cf733b375579"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "b7f7e4e37e3f1017e7d6ec05e50ae3bbbaa38931e3a465446dc06e7c5d22c03a",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1505:actorinfighthead/sub_2/infight_head_1505a",
+      "path": "1505/ui-final-v2/actorinfighthead/sub_2/infight_head_1505a.png",
+      "sha256": "26cc23760e5b93ff92bc3ba6be0f3fc70b06921a9505cdc3c3eb6104455218c9",
+      "width": 512,
+      "height": 128,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1505/fullbody-approved-cutout.png",
+            "sha256": "6a69f67c2157bc21342c763ab708f94d74584d453388961dd8d8cf733b375579"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "26cc23760e5b93ff92bc3ba6be0f3fc70b06921a9505cdc3c3eb6104455218c9",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1505:actorintroduction/introduction_1505a",
+      "path": "1505/ui-final-v2/actorintroduction/introduction_1505a.png",
+      "sha256": "ead73b7722477ea4f5c1c6d8692cc11dcd9a18d85bdf1e3cb6b2a81216dbdb3b",
+      "width": 512,
+      "height": 1024,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1505/fullbody-approved-cutout.png",
+            "sha256": "6a69f67c2157bc21342c763ab708f94d74584d453388961dd8d8cf733b375579"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "ead73b7722477ea4f5c1c6d8692cc11dcd9a18d85bdf1e3cb6b2a81216dbdb3b",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1505:actorjourneyhead/actor_head_1505a",
+      "path": "1505/ui-final-v2/actorjourneyhead/actor_head_1505a.png",
+      "sha256": "1c100127dd07f0823b294cb1dd71bc2748d22888f0538cb3067ac40b8799d7f8",
+      "width": 512,
+      "height": 256,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1505/fullbody-approved-cutout.png",
+            "sha256": "6a69f67c2157bc21342c763ab708f94d74584d453388961dd8d8cf733b375579"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "1c100127dd07f0823b294cb1dd71bc2748d22888f0538cb3067ac40b8799d7f8",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1505:actorlogo/actor_logo_1505a",
+      "path": "1505/ui-final-v2/actorlogo/actor_logo_1505a.png",
+      "sha256": "81926ab32a63ea1217f1dd9dee613d1c2e1a5c4143f2faa1fd19cd483b0e4eff",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1505/fullbody-approved-cutout.png",
+            "sha256": "6a69f67c2157bc21342c763ab708f94d74584d453388961dd8d8cf733b375579"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "81926ab32a63ea1217f1dd9dee613d1c2e1a5c4143f2faa1fd19cd483b0e4eff",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1505:actorportrait/actor_portrait_1505a",
+      "path": "1505/ui-final-v2/actorportrait/actor_portrait_1505a.png",
+      "sha256": "5156f272d52f1cbea09ee326305ca4918ab59b46e4e7de80b0400be6efe3310c",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1505/fullbody-approved-cutout.png",
+            "sha256": "6a69f67c2157bc21342c763ab708f94d74584d453388961dd8d8cf733b375579"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "5156f272d52f1cbea09ee326305ca4918ab59b46e4e7de80b0400be6efe3310c",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1505:actorportraitfull/actor_portrait_full_1505a",
+      "path": "1505/ui-final-v2/actorportraitfull/actor_portrait_full_1505a.png",
+      "sha256": "5156f272d52f1cbea09ee326305ca4918ab59b46e4e7de80b0400be6efe3310c",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1505/fullbody-approved-cutout.png",
+            "sha256": "6a69f67c2157bc21342c763ab708f94d74584d453388961dd8d8cf733b375579"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "5156f272d52f1cbea09ee326305ca4918ab59b46e4e7de80b0400be6efe3310c",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1505:actorskillhead/actor_skill_head_1505a",
+      "path": "1505/ui-final-v2/actorskillhead/actor_skill_head_1505a.png",
+      "sha256": "ec9bd294a39b28a95e372036b1869c872a7ec41d20c2812883526e5ecf5253af",
+      "width": 512,
+      "height": 64,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1505/fullbody-approved-cutout.png",
+            "sha256": "6a69f67c2157bc21342c763ab708f94d74584d453388961dd8d8cf733b375579"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "ec9bd294a39b28a95e372036b1869c872a7ec41d20c2812883526e5ecf5253af",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1505:actorskinhead/actorskinhead_2005",
+      "path": "1505/ui-final-v2/actorskinhead/actorskinhead_2005.png",
+      "sha256": "80f2247311d547995af865f6ce01d73a3c6b7fd027757fe60f463e749a38ab8a",
+      "width": 196,
+      "height": 196,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1505/fullbody-approved-cutout.png",
+            "sha256": "6a69f67c2157bc21342c763ab708f94d74584d453388961dd8d8cf733b375579"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "80f2247311d547995af865f6ce01d73a3c6b7fd027757fe60f463e749a38ab8a",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1505:actorskinheadbig/actorskinhead_big_2005",
+      "path": "1505/ui-final-v2/actorskinheadbig/actorskinhead_big_2005.png",
+      "sha256": "a0a1e432bcbf9cb8ef553b57ba98796ab53a39119cecd2d4636a9601c8f2be26",
+      "width": 438,
+      "height": 530,
+      "mode": "L",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1505/fullbody-approved-cutout.png",
+            "sha256": "6a69f67c2157bc21342c763ab708f94d74584d453388961dd8d8cf733b375579"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "a0a1e432bcbf9cb8ef553b57ba98796ab53a39119cecd2d4636a9601c8f2be26",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1506:actorgachahead/gacha_head_1506a",
+      "path": "1506/ui-final-v2/actorgachahead/gacha_head_1506a.png",
+      "sha256": "98d61b7384fe39d2963cf36f0ea4ca9de69bcb64ec48ed1163311df84610e1ce",
+      "width": 256,
+      "height": 128,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1506/fullbody-approved-cutout.png",
+            "sha256": "6e782afcb520574da6763471e0f01eff41a3064095d2472ef3bca7912f69e394"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "98d61b7384fe39d2963cf36f0ea4ca9de69bcb64ec48ed1163311df84610e1ce",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1506:actorgroup/selectteam_1506a",
+      "path": "1506/ui-final-v2/actorgroup/selectteam_1506a.png",
+      "sha256": "90b90b32901b085cd86f5e2cedf6c8728ed4c0ad4c6c94854777a914345babc2",
+      "width": 256,
+      "height": 1024,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1506/fullbody-approved-cutout.png",
+            "sha256": "6e782afcb520574da6763471e0f01eff41a3064095d2472ef3bca7912f69e394"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "90b90b32901b085cd86f5e2cedf6c8728ed4c0ad4c6c94854777a914345babc2",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1506:actorheadbig/actor_head_big_1506a",
+      "path": "1506/ui-final-v2/actorheadbig/actor_head_big_1506a.png",
+      "sha256": "5e3246bbf18f0efd705447b0dccf4f03d60194c5702e1600d0e00e1f5430db85",
+      "width": 256,
+      "height": 512,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1506/fullbody-approved-cutout.png",
+            "sha256": "6e782afcb520574da6763471e0f01eff41a3064095d2472ef3bca7912f69e394"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "5e3246bbf18f0efd705447b0dccf4f03d60194c5702e1600d0e00e1f5430db85",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1506:actorheadrectangle/actor_head_1506a",
+      "path": "1506/ui-final-v2/actorheadrectangle/actor_head_1506a.png",
+      "sha256": "2c3ad35b13c84e9ae33aa8f8e867f4b466dfaaafc21b21a03a9930f3a350ba68",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1506/fullbody-approved-cutout.png",
+            "sha256": "6e782afcb520574da6763471e0f01eff41a3064095d2472ef3bca7912f69e394"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "2c3ad35b13c84e9ae33aa8f8e867f4b466dfaaafc21b21a03a9930f3a350ba68",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1506:actorinfighthead/main/infight_head_1506a",
+      "path": "1506/ui-final-v2/actorinfighthead/main/infight_head_1506a.png",
+      "sha256": "1926bba036ea7cfd18c9756ae8bc1b3274686397996759c3f7cef597c58c0373",
+      "width": 128,
+      "height": 128,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1506/fullbody-approved-cutout.png",
+            "sha256": "6e782afcb520574da6763471e0f01eff41a3064095d2472ef3bca7912f69e394"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "1926bba036ea7cfd18c9756ae8bc1b3274686397996759c3f7cef597c58c0373",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1506:actorinfighthead/main_r/infight_head_1506a",
+      "path": "1506/ui-final-v2/actorinfighthead/main_r/infight_head_1506a.png",
+      "sha256": "3170273e76b082056d3638d863cb02eb7bbd53812bc7c63e414e16e0c21ceb2f",
+      "width": 128,
+      "height": 128,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1506/fullbody-approved-cutout.png",
+            "sha256": "6e782afcb520574da6763471e0f01eff41a3064095d2472ef3bca7912f69e394"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "3170273e76b082056d3638d863cb02eb7bbd53812bc7c63e414e16e0c21ceb2f",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1506:actorinfighthead/sub_2/infight_head_1506a",
+      "path": "1506/ui-final-v2/actorinfighthead/sub_2/infight_head_1506a.png",
+      "sha256": "a12368d86af696db81efaef421b2751d21f16ebf3b8cc5c919ab9df99cb45fb5",
+      "width": 512,
+      "height": 128,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1506/fullbody-approved-cutout.png",
+            "sha256": "6e782afcb520574da6763471e0f01eff41a3064095d2472ef3bca7912f69e394"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "a12368d86af696db81efaef421b2751d21f16ebf3b8cc5c919ab9df99cb45fb5",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1506:actorintroduction/introduction_1506a",
+      "path": "1506/ui-final-v2/actorintroduction/introduction_1506a.png",
+      "sha256": "a163aed1337c9a3f003ae22205def88848fa62a1c0b5098ea508fd33531c0f7f",
+      "width": 512,
+      "height": 1024,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1506/fullbody-approved-cutout.png",
+            "sha256": "6e782afcb520574da6763471e0f01eff41a3064095d2472ef3bca7912f69e394"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "a163aed1337c9a3f003ae22205def88848fa62a1c0b5098ea508fd33531c0f7f",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1506:actorjourneyhead/actor_head_1506a",
+      "path": "1506/ui-final-v2/actorjourneyhead/actor_head_1506a.png",
+      "sha256": "ab32ef6247d6a92adb45ff8cbd9b352c04f86141ba9b0f628e7635906ca08eff",
+      "width": 512,
+      "height": 256,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1506/fullbody-approved-cutout.png",
+            "sha256": "6e782afcb520574da6763471e0f01eff41a3064095d2472ef3bca7912f69e394"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "ab32ef6247d6a92adb45ff8cbd9b352c04f86141ba9b0f628e7635906ca08eff",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1506:actorlogo/actor_logo_1506a",
+      "path": "1506/ui-final-v2/actorlogo/actor_logo_1506a.png",
+      "sha256": "c4addb580f496e8d6a14d03b4b7eeec728f7f6d55cb7c83978578c10819195b7",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1506/fullbody-approved-cutout.png",
+            "sha256": "6e782afcb520574da6763471e0f01eff41a3064095d2472ef3bca7912f69e394"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "c4addb580f496e8d6a14d03b4b7eeec728f7f6d55cb7c83978578c10819195b7",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1506:actorportrait/actor_portrait_1506a",
+      "path": "1506/ui-final-v2/actorportrait/actor_portrait_1506a.png",
+      "sha256": "5b05f8cfb2b30a898e58c5c81a85bbbb52a79e40ea0eb55d384a42ba3ae6cebc",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1506/fullbody-approved-cutout.png",
+            "sha256": "6e782afcb520574da6763471e0f01eff41a3064095d2472ef3bca7912f69e394"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "5b05f8cfb2b30a898e58c5c81a85bbbb52a79e40ea0eb55d384a42ba3ae6cebc",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1506:actorportraitfull/actor_portrait_full_1506a",
+      "path": "1506/ui-final-v2/actorportraitfull/actor_portrait_full_1506a.png",
+      "sha256": "5b05f8cfb2b30a898e58c5c81a85bbbb52a79e40ea0eb55d384a42ba3ae6cebc",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1506/fullbody-approved-cutout.png",
+            "sha256": "6e782afcb520574da6763471e0f01eff41a3064095d2472ef3bca7912f69e394"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "5b05f8cfb2b30a898e58c5c81a85bbbb52a79e40ea0eb55d384a42ba3ae6cebc",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1506:actorskillhead/actor_skill_head_1506a",
+      "path": "1506/ui-final-v2/actorskillhead/actor_skill_head_1506a.png",
+      "sha256": "8cb534d0d57466fc91640df90d3bab0eb662394a5f01d083ada27e0c4f77d89c",
+      "width": 512,
+      "height": 64,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1506/fullbody-approved-cutout.png",
+            "sha256": "6e782afcb520574da6763471e0f01eff41a3064095d2472ef3bca7912f69e394"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "8cb534d0d57466fc91640df90d3bab0eb662394a5f01d083ada27e0c4f77d89c",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1506:actorskinhead/actorskinhead_2006",
+      "path": "1506/ui-final-v2/actorskinhead/actorskinhead_2006.png",
+      "sha256": "f8b8d76809e5d8c0c9c7dc2fe85ec018b0083e3ed99b5a48b2f3fd288b68fdb7",
+      "width": 196,
+      "height": 196,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1506/fullbody-approved-cutout.png",
+            "sha256": "6e782afcb520574da6763471e0f01eff41a3064095d2472ef3bca7912f69e394"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "f8b8d76809e5d8c0c9c7dc2fe85ec018b0083e3ed99b5a48b2f3fd288b68fdb7",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1506:actorskinheadbig/actorskinhead_big_2006",
+      "path": "1506/ui-final-v2/actorskinheadbig/actorskinhead_big_2006.png",
+      "sha256": "79ac489fce44eea04ca2bfa13d3a996a9eabf7f69dbb15d6957ec9c62894650b",
+      "width": 438,
+      "height": 530,
+      "mode": "L",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1506/fullbody-approved-cutout.png",
+            "sha256": "6e782afcb520574da6763471e0f01eff41a3064095d2472ef3bca7912f69e394"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "79ac489fce44eea04ca2bfa13d3a996a9eabf7f69dbb15d6957ec9c62894650b",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1515:actorgachahead/gacha_head_1515a",
+      "path": "1515/ui-final-v2/actorgachahead/gacha_head_1515a.png",
+      "sha256": "bbaa1e54a2722d4a241f93026e1226f89279cf66f3e902e86f683d1bdd8bd67e",
+      "width": 256,
+      "height": 128,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1515/fullbody-approved-cutout.png",
+            "sha256": "16716f2f6232d70dc9a481bba5a3073e7a02f28c7fc541a1e75c744dc8e8d400"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "bbaa1e54a2722d4a241f93026e1226f89279cf66f3e902e86f683d1bdd8bd67e",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1515:actorgroup/selectteam_1515a",
+      "path": "1515/ui-final-v2/actorgroup/selectteam_1515a.png",
+      "sha256": "753418781def19ade97b05f3bde1b356f9d5d5a03ce66e4381c963fdc9986519",
+      "width": 256,
+      "height": 1024,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1515/fullbody-approved-cutout.png",
+            "sha256": "16716f2f6232d70dc9a481bba5a3073e7a02f28c7fc541a1e75c744dc8e8d400"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "753418781def19ade97b05f3bde1b356f9d5d5a03ce66e4381c963fdc9986519",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1515:actorheadbig/actor_head_big_1515a",
+      "path": "1515/ui-final-v2/actorheadbig/actor_head_big_1515a.png",
+      "sha256": "0b728f09dc16a7994df1321a06d850b21a83adead80167571d8487fddb3c7b36",
+      "width": 256,
+      "height": 512,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1515/fullbody-approved-cutout.png",
+            "sha256": "16716f2f6232d70dc9a481bba5a3073e7a02f28c7fc541a1e75c744dc8e8d400"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "0b728f09dc16a7994df1321a06d850b21a83adead80167571d8487fddb3c7b36",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1515:actorheadrectangle/actor_head_1515a",
+      "path": "1515/ui-final-v2/actorheadrectangle/actor_head_1515a.png",
+      "sha256": "b3efa4f2d89e3d04264cc374076bb4d9c70896146e668a17ff14f8895ff644d7",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1515/fullbody-approved-cutout.png",
+            "sha256": "16716f2f6232d70dc9a481bba5a3073e7a02f28c7fc541a1e75c744dc8e8d400"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "b3efa4f2d89e3d04264cc374076bb4d9c70896146e668a17ff14f8895ff644d7",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1515:actorinfighthead/main/infight_head_1515a",
+      "path": "1515/ui-final-v2/actorinfighthead/main/infight_head_1515a.png",
+      "sha256": "959357a9ba1c4730f0b1d91771ebdb095381c6cf974f5da9a560fea3fa71e101",
+      "width": 128,
+      "height": 128,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1515/fullbody-approved-cutout.png",
+            "sha256": "16716f2f6232d70dc9a481bba5a3073e7a02f28c7fc541a1e75c744dc8e8d400"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "959357a9ba1c4730f0b1d91771ebdb095381c6cf974f5da9a560fea3fa71e101",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1515:actorinfighthead/main_r/infight_head_1515a",
+      "path": "1515/ui-final-v2/actorinfighthead/main_r/infight_head_1515a.png",
+      "sha256": "abac19d5b42b3f669ef4c4cbbd67bfc04583f3cd1bc7cdb77b5189b50c4ee271",
+      "width": 128,
+      "height": 128,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1515/fullbody-approved-cutout.png",
+            "sha256": "16716f2f6232d70dc9a481bba5a3073e7a02f28c7fc541a1e75c744dc8e8d400"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "abac19d5b42b3f669ef4c4cbbd67bfc04583f3cd1bc7cdb77b5189b50c4ee271",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1515:actorinfighthead/sub_2/infight_head_1515a",
+      "path": "1515/ui-final-v2/actorinfighthead/sub_2/infight_head_1515a.png",
+      "sha256": "fd0d1ecf168934033d5c396a0e2677751da8442e6c67cd963e69839f6fad47cb",
+      "width": 512,
+      "height": 128,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1515/fullbody-approved-cutout.png",
+            "sha256": "16716f2f6232d70dc9a481bba5a3073e7a02f28c7fc541a1e75c744dc8e8d400"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "fd0d1ecf168934033d5c396a0e2677751da8442e6c67cd963e69839f6fad47cb",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1515:actorintroduction/introduction_1515a",
+      "path": "1515/ui-final-v2/actorintroduction/introduction_1515a.png",
+      "sha256": "3b331a818f6f7bdd714fee58917fa6c7c676084478a4dc2e439a89ce77176a7f",
+      "width": 512,
+      "height": 1024,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1515/fullbody-approved-cutout.png",
+            "sha256": "16716f2f6232d70dc9a481bba5a3073e7a02f28c7fc541a1e75c744dc8e8d400"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "3b331a818f6f7bdd714fee58917fa6c7c676084478a4dc2e439a89ce77176a7f",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1515:actorjourneyhead/actor_head_1515a",
+      "path": "1515/ui-final-v2/actorjourneyhead/actor_head_1515a.png",
+      "sha256": "b3eb278e360eb320e2480dca84fa0a512fd6c9f7f205dcfb04dba143b5f1f0bb",
+      "width": 512,
+      "height": 256,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1515/fullbody-approved-cutout.png",
+            "sha256": "16716f2f6232d70dc9a481bba5a3073e7a02f28c7fc541a1e75c744dc8e8d400"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "b3eb278e360eb320e2480dca84fa0a512fd6c9f7f205dcfb04dba143b5f1f0bb",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1515:actorlogo/actor_logo_1515a",
+      "path": "1515/ui-final-v2/actorlogo/actor_logo_1515a.png",
+      "sha256": "5a9b1c877cd0f61eb6604449339a432e57953a35b7610ed2eda88da83b7d5a85",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1515/fullbody-approved-cutout.png",
+            "sha256": "16716f2f6232d70dc9a481bba5a3073e7a02f28c7fc541a1e75c744dc8e8d400"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "5a9b1c877cd0f61eb6604449339a432e57953a35b7610ed2eda88da83b7d5a85",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1515:actorportrait/actor_portrait_1515a",
+      "path": "1515/ui-final-v2/actorportrait/actor_portrait_1515a.png",
+      "sha256": "3d019e80ada7a3c661c45bdc384bd1b0815a477262da33450d9466f93568a810",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1515/fullbody-approved-cutout.png",
+            "sha256": "16716f2f6232d70dc9a481bba5a3073e7a02f28c7fc541a1e75c744dc8e8d400"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "3d019e80ada7a3c661c45bdc384bd1b0815a477262da33450d9466f93568a810",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1515:actorportraitfull/actor_portrait_full_1515a",
+      "path": "1515/ui-final-v2/actorportraitfull/actor_portrait_full_1515a.png",
+      "sha256": "3d019e80ada7a3c661c45bdc384bd1b0815a477262da33450d9466f93568a810",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1515/fullbody-approved-cutout.png",
+            "sha256": "16716f2f6232d70dc9a481bba5a3073e7a02f28c7fc541a1e75c744dc8e8d400"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "3d019e80ada7a3c661c45bdc384bd1b0815a477262da33450d9466f93568a810",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1515:actorskillhead/actor_skill_head_1515a",
+      "path": "1515/ui-final-v2/actorskillhead/actor_skill_head_1515a.png",
+      "sha256": "80a3f9c5426bc8a990d049e6ebcb9334bfb329910aa9237b2672095248fa5e28",
+      "width": 512,
+      "height": 64,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1515/fullbody-approved-cutout.png",
+            "sha256": "16716f2f6232d70dc9a481bba5a3073e7a02f28c7fc541a1e75c744dc8e8d400"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "80a3f9c5426bc8a990d049e6ebcb9334bfb329910aa9237b2672095248fa5e28",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1515:actorskinhead/actorskinhead_2015",
+      "path": "1515/ui-final-v2/actorskinhead/actorskinhead_2015.png",
+      "sha256": "e020a2ac65f1d9b0bcb4bce6ff949beca2744d8432e9ddff44a33e1cca4c8273",
+      "width": 196,
+      "height": 196,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1515/fullbody-approved-cutout.png",
+            "sha256": "16716f2f6232d70dc9a481bba5a3073e7a02f28c7fc541a1e75c744dc8e8d400"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "e020a2ac65f1d9b0bcb4bce6ff949beca2744d8432e9ddff44a33e1cca4c8273",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1515:actorskinheadbig/actorskinhead_big_2015",
+      "path": "1515/ui-final-v2/actorskinheadbig/actorskinhead_big_2015.png",
+      "sha256": "09ec50195cf795fbc8582430a6d71c0f325758450310bc8e7403b323274239eb",
+      "width": 438,
+      "height": 530,
+      "mode": "L",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1515/fullbody-approved-cutout.png",
+            "sha256": "16716f2f6232d70dc9a481bba5a3073e7a02f28c7fc541a1e75c744dc8e8d400"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "09ec50195cf795fbc8582430a6d71c0f325758450310bc8e7403b323274239eb",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1516:actorgachahead/gacha_head_1516a",
+      "path": "1516/ui-final-v2/actorgachahead/gacha_head_1516a.png",
+      "sha256": "a7017a90db93d97754f925be235d96563763cefdb49f6cdb53ada9b31461d828",
+      "width": 256,
+      "height": 128,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1516/fullbody-approved-cutout.png",
+            "sha256": "d1b289f6884e67afc1f510ff1fe0916f67cacfe31b11e554542fe06846e3e802"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "a7017a90db93d97754f925be235d96563763cefdb49f6cdb53ada9b31461d828",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1516:actorgroup/selectteam_1516a",
+      "path": "1516/ui-final-v2/actorgroup/selectteam_1516a.png",
+      "sha256": "8cfbc0fe84e4a7c7e0ad5bc8b740065fa760caaa771bcbb4c2fc32a3ed6f01cf",
+      "width": 256,
+      "height": 1024,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1516/fullbody-approved-cutout.png",
+            "sha256": "d1b289f6884e67afc1f510ff1fe0916f67cacfe31b11e554542fe06846e3e802"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "8cfbc0fe84e4a7c7e0ad5bc8b740065fa760caaa771bcbb4c2fc32a3ed6f01cf",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1516:actorheadbig/actor_head_big_1516a",
+      "path": "1516/ui-final-v2/actorheadbig/actor_head_big_1516a.png",
+      "sha256": "5079da2e512f4978e10fe4297ddff0972c78e0c07276fae2b6cd78828b9a090d",
+      "width": 256,
+      "height": 512,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1516/fullbody-approved-cutout.png",
+            "sha256": "d1b289f6884e67afc1f510ff1fe0916f67cacfe31b11e554542fe06846e3e802"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "5079da2e512f4978e10fe4297ddff0972c78e0c07276fae2b6cd78828b9a090d",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1516:actorheadrectangle/actor_head_1516a",
+      "path": "1516/ui-final-v2/actorheadrectangle/actor_head_1516a.png",
+      "sha256": "aebbb0693703e9086b7a39b2b3dd9d1f0d458d4344c00177855509f00d80b7c0",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1516/fullbody-approved-cutout.png",
+            "sha256": "d1b289f6884e67afc1f510ff1fe0916f67cacfe31b11e554542fe06846e3e802"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "aebbb0693703e9086b7a39b2b3dd9d1f0d458d4344c00177855509f00d80b7c0",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1516:actorinfighthead/main/infight_head_1516a",
+      "path": "1516/ui-final-v2/actorinfighthead/main/infight_head_1516a.png",
+      "sha256": "d3fdf5c1c178726901d567ffcbfb0954b5467bf9d14ed2dc3ecbc8fd5924dfb0",
+      "width": 128,
+      "height": 128,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1516/fullbody-approved-cutout.png",
+            "sha256": "d1b289f6884e67afc1f510ff1fe0916f67cacfe31b11e554542fe06846e3e802"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "d3fdf5c1c178726901d567ffcbfb0954b5467bf9d14ed2dc3ecbc8fd5924dfb0",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1516:actorinfighthead/main_r/infight_head_1516a",
+      "path": "1516/ui-final-v2/actorinfighthead/main_r/infight_head_1516a.png",
+      "sha256": "295cb540fc7da4f23646a61975dc61f59cf6f65963834964301ff80bc6a21fa2",
+      "width": 128,
+      "height": 128,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1516/fullbody-approved-cutout.png",
+            "sha256": "d1b289f6884e67afc1f510ff1fe0916f67cacfe31b11e554542fe06846e3e802"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "295cb540fc7da4f23646a61975dc61f59cf6f65963834964301ff80bc6a21fa2",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1516:actorinfighthead/sub_2/infight_head_1516a",
+      "path": "1516/ui-final-v2/actorinfighthead/sub_2/infight_head_1516a.png",
+      "sha256": "21c2710aa03355f74537ef6bf1ebd80d056713a7049e3a9f007272ffeb986571",
+      "width": 512,
+      "height": 128,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1516/fullbody-approved-cutout.png",
+            "sha256": "d1b289f6884e67afc1f510ff1fe0916f67cacfe31b11e554542fe06846e3e802"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "21c2710aa03355f74537ef6bf1ebd80d056713a7049e3a9f007272ffeb986571",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1516:actorintroduction/introduction_1516a",
+      "path": "1516/ui-final-v2/actorintroduction/introduction_1516a.png",
+      "sha256": "604a1d037b630f56b1746618cb77eb0273b194b9a2ca40529a986c4bb45c0b64",
+      "width": 512,
+      "height": 1024,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1516/fullbody-approved-cutout.png",
+            "sha256": "d1b289f6884e67afc1f510ff1fe0916f67cacfe31b11e554542fe06846e3e802"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "604a1d037b630f56b1746618cb77eb0273b194b9a2ca40529a986c4bb45c0b64",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1516:actorjourneyhead/actor_head_1516a",
+      "path": "1516/ui-final-v2/actorjourneyhead/actor_head_1516a.png",
+      "sha256": "0295fe1bf09d3a7f1c82ad632d415940aae82f3d9e746af353772d96d5112001",
+      "width": 512,
+      "height": 256,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1516/fullbody-approved-cutout.png",
+            "sha256": "d1b289f6884e67afc1f510ff1fe0916f67cacfe31b11e554542fe06846e3e802"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "0295fe1bf09d3a7f1c82ad632d415940aae82f3d9e746af353772d96d5112001",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1516:actorlogo/actor_logo_1516a",
+      "path": "1516/ui-final-v2/actorlogo/actor_logo_1516a.png",
+      "sha256": "e0847ae8caf435dacebb8099e2e7c3755bb80924cf45eec16de00563b0345649",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1516/fullbody-approved-cutout.png",
+            "sha256": "d1b289f6884e67afc1f510ff1fe0916f67cacfe31b11e554542fe06846e3e802"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "e0847ae8caf435dacebb8099e2e7c3755bb80924cf45eec16de00563b0345649",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1516:actorportrait/actor_portrait_1516a",
+      "path": "1516/ui-final-v2/actorportrait/actor_portrait_1516a.png",
+      "sha256": "d1807d8c61e46c82ead8733a930868f7cb340b8bd48d6b6627fdf733b500e3b1",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1516/fullbody-approved-cutout.png",
+            "sha256": "d1b289f6884e67afc1f510ff1fe0916f67cacfe31b11e554542fe06846e3e802"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "d1807d8c61e46c82ead8733a930868f7cb340b8bd48d6b6627fdf733b500e3b1",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1516:actorportraitfull/actor_portrait_full_1516a",
+      "path": "1516/ui-final-v2/actorportraitfull/actor_portrait_full_1516a.png",
+      "sha256": "d1807d8c61e46c82ead8733a930868f7cb340b8bd48d6b6627fdf733b500e3b1",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1516/fullbody-approved-cutout.png",
+            "sha256": "d1b289f6884e67afc1f510ff1fe0916f67cacfe31b11e554542fe06846e3e802"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "d1807d8c61e46c82ead8733a930868f7cb340b8bd48d6b6627fdf733b500e3b1",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1516:actorskillhead/actor_skill_head_1516a",
+      "path": "1516/ui-final-v2/actorskillhead/actor_skill_head_1516a.png",
+      "sha256": "6085ca5e4f1ad76b82c07e619032f80b1ccb20220eeb684c99bc3bf6ab00dc43",
+      "width": 512,
+      "height": 64,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1516/fullbody-approved-cutout.png",
+            "sha256": "d1b289f6884e67afc1f510ff1fe0916f67cacfe31b11e554542fe06846e3e802"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "6085ca5e4f1ad76b82c07e619032f80b1ccb20220eeb684c99bc3bf6ab00dc43",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1516:actorskinhead/actorskinhead_2016",
+      "path": "1516/ui-final-v2/actorskinhead/actorskinhead_2016.png",
+      "sha256": "7a2e1b65c719b75413d535d5a0694c27440e281d6159371c06b7e4a63d9e586f",
+      "width": 196,
+      "height": 196,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1516/fullbody-approved-cutout.png",
+            "sha256": "d1b289f6884e67afc1f510ff1fe0916f67cacfe31b11e554542fe06846e3e802"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "7a2e1b65c719b75413d535d5a0694c27440e281d6159371c06b7e4a63d9e586f",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1516:actorskinheadbig/actorskinhead_big_2016",
+      "path": "1516/ui-final-v2/actorskinheadbig/actorskinhead_big_2016.png",
+      "sha256": "e4afcb64e5b661fc30d68750cdba7f8c5cb295462e97a0ad55ed7efaceaa69bd",
+      "width": 438,
+      "height": 530,
+      "mode": "L",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1516/fullbody-approved-cutout.png",
+            "sha256": "d1b289f6884e67afc1f510ff1fe0916f67cacfe31b11e554542fe06846e3e802"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "e4afcb64e5b661fc30d68750cdba7f8c5cb295462e97a0ad55ed7efaceaa69bd",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1517:actorgachahead/gacha_head_1517a",
+      "path": "1517/ui-final-v2/actorgachahead/gacha_head_1517a.png",
+      "sha256": "849108a77fcf9d9a8670fca52e62e7b1292bbb3f48c680167cb5ffc6d613f918",
+      "width": 256,
+      "height": 128,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1517/fullbody-approved-cutout.png",
+            "sha256": "93a73eac7d8db2ed386024de4223861568a759ce0403d4747460fe82d90348db"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "849108a77fcf9d9a8670fca52e62e7b1292bbb3f48c680167cb5ffc6d613f918",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1517:actorgroup/selectteam_1517a",
+      "path": "1517/ui-final-v2/actorgroup/selectteam_1517a.png",
+      "sha256": "ba9760c13f3df6a13d231c22d084a61a1fff9404991fb5c9249cf3328693e4ab",
+      "width": 256,
+      "height": 1024,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1517/fullbody-approved-cutout.png",
+            "sha256": "93a73eac7d8db2ed386024de4223861568a759ce0403d4747460fe82d90348db"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "ba9760c13f3df6a13d231c22d084a61a1fff9404991fb5c9249cf3328693e4ab",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1517:actorheadbig/actor_head_big_1517a",
+      "path": "1517/ui-final-v2/actorheadbig/actor_head_big_1517a.png",
+      "sha256": "1c286e652c720092938583e4922ad003f79d26fbf71f38182d020f773a1f3e74",
+      "width": 256,
+      "height": 512,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1517/fullbody-approved-cutout.png",
+            "sha256": "93a73eac7d8db2ed386024de4223861568a759ce0403d4747460fe82d90348db"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "1c286e652c720092938583e4922ad003f79d26fbf71f38182d020f773a1f3e74",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1517:actorheadrectangle/actor_head_1517a",
+      "path": "1517/ui-final-v2/actorheadrectangle/actor_head_1517a.png",
+      "sha256": "8f496d69a3a6f0118ffb36be052cba67aeb4d64cf0be612d49d762414fb8b53c",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1517/fullbody-approved-cutout.png",
+            "sha256": "93a73eac7d8db2ed386024de4223861568a759ce0403d4747460fe82d90348db"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "8f496d69a3a6f0118ffb36be052cba67aeb4d64cf0be612d49d762414fb8b53c",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1517:actorinfighthead/main/infight_head_1517a",
+      "path": "1517/ui-final-v2/actorinfighthead/main/infight_head_1517a.png",
+      "sha256": "a70f47a0db143b35d2c60ee0920de21ad16dc33ba33c472e9ff9c37ca7adf570",
+      "width": 128,
+      "height": 128,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1517/fullbody-approved-cutout.png",
+            "sha256": "93a73eac7d8db2ed386024de4223861568a759ce0403d4747460fe82d90348db"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "a70f47a0db143b35d2c60ee0920de21ad16dc33ba33c472e9ff9c37ca7adf570",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1517:actorinfighthead/main_r/infight_head_1517a",
+      "path": "1517/ui-final-v2/actorinfighthead/main_r/infight_head_1517a.png",
+      "sha256": "2c1709c64269c137645566bd00650acbb3f9093f4ee6fa1cfc4662ee09892350",
+      "width": 128,
+      "height": 128,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1517/fullbody-approved-cutout.png",
+            "sha256": "93a73eac7d8db2ed386024de4223861568a759ce0403d4747460fe82d90348db"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "2c1709c64269c137645566bd00650acbb3f9093f4ee6fa1cfc4662ee09892350",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1517:actorinfighthead/sub_2/infight_head_1517a",
+      "path": "1517/ui-final-v2/actorinfighthead/sub_2/infight_head_1517a.png",
+      "sha256": "786c6328b35df21dbca54ce00688e27b9740bb0f014a93d9f833a40e275a27a8",
+      "width": 512,
+      "height": 128,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1517/fullbody-approved-cutout.png",
+            "sha256": "93a73eac7d8db2ed386024de4223861568a759ce0403d4747460fe82d90348db"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "786c6328b35df21dbca54ce00688e27b9740bb0f014a93d9f833a40e275a27a8",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1517:actorintroduction/introduction_1517a",
+      "path": "1517/ui-final-v2/actorintroduction/introduction_1517a.png",
+      "sha256": "5798fb22ab65c7859039047117e45dae8cf40c53df61f7dda650f13785f8ff7e",
+      "width": 512,
+      "height": 1024,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1517/fullbody-approved-cutout.png",
+            "sha256": "93a73eac7d8db2ed386024de4223861568a759ce0403d4747460fe82d90348db"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "5798fb22ab65c7859039047117e45dae8cf40c53df61f7dda650f13785f8ff7e",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1517:actorjourneyhead/actor_head_1517a",
+      "path": "1517/ui-final-v2/actorjourneyhead/actor_head_1517a.png",
+      "sha256": "5c7b08c6ba8ed202f50573cc1d332c8fffd2182ee2e896af72210019f188aa06",
+      "width": 512,
+      "height": 256,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1517/fullbody-approved-cutout.png",
+            "sha256": "93a73eac7d8db2ed386024de4223861568a759ce0403d4747460fe82d90348db"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "5c7b08c6ba8ed202f50573cc1d332c8fffd2182ee2e896af72210019f188aa06",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1517:actorlogo/actor_logo_1517a",
+      "path": "1517/ui-final-v2/actorlogo/actor_logo_1517a.png",
+      "sha256": "e53e8366481e911c90dbe4217abd508760bc67997c5a4d19e9d97017d8f6c1ca",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1517/fullbody-approved-cutout.png",
+            "sha256": "93a73eac7d8db2ed386024de4223861568a759ce0403d4747460fe82d90348db"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "e53e8366481e911c90dbe4217abd508760bc67997c5a4d19e9d97017d8f6c1ca",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1517:actorportrait/actor_portrait_1517a",
+      "path": "1517/ui-final-v2/actorportrait/actor_portrait_1517a.png",
+      "sha256": "448a05e70fd11d3a8602df3023169814ff283cda5caa89630ee49036af7702ac",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1517/fullbody-approved-cutout.png",
+            "sha256": "93a73eac7d8db2ed386024de4223861568a759ce0403d4747460fe82d90348db"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "448a05e70fd11d3a8602df3023169814ff283cda5caa89630ee49036af7702ac",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1517:actorportraitfull/actor_portrait_full_1517a",
+      "path": "1517/ui-final-v2/actorportraitfull/actor_portrait_full_1517a.png",
+      "sha256": "448a05e70fd11d3a8602df3023169814ff283cda5caa89630ee49036af7702ac",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1517/fullbody-approved-cutout.png",
+            "sha256": "93a73eac7d8db2ed386024de4223861568a759ce0403d4747460fe82d90348db"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "448a05e70fd11d3a8602df3023169814ff283cda5caa89630ee49036af7702ac",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1517:actorskillhead/actor_skill_head_1517a",
+      "path": "1517/ui-final-v2/actorskillhead/actor_skill_head_1517a.png",
+      "sha256": "4519169cba5ce115492c61ea5111740fb09c3f816c5c1acc97fbf25e8e1198cf",
+      "width": 512,
+      "height": 64,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1517/fullbody-approved-cutout.png",
+            "sha256": "93a73eac7d8db2ed386024de4223861568a759ce0403d4747460fe82d90348db"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "4519169cba5ce115492c61ea5111740fb09c3f816c5c1acc97fbf25e8e1198cf",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1517:actorskinhead/actorskinhead_2017",
+      "path": "1517/ui-final-v2/actorskinhead/actorskinhead_2017.png",
+      "sha256": "0efe968e4c13b120c469e7c4cd467095d7de5a394a2050a055873948b99bca97",
+      "width": 196,
+      "height": 196,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1517/fullbody-approved-cutout.png",
+            "sha256": "93a73eac7d8db2ed386024de4223861568a759ce0403d4747460fe82d90348db"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "0efe968e4c13b120c469e7c4cd467095d7de5a394a2050a055873948b99bca97",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1517:actorskinheadbig/actorskinhead_big_2017",
+      "path": "1517/ui-final-v2/actorskinheadbig/actorskinhead_big_2017.png",
+      "sha256": "8d8a129891ca997824f374fd0aa62c2e9a1f881e55f600a1672b875a36603f07",
+      "width": 438,
+      "height": 530,
+      "mode": "L",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1517/fullbody-approved-cutout.png",
+            "sha256": "93a73eac7d8db2ed386024de4223861568a759ce0403d4747460fe82d90348db"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "8d8a129891ca997824f374fd0aa62c2e9a1f881e55f600a1672b875a36603f07",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1601:actorgachahead/gacha_head_1601a",
+      "path": "1601/ui-final-v2/actorgachahead/gacha_head_1601a.png",
+      "sha256": "7af2a86ac196b237f2c9bef190da21db3c8752ee913f998ee9df526dd5cb9f6c",
+      "width": 256,
+      "height": 128,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1601/fullbody-approved-cutout.png",
+            "sha256": "8f94a7fa6f44151c1426d707765004d9d336f57ff3a787b5f6d8cfa1b9ed6d79"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "7af2a86ac196b237f2c9bef190da21db3c8752ee913f998ee9df526dd5cb9f6c",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1601:actorgroup/selectteam_1601a",
+      "path": "1601/ui-final-v2/actorgroup/selectteam_1601a.png",
+      "sha256": "4f24acb3f2737b9ab23bf43d82bd91c14806214ad37796d273f4980a3dc0cc07",
+      "width": 256,
+      "height": 1024,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1601/fullbody-approved-cutout.png",
+            "sha256": "8f94a7fa6f44151c1426d707765004d9d336f57ff3a787b5f6d8cfa1b9ed6d79"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "4f24acb3f2737b9ab23bf43d82bd91c14806214ad37796d273f4980a3dc0cc07",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1601:actorheadbig/actor_head_big_1601a",
+      "path": "1601/ui-final-v2/actorheadbig/actor_head_big_1601a.png",
+      "sha256": "842ea32cb66f2c63dd670484f8b2e7cce81c0e5f0c595d26df1e7e01720b74e5",
+      "width": 256,
+      "height": 512,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1601/fullbody-approved-cutout.png",
+            "sha256": "8f94a7fa6f44151c1426d707765004d9d336f57ff3a787b5f6d8cfa1b9ed6d79"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "842ea32cb66f2c63dd670484f8b2e7cce81c0e5f0c595d26df1e7e01720b74e5",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1601:actorheadrectangle/actor_head_1601a",
+      "path": "1601/ui-final-v2/actorheadrectangle/actor_head_1601a.png",
+      "sha256": "3c7a93c5f98c5243a7f5bce3301c33da646d6b01445eef9e3117d431222de583",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1601/fullbody-approved-cutout.png",
+            "sha256": "8f94a7fa6f44151c1426d707765004d9d336f57ff3a787b5f6d8cfa1b9ed6d79"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "3c7a93c5f98c5243a7f5bce3301c33da646d6b01445eef9e3117d431222de583",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1601:actorinfighthead/main/infight_head_1601a",
+      "path": "1601/ui-final-v2/actorinfighthead/main/infight_head_1601a.png",
+      "sha256": "5a9ac6e7be9603ff0b77d26fba3eb05ed5dded1a78d78c0cbb69097bc35e187d",
+      "width": 128,
+      "height": 128,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1601/fullbody-approved-cutout.png",
+            "sha256": "8f94a7fa6f44151c1426d707765004d9d336f57ff3a787b5f6d8cfa1b9ed6d79"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "5a9ac6e7be9603ff0b77d26fba3eb05ed5dded1a78d78c0cbb69097bc35e187d",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1601:actorinfighthead/main_r/infight_head_1601a",
+      "path": "1601/ui-final-v2/actorinfighthead/main_r/infight_head_1601a.png",
+      "sha256": "f9f274697400ce0a491927d41366116dbaf0b284bd653f527229d34ce170d04b",
+      "width": 128,
+      "height": 128,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1601/fullbody-approved-cutout.png",
+            "sha256": "8f94a7fa6f44151c1426d707765004d9d336f57ff3a787b5f6d8cfa1b9ed6d79"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "f9f274697400ce0a491927d41366116dbaf0b284bd653f527229d34ce170d04b",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1601:actorinfighthead/sub_2/infight_head_1601a",
+      "path": "1601/ui-final-v2/actorinfighthead/sub_2/infight_head_1601a.png",
+      "sha256": "dc776aa6493109e5c153231cab735db9466dda69383442a14bfadac5ed4ab4bd",
+      "width": 512,
+      "height": 128,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1601/fullbody-approved-cutout.png",
+            "sha256": "8f94a7fa6f44151c1426d707765004d9d336f57ff3a787b5f6d8cfa1b9ed6d79"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "dc776aa6493109e5c153231cab735db9466dda69383442a14bfadac5ed4ab4bd",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1601:actorintroduction/introduction_1601a",
+      "path": "1601/ui-final-v2/actorintroduction/introduction_1601a.png",
+      "sha256": "34537cbfbd48427e38edeed249a76763309965e2c77ec1b18367ad3c062cda1a",
+      "width": 512,
+      "height": 1024,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1601/fullbody-approved-cutout.png",
+            "sha256": "8f94a7fa6f44151c1426d707765004d9d336f57ff3a787b5f6d8cfa1b9ed6d79"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "34537cbfbd48427e38edeed249a76763309965e2c77ec1b18367ad3c062cda1a",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1601:actorjourneyhead/actor_head_1601a",
+      "path": "1601/ui-final-v2/actorjourneyhead/actor_head_1601a.png",
+      "sha256": "5b34ef2824e248abf1e0a0e7e7e0cf06735bd99bf3d38c00dd6385b49c8549dc",
+      "width": 512,
+      "height": 256,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1601/fullbody-approved-cutout.png",
+            "sha256": "8f94a7fa6f44151c1426d707765004d9d336f57ff3a787b5f6d8cfa1b9ed6d79"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "5b34ef2824e248abf1e0a0e7e7e0cf06735bd99bf3d38c00dd6385b49c8549dc",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1601:actorlogo/actor_logo_1601a",
+      "path": "1601/ui-final-v2/actorlogo/actor_logo_1601a.png",
+      "sha256": "56f9b757adb9cab35ff4ea05b70ba713f37835deb60c32fa59d654b7fb7e4c5c",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1601/fullbody-approved-cutout.png",
+            "sha256": "8f94a7fa6f44151c1426d707765004d9d336f57ff3a787b5f6d8cfa1b9ed6d79"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "56f9b757adb9cab35ff4ea05b70ba713f37835deb60c32fa59d654b7fb7e4c5c",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1601:actorportrait/actor_portrait_1601a",
+      "path": "1601/ui-final-v2/actorportrait/actor_portrait_1601a.png",
+      "sha256": "99b31c1dcd38bd2c3320a72c1964bd907539cac4bea506127e4efc485368e648",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1601/fullbody-approved-cutout.png",
+            "sha256": "8f94a7fa6f44151c1426d707765004d9d336f57ff3a787b5f6d8cfa1b9ed6d79"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "99b31c1dcd38bd2c3320a72c1964bd907539cac4bea506127e4efc485368e648",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1601:actorportraitfull/actor_portrait_full_1601a",
+      "path": "1601/ui-final-v2/actorportraitfull/actor_portrait_full_1601a.png",
+      "sha256": "99b31c1dcd38bd2c3320a72c1964bd907539cac4bea506127e4efc485368e648",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1601/fullbody-approved-cutout.png",
+            "sha256": "8f94a7fa6f44151c1426d707765004d9d336f57ff3a787b5f6d8cfa1b9ed6d79"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "99b31c1dcd38bd2c3320a72c1964bd907539cac4bea506127e4efc485368e648",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1601:actorskillhead/actor_skill_head_1601a",
+      "path": "1601/ui-final-v2/actorskillhead/actor_skill_head_1601a.png",
+      "sha256": "c47a2df19f8eb21b3884143a6f4e05ea5efa8c4fe73d271e440cbbb653625612",
+      "width": 512,
+      "height": 64,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1601/fullbody-approved-cutout.png",
+            "sha256": "8f94a7fa6f44151c1426d707765004d9d336f57ff3a787b5f6d8cfa1b9ed6d79"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "c47a2df19f8eb21b3884143a6f4e05ea5efa8c4fe73d271e440cbbb653625612",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1601:actorskinhead/actorskinhead_2101",
+      "path": "1601/ui-final-v2/actorskinhead/actorskinhead_2101.png",
+      "sha256": "2d9f25d891c233af2260baf044b6217e2acb7dbdbc520c1c7e52b53f074b9a86",
+      "width": 196,
+      "height": 196,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1601/fullbody-approved-cutout.png",
+            "sha256": "8f94a7fa6f44151c1426d707765004d9d336f57ff3a787b5f6d8cfa1b9ed6d79"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "2d9f25d891c233af2260baf044b6217e2acb7dbdbc520c1c7e52b53f074b9a86",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1601:actorskinheadbig/actorskinhead_big_2101",
+      "path": "1601/ui-final-v2/actorskinheadbig/actorskinhead_big_2101.png",
+      "sha256": "ed0a6615d81d081e5cfd73e8440d05162611302d8ddacbad963d78e6e47b1abd",
+      "width": 438,
+      "height": 530,
+      "mode": "L",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1601/fullbody-approved-cutout.png",
+            "sha256": "8f94a7fa6f44151c1426d707765004d9d336f57ff3a787b5f6d8cfa1b9ed6d79"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "ed0a6615d81d081e5cfd73e8440d05162611302d8ddacbad963d78e6e47b1abd",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1607:actorgachahead/gacha_head_1607a",
+      "path": "1607/ui-final-v2/actorgachahead/gacha_head_1607a.png",
+      "sha256": "0a2e1671f470509eddd061dea0e064b59efb89efcdefd29e199706432123e8ac",
+      "width": 256,
+      "height": 128,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1607/fullbody-approved-cutout.png",
+            "sha256": "15d5317189fca2e88d1044b3fe853968400f125432935586ffff2dfcad0f258b"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "0a2e1671f470509eddd061dea0e064b59efb89efcdefd29e199706432123e8ac",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1607:actorgroup/selectteam_1607a",
+      "path": "1607/ui-final-v2/actorgroup/selectteam_1607a.png",
+      "sha256": "fc3269c8e61c679824314dcccd27d5d99c48cf69fbffc84000fa32bc58597a6c",
+      "width": 256,
+      "height": 1024,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1607/fullbody-approved-cutout.png",
+            "sha256": "15d5317189fca2e88d1044b3fe853968400f125432935586ffff2dfcad0f258b"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "fc3269c8e61c679824314dcccd27d5d99c48cf69fbffc84000fa32bc58597a6c",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1607:actorheadbig/actor_head_big_1607a",
+      "path": "1607/ui-final-v2/actorheadbig/actor_head_big_1607a.png",
+      "sha256": "f7884dde14b68ec17b58cb0b51e919e47fcc2f424b9f4fe6ff0aea31a0325b30",
+      "width": 256,
+      "height": 512,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1607/fullbody-approved-cutout.png",
+            "sha256": "15d5317189fca2e88d1044b3fe853968400f125432935586ffff2dfcad0f258b"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "f7884dde14b68ec17b58cb0b51e919e47fcc2f424b9f4fe6ff0aea31a0325b30",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1607:actorheadrectangle/actor_head_1607a",
+      "path": "1607/ui-final-v2/actorheadrectangle/actor_head_1607a.png",
+      "sha256": "51d52fca2bd2e6f7defe6e4f2778b0d2e948a934c396f6efb9851ec070049d16",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1607/fullbody-approved-cutout.png",
+            "sha256": "15d5317189fca2e88d1044b3fe853968400f125432935586ffff2dfcad0f258b"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "51d52fca2bd2e6f7defe6e4f2778b0d2e948a934c396f6efb9851ec070049d16",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1607:actorinfighthead/main/infight_head_1607a",
+      "path": "1607/ui-final-v2/actorinfighthead/main/infight_head_1607a.png",
+      "sha256": "a9ea6bf3b354c5f7787942b3d6c6d8b05b8bb2c7f4408d0ad6915e2720fe13e6",
+      "width": 128,
+      "height": 128,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1607/fullbody-approved-cutout.png",
+            "sha256": "15d5317189fca2e88d1044b3fe853968400f125432935586ffff2dfcad0f258b"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "a9ea6bf3b354c5f7787942b3d6c6d8b05b8bb2c7f4408d0ad6915e2720fe13e6",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1607:actorinfighthead/main_r/infight_head_1607a",
+      "path": "1607/ui-final-v2/actorinfighthead/main_r/infight_head_1607a.png",
+      "sha256": "e9e9a22009e9cc199d9cb0f45f9fc896b6a8c24b747848848906368f3023111c",
+      "width": 128,
+      "height": 128,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1607/fullbody-approved-cutout.png",
+            "sha256": "15d5317189fca2e88d1044b3fe853968400f125432935586ffff2dfcad0f258b"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "e9e9a22009e9cc199d9cb0f45f9fc896b6a8c24b747848848906368f3023111c",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1607:actorinfighthead/sub_2/infight_head_1607a",
+      "path": "1607/ui-final-v2/actorinfighthead/sub_2/infight_head_1607a.png",
+      "sha256": "ee67d622b9f7ba8334cb124e2cdaa91bd2736b7896467a099e738543161a17d2",
+      "width": 512,
+      "height": 128,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1607/fullbody-approved-cutout.png",
+            "sha256": "15d5317189fca2e88d1044b3fe853968400f125432935586ffff2dfcad0f258b"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "ee67d622b9f7ba8334cb124e2cdaa91bd2736b7896467a099e738543161a17d2",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1607:actorintroduction/introduction_1607a",
+      "path": "1607/ui-final-v2/actorintroduction/introduction_1607a.png",
+      "sha256": "c928e296d20f1a9228e8149d54e91a10b96014f89aff6d479f01715e2b5e87ae",
+      "width": 512,
+      "height": 1024,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1607/fullbody-approved-cutout.png",
+            "sha256": "15d5317189fca2e88d1044b3fe853968400f125432935586ffff2dfcad0f258b"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "c928e296d20f1a9228e8149d54e91a10b96014f89aff6d479f01715e2b5e87ae",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1607:actorjourneyhead/actor_head_1607a",
+      "path": "1607/ui-final-v2/actorjourneyhead/actor_head_1607a.png",
+      "sha256": "4bee16eceacd4e2d05b2c631816c64e923e80f513cbc6f1019d722f2b1e2c347",
+      "width": 512,
+      "height": 256,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1607/fullbody-approved-cutout.png",
+            "sha256": "15d5317189fca2e88d1044b3fe853968400f125432935586ffff2dfcad0f258b"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "4bee16eceacd4e2d05b2c631816c64e923e80f513cbc6f1019d722f2b1e2c347",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1607:actorlogo/actor_logo_1607a",
+      "path": "1607/ui-final-v2/actorlogo/actor_logo_1607a.png",
+      "sha256": "6c814ca543b4f454925088ed2a34e408c39b8c78faa994d6eb59b34e2aa24dab",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1607/fullbody-approved-cutout.png",
+            "sha256": "15d5317189fca2e88d1044b3fe853968400f125432935586ffff2dfcad0f258b"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "6c814ca543b4f454925088ed2a34e408c39b8c78faa994d6eb59b34e2aa24dab",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1607:actorportrait/actor_portrait_1607a",
+      "path": "1607/ui-final-v2/actorportrait/actor_portrait_1607a.png",
+      "sha256": "fa5e5c6e1c5e34304b89f9c2a9b7b3d1bce964bebc82c3a6fe8e4a9e0a86d96c",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1607/fullbody-approved-cutout.png",
+            "sha256": "15d5317189fca2e88d1044b3fe853968400f125432935586ffff2dfcad0f258b"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "fa5e5c6e1c5e34304b89f9c2a9b7b3d1bce964bebc82c3a6fe8e4a9e0a86d96c",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1607:actorportraitfull/actor_portrait_full_1607a",
+      "path": "1607/ui-final-v2/actorportraitfull/actor_portrait_full_1607a.png",
+      "sha256": "fa5e5c6e1c5e34304b89f9c2a9b7b3d1bce964bebc82c3a6fe8e4a9e0a86d96c",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1607/fullbody-approved-cutout.png",
+            "sha256": "15d5317189fca2e88d1044b3fe853968400f125432935586ffff2dfcad0f258b"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "fa5e5c6e1c5e34304b89f9c2a9b7b3d1bce964bebc82c3a6fe8e4a9e0a86d96c",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1607:actorskillhead/actor_skill_head_1607a",
+      "path": "1607/ui-final-v2/actorskillhead/actor_skill_head_1607a.png",
+      "sha256": "4a9daa8825c7dbc8890eca55b8592005a20c397acb27f37047e07b96bdba8c28",
+      "width": 512,
+      "height": 64,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1607/fullbody-approved-cutout.png",
+            "sha256": "15d5317189fca2e88d1044b3fe853968400f125432935586ffff2dfcad0f258b"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "4a9daa8825c7dbc8890eca55b8592005a20c397acb27f37047e07b96bdba8c28",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1607:actorskinhead/actorskinhead_2107",
+      "path": "1607/ui-final-v2/actorskinhead/actorskinhead_2107.png",
+      "sha256": "b00bd86dd1d48753a2671d76024c11b856c70895ba0ecb17a0c087590329ea8a",
+      "width": 196,
+      "height": 196,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1607/fullbody-approved-cutout.png",
+            "sha256": "15d5317189fca2e88d1044b3fe853968400f125432935586ffff2dfcad0f258b"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "b00bd86dd1d48753a2671d76024c11b856c70895ba0ecb17a0c087590329ea8a",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "1607:actorskinheadbig/actorskinhead_big_2107",
+      "path": "1607/ui-final-v2/actorskinheadbig/actorskinhead_big_2107.png",
+      "sha256": "00415b4211316e1d6d030b68fb110a893c98c44cee50881dbcd6dc5b302d30f9",
+      "width": 438,
+      "height": 530,
+      "mode": "L",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "1607/fullbody-approved-cutout.png",
+            "sha256": "15d5317189fca2e88d1044b3fe853968400f125432935586ffff2dfcad0f258b"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "00415b4211316e1d6d030b68fb110a893c98c44cee50881dbcd6dc5b302d30f9",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "2016:actorgachahead/gacha_head_2016a",
+      "path": "2016/ui-final-v2/actorgachahead/gacha_head_2016a.png",
+      "sha256": "fb2d01bc06c55f103f493cd4ff14f289eb95016b05929e3d0bc314b4d9dbe83b",
+      "width": 256,
+      "height": 128,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "2016/fullbody-approved-cutout.png",
+            "sha256": "d7c01af738779df310870726587c71053b4f5358392f49ce65b78ee0eec62ae0"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "fb2d01bc06c55f103f493cd4ff14f289eb95016b05929e3d0bc314b4d9dbe83b",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "2016:actorgroup/selectteam_2016a",
+      "path": "2016/ui-final-v2/actorgroup/selectteam_2016a.png",
+      "sha256": "8640563b9b53946ff7818b761995f0b5cc08a8e69098455d8bdd1749a5295911",
+      "width": 256,
+      "height": 1024,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "2016/fullbody-approved-cutout.png",
+            "sha256": "d7c01af738779df310870726587c71053b4f5358392f49ce65b78ee0eec62ae0"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "8640563b9b53946ff7818b761995f0b5cc08a8e69098455d8bdd1749a5295911",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "2016:actorheadbig/actor_head_big_2016a",
+      "path": "2016/ui-final-v2/actorheadbig/actor_head_big_2016a.png",
+      "sha256": "8c3a6da843f723097d62f967e41a4422467d33dbbe1a8be3d0c4f70b8d43b403",
+      "width": 256,
+      "height": 512,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "2016/fullbody-approved-cutout.png",
+            "sha256": "d7c01af738779df310870726587c71053b4f5358392f49ce65b78ee0eec62ae0"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "8c3a6da843f723097d62f967e41a4422467d33dbbe1a8be3d0c4f70b8d43b403",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "2016:actorheadrectangle/actor_head_2016a",
+      "path": "2016/ui-final-v2/actorheadrectangle/actor_head_2016a.png",
+      "sha256": "b8df876ba6adcdd39ba5c91032d813e8c936099cbb842e9adbf84914761f1a5b",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "2016/fullbody-approved-cutout.png",
+            "sha256": "d7c01af738779df310870726587c71053b4f5358392f49ce65b78ee0eec62ae0"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "b8df876ba6adcdd39ba5c91032d813e8c936099cbb842e9adbf84914761f1a5b",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "2016:actorinfighthead/main/infight_head_2016a",
+      "path": "2016/ui-final-v2/actorinfighthead/main/infight_head_2016a.png",
+      "sha256": "6db48975c6571c445816fbf0831cb015504b98e65cdf20f90e0ed20854951bdc",
+      "width": 128,
+      "height": 128,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "2016/fullbody-approved-cutout.png",
+            "sha256": "d7c01af738779df310870726587c71053b4f5358392f49ce65b78ee0eec62ae0"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "6db48975c6571c445816fbf0831cb015504b98e65cdf20f90e0ed20854951bdc",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "2016:actorinfighthead/main_r/infight_head_2016a",
+      "path": "2016/ui-final-v2/actorinfighthead/main_r/infight_head_2016a.png",
+      "sha256": "76789a4be7a6514ab54dfc5791cc9232e8260b8428866076359bc162c31eeb12",
+      "width": 128,
+      "height": 128,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "2016/fullbody-approved-cutout.png",
+            "sha256": "d7c01af738779df310870726587c71053b4f5358392f49ce65b78ee0eec62ae0"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "76789a4be7a6514ab54dfc5791cc9232e8260b8428866076359bc162c31eeb12",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "2016:actorinfighthead/sub_2/infight_head_2016a",
+      "path": "2016/ui-final-v2/actorinfighthead/sub_2/infight_head_2016a.png",
+      "sha256": "b2d37c04e730052b5f3bca685c52281440508e6415a209e0125f08492b98b538",
+      "width": 512,
+      "height": 128,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "2016/fullbody-approved-cutout.png",
+            "sha256": "d7c01af738779df310870726587c71053b4f5358392f49ce65b78ee0eec62ae0"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "b2d37c04e730052b5f3bca685c52281440508e6415a209e0125f08492b98b538",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "2016:actorintroduction/introduction_2016a",
+      "path": "2016/ui-final-v2/actorintroduction/introduction_2016a.png",
+      "sha256": "604a1d037b630f56b1746618cb77eb0273b194b9a2ca40529a986c4bb45c0b64",
+      "width": 512,
+      "height": 1024,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "2016/fullbody-approved-cutout.png",
+            "sha256": "d7c01af738779df310870726587c71053b4f5358392f49ce65b78ee0eec62ae0"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "604a1d037b630f56b1746618cb77eb0273b194b9a2ca40529a986c4bb45c0b64",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "2016:actorjourneyhead/actor_head_2016a",
+      "path": "2016/ui-final-v2/actorjourneyhead/actor_head_2016a.png",
+      "sha256": "c177afa6f2d18600f9e2498ff7d0dd65f08b4072c8b248ac3a63f2ea0605f652",
+      "width": 512,
+      "height": 256,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "2016/fullbody-approved-cutout.png",
+            "sha256": "d7c01af738779df310870726587c71053b4f5358392f49ce65b78ee0eec62ae0"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "c177afa6f2d18600f9e2498ff7d0dd65f08b4072c8b248ac3a63f2ea0605f652",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "2016:actorlogo/actor_logo_2016a",
+      "path": "2016/ui-final-v2/actorlogo/actor_logo_2016a.png",
+      "sha256": "e0847ae8caf435dacebb8099e2e7c3755bb80924cf45eec16de00563b0345649",
+      "width": 256,
+      "height": 256,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "2016/fullbody-approved-cutout.png",
+            "sha256": "d7c01af738779df310870726587c71053b4f5358392f49ce65b78ee0eec62ae0"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "e0847ae8caf435dacebb8099e2e7c3755bb80924cf45eec16de00563b0345649",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "2016:actorportrait/actor_portrait_2016a",
+      "path": "2016/ui-final-v2/actorportrait/actor_portrait_2016a.png",
+      "sha256": "f5ab661fe70e51144076da0adf77e75c8be6acd15dd38f14606a075d26a682b9",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "2016/fullbody-approved-cutout.png",
+            "sha256": "d7c01af738779df310870726587c71053b4f5358392f49ce65b78ee0eec62ae0"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "f5ab661fe70e51144076da0adf77e75c8be6acd15dd38f14606a075d26a682b9",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "2016:actorportraitfull/actor_portrait_full_2016a",
+      "path": "2016/ui-final-v2/actorportraitfull/actor_portrait_full_2016a.png",
+      "sha256": "f5ab661fe70e51144076da0adf77e75c8be6acd15dd38f14606a075d26a682b9",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "2016/fullbody-approved-cutout.png",
+            "sha256": "d7c01af738779df310870726587c71053b4f5358392f49ce65b78ee0eec62ae0"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "f5ab661fe70e51144076da0adf77e75c8be6acd15dd38f14606a075d26a682b9",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "2016:actorskillhead/actor_skill_head_2016a",
+      "path": "2016/ui-final-v2/actorskillhead/actor_skill_head_2016a.png",
+      "sha256": "20eda96322c7b3f6e7ade5540eadf7aedf842110a5565b7849ac6c8346e75528",
+      "width": 512,
+      "height": 64,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "2016/fullbody-approved-cutout.png",
+            "sha256": "d7c01af738779df310870726587c71053b4f5358392f49ce65b78ee0eec62ae0"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "20eda96322c7b3f6e7ade5540eadf7aedf842110a5565b7849ac6c8346e75528",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "2016:actorskinhead/actorskinhead_1016",
+      "path": "2016/ui-final-v2/actorskinhead/actorskinhead_1016.png",
+      "sha256": "439a313568be0e297c52459b623e9457a94fc2e88e10e2aa81516a66c39828a7",
+      "width": 196,
+      "height": 196,
+      "mode": "RGBA",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "2016/fullbody-approved-cutout.png",
+            "sha256": "d7c01af738779df310870726587c71053b4f5358392f49ce65b78ee0eec62ae0"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "439a313568be0e297c52459b623e9457a94fc2e88e10e2aa81516a66c39828a7",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    },
+    {
+      "id": "2016:actorskinheadbig/actorskinhead_big_1016",
+      "path": "2016/ui-final-v2/actorskinheadbig/actorskinhead_big_1016.png",
+      "sha256": "cab7ab65ff63474b2d57ea4851ac1c267f329f94b4483deea0e10cd29fd7b2c8",
+      "width": 438,
+      "height": 530,
+      "mode": "L",
+      "origin": {
+        "kind": "derived",
+        "operation": "approved full-body cutout plus deterministic tools/art derive_ui; original same-role logo/introduction copied where applicable",
+        "references": [
+          {
+            "path": "2016/fullbody-approved-cutout.png",
+            "sha256": "d7c01af738779df310870726587c71053b4f5358392f49ce65b78ee0eec62ae0"
+          }
+        ]
+      },
+      "generatedAt": "2026-11-04T13:49:21Z",
+      "approval": {
+        "status": "approved",
+        "sha256": "cab7ab65ff63474b2d57ea4851ac1c267f329f94b4483deea0e10cd29fd7b2c8",
+        "confirmedBy": "user",
+        "confirmedAt": "2026-11-04T13:49:21Z",
+        "evidence": "User confirmation 2026-11-04 approved the first 10-role preview batch for cutout/crop and isolated patch build; this asset is a deterministic derivative bound to the approved full-body cutout."
+      }
+    }
+  ]
+}

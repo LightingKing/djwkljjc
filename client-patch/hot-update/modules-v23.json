@@ -1,0 +1,1749 @@
+{
+  "appVersion": "2.0.4.59162.0",
+  "patchVersion": 23,
+  "modules": [
+    {
+      "source": "sources/login.lua",
+      "target": "assetbundle/data/lua/window/login/login",
+      "originalSha256": "7bb80bcd7dbede6d4be6027ea9936f165a62715ab1e7db4127d8406383a1d6c4"
+    },
+    {
+      "source": "sources/auth-lan.lua",
+      "target": "assetbundle/data/lua/window/auth/auth",
+      "originalSha256": "08ee811367d6ca80896da4c11ec753f1908a7584043b32730c9c492bcfde911b"
+    },
+    {
+      "source": "sources/iaphandler-local.lua",
+      "target": "assetbundle/data/lua/manager/iaphandler",
+      "originalSha256": "0e84d01f67546752cb1f01e476f946bdc59c2851b8afb65b14ff72b35426e021"
+    },
+    {
+      "source": "sources/actorutil-content-open.lua",
+      "target": "assetbundle/data/lua/common/actorutil",
+      "originalSha256": "e8040bfde750f4ac7b03fee3e6f931ee21e5837dfa9badb1ae166d7fcb8840f8"
+    },
+    {
+      "source": "sources/resourceexchange.lua",
+      "target": "assetbundle/data/lua/window/resourceexchange/resourceexchange",
+      "originalSha256": "f79f11ee0dc50c63b7fe6193e20e63a06e4b58e6d02b188b88a2015c284e41fe"
+    },
+    {
+      "source": "sources/restifizermanager-v14.lua",
+      "target": "assetbundle/data/lua/manager/restifizermanager",
+      "originalSha256": "45ac8875b53019b2113617158cdad3d4c3621e6249c6ebabe2b49b922a45ae16"
+    },
+    {
+      "source": "sources/purchaseactivitygift.lua",
+      "target": "assetbundle/data/lua/window/purchase/purchaseactivitygift",
+      "originalSha256": "32bba995204364c3325a13680ee249fba692f23f93fc2492611bc5cef3352d23"
+    },
+    {
+      "source": "sources/purchasegiftitem.lua",
+      "target": "assetbundle/data/lua/window/purchase/purchasegiftitem",
+      "originalSha256": "e3e89964a8fe1efd8f4d506677a587d6ee36588c174d37ee638211b5704d63c2"
+    },
+    {
+      "source": "sources/purchasebuy.lua",
+      "target": "assetbundle/data/lua/window/purchasebuy/purchasebuy",
+      "originalSha256": "f8179408e3c39559f220f1d333b30bd0ba5771181a22b070dd7cb8d54b80acac"
+    },
+    {
+      "source": "sources/activity.lua",
+      "target": "assetbundle/data/lua/window/activity/activity",
+      "originalSha256": "9a3046436230bb9b51139e5d7ebde1df7d03316f79237571d49825a02c5d6936"
+    },
+    {
+      "source": "sources/windowutil-role-completion.lua",
+      "target": "assetbundle/data/lua/common/windowutil",
+      "originalSha256": "7698c0454718a71750fead33e3ea6f8910bda47292a592795eea9ac194dce703"
+    },
+    {
+      "source": "sources/mazemain.lua",
+      "target": "assetbundle/data/lua/window/mazemain/mazemain",
+      "originalSha256": "9fa0c7d7c991cda44128cd3bcbab9af5f7d69154a84b5078f957ac6e835de747"
+    },
+    {
+      "source": "sources/dungeonbalancefailed.lua",
+      "target": "assetbundle/data/lua/window/dungeonbalancefailed/dungeonbalancefailed",
+      "originalSha256": "4a0ee5a51c5a00b112b7d8ce097825ffbb50e88a2e848703171b7c587342ab61"
+    },
+    {
+      "source": "sources/dungeonteam-local.lua",
+      "target": "assetbundle/data/lua/window/dungeonteam/dungeonteam",
+      "originalSha256": "48be3f25ed11127d592cdca8f228266ccd62eac444e80da883e324680adb7e48"
+    },
+    {
+      "source": "sources/dungeonteamprepare-local.lua",
+      "target": "assetbundle/data/lua/window/dungeonteamprepare/dungeonteamprepare",
+      "originalSha256": "6d2fb589d931c918fc387b948fd69f069c842dae1f256eeb138cddefe7e5c0ad"
+    },
+    {
+      "source": "sources/burstlinkactorgroup-v10.lua",
+      "target": "assetbundle/data/lua/window/burstlinkactorgroup/burstlinkactorgroup",
+      "originalSha256": "7acdc9f5cbf605f949986d2301746ce97bb05104661d90ac116401575ca9c7a5"
+    },
+    {
+      "source": "sources/scenefight-v10.lua",
+      "target": "assetbundle/data/lua/scene/scenefight",
+      "originalSha256": "09d67efd9cce1c0d29563fee4372e96109fb41bd27fe2f45ae5821e4cf237812"
+    },
+    {
+      "source": "sources/helplogic-v10.lua",
+      "target": "assetbundle/data/lua/logic/helplogic",
+      "originalSha256": "881047b7342ab5a41d618f0b3deca2b867d0ca40e5d90d4f179ba761ce5dfd11"
+    },
+    {
+      "source": "sources/dungeonutil-v10.lua",
+      "target": "assetbundle/data/lua/common/dungeonutil",
+      "originalSha256": "821bc4c4e2264c41e62cf230f3c3f63bd57569d030cd1703706f7a7a80020c0c"
+    },
+    {
+      "source": "sources/fightpausewithmorecontent-v10.lua",
+      "target": "assetbundle/data/lua/window/fightpausewithmorecontent/fightpausewithmorecontent",
+      "originalSha256": "2b9e4de4167022af786a1900cdb1132a75a2ecec94ef22352d339e5f4a3ed8b7"
+    },
+    {
+      "source": "sources/itemdetail-activitydrop.lua",
+      "target": "assetbundle/data/lua/window/itemdetail/itemdetail",
+      "originalSha256": "4c26b52a273f6d6193d9bbbe6e3879fb9e61561d852d93b2e26b3790a2f83b8c"
+    },
+    {
+      "source": "sources/wlfpostcard-v11.lua",
+      "target": "assetbundle/data/lua/window/welfare2/wlfpostcard",
+      "originalSha256": "9774a9ab3886341c45c35623375b19b18aa89f8ba4db66ffadca485bae205c78"
+    },
+    {
+      "source": "sources/wlfdecrepittransport-content-open.lua",
+      "target": "assetbundle/data/lua/window/welfare2/wlfdecrepittransport",
+      "originalSha256": "e2c9d0e816f13f8c0dfd12f6eeb9e10e315a157c1cf004732ea52b0cd846a9ac"
+    },
+    {
+      "source": "sources/wlfconditionreward-v11.lua",
+      "target": "assetbundle/data/lua/window/welfare2/wlfconditionreward",
+      "originalSha256": "4fe77b3c0b8b4de744a7b768870eef6ea6818126664972feda22ff00e124a08e"
+    },
+    {
+      "source": "sources/taskpresent-v14.lua",
+      "target": "assetbundle/data/lua/window/taskpresent/taskpresent",
+      "originalSha256": "06be81fd398a2d1d02751f962562b2c6b8c3958ed43d35767ae45e2560124df1"
+    },
+    {
+      "source": "sources/widgettaskpresenthint-v14.lua",
+      "target": "assetbundle/data/lua/window/taskpresent/widgettaskpresenthint",
+      "originalSha256": "bb5284036ef0cde49d64b8b40f3b0cd4be186387c2182f16aae639f8aaa30938"
+    },
+    {
+      "source": "sources/gacha-open-all.lua",
+      "target": "assetbundle/data/lua/window/gacha/gacha",
+      "originalSha256": "09d26ff5482c66631fd301e330ce548df662c94a86182f76ba806dedaafb33d1"
+    },
+    {
+      "source": "sources/gachanormal-open-all.lua",
+      "target": "assetbundle/data/lua/window/gachanormal/gachanormal",
+      "originalSha256": "2757c5721909c7c1c31aca25b9984118bbb0d8a6b765394b655b7cafaa2d3706"
+    },
+    {
+      "source": "sources/gachaeventautumn-open-all.lua",
+      "target": "assetbundle/data/lua/window/gachaeventautumn/gachaeventautumn",
+      "originalSha256": "3a82776462c3c5a9db0f6cd7066e71c5f1d21021b9c9c0adc2e44b951eb7c731"
+    },
+    {
+      "source": "sources/actorskin-content-open.lua",
+      "target": "assetbundle/data/lua/xlsx/actorskin",
+      "originalSha256": "ea4bcf3444520ae77c90a2d986de36c6e517bfe7955d02a86a318a8f8ab235b3"
+    },
+    {
+      "source": "sources/widgeticonskin-content-open.lua",
+      "target": "assetbundle/data/lua/window/widget/widgeticonslot/widgeticonskin",
+      "originalSha256": "9b7fe64cb3b6fd995318be12cccc0fbb61046a025809eb2acf471b124d125ebf"
+    },
+    {
+      "source": "sources/collectionsactorpicture-content-open.lua",
+      "target": "assetbundle/data/lua/window/collectionsactorpicture/collectionsactorpicture",
+      "originalSha256": "b249efe37e00b8cede4cce507d6a50e9d780172fbe8b8d3a811d798cc755e3e9"
+    },
+    {
+      "source": "sources/actorcultivation-content-open.lua",
+      "target": "assetbundle/data/lua/window/actorcultivation/actorcultivation",
+      "originalSha256": "b2c5a88bbd6bc7320874a8d1bae5061c72bf5ff714171f76d5dc902cba7f2bf3"
+    },
+    {
+      "source": "sources/wlfactorcultivation-content-open.lua",
+      "target": "assetbundle/data/lua/window/welfare2/wlfactorcultivation",
+      "originalSha256": "08fab9ca0cddfdf413e0bbaef7fe2f1758f0a1542ea249aa882f86d02b9d9cf9"
+    },
+    {
+      "source": "sources/decrepittransport-content-open.lua",
+      "target": "assetbundle/data/lua/window/welfare/decrepittransport",
+      "originalSha256": "ccb687d48053f9e2c55783d47f231c1838d89a0634f1080b4d3771a71be70286"
+    },
+    {
+      "source": "sources/collectionsscenes-content-open.lua",
+      "target": "assetbundle/data/lua/xlsx/collectionsscenes",
+      "originalSha256": "fbadc9c2a760eb8d42f5c712ef8ae6cbbfbb504cc10c66d4bb2ae0e6ba8f38f1"
+    },
+    {
+      "source": "sources/actorconfig-role-completion.lua",
+      "target": "assetbundle/data/lua/xlsx/actorconfig",
+      "originalSha256": "8d00032db6959f1ccbdb515490995c79eff4b83364e99a6bc518b962da45a294"
+    },
+    {
+      "source": "sources/actorskill-role-completion.lua",
+      "target": "assetbundle/data/lua/xlsx/actorskill",
+      "originalSha256": "cbe9fce04f77da222bf97477fbd2e5b94dfc4c5e21760f52b1fd3a6f84367cfb"
+    },
+    {
+      "source": "sources/actorskillmaxlevel-role-completion.lua",
+      "target": "assetbundle/data/lua/xlsx/actorskillmaxlevel",
+      "originalSha256": "30d20ccea02a0076df62c9fefa83e0f7534f98132cf20c0eb7e85c5121487f14"
+    },
+    {
+      "source": "sources/actorcombo-role-completion.lua",
+      "target": "assetbundle/data/lua/xlsx/actorcombo",
+      "originalSha256": "7bd732483e303847f98359cad4c7a6f6755ec2586972b50abca669a3778c3328"
+    },
+    {
+      "source": "sources/actiondamage-role-completion.lua",
+      "target": "assetbundle/data/lua/xlsx/actiondamage",
+      "originalSha256": "edbc3506e3a583bb3db66355d468f8cd06da099a15b190cda3ecae23e4876ce2"
+    },
+    {
+      "source": "sources/actionbuff-role-completion.lua",
+      "target": "assetbundle/data/lua/xlsx/actionbuff",
+      "originalSha256": "5aeb8416d7dfb8a6d6af66a2395d7ba7e964e22d91ea75a0fff701d8f0ad05ad"
+    },
+    {
+      "source": "sources/actortag-role-completion.lua",
+      "target": "assetbundle/data/lua/xlsx/actortag",
+      "originalSha256": "6d7d26e913df59ba1786eaf583e575ef6a7da36a128ded35ba5c4d8c0a96f745"
+    },
+    {
+      "source": "sources/actortaginfo-role-completion.lua",
+      "target": "assetbundle/data/lua/xlsx/actortaginfo",
+      "originalSha256": "3ee7aaa45fa39b1ca406e93a9bf1b18f1a96a4181c5fc5513426f793547550a6"
+    },
+    {
+      "source": "sources/skilleffect-role-completion.lua",
+      "target": "assetbundle/data/lua/common/skilleffect",
+      "originalSha256": "1e4a9e6853a470af2bc629e635eb48034a776ce3249fbd5da770e6acfb2a27f2"
+    },
+    {
+      "source": "sources/actormain-role-completion.lua",
+      "target": "assetbundle/data/lua/window/actormain/actormain",
+      "originalSha256": "8ca725eaa1ed7434811b3efbdab530d0bb4b76f92e1e164b1084c06d26087a79"
+    },
+    {
+      "source": "sources/newactorget-role-completion.lua",
+      "target": "assetbundle/data/lua/window/newactorget/newactorget",
+      "originalSha256": "9b2e938c8100aae45c6744176300a0f2b69ebf02355870398a1fdc8ed8795df9"
+    },
+    {
+      "source": "sources/widgetactorcard-role-completion.lua",
+      "target": "assetbundle/data/lua/window/widget/widgetactorcard",
+      "originalSha256": "22bef3104a6bb04940197f5f5eccb8f3dedc3443593540a6f89d42c42b8d5605"
+    }
+  ],
+  "textures": [
+    {
+      "artId": "1501:actorgachahead/gacha_head_1501a",
+      "template": "assetbundle/texture/actorgachahead/gacha_head_1502a",
+      "templateSha256": "fa9ce79ad1c568d1839867825e6e7c15ec7b5883a51778ed19022ad28286c66f",
+      "target": "assetbundle/texture/actorgachahead/gacha_head_1501a",
+      "width": 256,
+      "height": 128,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1501:actorgroup/selectteam_1501a",
+      "template": "assetbundle/texture/actorgroup/selectteam_1502a",
+      "templateSha256": "4b1628a676217ad54cef0a203cd189b82266884df945c54d3a6b1dd3478d70b3",
+      "target": "assetbundle/texture/actorgroup/selectteam_1501a",
+      "width": 256,
+      "height": 1024,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1501:actorheadbig/actor_head_big_1501a",
+      "template": "assetbundle/texture/actorheadbig/actor_head_big_1502a",
+      "templateSha256": "75e815bc07ce7585447672582363c47b0ca94eaa6d776400871a4a700d04fb5e",
+      "target": "assetbundle/texture/actorheadbig/actor_head_big_1501a",
+      "width": 256,
+      "height": 512,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1501:actorheadrectangle/actor_head_1501a",
+      "template": "assetbundle/texture/actorheadrectangle/actor_head_1502a",
+      "templateSha256": "59e51d9cd3a18d699f63b80b4eeda8f658698ae7fe0c23f406539d65db4726eb",
+      "target": "assetbundle/texture/actorheadrectangle/actor_head_1501a",
+      "width": 256,
+      "height": 256,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1501:actorinfighthead/main/infight_head_1501a",
+      "template": "assetbundle/texture/actorinfighthead/main/infight_head_1502a",
+      "templateSha256": "4b4d72e19681ec54956324585ee8728e9a7b0e5cbf6319753a0c022e55ea5252",
+      "target": "assetbundle/texture/actorinfighthead/main/infight_head_1501a",
+      "width": 128,
+      "height": 128,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1501:actorinfighthead/main_r/infight_head_1501a",
+      "template": "assetbundle/texture/actorinfighthead/main_r/infight_head_1502a",
+      "templateSha256": "0384bf9d4c32b05b87fcdc9fdfa4b41007fbcf7c6db116153b5519b6a5d9837f",
+      "target": "assetbundle/texture/actorinfighthead/main_r/infight_head_1501a",
+      "width": 128,
+      "height": 128,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1501:actorinfighthead/sub_2/infight_head_1501a",
+      "template": "assetbundle/texture/actorinfighthead/sub_2/infight_head_1502a",
+      "templateSha256": "3348bc65c4fb90fa408a3f5add3990558a4a26f52aea2f81132d2f86eba2036a",
+      "target": "assetbundle/texture/actorinfighthead/sub_2/infight_head_1501a",
+      "width": 512,
+      "height": 128,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1501:actorintroduction/introduction_1501a",
+      "template": "assetbundle/texture/actorintroduction/introduction_1502a",
+      "templateSha256": "c52ad0c955c7f16f9eb7ab2feef8867836c08302370e4818e4f64bd90c692e25",
+      "target": "assetbundle/texture/actorintroduction/introduction_1501a",
+      "width": 512,
+      "height": 1024,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1501:actorjourneyhead/actor_head_1501a",
+      "template": "assetbundle/texture/actorjourneyhead/actor_head_1502a",
+      "templateSha256": "bc51ba01d6496d0ffcb3f04e87e977b31538cc9d3177f2b0477830c12c4e103d",
+      "target": "assetbundle/texture/actorjourneyhead/actor_head_1501a",
+      "width": 512,
+      "height": 256,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1501:actorlogo/actor_logo_1501a",
+      "template": "assetbundle/texture/actorlogo/actor_logo_1502a",
+      "templateSha256": "56011a8aafce6f36107d31a0fbf7c9bda180bdece1e9bde707cc4808f989c587",
+      "target": "assetbundle/texture/actorlogo/actor_logo_1501a",
+      "width": 256,
+      "height": 256,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1501:actorportrait/actor_portrait_1501a",
+      "template": "assetbundle/texture/actorportrait/actor_portrait_1502a",
+      "templateSha256": "95e92aab7eb50451a9d7b6faf0141ac633943003e16d968342fee5990c220c10",
+      "target": "assetbundle/texture/actorportrait/actor_portrait_1501a",
+      "width": 1024,
+      "height": 1024,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1501:actorportraitfull/actor_portrait_full_1501a",
+      "template": "assetbundle/texture/actorportraitfull/actor_portrait_full_1502a",
+      "templateSha256": "600fbbcab5370a0aab62597a2549868e103ce0d75144044fb21100edda9ba5fe",
+      "target": "assetbundle/texture/actorportraitfull/actor_portrait_full_1501a",
+      "width": 1024,
+      "height": 1024,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1501:actorskillhead/actor_skill_head_1501a",
+      "template": "assetbundle/texture/actorskillhead/actor_skill_head_1502a",
+      "templateSha256": "e5bff470a4ffc9474d75df6ce83d6bd7dd73816815eda262e1c2a55e1ddbd7d2",
+      "target": "assetbundle/texture/actorskillhead/actor_skill_head_1501a",
+      "width": 512,
+      "height": 64,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1501:actorskinhead/actorskinhead_2001",
+      "template": "assetbundle/texture/actorskinhead/actorskinhead_1001",
+      "templateSha256": "d30e3af203c4ec1b8b1562b5bb864daff373d34969e21fd4c823a07d0b7bf7a2",
+      "target": "assetbundle/texture/actorskinhead/actorskinhead_2001",
+      "width": 196,
+      "height": 196,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1501:actorskinheadbig/actorskinhead_big_2001",
+      "template": "assetbundle/texture/actorskinheadbig/actorskinhead_big_1502",
+      "templateSha256": "40dfc095b6e380774327324c53a167a492d3c2b4181c7a997798671ced1c71b8",
+      "target": "assetbundle/texture/actorskinheadbig/actorskinhead_big_2001",
+      "width": 438,
+      "height": 530,
+      "format": 1,
+      "alphaSource": "mask"
+    },
+    {
+      "artId": "1503:actorgachahead/gacha_head_1503a",
+      "template": "assetbundle/texture/actorgachahead/gacha_head_1502a",
+      "templateSha256": "fa9ce79ad1c568d1839867825e6e7c15ec7b5883a51778ed19022ad28286c66f",
+      "target": "assetbundle/texture/actorgachahead/gacha_head_1503a",
+      "width": 256,
+      "height": 128,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1503:actorgroup/selectteam_1503a",
+      "template": "assetbundle/texture/actorgroup/selectteam_1502a",
+      "templateSha256": "4b1628a676217ad54cef0a203cd189b82266884df945c54d3a6b1dd3478d70b3",
+      "target": "assetbundle/texture/actorgroup/selectteam_1503a",
+      "width": 256,
+      "height": 1024,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1503:actorheadbig/actor_head_big_1503a",
+      "template": "assetbundle/texture/actorheadbig/actor_head_big_1502a",
+      "templateSha256": "75e815bc07ce7585447672582363c47b0ca94eaa6d776400871a4a700d04fb5e",
+      "target": "assetbundle/texture/actorheadbig/actor_head_big_1503a",
+      "width": 256,
+      "height": 512,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1503:actorheadrectangle/actor_head_1503a",
+      "template": "assetbundle/texture/actorheadrectangle/actor_head_1502a",
+      "templateSha256": "59e51d9cd3a18d699f63b80b4eeda8f658698ae7fe0c23f406539d65db4726eb",
+      "target": "assetbundle/texture/actorheadrectangle/actor_head_1503a",
+      "width": 256,
+      "height": 256,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1503:actorinfighthead/main/infight_head_1503a",
+      "template": "assetbundle/texture/actorinfighthead/main/infight_head_1502a",
+      "templateSha256": "4b4d72e19681ec54956324585ee8728e9a7b0e5cbf6319753a0c022e55ea5252",
+      "target": "assetbundle/texture/actorinfighthead/main/infight_head_1503a",
+      "width": 128,
+      "height": 128,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1503:actorinfighthead/main_r/infight_head_1503a",
+      "template": "assetbundle/texture/actorinfighthead/main_r/infight_head_1502a",
+      "templateSha256": "0384bf9d4c32b05b87fcdc9fdfa4b41007fbcf7c6db116153b5519b6a5d9837f",
+      "target": "assetbundle/texture/actorinfighthead/main_r/infight_head_1503a",
+      "width": 128,
+      "height": 128,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1503:actorinfighthead/sub_2/infight_head_1503a",
+      "template": "assetbundle/texture/actorinfighthead/sub_2/infight_head_1502a",
+      "templateSha256": "3348bc65c4fb90fa408a3f5add3990558a4a26f52aea2f81132d2f86eba2036a",
+      "target": "assetbundle/texture/actorinfighthead/sub_2/infight_head_1503a",
+      "width": 512,
+      "height": 128,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1503:actorintroduction/introduction_1503a",
+      "template": "assetbundle/texture/actorintroduction/introduction_1502a",
+      "templateSha256": "c52ad0c955c7f16f9eb7ab2feef8867836c08302370e4818e4f64bd90c692e25",
+      "target": "assetbundle/texture/actorintroduction/introduction_1503a",
+      "width": 512,
+      "height": 1024,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1503:actorjourneyhead/actor_head_1503a",
+      "template": "assetbundle/texture/actorjourneyhead/actor_head_1502a",
+      "templateSha256": "bc51ba01d6496d0ffcb3f04e87e977b31538cc9d3177f2b0477830c12c4e103d",
+      "target": "assetbundle/texture/actorjourneyhead/actor_head_1503a",
+      "width": 512,
+      "height": 256,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1503:actorlogo/actor_logo_1503a",
+      "template": "assetbundle/texture/actorlogo/actor_logo_1502a",
+      "templateSha256": "56011a8aafce6f36107d31a0fbf7c9bda180bdece1e9bde707cc4808f989c587",
+      "target": "assetbundle/texture/actorlogo/actor_logo_1503a",
+      "width": 256,
+      "height": 256,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1503:actorportrait/actor_portrait_1503a",
+      "template": "assetbundle/texture/actorportrait/actor_portrait_1502a",
+      "templateSha256": "95e92aab7eb50451a9d7b6faf0141ac633943003e16d968342fee5990c220c10",
+      "target": "assetbundle/texture/actorportrait/actor_portrait_1503a",
+      "width": 1024,
+      "height": 1024,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1503:actorportraitfull/actor_portrait_full_1503a",
+      "template": "assetbundle/texture/actorportraitfull/actor_portrait_full_1502a",
+      "templateSha256": "600fbbcab5370a0aab62597a2549868e103ce0d75144044fb21100edda9ba5fe",
+      "target": "assetbundle/texture/actorportraitfull/actor_portrait_full_1503a",
+      "width": 1024,
+      "height": 1024,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1503:actorskillhead/actor_skill_head_1503a",
+      "template": "assetbundle/texture/actorskillhead/actor_skill_head_1502a",
+      "templateSha256": "e5bff470a4ffc9474d75df6ce83d6bd7dd73816815eda262e1c2a55e1ddbd7d2",
+      "target": "assetbundle/texture/actorskillhead/actor_skill_head_1503a",
+      "width": 512,
+      "height": 64,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1503:actorskinhead/actorskinhead_2003",
+      "template": "assetbundle/texture/actorskinhead/actorskinhead_1001",
+      "templateSha256": "d30e3af203c4ec1b8b1562b5bb864daff373d34969e21fd4c823a07d0b7bf7a2",
+      "target": "assetbundle/texture/actorskinhead/actorskinhead_2003",
+      "width": 196,
+      "height": 196,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1503:actorskinheadbig/actorskinhead_big_2003",
+      "template": "assetbundle/texture/actorskinheadbig/actorskinhead_big_1502",
+      "templateSha256": "40dfc095b6e380774327324c53a167a492d3c2b4181c7a997798671ced1c71b8",
+      "target": "assetbundle/texture/actorskinheadbig/actorskinhead_big_2003",
+      "width": 438,
+      "height": 530,
+      "format": 1,
+      "alphaSource": "mask"
+    },
+    {
+      "artId": "1505:actorgachahead/gacha_head_1505a",
+      "template": "assetbundle/texture/actorgachahead/gacha_head_1502a",
+      "templateSha256": "fa9ce79ad1c568d1839867825e6e7c15ec7b5883a51778ed19022ad28286c66f",
+      "target": "assetbundle/texture/actorgachahead/gacha_head_1505a",
+      "width": 256,
+      "height": 128,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1505:actorgroup/selectteam_1505a",
+      "template": "assetbundle/texture/actorgroup/selectteam_1502a",
+      "templateSha256": "4b1628a676217ad54cef0a203cd189b82266884df945c54d3a6b1dd3478d70b3",
+      "target": "assetbundle/texture/actorgroup/selectteam_1505a",
+      "width": 256,
+      "height": 1024,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1505:actorheadbig/actor_head_big_1505a",
+      "template": "assetbundle/texture/actorheadbig/actor_head_big_1502a",
+      "templateSha256": "75e815bc07ce7585447672582363c47b0ca94eaa6d776400871a4a700d04fb5e",
+      "target": "assetbundle/texture/actorheadbig/actor_head_big_1505a",
+      "width": 256,
+      "height": 512,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1505:actorheadrectangle/actor_head_1505a",
+      "template": "assetbundle/texture/actorheadrectangle/actor_head_1502a",
+      "templateSha256": "59e51d9cd3a18d699f63b80b4eeda8f658698ae7fe0c23f406539d65db4726eb",
+      "target": "assetbundle/texture/actorheadrectangle/actor_head_1505a",
+      "width": 256,
+      "height": 256,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1505:actorinfighthead/main/infight_head_1505a",
+      "template": "assetbundle/texture/actorinfighthead/main/infight_head_1502a",
+      "templateSha256": "4b4d72e19681ec54956324585ee8728e9a7b0e5cbf6319753a0c022e55ea5252",
+      "target": "assetbundle/texture/actorinfighthead/main/infight_head_1505a",
+      "width": 128,
+      "height": 128,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1505:actorinfighthead/main_r/infight_head_1505a",
+      "template": "assetbundle/texture/actorinfighthead/main_r/infight_head_1502a",
+      "templateSha256": "0384bf9d4c32b05b87fcdc9fdfa4b41007fbcf7c6db116153b5519b6a5d9837f",
+      "target": "assetbundle/texture/actorinfighthead/main_r/infight_head_1505a",
+      "width": 128,
+      "height": 128,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1505:actorinfighthead/sub_2/infight_head_1505a",
+      "template": "assetbundle/texture/actorinfighthead/sub_2/infight_head_1502a",
+      "templateSha256": "3348bc65c4fb90fa408a3f5add3990558a4a26f52aea2f81132d2f86eba2036a",
+      "target": "assetbundle/texture/actorinfighthead/sub_2/infight_head_1505a",
+      "width": 512,
+      "height": 128,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1505:actorintroduction/introduction_1505a",
+      "template": "assetbundle/texture/actorintroduction/introduction_1502a",
+      "templateSha256": "c52ad0c955c7f16f9eb7ab2feef8867836c08302370e4818e4f64bd90c692e25",
+      "target": "assetbundle/texture/actorintroduction/introduction_1505a",
+      "width": 512,
+      "height": 1024,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1505:actorjourneyhead/actor_head_1505a",
+      "template": "assetbundle/texture/actorjourneyhead/actor_head_1502a",
+      "templateSha256": "bc51ba01d6496d0ffcb3f04e87e977b31538cc9d3177f2b0477830c12c4e103d",
+      "target": "assetbundle/texture/actorjourneyhead/actor_head_1505a",
+      "width": 512,
+      "height": 256,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1505:actorlogo/actor_logo_1505a",
+      "template": "assetbundle/texture/actorlogo/actor_logo_1502a",
+      "templateSha256": "56011a8aafce6f36107d31a0fbf7c9bda180bdece1e9bde707cc4808f989c587",
+      "target": "assetbundle/texture/actorlogo/actor_logo_1505a",
+      "width": 256,
+      "height": 256,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1505:actorportrait/actor_portrait_1505a",
+      "template": "assetbundle/texture/actorportrait/actor_portrait_1502a",
+      "templateSha256": "95e92aab7eb50451a9d7b6faf0141ac633943003e16d968342fee5990c220c10",
+      "target": "assetbundle/texture/actorportrait/actor_portrait_1505a",
+      "width": 1024,
+      "height": 1024,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1505:actorportraitfull/actor_portrait_full_1505a",
+      "template": "assetbundle/texture/actorportraitfull/actor_portrait_full_1502a",
+      "templateSha256": "600fbbcab5370a0aab62597a2549868e103ce0d75144044fb21100edda9ba5fe",
+      "target": "assetbundle/texture/actorportraitfull/actor_portrait_full_1505a",
+      "width": 1024,
+      "height": 1024,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1505:actorskillhead/actor_skill_head_1505a",
+      "template": "assetbundle/texture/actorskillhead/actor_skill_head_1502a",
+      "templateSha256": "e5bff470a4ffc9474d75df6ce83d6bd7dd73816815eda262e1c2a55e1ddbd7d2",
+      "target": "assetbundle/texture/actorskillhead/actor_skill_head_1505a",
+      "width": 512,
+      "height": 64,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1505:actorskinhead/actorskinhead_2005",
+      "template": "assetbundle/texture/actorskinhead/actorskinhead_1001",
+      "templateSha256": "d30e3af203c4ec1b8b1562b5bb864daff373d34969e21fd4c823a07d0b7bf7a2",
+      "target": "assetbundle/texture/actorskinhead/actorskinhead_2005",
+      "width": 196,
+      "height": 196,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1505:actorskinheadbig/actorskinhead_big_2005",
+      "template": "assetbundle/texture/actorskinheadbig/actorskinhead_big_1502",
+      "templateSha256": "40dfc095b6e380774327324c53a167a492d3c2b4181c7a997798671ced1c71b8",
+      "target": "assetbundle/texture/actorskinheadbig/actorskinhead_big_2005",
+      "width": 438,
+      "height": 530,
+      "format": 1,
+      "alphaSource": "mask"
+    },
+    {
+      "artId": "1506:actorgachahead/gacha_head_1506a",
+      "template": "assetbundle/texture/actorgachahead/gacha_head_1502a",
+      "templateSha256": "fa9ce79ad1c568d1839867825e6e7c15ec7b5883a51778ed19022ad28286c66f",
+      "target": "assetbundle/texture/actorgachahead/gacha_head_1506a",
+      "width": 256,
+      "height": 128,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1506:actorgroup/selectteam_1506a",
+      "template": "assetbundle/texture/actorgroup/selectteam_1502a",
+      "templateSha256": "4b1628a676217ad54cef0a203cd189b82266884df945c54d3a6b1dd3478d70b3",
+      "target": "assetbundle/texture/actorgroup/selectteam_1506a",
+      "width": 256,
+      "height": 1024,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1506:actorheadbig/actor_head_big_1506a",
+      "template": "assetbundle/texture/actorheadbig/actor_head_big_1502a",
+      "templateSha256": "75e815bc07ce7585447672582363c47b0ca94eaa6d776400871a4a700d04fb5e",
+      "target": "assetbundle/texture/actorheadbig/actor_head_big_1506a",
+      "width": 256,
+      "height": 512,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1506:actorheadrectangle/actor_head_1506a",
+      "template": "assetbundle/texture/actorheadrectangle/actor_head_1502a",
+      "templateSha256": "59e51d9cd3a18d699f63b80b4eeda8f658698ae7fe0c23f406539d65db4726eb",
+      "target": "assetbundle/texture/actorheadrectangle/actor_head_1506a",
+      "width": 256,
+      "height": 256,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1506:actorinfighthead/main/infight_head_1506a",
+      "template": "assetbundle/texture/actorinfighthead/main/infight_head_1502a",
+      "templateSha256": "4b4d72e19681ec54956324585ee8728e9a7b0e5cbf6319753a0c022e55ea5252",
+      "target": "assetbundle/texture/actorinfighthead/main/infight_head_1506a",
+      "width": 128,
+      "height": 128,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1506:actorinfighthead/main_r/infight_head_1506a",
+      "template": "assetbundle/texture/actorinfighthead/main_r/infight_head_1502a",
+      "templateSha256": "0384bf9d4c32b05b87fcdc9fdfa4b41007fbcf7c6db116153b5519b6a5d9837f",
+      "target": "assetbundle/texture/actorinfighthead/main_r/infight_head_1506a",
+      "width": 128,
+      "height": 128,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1506:actorinfighthead/sub_2/infight_head_1506a",
+      "template": "assetbundle/texture/actorinfighthead/sub_2/infight_head_1502a",
+      "templateSha256": "3348bc65c4fb90fa408a3f5add3990558a4a26f52aea2f81132d2f86eba2036a",
+      "target": "assetbundle/texture/actorinfighthead/sub_2/infight_head_1506a",
+      "width": 512,
+      "height": 128,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1506:actorintroduction/introduction_1506a",
+      "template": "assetbundle/texture/actorintroduction/introduction_1502a",
+      "templateSha256": "c52ad0c955c7f16f9eb7ab2feef8867836c08302370e4818e4f64bd90c692e25",
+      "target": "assetbundle/texture/actorintroduction/introduction_1506a",
+      "width": 512,
+      "height": 1024,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1506:actorjourneyhead/actor_head_1506a",
+      "template": "assetbundle/texture/actorjourneyhead/actor_head_1502a",
+      "templateSha256": "bc51ba01d6496d0ffcb3f04e87e977b31538cc9d3177f2b0477830c12c4e103d",
+      "target": "assetbundle/texture/actorjourneyhead/actor_head_1506a",
+      "width": 512,
+      "height": 256,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1506:actorlogo/actor_logo_1506a",
+      "template": "assetbundle/texture/actorlogo/actor_logo_1502a",
+      "templateSha256": "56011a8aafce6f36107d31a0fbf7c9bda180bdece1e9bde707cc4808f989c587",
+      "target": "assetbundle/texture/actorlogo/actor_logo_1506a",
+      "width": 256,
+      "height": 256,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1506:actorportrait/actor_portrait_1506a",
+      "template": "assetbundle/texture/actorportrait/actor_portrait_1502a",
+      "templateSha256": "95e92aab7eb50451a9d7b6faf0141ac633943003e16d968342fee5990c220c10",
+      "target": "assetbundle/texture/actorportrait/actor_portrait_1506a",
+      "width": 1024,
+      "height": 1024,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1506:actorportraitfull/actor_portrait_full_1506a",
+      "template": "assetbundle/texture/actorportraitfull/actor_portrait_full_1502a",
+      "templateSha256": "600fbbcab5370a0aab62597a2549868e103ce0d75144044fb21100edda9ba5fe",
+      "target": "assetbundle/texture/actorportraitfull/actor_portrait_full_1506a",
+      "width": 1024,
+      "height": 1024,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1506:actorskillhead/actor_skill_head_1506a",
+      "template": "assetbundle/texture/actorskillhead/actor_skill_head_1502a",
+      "templateSha256": "e5bff470a4ffc9474d75df6ce83d6bd7dd73816815eda262e1c2a55e1ddbd7d2",
+      "target": "assetbundle/texture/actorskillhead/actor_skill_head_1506a",
+      "width": 512,
+      "height": 64,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1506:actorskinhead/actorskinhead_2006",
+      "template": "assetbundle/texture/actorskinhead/actorskinhead_1001",
+      "templateSha256": "d30e3af203c4ec1b8b1562b5bb864daff373d34969e21fd4c823a07d0b7bf7a2",
+      "target": "assetbundle/texture/actorskinhead/actorskinhead_2006",
+      "width": 196,
+      "height": 196,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1506:actorskinheadbig/actorskinhead_big_2006",
+      "template": "assetbundle/texture/actorskinheadbig/actorskinhead_big_1502",
+      "templateSha256": "40dfc095b6e380774327324c53a167a492d3c2b4181c7a997798671ced1c71b8",
+      "target": "assetbundle/texture/actorskinheadbig/actorskinhead_big_2006",
+      "width": 438,
+      "height": 530,
+      "format": 1,
+      "alphaSource": "mask"
+    },
+    {
+      "artId": "1515:actorgachahead/gacha_head_1515a",
+      "template": "assetbundle/texture/actorgachahead/gacha_head_1502a",
+      "templateSha256": "fa9ce79ad1c568d1839867825e6e7c15ec7b5883a51778ed19022ad28286c66f",
+      "target": "assetbundle/texture/actorgachahead/gacha_head_1515a",
+      "width": 256,
+      "height": 128,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1515:actorgroup/selectteam_1515a",
+      "template": "assetbundle/texture/actorgroup/selectteam_1502a",
+      "templateSha256": "4b1628a676217ad54cef0a203cd189b82266884df945c54d3a6b1dd3478d70b3",
+      "target": "assetbundle/texture/actorgroup/selectteam_1515a",
+      "width": 256,
+      "height": 1024,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1515:actorheadbig/actor_head_big_1515a",
+      "template": "assetbundle/texture/actorheadbig/actor_head_big_1502a",
+      "templateSha256": "75e815bc07ce7585447672582363c47b0ca94eaa6d776400871a4a700d04fb5e",
+      "target": "assetbundle/texture/actorheadbig/actor_head_big_1515a",
+      "width": 256,
+      "height": 512,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1515:actorheadrectangle/actor_head_1515a",
+      "template": "assetbundle/texture/actorheadrectangle/actor_head_1502a",
+      "templateSha256": "59e51d9cd3a18d699f63b80b4eeda8f658698ae7fe0c23f406539d65db4726eb",
+      "target": "assetbundle/texture/actorheadrectangle/actor_head_1515a",
+      "width": 256,
+      "height": 256,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1515:actorinfighthead/main/infight_head_1515a",
+      "template": "assetbundle/texture/actorinfighthead/main/infight_head_1502a",
+      "templateSha256": "4b4d72e19681ec54956324585ee8728e9a7b0e5cbf6319753a0c022e55ea5252",
+      "target": "assetbundle/texture/actorinfighthead/main/infight_head_1515a",
+      "width": 128,
+      "height": 128,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1515:actorinfighthead/main_r/infight_head_1515a",
+      "template": "assetbundle/texture/actorinfighthead/main_r/infight_head_1502a",
+      "templateSha256": "0384bf9d4c32b05b87fcdc9fdfa4b41007fbcf7c6db116153b5519b6a5d9837f",
+      "target": "assetbundle/texture/actorinfighthead/main_r/infight_head_1515a",
+      "width": 128,
+      "height": 128,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1515:actorinfighthead/sub_2/infight_head_1515a",
+      "template": "assetbundle/texture/actorinfighthead/sub_2/infight_head_1502a",
+      "templateSha256": "3348bc65c4fb90fa408a3f5add3990558a4a26f52aea2f81132d2f86eba2036a",
+      "target": "assetbundle/texture/actorinfighthead/sub_2/infight_head_1515a",
+      "width": 512,
+      "height": 128,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1515:actorintroduction/introduction_1515a",
+      "template": "assetbundle/texture/actorintroduction/introduction_1502a",
+      "templateSha256": "c52ad0c955c7f16f9eb7ab2feef8867836c08302370e4818e4f64bd90c692e25",
+      "target": "assetbundle/texture/actorintroduction/introduction_1515a",
+      "width": 512,
+      "height": 1024,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1515:actorjourneyhead/actor_head_1515a",
+      "template": "assetbundle/texture/actorjourneyhead/actor_head_1502a",
+      "templateSha256": "bc51ba01d6496d0ffcb3f04e87e977b31538cc9d3177f2b0477830c12c4e103d",
+      "target": "assetbundle/texture/actorjourneyhead/actor_head_1515a",
+      "width": 512,
+      "height": 256,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1515:actorlogo/actor_logo_1515a",
+      "template": "assetbundle/texture/actorlogo/actor_logo_1502a",
+      "templateSha256": "56011a8aafce6f36107d31a0fbf7c9bda180bdece1e9bde707cc4808f989c587",
+      "target": "assetbundle/texture/actorlogo/actor_logo_1515a",
+      "width": 256,
+      "height": 256,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1515:actorportrait/actor_portrait_1515a",
+      "template": "assetbundle/texture/actorportrait/actor_portrait_1502a",
+      "templateSha256": "95e92aab7eb50451a9d7b6faf0141ac633943003e16d968342fee5990c220c10",
+      "target": "assetbundle/texture/actorportrait/actor_portrait_1515a",
+      "width": 1024,
+      "height": 1024,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1515:actorportraitfull/actor_portrait_full_1515a",
+      "template": "assetbundle/texture/actorportraitfull/actor_portrait_full_1502a",
+      "templateSha256": "600fbbcab5370a0aab62597a2549868e103ce0d75144044fb21100edda9ba5fe",
+      "target": "assetbundle/texture/actorportraitfull/actor_portrait_full_1515a",
+      "width": 1024,
+      "height": 1024,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1515:actorskillhead/actor_skill_head_1515a",
+      "template": "assetbundle/texture/actorskillhead/actor_skill_head_1502a",
+      "templateSha256": "e5bff470a4ffc9474d75df6ce83d6bd7dd73816815eda262e1c2a55e1ddbd7d2",
+      "target": "assetbundle/texture/actorskillhead/actor_skill_head_1515a",
+      "width": 512,
+      "height": 64,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1515:actorskinhead/actorskinhead_2015",
+      "template": "assetbundle/texture/actorskinhead/actorskinhead_1001",
+      "templateSha256": "d30e3af203c4ec1b8b1562b5bb864daff373d34969e21fd4c823a07d0b7bf7a2",
+      "target": "assetbundle/texture/actorskinhead/actorskinhead_2015",
+      "width": 196,
+      "height": 196,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1515:actorskinheadbig/actorskinhead_big_2015",
+      "template": "assetbundle/texture/actorskinheadbig/actorskinhead_big_1502",
+      "templateSha256": "40dfc095b6e380774327324c53a167a492d3c2b4181c7a997798671ced1c71b8",
+      "target": "assetbundle/texture/actorskinheadbig/actorskinhead_big_2015",
+      "width": 438,
+      "height": 530,
+      "format": 1,
+      "alphaSource": "mask"
+    },
+    {
+      "artId": "1516:actorgachahead/gacha_head_1516a",
+      "template": "assetbundle/texture/actorgachahead/gacha_head_1502a",
+      "templateSha256": "fa9ce79ad1c568d1839867825e6e7c15ec7b5883a51778ed19022ad28286c66f",
+      "target": "assetbundle/texture/actorgachahead/gacha_head_1516a",
+      "width": 256,
+      "height": 128,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1516:actorgroup/selectteam_1516a",
+      "template": "assetbundle/texture/actorgroup/selectteam_1502a",
+      "templateSha256": "4b1628a676217ad54cef0a203cd189b82266884df945c54d3a6b1dd3478d70b3",
+      "target": "assetbundle/texture/actorgroup/selectteam_1516a",
+      "width": 256,
+      "height": 1024,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1516:actorheadbig/actor_head_big_1516a",
+      "template": "assetbundle/texture/actorheadbig/actor_head_big_1502a",
+      "templateSha256": "75e815bc07ce7585447672582363c47b0ca94eaa6d776400871a4a700d04fb5e",
+      "target": "assetbundle/texture/actorheadbig/actor_head_big_1516a",
+      "width": 256,
+      "height": 512,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1516:actorheadrectangle/actor_head_1516a",
+      "template": "assetbundle/texture/actorheadrectangle/actor_head_1502a",
+      "templateSha256": "59e51d9cd3a18d699f63b80b4eeda8f658698ae7fe0c23f406539d65db4726eb",
+      "target": "assetbundle/texture/actorheadrectangle/actor_head_1516a",
+      "width": 256,
+      "height": 256,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1516:actorinfighthead/main/infight_head_1516a",
+      "template": "assetbundle/texture/actorinfighthead/main/infight_head_1502a",
+      "templateSha256": "4b4d72e19681ec54956324585ee8728e9a7b0e5cbf6319753a0c022e55ea5252",
+      "target": "assetbundle/texture/actorinfighthead/main/infight_head_1516a",
+      "width": 128,
+      "height": 128,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1516:actorinfighthead/main_r/infight_head_1516a",
+      "template": "assetbundle/texture/actorinfighthead/main_r/infight_head_1502a",
+      "templateSha256": "0384bf9d4c32b05b87fcdc9fdfa4b41007fbcf7c6db116153b5519b6a5d9837f",
+      "target": "assetbundle/texture/actorinfighthead/main_r/infight_head_1516a",
+      "width": 128,
+      "height": 128,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1516:actorinfighthead/sub_2/infight_head_1516a",
+      "template": "assetbundle/texture/actorinfighthead/sub_2/infight_head_1502a",
+      "templateSha256": "3348bc65c4fb90fa408a3f5add3990558a4a26f52aea2f81132d2f86eba2036a",
+      "target": "assetbundle/texture/actorinfighthead/sub_2/infight_head_1516a",
+      "width": 512,
+      "height": 128,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1516:actorintroduction/introduction_1516a",
+      "template": "assetbundle/texture/actorintroduction/introduction_1502a",
+      "templateSha256": "c52ad0c955c7f16f9eb7ab2feef8867836c08302370e4818e4f64bd90c692e25",
+      "target": "assetbundle/texture/actorintroduction/introduction_1516a",
+      "width": 512,
+      "height": 1024,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1516:actorjourneyhead/actor_head_1516a",
+      "template": "assetbundle/texture/actorjourneyhead/actor_head_1502a",
+      "templateSha256": "bc51ba01d6496d0ffcb3f04e87e977b31538cc9d3177f2b0477830c12c4e103d",
+      "target": "assetbundle/texture/actorjourneyhead/actor_head_1516a",
+      "width": 512,
+      "height": 256,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1516:actorlogo/actor_logo_1516a",
+      "template": "assetbundle/texture/actorlogo/actor_logo_1502a",
+      "templateSha256": "56011a8aafce6f36107d31a0fbf7c9bda180bdece1e9bde707cc4808f989c587",
+      "target": "assetbundle/texture/actorlogo/actor_logo_1516a",
+      "width": 256,
+      "height": 256,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1516:actorportrait/actor_portrait_1516a",
+      "template": "assetbundle/texture/actorportrait/actor_portrait_1502a",
+      "templateSha256": "95e92aab7eb50451a9d7b6faf0141ac633943003e16d968342fee5990c220c10",
+      "target": "assetbundle/texture/actorportrait/actor_portrait_1516a",
+      "width": 1024,
+      "height": 1024,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1516:actorportraitfull/actor_portrait_full_1516a",
+      "template": "assetbundle/texture/actorportraitfull/actor_portrait_full_1502a",
+      "templateSha256": "600fbbcab5370a0aab62597a2549868e103ce0d75144044fb21100edda9ba5fe",
+      "target": "assetbundle/texture/actorportraitfull/actor_portrait_full_1516a",
+      "width": 1024,
+      "height": 1024,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1516:actorskillhead/actor_skill_head_1516a",
+      "template": "assetbundle/texture/actorskillhead/actor_skill_head_1502a",
+      "templateSha256": "e5bff470a4ffc9474d75df6ce83d6bd7dd73816815eda262e1c2a55e1ddbd7d2",
+      "target": "assetbundle/texture/actorskillhead/actor_skill_head_1516a",
+      "width": 512,
+      "height": 64,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1516:actorskinhead/actorskinhead_2016",
+      "template": "assetbundle/texture/actorskinhead/actorskinhead_1001",
+      "templateSha256": "d30e3af203c4ec1b8b1562b5bb864daff373d34969e21fd4c823a07d0b7bf7a2",
+      "target": "assetbundle/texture/actorskinhead/actorskinhead_2016",
+      "width": 196,
+      "height": 196,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1516:actorskinheadbig/actorskinhead_big_2016",
+      "template": "assetbundle/texture/actorskinheadbig/actorskinhead_big_1502",
+      "templateSha256": "40dfc095b6e380774327324c53a167a492d3c2b4181c7a997798671ced1c71b8",
+      "target": "assetbundle/texture/actorskinheadbig/actorskinhead_big_2016",
+      "width": 438,
+      "height": 530,
+      "format": 1,
+      "alphaSource": "mask"
+    },
+    {
+      "artId": "1517:actorgachahead/gacha_head_1517a",
+      "template": "assetbundle/texture/actorgachahead/gacha_head_1502a",
+      "templateSha256": "fa9ce79ad1c568d1839867825e6e7c15ec7b5883a51778ed19022ad28286c66f",
+      "target": "assetbundle/texture/actorgachahead/gacha_head_1517a",
+      "width": 256,
+      "height": 128,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1517:actorgroup/selectteam_1517a",
+      "template": "assetbundle/texture/actorgroup/selectteam_1502a",
+      "templateSha256": "4b1628a676217ad54cef0a203cd189b82266884df945c54d3a6b1dd3478d70b3",
+      "target": "assetbundle/texture/actorgroup/selectteam_1517a",
+      "width": 256,
+      "height": 1024,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1517:actorheadbig/actor_head_big_1517a",
+      "template": "assetbundle/texture/actorheadbig/actor_head_big_1502a",
+      "templateSha256": "75e815bc07ce7585447672582363c47b0ca94eaa6d776400871a4a700d04fb5e",
+      "target": "assetbundle/texture/actorheadbig/actor_head_big_1517a",
+      "width": 256,
+      "height": 512,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1517:actorheadrectangle/actor_head_1517a",
+      "template": "assetbundle/texture/actorheadrectangle/actor_head_1502a",
+      "templateSha256": "59e51d9cd3a18d699f63b80b4eeda8f658698ae7fe0c23f406539d65db4726eb",
+      "target": "assetbundle/texture/actorheadrectangle/actor_head_1517a",
+      "width": 256,
+      "height": 256,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1517:actorinfighthead/main/infight_head_1517a",
+      "template": "assetbundle/texture/actorinfighthead/main/infight_head_1502a",
+      "templateSha256": "4b4d72e19681ec54956324585ee8728e9a7b0e5cbf6319753a0c022e55ea5252",
+      "target": "assetbundle/texture/actorinfighthead/main/infight_head_1517a",
+      "width": 128,
+      "height": 128,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1517:actorinfighthead/main_r/infight_head_1517a",
+      "template": "assetbundle/texture/actorinfighthead/main_r/infight_head_1502a",
+      "templateSha256": "0384bf9d4c32b05b87fcdc9fdfa4b41007fbcf7c6db116153b5519b6a5d9837f",
+      "target": "assetbundle/texture/actorinfighthead/main_r/infight_head_1517a",
+      "width": 128,
+      "height": 128,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1517:actorinfighthead/sub_2/infight_head_1517a",
+      "template": "assetbundle/texture/actorinfighthead/sub_2/infight_head_1502a",
+      "templateSha256": "3348bc65c4fb90fa408a3f5add3990558a4a26f52aea2f81132d2f86eba2036a",
+      "target": "assetbundle/texture/actorinfighthead/sub_2/infight_head_1517a",
+      "width": 512,
+      "height": 128,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1517:actorintroduction/introduction_1517a",
+      "template": "assetbundle/texture/actorintroduction/introduction_1502a",
+      "templateSha256": "c52ad0c955c7f16f9eb7ab2feef8867836c08302370e4818e4f64bd90c692e25",
+      "target": "assetbundle/texture/actorintroduction/introduction_1517a",
+      "width": 512,
+      "height": 1024,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1517:actorjourneyhead/actor_head_1517a",
+      "template": "assetbundle/texture/actorjourneyhead/actor_head_1502a",
+      "templateSha256": "bc51ba01d6496d0ffcb3f04e87e977b31538cc9d3177f2b0477830c12c4e103d",
+      "target": "assetbundle/texture/actorjourneyhead/actor_head_1517a",
+      "width": 512,
+      "height": 256,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1517:actorlogo/actor_logo_1517a",
+      "template": "assetbundle/texture/actorlogo/actor_logo_1502a",
+      "templateSha256": "56011a8aafce6f36107d31a0fbf7c9bda180bdece1e9bde707cc4808f989c587",
+      "target": "assetbundle/texture/actorlogo/actor_logo_1517a",
+      "width": 256,
+      "height": 256,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1517:actorportrait/actor_portrait_1517a",
+      "template": "assetbundle/texture/actorportrait/actor_portrait_1502a",
+      "templateSha256": "95e92aab7eb50451a9d7b6faf0141ac633943003e16d968342fee5990c220c10",
+      "target": "assetbundle/texture/actorportrait/actor_portrait_1517a",
+      "width": 1024,
+      "height": 1024,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1517:actorportraitfull/actor_portrait_full_1517a",
+      "template": "assetbundle/texture/actorportraitfull/actor_portrait_full_1502a",
+      "templateSha256": "600fbbcab5370a0aab62597a2549868e103ce0d75144044fb21100edda9ba5fe",
+      "target": "assetbundle/texture/actorportraitfull/actor_portrait_full_1517a",
+      "width": 1024,
+      "height": 1024,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1517:actorskillhead/actor_skill_head_1517a",
+      "template": "assetbundle/texture/actorskillhead/actor_skill_head_1502a",
+      "templateSha256": "e5bff470a4ffc9474d75df6ce83d6bd7dd73816815eda262e1c2a55e1ddbd7d2",
+      "target": "assetbundle/texture/actorskillhead/actor_skill_head_1517a",
+      "width": 512,
+      "height": 64,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1517:actorskinhead/actorskinhead_2017",
+      "template": "assetbundle/texture/actorskinhead/actorskinhead_1001",
+      "templateSha256": "d30e3af203c4ec1b8b1562b5bb864daff373d34969e21fd4c823a07d0b7bf7a2",
+      "target": "assetbundle/texture/actorskinhead/actorskinhead_2017",
+      "width": 196,
+      "height": 196,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1517:actorskinheadbig/actorskinhead_big_2017",
+      "template": "assetbundle/texture/actorskinheadbig/actorskinhead_big_1502",
+      "templateSha256": "40dfc095b6e380774327324c53a167a492d3c2b4181c7a997798671ced1c71b8",
+      "target": "assetbundle/texture/actorskinheadbig/actorskinhead_big_2017",
+      "width": 438,
+      "height": 530,
+      "format": 1,
+      "alphaSource": "mask"
+    },
+    {
+      "artId": "1601:actorgachahead/gacha_head_1601a",
+      "template": "assetbundle/texture/actorgachahead/gacha_head_1502a",
+      "templateSha256": "fa9ce79ad1c568d1839867825e6e7c15ec7b5883a51778ed19022ad28286c66f",
+      "target": "assetbundle/texture/actorgachahead/gacha_head_1601a",
+      "width": 256,
+      "height": 128,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1601:actorgroup/selectteam_1601a",
+      "template": "assetbundle/texture/actorgroup/selectteam_1502a",
+      "templateSha256": "4b1628a676217ad54cef0a203cd189b82266884df945c54d3a6b1dd3478d70b3",
+      "target": "assetbundle/texture/actorgroup/selectteam_1601a",
+      "width": 256,
+      "height": 1024,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1601:actorheadbig/actor_head_big_1601a",
+      "template": "assetbundle/texture/actorheadbig/actor_head_big_1502a",
+      "templateSha256": "75e815bc07ce7585447672582363c47b0ca94eaa6d776400871a4a700d04fb5e",
+      "target": "assetbundle/texture/actorheadbig/actor_head_big_1601a",
+      "width": 256,
+      "height": 512,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1601:actorheadrectangle/actor_head_1601a",
+      "template": "assetbundle/texture/actorheadrectangle/actor_head_1502a",
+      "templateSha256": "59e51d9cd3a18d699f63b80b4eeda8f658698ae7fe0c23f406539d65db4726eb",
+      "target": "assetbundle/texture/actorheadrectangle/actor_head_1601a",
+      "width": 256,
+      "height": 256,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1601:actorinfighthead/main/infight_head_1601a",
+      "template": "assetbundle/texture/actorinfighthead/main/infight_head_1502a",
+      "templateSha256": "4b4d72e19681ec54956324585ee8728e9a7b0e5cbf6319753a0c022e55ea5252",
+      "target": "assetbundle/texture/actorinfighthead/main/infight_head_1601a",
+      "width": 128,
+      "height": 128,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1601:actorinfighthead/main_r/infight_head_1601a",
+      "template": "assetbundle/texture/actorinfighthead/main_r/infight_head_1502a",
+      "templateSha256": "0384bf9d4c32b05b87fcdc9fdfa4b41007fbcf7c6db116153b5519b6a5d9837f",
+      "target": "assetbundle/texture/actorinfighthead/main_r/infight_head_1601a",
+      "width": 128,
+      "height": 128,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1601:actorinfighthead/sub_2/infight_head_1601a",
+      "template": "assetbundle/texture/actorinfighthead/sub_2/infight_head_1502a",
+      "templateSha256": "3348bc65c4fb90fa408a3f5add3990558a4a26f52aea2f81132d2f86eba2036a",
+      "target": "assetbundle/texture/actorinfighthead/sub_2/infight_head_1601a",
+      "width": 512,
+      "height": 128,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1601:actorintroduction/introduction_1601a",
+      "template": "assetbundle/texture/actorintroduction/introduction_1502a",
+      "templateSha256": "c52ad0c955c7f16f9eb7ab2feef8867836c08302370e4818e4f64bd90c692e25",
+      "target": "assetbundle/texture/actorintroduction/introduction_1601a",
+      "width": 512,
+      "height": 1024,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1601:actorjourneyhead/actor_head_1601a",
+      "template": "assetbundle/texture/actorjourneyhead/actor_head_1502a",
+      "templateSha256": "bc51ba01d6496d0ffcb3f04e87e977b31538cc9d3177f2b0477830c12c4e103d",
+      "target": "assetbundle/texture/actorjourneyhead/actor_head_1601a",
+      "width": 512,
+      "height": 256,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1601:actorlogo/actor_logo_1601a",
+      "template": "assetbundle/texture/actorlogo/actor_logo_1502a",
+      "templateSha256": "56011a8aafce6f36107d31a0fbf7c9bda180bdece1e9bde707cc4808f989c587",
+      "target": "assetbundle/texture/actorlogo/actor_logo_1601a",
+      "width": 256,
+      "height": 256,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1601:actorportrait/actor_portrait_1601a",
+      "template": "assetbundle/texture/actorportrait/actor_portrait_1502a",
+      "templateSha256": "95e92aab7eb50451a9d7b6faf0141ac633943003e16d968342fee5990c220c10",
+      "target": "assetbundle/texture/actorportrait/actor_portrait_1601a",
+      "width": 1024,
+      "height": 1024,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1601:actorportraitfull/actor_portrait_full_1601a",
+      "template": "assetbundle/texture/actorportraitfull/actor_portrait_full_1502a",
+      "templateSha256": "600fbbcab5370a0aab62597a2549868e103ce0d75144044fb21100edda9ba5fe",
+      "target": "assetbundle/texture/actorportraitfull/actor_portrait_full_1601a",
+      "width": 1024,
+      "height": 1024,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1601:actorskillhead/actor_skill_head_1601a",
+      "template": "assetbundle/texture/actorskillhead/actor_skill_head_1502a",
+      "templateSha256": "e5bff470a4ffc9474d75df6ce83d6bd7dd73816815eda262e1c2a55e1ddbd7d2",
+      "target": "assetbundle/texture/actorskillhead/actor_skill_head_1601a",
+      "width": 512,
+      "height": 64,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1601:actorskinhead/actorskinhead_2101",
+      "template": "assetbundle/texture/actorskinhead/actorskinhead_1001",
+      "templateSha256": "d30e3af203c4ec1b8b1562b5bb864daff373d34969e21fd4c823a07d0b7bf7a2",
+      "target": "assetbundle/texture/actorskinhead/actorskinhead_2101",
+      "width": 196,
+      "height": 196,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1601:actorskinheadbig/actorskinhead_big_2101",
+      "template": "assetbundle/texture/actorskinheadbig/actorskinhead_big_1502",
+      "templateSha256": "40dfc095b6e380774327324c53a167a492d3c2b4181c7a997798671ced1c71b8",
+      "target": "assetbundle/texture/actorskinheadbig/actorskinhead_big_2101",
+      "width": 438,
+      "height": 530,
+      "format": 1,
+      "alphaSource": "mask"
+    },
+    {
+      "artId": "1607:actorgachahead/gacha_head_1607a",
+      "template": "assetbundle/texture/actorgachahead/gacha_head_1502a",
+      "templateSha256": "fa9ce79ad1c568d1839867825e6e7c15ec7b5883a51778ed19022ad28286c66f",
+      "target": "assetbundle/texture/actorgachahead/gacha_head_1607a",
+      "width": 256,
+      "height": 128,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1607:actorgroup/selectteam_1607a",
+      "template": "assetbundle/texture/actorgroup/selectteam_1502a",
+      "templateSha256": "4b1628a676217ad54cef0a203cd189b82266884df945c54d3a6b1dd3478d70b3",
+      "target": "assetbundle/texture/actorgroup/selectteam_1607a",
+      "width": 256,
+      "height": 1024,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1607:actorheadbig/actor_head_big_1607a",
+      "template": "assetbundle/texture/actorheadbig/actor_head_big_1502a",
+      "templateSha256": "75e815bc07ce7585447672582363c47b0ca94eaa6d776400871a4a700d04fb5e",
+      "target": "assetbundle/texture/actorheadbig/actor_head_big_1607a",
+      "width": 256,
+      "height": 512,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1607:actorheadrectangle/actor_head_1607a",
+      "template": "assetbundle/texture/actorheadrectangle/actor_head_1502a",
+      "templateSha256": "59e51d9cd3a18d699f63b80b4eeda8f658698ae7fe0c23f406539d65db4726eb",
+      "target": "assetbundle/texture/actorheadrectangle/actor_head_1607a",
+      "width": 256,
+      "height": 256,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1607:actorinfighthead/main/infight_head_1607a",
+      "template": "assetbundle/texture/actorinfighthead/main/infight_head_1502a",
+      "templateSha256": "4b4d72e19681ec54956324585ee8728e9a7b0e5cbf6319753a0c022e55ea5252",
+      "target": "assetbundle/texture/actorinfighthead/main/infight_head_1607a",
+      "width": 128,
+      "height": 128,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1607:actorinfighthead/main_r/infight_head_1607a",
+      "template": "assetbundle/texture/actorinfighthead/main_r/infight_head_1502a",
+      "templateSha256": "0384bf9d4c32b05b87fcdc9fdfa4b41007fbcf7c6db116153b5519b6a5d9837f",
+      "target": "assetbundle/texture/actorinfighthead/main_r/infight_head_1607a",
+      "width": 128,
+      "height": 128,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1607:actorinfighthead/sub_2/infight_head_1607a",
+      "template": "assetbundle/texture/actorinfighthead/sub_2/infight_head_1502a",
+      "templateSha256": "3348bc65c4fb90fa408a3f5add3990558a4a26f52aea2f81132d2f86eba2036a",
+      "target": "assetbundle/texture/actorinfighthead/sub_2/infight_head_1607a",
+      "width": 512,
+      "height": 128,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1607:actorintroduction/introduction_1607a",
+      "template": "assetbundle/texture/actorintroduction/introduction_1502a",
+      "templateSha256": "c52ad0c955c7f16f9eb7ab2feef8867836c08302370e4818e4f64bd90c692e25",
+      "target": "assetbundle/texture/actorintroduction/introduction_1607a",
+      "width": 512,
+      "height": 1024,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1607:actorjourneyhead/actor_head_1607a",
+      "template": "assetbundle/texture/actorjourneyhead/actor_head_1502a",
+      "templateSha256": "bc51ba01d6496d0ffcb3f04e87e977b31538cc9d3177f2b0477830c12c4e103d",
+      "target": "assetbundle/texture/actorjourneyhead/actor_head_1607a",
+      "width": 512,
+      "height": 256,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1607:actorlogo/actor_logo_1607a",
+      "template": "assetbundle/texture/actorlogo/actor_logo_1502a",
+      "templateSha256": "56011a8aafce6f36107d31a0fbf7c9bda180bdece1e9bde707cc4808f989c587",
+      "target": "assetbundle/texture/actorlogo/actor_logo_1607a",
+      "width": 256,
+      "height": 256,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1607:actorportrait/actor_portrait_1607a",
+      "template": "assetbundle/texture/actorportrait/actor_portrait_1502a",
+      "templateSha256": "95e92aab7eb50451a9d7b6faf0141ac633943003e16d968342fee5990c220c10",
+      "target": "assetbundle/texture/actorportrait/actor_portrait_1607a",
+      "width": 1024,
+      "height": 1024,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1607:actorportraitfull/actor_portrait_full_1607a",
+      "template": "assetbundle/texture/actorportraitfull/actor_portrait_full_1502a",
+      "templateSha256": "600fbbcab5370a0aab62597a2549868e103ce0d75144044fb21100edda9ba5fe",
+      "target": "assetbundle/texture/actorportraitfull/actor_portrait_full_1607a",
+      "width": 1024,
+      "height": 1024,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1607:actorskillhead/actor_skill_head_1607a",
+      "template": "assetbundle/texture/actorskillhead/actor_skill_head_1502a",
+      "templateSha256": "e5bff470a4ffc9474d75df6ce83d6bd7dd73816815eda262e1c2a55e1ddbd7d2",
+      "target": "assetbundle/texture/actorskillhead/actor_skill_head_1607a",
+      "width": 512,
+      "height": 64,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1607:actorskinhead/actorskinhead_2107",
+      "template": "assetbundle/texture/actorskinhead/actorskinhead_1001",
+      "templateSha256": "d30e3af203c4ec1b8b1562b5bb864daff373d34969e21fd4c823a07d0b7bf7a2",
+      "target": "assetbundle/texture/actorskinhead/actorskinhead_2107",
+      "width": 196,
+      "height": 196,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "1607:actorskinheadbig/actorskinhead_big_2107",
+      "template": "assetbundle/texture/actorskinheadbig/actorskinhead_big_1502",
+      "templateSha256": "40dfc095b6e380774327324c53a167a492d3c2b4181c7a997798671ced1c71b8",
+      "target": "assetbundle/texture/actorskinheadbig/actorskinhead_big_2107",
+      "width": 438,
+      "height": 530,
+      "format": 1,
+      "alphaSource": "mask"
+    },
+    {
+      "artId": "2016:actorgachahead/gacha_head_2016a",
+      "template": "assetbundle/texture/actorgachahead/gacha_head_1502a",
+      "templateSha256": "fa9ce79ad1c568d1839867825e6e7c15ec7b5883a51778ed19022ad28286c66f",
+      "target": "assetbundle/texture/actorgachahead/gacha_head_2016a",
+      "width": 256,
+      "height": 128,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "2016:actorgroup/selectteam_2016a",
+      "template": "assetbundle/texture/actorgroup/selectteam_1502a",
+      "templateSha256": "4b1628a676217ad54cef0a203cd189b82266884df945c54d3a6b1dd3478d70b3",
+      "target": "assetbundle/texture/actorgroup/selectteam_2016a",
+      "width": 256,
+      "height": 1024,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "2016:actorheadbig/actor_head_big_2016a",
+      "template": "assetbundle/texture/actorheadbig/actor_head_big_1502a",
+      "templateSha256": "75e815bc07ce7585447672582363c47b0ca94eaa6d776400871a4a700d04fb5e",
+      "target": "assetbundle/texture/actorheadbig/actor_head_big_2016a",
+      "width": 256,
+      "height": 512,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "2016:actorheadrectangle/actor_head_2016a",
+      "template": "assetbundle/texture/actorheadrectangle/actor_head_1502a",
+      "templateSha256": "59e51d9cd3a18d699f63b80b4eeda8f658698ae7fe0c23f406539d65db4726eb",
+      "target": "assetbundle/texture/actorheadrectangle/actor_head_2016a",
+      "width": 256,
+      "height": 256,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "2016:actorinfighthead/main/infight_head_2016a",
+      "template": "assetbundle/texture/actorinfighthead/main/infight_head_1502a",
+      "templateSha256": "4b4d72e19681ec54956324585ee8728e9a7b0e5cbf6319753a0c022e55ea5252",
+      "target": "assetbundle/texture/actorinfighthead/main/infight_head_2016a",
+      "width": 128,
+      "height": 128,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "2016:actorinfighthead/main_r/infight_head_2016a",
+      "template": "assetbundle/texture/actorinfighthead/main_r/infight_head_1502a",
+      "templateSha256": "0384bf9d4c32b05b87fcdc9fdfa4b41007fbcf7c6db116153b5519b6a5d9837f",
+      "target": "assetbundle/texture/actorinfighthead/main_r/infight_head_2016a",
+      "width": 128,
+      "height": 128,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "2016:actorinfighthead/sub_2/infight_head_2016a",
+      "template": "assetbundle/texture/actorinfighthead/sub_2/infight_head_1502a",
+      "templateSha256": "3348bc65c4fb90fa408a3f5add3990558a4a26f52aea2f81132d2f86eba2036a",
+      "target": "assetbundle/texture/actorinfighthead/sub_2/infight_head_2016a",
+      "width": 512,
+      "height": 128,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "2016:actorintroduction/introduction_2016a",
+      "template": "assetbundle/texture/actorintroduction/introduction_1502a",
+      "templateSha256": "c52ad0c955c7f16f9eb7ab2feef8867836c08302370e4818e4f64bd90c692e25",
+      "target": "assetbundle/texture/actorintroduction/introduction_2016a",
+      "width": 512,
+      "height": 1024,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "2016:actorjourneyhead/actor_head_2016a",
+      "template": "assetbundle/texture/actorjourneyhead/actor_head_1502a",
+      "templateSha256": "bc51ba01d6496d0ffcb3f04e87e977b31538cc9d3177f2b0477830c12c4e103d",
+      "target": "assetbundle/texture/actorjourneyhead/actor_head_2016a",
+      "width": 512,
+      "height": 256,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "2016:actorlogo/actor_logo_2016a",
+      "template": "assetbundle/texture/actorlogo/actor_logo_1502a",
+      "templateSha256": "56011a8aafce6f36107d31a0fbf7c9bda180bdece1e9bde707cc4808f989c587",
+      "target": "assetbundle/texture/actorlogo/actor_logo_2016a",
+      "width": 256,
+      "height": 256,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "2016:actorportrait/actor_portrait_2016a",
+      "template": "assetbundle/texture/actorportrait/actor_portrait_1502a",
+      "templateSha256": "95e92aab7eb50451a9d7b6faf0141ac633943003e16d968342fee5990c220c10",
+      "target": "assetbundle/texture/actorportrait/actor_portrait_2016a",
+      "width": 1024,
+      "height": 1024,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "2016:actorportraitfull/actor_portrait_full_2016a",
+      "template": "assetbundle/texture/actorportraitfull/actor_portrait_full_1502a",
+      "templateSha256": "600fbbcab5370a0aab62597a2549868e103ce0d75144044fb21100edda9ba5fe",
+      "target": "assetbundle/texture/actorportraitfull/actor_portrait_full_2016a",
+      "width": 1024,
+      "height": 1024,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "2016:actorskillhead/actor_skill_head_2016a",
+      "template": "assetbundle/texture/actorskillhead/actor_skill_head_1502a",
+      "templateSha256": "e5bff470a4ffc9474d75df6ce83d6bd7dd73816815eda262e1c2a55e1ddbd7d2",
+      "target": "assetbundle/texture/actorskillhead/actor_skill_head_2016a",
+      "width": 512,
+      "height": 64,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "2016:actorskinhead/actorskinhead_1016",
+      "template": "assetbundle/texture/actorskinhead/actorskinhead_1001",
+      "templateSha256": "d30e3af203c4ec1b8b1562b5bb864daff373d34969e21fd4c823a07d0b7bf7a2",
+      "target": "assetbundle/texture/actorskinhead/actorskinhead_1016",
+      "width": 196,
+      "height": 196,
+      "format": 47,
+      "alphaSource": "rgba"
+    },
+    {
+      "artId": "2016:actorskinheadbig/actorskinhead_big_1016",
+      "template": "assetbundle/texture/actorskinheadbig/actorskinhead_big_1502",
+      "templateSha256": "40dfc095b6e380774327324c53a167a492d3c2b4181c7a997798671ced1c71b8",
+      "target": "assetbundle/texture/actorskinheadbig/actorskinhead_big_1016",
+      "width": 438,
+      "height": 530,
+      "format": 1,
+      "alphaSource": "mask"
+    }
+  ],
+  "artOrigins": "art-origins-v23.json"
+}
