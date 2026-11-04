@@ -99,20 +99,21 @@ class ArtApiTests(unittest.TestCase):
         portrait = silhouette()
         full = silhouette((768, 1024))
         full.putpixel((1, 1), (0, 0, 0, 128))
-        result = pipeline.derive_ui(portrait, full, actor_id=1501, anim_res="1501a",
+        result = pipeline.derive_ui(portrait, full, actor_id=1501, anim_res="1501a", skin_ui_res=2001,
                                     face_box=(400, 100, 200),
                                     logo=Image.new("RGBA", (256, 256), (1, 2, 3, 128)),
                                     introduction=Image.new("RGBA", (512, 1024), (2, 3, 4, 128)))
-        self.assertEqual(len(result), 14)
+        self.assertEqual(len(result), 15)
         expected = {"actorportrait/actor_portrait_1501a": (1024, 1024),
                     "actorheadbig/actor_head_big_1501a": (256, 512),
                     "actorheadrectangle/actor_head_1501a": (256, 256),
                     "actorgroup/selectteam_1501a": (256, 1024),
                     "actorportraitfull/actor_portrait_full_1501a": (1024, 1024),
-                    "actorskinheadbig/actorskinhead_big_1501": (438, 530)}
+                    "actorskinhead/actorskinhead_2001": (196, 196),
+                    "actorskinheadbig/actorskinhead_big_2001": (438, 530)}
         for key, size in expected.items():
             self.assertEqual(result[key].size, size, key)
-        self.assertEqual(result["actorskinheadbig/actorskinhead_big_1501"].mode, "L")
+        self.assertEqual(result["actorskinheadbig/actorskinhead_big_2001"].mode, "L")
         self.assertEqual(result["actorportrait/actor_portrait_1501a"].tobytes(), portrait.tobytes())
         self.assertEqual(result["actorlogo/actor_logo_1501a"].getchannel("A").getextrema(), (128, 128))
         self.assertEqual(result["actorportraitfull/actor_portrait_full_1501a"].getchannel("A").getextrema(), (0, 255))

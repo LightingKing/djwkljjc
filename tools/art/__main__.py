@@ -31,6 +31,7 @@ def main():
     derive.add_argument("--full-body", type=Path, required=True)
     derive.add_argument("--actor-id", type=int, required=True)
     derive.add_argument("--anim-res", required=True)
+    derive.add_argument("--skin-ui-res", type=int)
     derive.add_argument("--face-box", type=float, nargs=3, required=True, metavar=("X", "Y", "WIDTH"))
     derive.add_argument("--logo", type=Path)
     derive.add_argument("--introduction", type=Path)
@@ -71,7 +72,7 @@ def main():
             with Image.open(path) as image:
                 return image.copy()
         images = derive_ui(read(args.portrait), read(args.full_body), actor_id=args.actor_id,
-                           anim_res=args.anim_res, face_box=args.face_box, logo=read(args.logo),
+                           anim_res=args.anim_res, skin_ui_res=args.skin_ui_res, face_box=args.face_box, logo=read(args.logo),
                            introduction=read(args.introduction))
         print(json.dumps([str(p) for p in write_images(args.output_root, images)], indent=2))
     elif args.command == "record":

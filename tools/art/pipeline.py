@@ -113,7 +113,8 @@ def _skin_mask(full_body):
 
 
 def derive_ui(portrait: Image.Image, full_body: Image.Image | None, *, actor_id: int,
-              anim_res: str, face_box: tuple[float, float, float],
+              anim_res: str, skin_ui_res: int | None = None,
+              face_box: tuple[float, float, float],
               logo: Image.Image | None = None, introduction: Image.Image | None = None) -> dict[str, Image.Image]:
     """Derive 12 art textures plus optional same-Role logo/introduction copies.
 
@@ -144,7 +145,12 @@ def derive_ui(portrait: Image.Image, full_body: Image.Image | None, *, actor_id:
     box = (int(cx - h / 8), top, int(cx + h / 8), portrait.height)
     out[f"actorgroup/selectteam_{anim_res}"] = portrait.crop(box).resize((256, 1024), Image.Resampling.LANCZOS)
     out[f"actorportraitfull/actor_portrait_full_{anim_res}"] = _full_body_canvas(full_body)
-    out[f"actorskinheadbig/actorskinhead_big_{actor_id}"] = _skin_mask(full_body)
+    skin_res = actor_id if skin_ui_res is None else skin_ui_res
+    # Small skin head is ETC2/RGBA in the client; the large skin preview is
+    # Alpha8. Both use skinUIRes, which can differ from the actor ID (e.g. 1509→2009).
+    head_spec = ("actorskinhead/actorskinhead_{a}", (196, 196), 0.0, 0.05, 1.55, None)
+    out[f"actorskinhead/actorskinhead_{skin_res}"] = _crop(portrait, face_box, head_spec)
+    out[f"actorskinheadbig/actorskinhead_big_{skin_res}"] = _skin_mask(full_body)
     for image, key, size in ((logo, f"actorlogo/actor_logo_{anim_res}", (256, 256)),
                              (introduction, f"actorintroduction/introduction_{anim_res}", (512, 1024))):
         if image is not None:
