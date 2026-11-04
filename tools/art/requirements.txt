@@ -1,0 +1,8 @@
+# Offline tooling only. Server imports none of these modules.
+UnityPy==1.25.4
+Pillow==13.0.0
+# Matting dependencies: use the existing external .venv or a separate environment.
+rembg==2.0.86
+onnxruntime==1.31.1
+# Optional cascade face detection; explicit reviewed face-box coordinates also work.
+opencv-python-headless>=4.10,<5
