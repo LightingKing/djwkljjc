@@ -5,6 +5,7 @@ param(
     [switch]$PlanOnly,
     [string]$ConfigFile,
     [string]$BackupDirectory,
+    [string]$ArtRoot = 'I:/workspace/mobilegame/runtime/role-completion-20261104/art',
     [string]$CandidateDirectory = 'I:/workspace/mobilegame/runtime/remediation-20261031/candidate'
 )
 $ErrorActionPreference = 'Stop'
@@ -21,6 +22,7 @@ $dirty = @(& git -C $codeDirectory status --porcelain)
 if ($LASTEXITCODE -ne 0 -or $dirty.Count -ne 0) { throw 'Refusing release from a dirty checkout.' }
 $pythonExecutable = 'C:/Users/Administrator/AppData/Local/Programs/Python/Python312/python.exe'
 $releaseTools = Join-Path $releaseRoot 'release-tools/release_tools.py'
+$artifactVerifier = Join-Path $codeDirectory 'tools/verify_hot_update_assets.py'
 if ($PlanOnly -and $CheckOnly) { throw 'Use either -PlanOnly or -CheckOnly.' }
 if (-not $ConfigFile) {
     # The old launcher did not load server.toml. Preserve its network defaults
@@ -98,6 +100,47 @@ if ($PlanOnly) {
     $plan | ConvertTo-Json -Depth 6
     return
 }
+
+function Invoke-RepositoryArtifactVerification([switch]$Staged) {
+    if (-not (Test-Path -LiteralPath $artifactVerifier -PathType Leaf)) {
+        throw "Repository artifact verifier missing: $artifactVerifier"
+    }
+    $reportPath = Join-Path $CandidateDirectory 'build-report.json'
+    if (-not (Test-Path -LiteralPath $reportPath -PathType Leaf)) {
+        throw "Candidate build report missing: $reportPath"
+    }
+    $report = Get-Content -LiteralPath $reportPath -Raw -Encoding UTF8 | ConvertFrom-Json
+    $patchVersion = [int]$report.patchVersion
+    $configName = if ($patchVersion -ge 8) { "modules-v$patchVersion.json" } else { 'modules.json' }
+    $candidateConfig = Join-Path $codeDirectory "client-patch/hot-update/$configName"
+    $bundleRoot = 'I:/workspace/mobilegame/analysis/ljjc_manifest_out/assets/Patch'
+    if (-not (Test-Path -LiteralPath $candidateConfig -PathType Leaf)) {
+        throw "Candidate patch configuration missing: $candidateConfig"
+    }
+    if (-not (Test-Path -LiteralPath $bundleRoot -PathType Container)) {
+        throw "Decoded client asset root missing: $bundleRoot"
+    }
+    $arguments = @('-B', $artifactVerifier, '--config', $candidateConfig,
+                   '--candidate-directory', $CandidateDirectory, '--bundle-root', $bundleRoot)
+    $hasTextures = $false
+    if ($report.PSObject.Properties.Name -contains 'textures' -and $null -ne $report.textures) {
+        $hasTextures = @($report.textures).Count -gt 0
+    }
+    if ($hasTextures) {
+        if (-not $ArtRoot -or -not (Test-Path -LiteralPath $ArtRoot -PathType Container)) {
+            throw 'Texture candidate requires an existing private -ArtRoot with approved assets.'
+        }
+        $arguments += @('--art-root', $ArtRoot)
+    }
+    if ($Staged) {
+        $arguments += @('--staged', '--manifest', 'I:/workspace/mobilegame/runtime/force-patch.json',
+                        '--fixtures', 'I:/workspace/mobilegame/analysis/ljjc-local/fixtures')
+    }
+    & $pythonExecutable @arguments
+    if ($LASTEXITCODE -ne 0) {
+        throw "Repository artifact verification failed (staged=$Staged)."
+    }
+}
 foreach ($required in @($pythonExecutable, $serverArguments[0], $releaseTools,
         'I:/workspace/mobilegame/analysis/ljjc-local/state/local.sqlite3',
         'I:/workspace/mobilegame/analysis/ljjc-local/certs/server.pem',
@@ -107,8 +150,7 @@ foreach ($required in @($pythonExecutable, $serverArguments[0], $releaseTools,
 $listeners = @(Get-NetTCPConnection -State Listen | Where-Object { $_.LocalPort -in @(19080, 19102) })
 $plan['occupiedPorts'] = @($listeners | Select-Object LocalAddress, LocalPort, OwningProcess)
 if ($CheckOnly) {
-    & $pythonExecutable $releaseTools --code-directory $codeDirectory --candidate-directory $CandidateDirectory verify-artifacts
-    if ($LASTEXITCODE -ne 0) { throw 'Candidate artifact verification failed.' }
+    Invoke-RepositoryArtifactVerification
     $plan | ConvertTo-Json -Depth 6
     return
 }
@@ -119,8 +161,7 @@ if ($listeners.Count -gt 0) {
 if (-not $BackupDirectory) { throw 'Provide -BackupDirectory from release_tools.py backup-state.' }
 & $pythonExecutable $releaseTools --code-directory $codeDirectory --candidate-directory $CandidateDirectory verify-backup $BackupDirectory
 if ($LASTEXITCODE -ne 0) { throw 'Final state backup verification failed.' }
-& $pythonExecutable $releaseTools --code-directory $codeDirectory --candidate-directory $CandidateDirectory verify-artifacts --staged
-if ($LASTEXITCODE -ne 0) { throw 'Stage the verified candidate ZIP and manifest before starting.' }
+Invoke-RepositoryArtifactVerification -Staged
 
 # Fixed arguments have no quotes or trailing backslashes. Quote every argument
 # because Start-Process joins ArgumentList into a Windows command line.
