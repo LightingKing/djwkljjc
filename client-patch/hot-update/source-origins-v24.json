@@ -1,0 +1,307 @@
+{
+  "schemaVersion": 1,
+  "baseModules": "modules-v22.json",
+  "baseModulesSha256": "712cdb2968981ca428f133375a9b659a62348e5986c8913e8de5adc2184c9dce",
+  "patchVersion": 24,
+  "reproduction": "Cumulative v24 keeps the published v22 modules and adds the daily-task claim refresh race fix. Existing source-origins-v22 remains immutable.",
+  "modules": [
+    {
+      "source": "sources/login.lua",
+      "destination": "sources/login.lua",
+      "target": "assetbundle/data/lua/window/login/login",
+      "sha256": "456fd97f3962daf3787f978912b3d52196d7160b9f20755ed03a483537f493b7",
+      "patchedSha256": "456fd97f3962daf3787f978912b3d52196d7160b9f20755ed03a483537f493b7",
+      "replacements": []
+    },
+    {
+      "source": "sources/auth-lan.lua",
+      "destination": "sources/auth-lan.lua",
+      "target": "assetbundle/data/lua/window/auth/auth",
+      "sha256": "646070754adc1e8d44129b7b89a3c0037f1ceefbc6307a914d0c509c9ed1a71f",
+      "patchedSha256": "646070754adc1e8d44129b7b89a3c0037f1ceefbc6307a914d0c509c9ed1a71f",
+      "replacements": []
+    },
+    {
+      "source": "sources/iaphandler-local.lua",
+      "destination": "sources/iaphandler-local.lua",
+      "target": "assetbundle/data/lua/manager/iaphandler",
+      "sha256": "00e9ba849120a4c635f7496e26425cc31c57d3cc6baf0d9243988a86a9e3271d",
+      "patchedSha256": "00e9ba849120a4c635f7496e26425cc31c57d3cc6baf0d9243988a86a9e3271d",
+      "replacements": []
+    },
+    {
+      "source": "sources/actorutil-content-open.lua",
+      "destination": "sources/actorutil-content-open.lua",
+      "target": "assetbundle/data/lua/common/actorutil",
+      "sha256": "70db21063a72f1016b4233d3a5a9b962ebb321fecf618c032e42c094c93bdd6d",
+      "patchedSha256": "70db21063a72f1016b4233d3a5a9b962ebb321fecf618c032e42c094c93bdd6d",
+      "replacements": []
+    },
+    {
+      "source": "sources/resourceexchange.lua",
+      "destination": "sources/resourceexchange.lua",
+      "target": "assetbundle/data/lua/window/resourceexchange/resourceexchange",
+      "sha256": "1bef3d6a883464395353c5a830be893028ed99c96e0c72e5d248d918a859ea37",
+      "patchedSha256": "1bef3d6a883464395353c5a830be893028ed99c96e0c72e5d248d918a859ea37",
+      "replacements": []
+    },
+    {
+      "source": "sources/restifizermanager-v14.lua",
+      "destination": "sources/restifizermanager-v14.lua",
+      "target": "assetbundle/data/lua/manager/restifizermanager",
+      "sha256": "0b29a65cc63770f362d5beb42c8066bd141e86d9a3f25916eff8a1c246f209d9",
+      "patchedSha256": "0b29a65cc63770f362d5beb42c8066bd141e86d9a3f25916eff8a1c246f209d9",
+      "replacements": []
+    },
+    {
+      "source": "sources/purchaseactivitygift.lua",
+      "destination": "sources/purchaseactivitygift.lua",
+      "target": "assetbundle/data/lua/window/purchase/purchaseactivitygift",
+      "sha256": "1a00d47b16ffa45e5be0501e2548040efb7ba8965f8682e9fec900d7370a6157",
+      "patchedSha256": "1a00d47b16ffa45e5be0501e2548040efb7ba8965f8682e9fec900d7370a6157",
+      "replacements": []
+    },
+    {
+      "source": "sources/purchasegiftitem.lua",
+      "destination": "sources/purchasegiftitem.lua",
+      "target": "assetbundle/data/lua/window/purchase/purchasegiftitem",
+      "sha256": "bf0fc9300bbec37af50f11f02ba763f2ee623663239e85ab00e516c749869442",
+      "patchedSha256": "bf0fc9300bbec37af50f11f02ba763f2ee623663239e85ab00e516c749869442",
+      "replacements": []
+    },
+    {
+      "source": "sources/purchasebuy.lua",
+      "destination": "sources/purchasebuy.lua",
+      "target": "assetbundle/data/lua/window/purchasebuy/purchasebuy",
+      "sha256": "2862f8acdc6c3f22573aa61abefe1162e3764ebf126dd74e51612b3f4faea325",
+      "patchedSha256": "2862f8acdc6c3f22573aa61abefe1162e3764ebf126dd74e51612b3f4faea325",
+      "replacements": []
+    },
+    {
+      "source": "sources/activity.lua",
+      "destination": "sources/activity.lua",
+      "target": "assetbundle/data/lua/window/activity/activity",
+      "sha256": "5f278763e131465685eef4e29812dab2f75265954d249a9d600d6e3c3b31c29f",
+      "patchedSha256": "5f278763e131465685eef4e29812dab2f75265954d249a9d600d6e3c3b31c29f",
+      "replacements": []
+    },
+    {
+      "source": "sources/windowutil-content-open.lua",
+      "destination": "sources/windowutil-content-open.lua",
+      "target": "assetbundle/data/lua/common/windowutil",
+      "sha256": "7388c5c158458f57335bbddc4d3b4b9755626f4bf9a42efb6628c17d26c0da1c",
+      "patchedSha256": "7388c5c158458f57335bbddc4d3b4b9755626f4bf9a42efb6628c17d26c0da1c",
+      "replacements": []
+    },
+    {
+      "source": "sources/mazemain.lua",
+      "destination": "sources/mazemain.lua",
+      "target": "assetbundle/data/lua/window/mazemain/mazemain",
+      "sha256": "4a6d4c86c8e95a60d1292167701c5aae744df30ccae441f47367be8914999bcb",
+      "patchedSha256": "4a6d4c86c8e95a60d1292167701c5aae744df30ccae441f47367be8914999bcb",
+      "replacements": []
+    },
+    {
+      "source": "sources/dungeonbalancefailed.lua",
+      "destination": "sources/dungeonbalancefailed.lua",
+      "target": "assetbundle/data/lua/window/dungeonbalancefailed/dungeonbalancefailed",
+      "sha256": "eab5e25af7dcd9c5cfd161910fb9db0b538f23fa372b31a3d6825c74dd7fd43b",
+      "patchedSha256": "eab5e25af7dcd9c5cfd161910fb9db0b538f23fa372b31a3d6825c74dd7fd43b",
+      "replacements": []
+    },
+    {
+      "source": "sources/dungeonteam-local.lua",
+      "destination": "sources/dungeonteam-local.lua",
+      "target": "assetbundle/data/lua/window/dungeonteam/dungeonteam",
+      "sha256": "06c94c328a6e7f1919d96f6bb2c73c48b2c8433910dbf8752127096ab7a7a133",
+      "patchedSha256": "06c94c328a6e7f1919d96f6bb2c73c48b2c8433910dbf8752127096ab7a7a133",
+      "replacements": []
+    },
+    {
+      "source": "sources/dungeonteamprepare-local.lua",
+      "destination": "sources/dungeonteamprepare-local.lua",
+      "target": "assetbundle/data/lua/window/dungeonteamprepare/dungeonteamprepare",
+      "sha256": "fdc8502990f31d32beaac84f00a4f53af83a447867803e78cf7f550e1900a55b",
+      "patchedSha256": "fdc8502990f31d32beaac84f00a4f53af83a447867803e78cf7f550e1900a55b",
+      "replacements": []
+    },
+    {
+      "source": "sources/burstlinkactorgroup-v10.lua",
+      "destination": "sources/burstlinkactorgroup-v10.lua",
+      "target": "assetbundle/data/lua/window/burstlinkactorgroup/burstlinkactorgroup",
+      "sha256": "9c8545b35d7dd4786549f694c7f315c48dfa8d5507e238483671c6d488003cfe",
+      "patchedSha256": "9c8545b35d7dd4786549f694c7f315c48dfa8d5507e238483671c6d488003cfe",
+      "replacements": []
+    },
+    {
+      "source": "sources/scenefight-v10.lua",
+      "destination": "sources/scenefight-v10.lua",
+      "target": "assetbundle/data/lua/scene/scenefight",
+      "sha256": "9bcfa2b5039910c231a6bdb4f15b89c3491a21b115f2729b8dff78289ae9a61d",
+      "patchedSha256": "9bcfa2b5039910c231a6bdb4f15b89c3491a21b115f2729b8dff78289ae9a61d",
+      "replacements": []
+    },
+    {
+      "source": "sources/helplogic-v10.lua",
+      "destination": "sources/helplogic-v10.lua",
+      "target": "assetbundle/data/lua/logic/helplogic",
+      "sha256": "ce95ad2135b0df6a247b8019eee71f430d2f6978f82c460b70957f2fa6cbdec3",
+      "patchedSha256": "ce95ad2135b0df6a247b8019eee71f430d2f6978f82c460b70957f2fa6cbdec3",
+      "replacements": []
+    },
+    {
+      "source": "sources/dungeonutil-v10.lua",
+      "destination": "sources/dungeonutil-v10.lua",
+      "target": "assetbundle/data/lua/common/dungeonutil",
+      "sha256": "6336bb7b553a12a92e342e2573b4370a7c527d14e85c3830ae06c42a35127495",
+      "patchedSha256": "6336bb7b553a12a92e342e2573b4370a7c527d14e85c3830ae06c42a35127495",
+      "replacements": []
+    },
+    {
+      "source": "sources/fightpausewithmorecontent-v10.lua",
+      "destination": "sources/fightpausewithmorecontent-v10.lua",
+      "target": "assetbundle/data/lua/window/fightpausewithmorecontent/fightpausewithmorecontent",
+      "sha256": "190ca617da5e608f3a259d3d1e05ad37fb745dd21d8298bc1d39e7bac61e1d1d",
+      "patchedSha256": "190ca617da5e608f3a259d3d1e05ad37fb745dd21d8298bc1d39e7bac61e1d1d",
+      "replacements": []
+    },
+    {
+      "source": "sources/itemdetail-activitydrop.lua",
+      "destination": "sources/itemdetail-activitydrop.lua",
+      "target": "assetbundle/data/lua/window/itemdetail/itemdetail",
+      "sha256": "bef30c690657d16bc097180325296214826027a6136068214440ddb9182b4cd3",
+      "patchedSha256": "bef30c690657d16bc097180325296214826027a6136068214440ddb9182b4cd3",
+      "replacements": []
+    },
+    {
+      "source": "sources/wlfpostcard-v11.lua",
+      "destination": "sources/wlfpostcard-v11.lua",
+      "target": "assetbundle/data/lua/window/welfare2/wlfpostcard",
+      "sha256": "980bcc0cc516f2a636fc10cd361a653c2b881aedc5a0bb9110e23d78602efe21",
+      "patchedSha256": "980bcc0cc516f2a636fc10cd361a653c2b881aedc5a0bb9110e23d78602efe21",
+      "replacements": []
+    },
+    {
+      "source": "sources/wlfdecrepittransport-content-open.lua",
+      "destination": "sources/wlfdecrepittransport-content-open.lua",
+      "target": "assetbundle/data/lua/window/welfare2/wlfdecrepittransport",
+      "sha256": "a29e0048bf4fa5c52330ac4cee1f70de7a190082ba963264e4b0c58eddea2c89",
+      "patchedSha256": "a29e0048bf4fa5c52330ac4cee1f70de7a190082ba963264e4b0c58eddea2c89",
+      "replacements": []
+    },
+    {
+      "source": "sources/wlfconditionreward-v11.lua",
+      "destination": "sources/wlfconditionreward-v11.lua",
+      "target": "assetbundle/data/lua/window/welfare2/wlfconditionreward",
+      "sha256": "249803ec6c40ee87467db83ed28a9520d923baf8175cf1836344b4a1ff627f3f",
+      "patchedSha256": "249803ec6c40ee87467db83ed28a9520d923baf8175cf1836344b4a1ff627f3f",
+      "replacements": []
+    },
+    {
+      "source": "sources/taskpresent-v14.lua",
+      "destination": "sources/taskpresent-v14.lua",
+      "target": "assetbundle/data/lua/window/taskpresent/taskpresent",
+      "sha256": "1b2ec914ae2a5b794326ab9ed433429fbd00a8b19b677c6e07559034cdce4af7",
+      "patchedSha256": "1b2ec914ae2a5b794326ab9ed433429fbd00a8b19b677c6e07559034cdce4af7",
+      "replacements": []
+    },
+    {
+      "source": "sources/widgettaskpresenthint-v14.lua",
+      "destination": "sources/widgettaskpresenthint-v14.lua",
+      "target": "assetbundle/data/lua/window/taskpresent/widgettaskpresenthint",
+      "sha256": "9685dfb59c3e00442b73d3b357ca6558368fa9c86647b8f293d3717fd5eec787",
+      "patchedSha256": "9685dfb59c3e00442b73d3b357ca6558368fa9c86647b8f293d3717fd5eec787",
+      "replacements": []
+    },
+    {
+      "source": "sources/gacha-open-all.lua",
+      "destination": "sources/gacha-open-all.lua",
+      "target": "assetbundle/data/lua/window/gacha/gacha",
+      "sha256": "17692361c96fd091e5ca44435cc7d4085279f1b748373ce8ca48e92d2794a5d9",
+      "patchedSha256": "17692361c96fd091e5ca44435cc7d4085279f1b748373ce8ca48e92d2794a5d9",
+      "replacements": []
+    },
+    {
+      "source": "sources/gachanormal-open-all.lua",
+      "destination": "sources/gachanormal-open-all.lua",
+      "target": "assetbundle/data/lua/window/gachanormal/gachanormal",
+      "sha256": "f0e3fd7fc33adb6578abf91d8d0cb882a86995480e7056ee6e448d732a6667d4",
+      "patchedSha256": "f0e3fd7fc33adb6578abf91d8d0cb882a86995480e7056ee6e448d732a6667d4",
+      "replacements": []
+    },
+    {
+      "source": "sources/gachaeventautumn-open-all.lua",
+      "destination": "sources/gachaeventautumn-open-all.lua",
+      "target": "assetbundle/data/lua/window/gachaeventautumn/gachaeventautumn",
+      "sha256": "01881ff64a58e9743f2d8a496f56f77fff9246de936f8024bdc6ca2c9ca28a56",
+      "patchedSha256": "01881ff64a58e9743f2d8a496f56f77fff9246de936f8024bdc6ca2c9ca28a56",
+      "replacements": []
+    },
+    {
+      "source": "sources/actorskin-content-open.lua",
+      "destination": "sources/actorskin-content-open.lua",
+      "target": "assetbundle/data/lua/xlsx/actorskin",
+      "sha256": "231d3650d50af12a3a7f19b58b5a2543dffe5df7caaeb9eac340485cf80dc280",
+      "patchedSha256": "231d3650d50af12a3a7f19b58b5a2543dffe5df7caaeb9eac340485cf80dc280",
+      "replacements": []
+    },
+    {
+      "source": "sources/widgeticonskin-content-open.lua",
+      "destination": "sources/widgeticonskin-content-open.lua",
+      "target": "assetbundle/data/lua/window/widget/widgeticonslot/widgeticonskin",
+      "sha256": "049d68ba1ecd4e1df8d054743f8616b51893fc657e7a75d49009fa527b16d29f",
+      "patchedSha256": "049d68ba1ecd4e1df8d054743f8616b51893fc657e7a75d49009fa527b16d29f",
+      "replacements": []
+    },
+    {
+      "source": "sources/collectionsactorpicture-content-open.lua",
+      "destination": "sources/collectionsactorpicture-content-open.lua",
+      "target": "assetbundle/data/lua/window/collectionsactorpicture/collectionsactorpicture",
+      "sha256": "bec4328394ca5584df821ef17e0d6f4243751766152066b254a77bcc765603b7",
+      "patchedSha256": "bec4328394ca5584df821ef17e0d6f4243751766152066b254a77bcc765603b7",
+      "replacements": []
+    },
+    {
+      "source": "sources/actorcultivation-content-open.lua",
+      "destination": "sources/actorcultivation-content-open.lua",
+      "target": "assetbundle/data/lua/window/actorcultivation/actorcultivation",
+      "sha256": "440d95024a1cf19655960d462cedfaa9820342014ab1be9c03b57ccb9b500f40",
+      "patchedSha256": "440d95024a1cf19655960d462cedfaa9820342014ab1be9c03b57ccb9b500f40",
+      "replacements": []
+    },
+    {
+      "source": "sources/wlfactorcultivation-content-open.lua",
+      "destination": "sources/wlfactorcultivation-content-open.lua",
+      "target": "assetbundle/data/lua/window/welfare2/wlfactorcultivation",
+      "sha256": "2816cf67550a217e74ac98887661fb02697e06bb9c2f72f5df760d59d29ba1f9",
+      "patchedSha256": "2816cf67550a217e74ac98887661fb02697e06bb9c2f72f5df760d59d29ba1f9",
+      "replacements": []
+    },
+    {
+      "source": "sources/decrepittransport-content-open.lua",
+      "destination": "sources/decrepittransport-content-open.lua",
+      "target": "assetbundle/data/lua/window/welfare/decrepittransport",
+      "sha256": "54a86f10c331909748460768d8b967a7a4abd950d0dcb9b7e02eb18f56bd96bd",
+      "patchedSha256": "54a86f10c331909748460768d8b967a7a4abd950d0dcb9b7e02eb18f56bd96bd",
+      "replacements": []
+    },
+    {
+      "source": "sources/collectionsscenes-content-open.lua",
+      "destination": "sources/collectionsscenes-content-open.lua",
+      "target": "assetbundle/data/lua/xlsx/collectionsscenes",
+      "sha256": "6b282b2da3f1cc6236da1812fc9c2f7193f3b386b0a1ef6bfb86211dc196c18a",
+      "patchedSha256": "6b282b2da3f1cc6236da1812fc9c2f7193f3b386b0a1ef6bfb86211dc196c18a",
+      "replacements": []
+    },
+    {
+      "source": "sources/widgettaskslot-v24.lua",
+      "destination": "sources/widgettaskslot-v24.lua",
+      "target": "assetbundle/data/lua/window/task/widgettaskslot",
+      "sha256": "13d6299049fb702cd10d8de1d1b3620a21fdf49f832f213034580fa8c319266a",
+      "patchedSha256": "13d6299049fb702cd10d8de1d1b3620a21fdf49f832f213034580fa8c319266a",
+      "replacements": [
+        "Removed local task-list remove/reinsert after claim; refreshes authoritative /fci/task snapshot."
+      ]
+    }
+  ]
+}
