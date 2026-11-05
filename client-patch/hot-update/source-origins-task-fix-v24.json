@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "appVersion": "2.0.4.59162.0",
+  "patchVersion": 24,
+  "baseModules": "modules-v22.json",
+  "reproduction": "Cumulative task-claim list race fix based on published v22; v24 avoids the unpublished role-completion v23 config.",
+  "modules": [
+    {
+      "source": "sources/widgettaskslot-v24.lua",
+      "target": "assetbundle/data/lua/window/task/widgettaskslot",
+      "originalSha256": "42c91a9b311a0e847798bd9066394b001c33b82e5435ee197fa90be256e82faf"
+    }
+  ]
+}
